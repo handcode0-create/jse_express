@@ -1,6 +1,7 @@
 import { router, usePage } from "@inertiajs/react";
 import { ArrowLeft, Check, ChevronRight, Bike, Clock3, Heart, Info, MapPin, MessageCircle, Minus, Plus, Search, Share2, ShoppingBag, UtensilsCrossed, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { basculerFavori, estFavori } from "../lib/favoris";
 
 const imagesRestaurants = [
     "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=90",
@@ -24,6 +25,17 @@ export default function RestaurantDetail() {
     const [recherche, setRecherche] = useState("");
     const [categorie, setCategorie] = useState("Toutes");
     const [favori, setFavori] = useState(false);
+
+    useEffect(() => {
+        const synchroniser = () => setFavori(estFavori(restaurant?.id));
+        synchroniser();
+        window.addEventListener("jse:favoris-change", synchroniser);
+        window.addEventListener("storage", synchroniser);
+        return () => {
+            window.removeEventListener("jse:favoris-change", synchroniser);
+            window.removeEventListener("storage", synchroniser);
+        };
+    }, [restaurant?.id]);
     const [panierOuvert, setPanierOuvert] = useState(false);
     const [ajout, setAjout] = useState(null);
 
@@ -71,7 +83,7 @@ export default function RestaurantDetail() {
                     <div className="absolute inset-x-0 top-0 flex items-center justify-between px-5 pt-6 sm:px-7 sm:pt-7">
                         <Action label="Retour" onClick={() => router.visit("/accueil")}><ArrowLeft size={22} /></Action>
                         <div className="flex gap-2.5">
-                            <Action label="Favori" active={favori} onClick={() => setFavori(!favori)}><Heart size={22} fill={favori ? "currentColor" : "none"} /></Action>
+                            <Action label={favori ? "Retirer des favoris" : "Ajouter aux favoris"} active={favori} onClick={() => { setFavori(basculerFavori({ ...restaurant, image: imageRestaurant })); }}><Heart size={22} fill={favori ? "currentColor" : "none"} /></Action>
                             <Action label="Partager" onClick={partager}><Share2 size={21} /></Action>
                         </div>
                     </div>
