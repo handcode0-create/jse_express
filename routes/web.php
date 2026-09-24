@@ -3,6 +3,7 @@
 use App\Models\Categorie;
 use App\Models\Commande;
 use App\Models\HistoriqueCommande;
+use App\Models\Notification;
 use App\Models\LigneCommande;
 use App\Models\LignePanier;
 use App\Models\Panier;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -179,6 +181,80 @@ Route::get('/favoris', function () {
 
     return Inertia::render('Favoris');
 })->middleware('auth')->name('favoris');
+
+Route::get('/profil', function () {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+
+    return Inertia::render('Profil', [
+        'utilisateur' => [
+            'id' => Auth::id(),
+            'nom' => Auth::user()->nom,
+            'prenom' => Auth::user()->prenom,
+            'telephone' => Auth::user()->telephone,
+            'email' => Auth::user()->email,
+        ],
+        'notificationsCount' => Notification::query()
+            ->where('user_id', Auth::id())
+            ->count(),
+    ]);
+})->middleware('auth')->name('profil');
+
+Route::patch('/profil', function (Request $request) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+
+    $donnees = $request->validate([
+        'nom' => ['required', 'string', 'max:100'],
+        'prenom' => ['nullable', 'string', 'max:100'],
+        'telephone' => [
+            'required',
+            'string',
+            'max:30',
+            Rule::unique('users', 'telephone')->ignore(Auth::id()),
+        ],
+        'email' => [
+            'nullable',
+            'email',
+            'max:255',
+            Rule::unique('users', 'email')->ignore(Auth::id()),
+        ],
+    ], [
+        'nom.required' => 'Le nom est obligatoire.',
+        'telephone.required' => 'Le numéro de téléphone est obligatoire.',
+        'telephone.unique' => 'Ce numéro de téléphone est déjà utilisé.',
+        'email.email' => 'Veuillez saisir une adresse e-mail valide.',
+        'email.unique' => 'Cette adresse e-mail est déjà utilisée.',
+    ]);
+
+    Auth::user()->update($donnees);
+
+    return back()->with('success', 'Vos informations ont été mises à jour.');
+})->middleware('auth')->name('profil.modifier');
+
+Route::get('/notifications', function () {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+
+    $notifications = Notification::query()
+        ->where('user_id', Auth::id())
+        ->latest('id')
+        ->get()
+        ->map(function (Notification $notification) {
+            return [
+                'id' => $notification->id,
+                'type' => $notification->type_evenement,
+                'contenu' => $notification->contenu,
+                'canal' => $notification->canal,
+                'statut' => $notification->statut_envoi,
+                'date' => $notification->date_envoi
+                    ? \Illuminate\Support\Carbon::parse($notification->date_envoi)->format('d/m/Y H:i')
+                    : null,
+            ];
+        })
+        ->values();
+
+    return Inertia::render('Notifications', [
+        'notifications' => $notifications,
+    ]);
+})->middleware('auth')->name('notifications');
 
 Route::get('/commandes', function (Request $request) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
