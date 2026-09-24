@@ -286,7 +286,7 @@ export default function Accueil() {
                                     <button type="button" onClick={() => window.alert("Vos notifications seront disponibles ici.")} className="relative flex size-11 items-center justify-center rounded-full bg-transparent text-jse-principal lg:bg-white lg:shadow-sm lg:ring-1 lg:ring-jse-texte/5" aria-label="Notifications">
                                         <Bell size={26} strokeWidth={1.8} />
                                     </button>
-                                    <button type="button" onClick={() => window.alert("Votre panier sera accessible ici.")} className="relative hidden size-11 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm ring-1 ring-jse-texte/5 sm:flex" aria-label="Panier">
+                                    <button type="button" onClick={() => router.visit("/panier")} className="relative hidden size-11 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm ring-1 ring-jse-texte/5 sm:flex" aria-label="Panier">
                                         <ShoppingBag size={19} strokeWidth={1.8} />
                                         {nombreArticles > 0 && <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-jse-accent font-sans text-[9px] font-bold text-white">{nombreArticles > 9 ? "9+" : nombreArticles}</span>}
                                     </button>
