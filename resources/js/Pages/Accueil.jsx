@@ -73,6 +73,30 @@ const imagesRestaurants = [
     "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=85",
 ];
 
+
+const restaurantsLocaux = [
+    { id: "local-oasis-du-chef", nom: "L’oasis du chef", note: 5, avis: 6, type: "Restaurant", adresse: "443V+48P", services: "Vente à emporter", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmPH6O-uVY6GHFjxqfv3s8CkKnb2IcqcGAe8zYn71lOsnzzrl3IHeiZggLxhNznAJHY310G8Lctym3yAv-Fb6J0VPjYDBiJ6rlCM5lnH2tOXjzrqoGAc5OwiwZWJDICsrJZQOH3kDE-xQBM=w92-h92-n-k-no" },
+    { id: "local-le-queens", nom: "Maquis-Resto Le Queens Adzopé", note: 4.6, avis: 5, type: "Restaurant", adresse: "34VM+X35", services: "Restaurant", description: "Cadre propre, cuisine superbe et personnel accueillant 👌🏾", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmNvt4N0-Zz4A6qHeM3fBwE76MSPW4iPSOOTGggF2RV1nN8JLeYxMaEvQkkTupMqevd9YNG-4wjk3bdzU-WvDgZIjin07Y-UmKExQUiR0WYBIMsbc959if4mFkOfidQzyrpN-BAUXA=w92-h92-n-k-no" },
+    { id: "local-cdg", nom: "Maquis La Cour Des Grands (CDG) Adzopé", note: 3.8, avis: 74, type: "Restaurant", adresse: "34XQ+HG2", services: "Maquis · Restaurant", description: "Pour l’ambiance c’est l’endroit idéal à Adzopé", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmOxedAG2O3p9SQ8JUd5Bn3JdpIrZ2X51Z6k2wyQUM2FXy7G-_D4tZBOsDdl6tX0c3K4EjoM5mVhbDBmUQhx3VvAHFS88n11CsCtOMeQcuLZ999RRADhoOSSfw3tuV0PYr1ynyvA=w92-h92-n-k-no" },
+    { id: "local-tantie-marthe", nom: "Maquis Chez Tantie Marthe", note: 3.5, avis: 135, type: "Restaurant", adresse: "442X+JP2", services: "Repas sur place · Vente à emporter", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmP3mLvf0Z4F6Axq4v6HNTOEwZtzFpbaXzL5n2NjYHiQgETvwzSHy0mKi9gSP74BjYWRhocKD95tSx8D2JrocZ2cVliUaAZi5AHWW8AnS6Scuqba0_gHuV43uyzlJ0ZKhBcu0foCdA=w92-h92-n-k-no" },
+    { id: "local-escale", nom: "L’escale", note: 3.6, avis: 109, type: "Plats africains", adresse: "34RM+GX2", services: "Restaurant", description: "Accueil chaleureux, plats délicieux, service impeccable, ambiance magique.", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmPzf2cuC2AbHSf0B50Vfv71ZW1XiVJT2Mat8snF27MRXI5sVJIlHlOXK6t45UL5ozNJUAQgUFXwn99Q-SFoImWDO8HuCsUo4G71ZKM3peO4-mFJfNR6N5DWMJIkqt86-a6Cjox5=w92-h92-n-k-no" },
+    { id: "local-escalier", nom: "Maquis restaurant L’ESCALIER", note: 3.8, avis: 5, type: "Restaurant", adresse: "34XW+QC9", services: "Repas sur place · Vente à emporter", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmMtxwslfwJb7k6eDKqKecRWxB0xgKwbADjoC08NZ-7S3CXBc2GkOLt9kTDfS-OsOPzt4OpE5UREaC-I0IGtJt0O8b4r1OgoD30JcQBXo3PFdis1WOUeXFPl7Inrv07c6G1WS9eN=w92-h92-n-k-no" },
+    { id: "local-adebo", nom: "Marquis resto ADÊBÔ", note: 5, avis: 2, type: "Restaurant", adresse: "442H+26", services: "Repas sur place · Vente à emporter", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmMXbl-doItLuL52JAXK7d61blM08fGFYuEqx8M7gS8gs-Mu4-2KI23nEWvGx-e3RDAVTM75vfwPeZLhYiwZvfbmg09-aVdd3TcigPW_nK4vRGoFEBOtL0pNRNvBYGmC1i7Ixy2GRL2zNoQQ=w92-h92-n-k-no" },
+    { id: "local-palmeraie", nom: "Plein-air la palmeraie d’adzopé", note: 4, avis: 20, type: "Plats africains", adresse: "34QR+72V", services: "Fermé · Ouvre à 00:00 sam.", description: "Très bon espace avec de très bons plats africains.", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmNvFLyxrlxLakVckZQCvsBOT5iMEMC-M9B5xGTv8ztRoGsi3DPI3eb6varT19TXSMObqD1_KuMgDwLxCFsjMDV2PQu6Vz589BKfpBv_g8GDEOT-Rtx9YUL-MKyOBUNWbdQ_ZSI=w92-h92-n-k-no" },
+    { id: "local-colombe", nom: "Restaurant la COLOMBE", note: 3.3, avis: 8, type: "Restaurant", adresse: "444P+HR6", services: "Repas sur place · Vente à emporter", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmMM8jNetpR4RrKEGrYFI0RCwO2o6ezQY8_--UOEBqFFGKQ2JYLck9rktedxa6rVp__RJOYbDL0a5IMNqz3FLn_O3D8IXTKjh7tZG-yaqMPnBblN8qJzHx2SAZMm2JgUb3sf506WsvA5Vyj=w92-h92-n-k-no" },
+    { id: "local-grand-ouest", nom: "Maquis Le Grand Ouest", note: 5, avis: 1, type: "Restaurant", adresse: "En dessous de L’escale", services: "Repas sur place · Vente à emporter", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmNrCNdUs_8ouvYvqJOf60OEh30msctUUJafdzX3tLz66dCJMZ0qwYJc_dyMvLu4ohg5GP8Nr6pQH5z3IcBWvpWS832Pfb6Of2rn2xVS5UfPls6Map7aK5LIMM5tBIcBura90QDMcIhUEtOX=w92-h92-n-k-no" },
+    { id: "local-san-pedro", nom: "Espace SAN PEDRO", note: 4, avis: 2, type: "Restaurant", adresse: "449W+885 King Palace Hotel", services: "Repas sur place · Vente à emporter", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmM4NqNIJ9sqa6DTj0TZuH5PZ21MYd54qFuezTnKlK0SW03534tqkbCu7YTJweh0MWxyqFv5zemrJJtmJIZl9IsJZAyGJ4o55dkSigAkSPlzWxw2XP-BHUjJQholNblTqqjMXBkBbg=w92-h92-n-k-no" },
+    { id: "local-kra-kra", nom: "Kra-Kra", note: 4.8, avis: 5, type: "Restaurant", adresse: "449H+WJV", services: "Vente à emporter", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmMp1VYuob97NdHsxYmECI2P4Wq9vppSsPODb_jWmcVmZ2yjNUvFhLiRszGDg2nLyLkVDcB1gZ-4BeUQ6P8-uc7pUnlRHBsBi2d9Op6y95exuPGe5CpM1Wij0P3uLKNPO4L0s1VSaw=w92-h92-n-k-no" },
+    { id: "local-obarachiel", nom: "Restaurant O’Barachiel", note: null, avis: 0, type: "Restaurant", adresse: "447W+4CH", services: "Repas sur place", image: "https://www.google.com/maps/vt/data=-1J8cMbjBcG9zgLCkG1ZkBmGr20Skhe93acoenUuQoVzauvk865JDoob-zroxt794yBKj0KhZ6AYkGwbAD6fd_-G4_ZNWr2zXpJnuNtkcSO_gvX8tj6h-cLWbIRmE1moKC8p1OvusA6TOmL1TBxnTJpO_8udz33cnJFotYhP" },
+    { id: "local-la-texane", nom: "LA TEXANE", note: 5, avis: 1, type: "Restaurant", adresse: "443Q+22R", services: "Repas sur place", image: "https://www.google.com/maps/vt/data=1bkhqX6o0G22fdp2FVGqm2rq3CoEZ25FwRrHEdJRrLU81rhk6SP9KGYJ5eOk7znAzg2YgM2-z8hIOzzNH0uPgs-2FtfaK0QAi-K52SpdtuD4TS7qUUThcW8Blzt8Nn24VI5qHXLYpfmfFj170DRfapekAWMqZZ-P2AMZyjys" },
+    { id: "local-escalier-a1", nom: "RESTAURANT L’ESCALIER", note: 3.7, avis: 3, type: "Restaurant", adresse: "34PM+XWH, A1", services: "Repas sur place · Vente à emporter", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmMteMzCt4zSkgOa0wYcVpD9qD33_7jdjbNNs3Q4_4KZAl6I4npfDmELPYOcyAP8W63pqD9Po_qMY7zhTdbkhp3Mp7NSv3wFbm7Ol_nzWOU8SkYxAbXqm4CjhBDfEPVrXs_1yu_uBg=w92-h92-n-k-no" },
+    { id: "local-vitesse-superieure", nom: "Espace Vitesse Supérieure Plus", note: 4.3, avis: 3, type: "Buffet", adresse: "443R+65H", services: "Repas sur place · Vente à emporter", image: "https://www.google.com/maps/vt/data=hm_pzvlyIewt25-eOaXUz5pOzBASTCyqSFqVsU9Liwq3UHzyYQE-rD4PyIVE4XN-UbV6jxh8eaikF92uEFACXWTITzuR_QnwrL2swt1WyTCj02TVFyZtaKbcKTChaeNm7NKjA74Y4_zEa3_v2FxB69_QLQ_qq_edTtN6yPmE" },
+    { id: "local-le-leader", nom: "MAQUIS LE LEADER", note: 3.7, avis: 15, type: "Restaurant", adresse: "Adzopé", services: "Repas sur place · Vente à emporter", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmOujlojvtDNuoAGyI073Zk05MEyxjWA87etkYsWNWgT526Ul4S243q2l9K4IfWz4jED6uTTaEjKMNIbWU3dLidc6PyQS6rd-SY8UKGkYzOCILh6QjzejEaNSwYj7Q5BvTnvb3jMLA=w92-h92-n-k-no" },
+    { id: "local-riziere", nom: "La Rizière Restaurant", note: null, avis: 0, type: "Restaurant", adresse: "Adzopé", services: "Repas sur place · Vente à emporter · Livraison", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmM0-Lkl8x5xPaYWNdwwfxj5ej-XtIX-t680UiPr8cADsaJMjBANrPKlI5B22zrQ-ebmCvNLjSesqUJGNv6OCS-rvGOj58qFt4MOvMZU85Xo29-NC9hpwuXeTmuwKYmfpj1MAFBO5BtLuK-C=w92-h92-n-k-no" },
+    { id: "local-le-bonus", nom: "Maquis-restaurant Le Bonus", note: 4, avis: 4, type: "Soupe populaire", adresse: "443W+7W9", services: "Restaurant", image: "https://lh3.googleusercontent.com/grass-cs/ACvplmOnUlO6i9a_AAx8w2ebGO6sJdeve0bBAbe7rOXkclsZMK7QFHXAJ3mWJ6Al0ozfa6ikQfvZf_QzUsL4oySb_q4L37DuF_DyXdkA_fOa1E6u19eyvWCw2YKkkkrXW6lYwCkpiFbPmw=w92-h92-n-k-no" },
+    { id: "local-chez-fidele", nom: "Chez Fidèle", note: 4.7, avis: 3, type: "Poulet", adresse: "442W+56P", services: "Repas sur place · Vente à emporter · Livraison", image: "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=900&q=85" },
+];
+
 const navigation = [
     { label: "Accueil", icon: Home, active: true },
     { label: "Commandes", icon: ShoppingBag },
@@ -130,15 +154,33 @@ export default function Accueil() {
         return ["Toutes les zones", ...new Set(valeurs)];
     }, [restaurants]);
 
-    const restaurantsFiltres = useMemo(() => {
-        if (zoneSelectionnee === "Toutes les zones") {
-            return restaurants;
-        }
+    const restaurantsDisponibles = useMemo(
+        () => [...restaurantsLocaux, ...restaurants],
+        [restaurants],
+    );
 
-        return restaurants.filter(
-            (restaurant) => restaurant.zone?.nom === zoneSelectionnee,
-        );
-    }, [restaurants, zoneSelectionnee]);
+    const restaurantsFiltres = useMemo(() => {
+        const terme = String(recherche || "").trim().toLowerCase();
+
+        return restaurantsDisponibles.filter((restaurant) => {
+            const correspondZone =
+                zoneSelectionnee === "Toutes les zones" ||
+                restaurant.zone?.nom === zoneSelectionnee;
+
+            const texte = [
+                restaurant.nom,
+                restaurant.description,
+                restaurant.type,
+                restaurant.adresse,
+                restaurant.services,
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+
+            return correspondZone && (!terme || texte.includes(terme));
+        });
+    }, [restaurantsDisponibles, recherche, zoneSelectionnee]);
 
     useEffect(() => {
         const intervalle = window.setInterval(() => {
@@ -357,7 +399,15 @@ export default function Accueil() {
                                             className="w-[calc(100vw-72px)] max-w-[310px] shrink-0 snap-start snap-always overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-jse-texte/5 sm:w-[300px] lg:w-auto lg:max-w-none"
                                         >
                                             <div className="relative aspect-[1.45/1] overflow-hidden bg-jse-principal">
-                                                <img src={imagesRestaurants[index % imagesRestaurants.length]} alt="" className="h-full w-full object-cover" />
+                                                <img
+                                                    src={restaurant.image || imagesRestaurants[index % imagesRestaurants.length]}
+                                                    alt={restaurant.nom}
+                                                    onError={(event) => {
+                                                        event.currentTarget.onerror = null;
+                                                        event.currentTarget.src = imagesRestaurants[index % imagesRestaurants.length];
+                                                    }}
+                                                    className="h-full w-full object-cover"
+                                                />
                                                 <button type="button" disabled className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-white/90 text-jse-principal shadow-sm" aria-label="Ajouter aux favoris">
                                                     <Heart size={16} strokeWidth={1.8} />
                                                 </button>
@@ -365,15 +415,22 @@ export default function Accueil() {
 
                                             <div className="p-3.5">
                                                 <div className="flex items-start justify-between gap-3">
-                                                    <h3 className="font-sans text-sm font-semibold text-jse-texte">{restaurant.nom}</h3>
+                                                    <h3 className="line-clamp-2 font-sans text-sm font-semibold text-jse-texte">{restaurant.nom}</h3>
+                                                    {restaurant.note !== null && restaurant.note !== undefined && (
+                                                        <span className="shrink-0 rounded-full bg-jse-fond px-2 py-1 font-sans text-[10px] font-bold text-jse-principal">★ {Number(restaurant.note).toFixed(1)}</span>
+                                                    )}
                                                 </div>
                                                 <p className="mt-1 line-clamp-1 font-sans text-[10px] text-jse-texte/45">
-                                                    {restaurant.description || "Cuisine locale"}
+                                                    {restaurant.type || restaurant.description || "Restaurant"}
+                                                    {restaurant.avis > 0 ? \` · \${restaurant.avis} avis\` : " · Aucun avis"}
                                                 </p>
-                                                <div className="mt-3 flex items-center gap-2 font-sans text-[10px] text-jse-texte/50">
-                                                    <MapPin size={12} className="text-jse-secondaire" />
-                                                    <span>{restaurant.zone?.nom || restaurant.adresse || "Adzopé"}</span>
+                                                <div className="mt-3 flex items-start gap-2 font-sans text-[10px] leading-4 text-jse-texte/50">
+                                                    <MapPin size={12} className="mt-0.5 shrink-0 text-jse-secondaire" />
+                                                    <span className="line-clamp-2">{restaurant.adresse || restaurant.zone?.nom || "Adzopé"}</span>
                                                 </div>
+                                                {restaurant.services && (
+                                                    <p className="mt-2 line-clamp-1 font-sans text-[10px] text-jse-texte/45">{restaurant.services}</p>
+                                                )}
                                             </div>
                                         </article>
                                     ))}
