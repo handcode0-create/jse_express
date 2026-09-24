@@ -155,13 +155,13 @@ export default function RestaurantDetail() {
             </div>
 
             {nombre > 0 && <>
-                <button type="button" onClick={() => setPanierOuvert(true)} className="fixed inset-x-5 bottom-5 z-40 mx-auto flex h-[72px] w-[calc(100%-40px)] max-w-[700px] items-center rounded-full bg-jse-principal px-5 text-white shadow-2xl shadow-jse-principal/25">
+                <button type="button" onClick={() => router.visit("/panier")} className="fixed inset-x-5 bottom-5 z-40 mx-auto flex h-[72px] w-[calc(100%-40px)] max-w-[700px] items-center rounded-full bg-jse-principal px-5 text-white shadow-2xl shadow-jse-principal/25">
                     <div className="relative flex size-12 items-center justify-center rounded-full bg-white/10"><ShoppingBag size={27} /><span className="absolute -right-1 -top-1 flex size-6 items-center justify-center rounded-full bg-jse-accent font-sans text-[10px] font-bold">{nombre > 9 ? "9+" : nombre}</span></div>
                     <span className="ml-4 flex-1 text-left font-sans text-base font-bold">Voir mon panier</span>
                     <span className="font-sans text-base font-bold">{prix(total)} FCFA</span><ChevronRight className="ml-2" size={23} />
                 </button>
 
-                {panierOuvert && <div className="fixed inset-0 z-50 flex items-end justify-center bg-jse-principal/25 p-0 backdrop-blur-[2px] sm:items-center sm:p-5" onClick={() => setPanierOuvert(false)}>
+                {false && <div className="fixed inset-0 z-50 flex items-end justify-center bg-jse-principal/25 p-0 backdrop-blur-[2px] sm:items-center sm:p-5" onClick={() => setPanierOuvert(false)}>
                     <div className="max-h-[88vh] w-full max-w-lg overflow-hidden rounded-t-[32px] bg-jse-fond shadow-2xl sm:rounded-[32px]" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between border-b border-jse-texte/5 px-5 py-4"><div><p className="font-sans text-[10px] font-semibold uppercase tracking-[0.14em] text-jse-texte/35">Votre sélection</p><h2 className="font-against text-2xl text-jse-principal">Mon panier</h2></div><button type="button" onClick={() => setPanierOuvert(false)} className="flex size-10 items-center justify-center rounded-full bg-white"><X size={19} /></button></div>
                         <div className="max-h-[55vh] overflow-y-auto px-5 py-4 space-y-3">
