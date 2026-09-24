@@ -43,7 +43,7 @@ export default function Favoris() {
                             <NavigationItem label="Accueil" icon={Home} onClick={() => router.visit("/accueil")} />
                             <NavigationItem label="Commandes" icon={ShoppingBag} onClick={() => router.visit("/commandes")} />
                             <NavigationItem label="Favoris" icon={Heart} active />
-                            <NavigationItem label="Profil" icon={UserRound} />
+                            <NavigationItem label="Profil" icon={UserRound} onClick={() => router.visit("/profil")} />
                         </nav>
                     </div>
                 </aside>
