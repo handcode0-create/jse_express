@@ -2,6 +2,7 @@
 
 use App\Models\Categorie;
 use App\Models\Commande;
+use App\Models\HistoriqueCommande;
 use App\Models\LigneCommande;
 use App\Models\LignePanier;
 use App\Models\Panier;
@@ -173,6 +174,12 @@ Route::get('/panier', function () {
     ]);
 })->middleware('auth')->name('panier');
 
+Route::get('/favoris', function () {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+
+    return Inertia::render('Favoris');
+})->middleware('auth')->name('favoris');
+
 Route::get('/commandes', function (Request $request) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
 
@@ -237,17 +244,39 @@ Route::get('/commandes/{commande}', function (Commande $commande) {
         'zone',
         'statutCommande',
         'lignesCommande.produit',
+        'paiements',
+        'historiquesCommande.statut',
     ]);
+
+    $paiement = $commande->paiements
+        ->sortByDesc(fn ($item) => $item->date_paiement)
+        ->first();
+
+    $historique = $commande->historiquesCommande
+        ->sortBy('date_changement')
+        ->map(function ($element) {
+            return [
+                'code' => $element->statut?->code,
+                'libelle' => $element->statut?->libelle,
+                'date' => $element->date_changement
+                    ? \Illuminate\Support\Carbon::parse($element->date_changement)->format('d/m/Y'),
+                'heure' => $element->date_changement
+                    ? \Illuminate\Support\Carbon::parse($element->date_changement)->format('H:i'),
+            ];
+        })
+        ->values();
 
     return Inertia::render('CommandeDetails', [
         'commande' => [
             'id' => $commande->id,
             'reference' => $commande->reference,
-            'date_commande' => $commande->date_commande?->format('d/m/Y à H:i'),
+            'date_commande' => $commande->date_commande?->format('d/m/Y'),
+            'heure_commande' => $commande->date_commande?->format('H:i'),
             'restaurant' => $commande->restaurant ? [
                 'id' => $commande->restaurant->id,
                 'nom' => $commande->restaurant->nom,
                 'adresse' => $commande->restaurant->adresse,
+                'telephone' => $commande->restaurant->telephone,
             ] : null,
             'zone' => $commande->zone ? [
                 'id' => $commande->zone->id,
@@ -266,11 +295,23 @@ Route::get('/commandes/{commande}', function (Commande $commande) {
             'lignes' => $commande->lignesCommande->map(fn (LigneCommande $ligne) => [
                 'id' => $ligne->id,
                 'nom' => $ligne->nom_produit_snapshot,
+                'description' => $ligne->produit?->description,
                 'quantite' => (int) $ligne->quantite,
                 'prix_unitaire' => (float) $ligne->prix_unitaire,
                 'total' => (float) $ligne->total_ligne,
                 'image' => $ligne->produit?->image,
             ])->values(),
+            'paiement' => $paiement ? [
+                'moyen' => $paiement->moyen,
+                'reference_transaction' => $paiement->reference_transaction,
+                'montant' => (float) $paiement->montant,
+                'statut' => $paiement->statut,
+                'date' => $paiement->date_paiement
+                    ? \Illuminate\Support\Carbon::parse($paiement->date_paiement)->format('d/m/Y'),
+                'heure' => $paiement->date_paiement
+                    ? \Illuminate\Support\Carbon::parse($paiement->date_paiement)->format('H:i'),
+            ] : null,
+            'historique' => $historique,
         ],
     ]);
 })->whereNumber('commande')->middleware('auth')->name('commandes.details');
@@ -441,6 +482,14 @@ Route::post('/commande', function (Request $request) {
             'frais_livraison' => $fraisLivraison,
             'montant_total' => $sousTotal + $fraisLivraison,
             'date_commande' => now(),
+        ]);
+
+        HistoriqueCommande::create([
+            'commande_id' => $commande->id,
+            'statut_id' => $statutId,
+            'user_id' => Auth::id(),
+            'commentaire' => 'Commande reçue.',
+            'date_changement' => now(),
         ]);
 
         foreach ($lignes as $ligne) {
