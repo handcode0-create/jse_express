@@ -2,45 +2,87 @@ import React from "react";
 import { router, usePage } from "@inertiajs/react";
 import {
     ArrowLeft,
+    Bike,
     Check,
     ChevronRight,
     ClipboardList,
+    Clock3,
+    CreditCard,
     MapPin,
     Package,
     RefreshCcw,
-    Truck,
+    Store,
 } from "lucide-react";
 
 const imageFallback =
     "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80";
 
-function formatMontant(montant) {
-    return new Intl.NumberFormat("fr-FR").format(Number(montant || 0)) + " FCFA";
-}
-
-function etapeActive(statut) {
-    const code = statut?.code;
-
-    if (code === "LIVREE") return 4;
-    if (code === "EN_LIVRAISON") return 3;
-    if (code === "PRETE" || code === "EN_PREPARATION") return 2;
-    if (code === "CONFIRMEE") return 1;
-    if (code === "EN_ATTENTE") return 0;
-
-    return -1;
-}
-
 const etapes = [
-    "Reçue",
-    "Confirmée",
-    "Préparation",
-    "En livraison",
-    "Livrée",
+    { code: "EN_ATTENTE", label: "Commande reçue" },
+    { code: "CONFIRMEE", label: "Confirmée" },
+    { code: "EN_PREPARATION", label: "Préparation" },
+    { code: "PRETE", label: "Prête" },
+    { code: "EN_LIVRAISON", label: "En livraison" },
+    { code: "LIVREE", label: "Livrée" },
 ];
+
+function formatMontant(montant) {
+    return (
+        new Intl.NumberFormat("fr-FR").format(Number(montant || 0)) +
+        " FCFA"
+    );
+}
+
+function statutIndex(code) {
+    return etapes.findIndex((etape) => etape.code === code);
+}
+
+function formatHistorique(commande, code) {
+    const element = (commande.historique || []).find(
+        (item) => item.code === code,
+    );
+
+    if (element?.heure) {
+        return element.heure;
+    }
+
+    if (code === commande.statut?.code && commande.heure_commande) {
+        return commande.heure_commande;
+    }
+
+    return "—";
+}
+
+function libellePaiement(statut) {
+    if (!statut) return "Paiement non enregistré";
+
+    const valeur = String(statut).toLowerCase();
+
+    if (["paye", "payé", "reussi", "réussi", "success", "confirme", "confirmé"].includes(valeur)) {
+        return "Paiement réussi";
+    }
+
+    return statut;
+}
+
+function Card({ title, icon: Icon, children }) {
+    return (
+        <section className="mt-4 rounded-[28px] bg-white p-5 shadow-sm ring-1 ring-jse-texte/5 sm:p-6">
+            <div className="flex items-center gap-2">
+                <Icon size={20} className="text-jse-secondaire" strokeWidth={2} />
+                <h2 className="font-against text-[1.55rem] leading-none text-jse-principal sm:text-[1.7rem]">
+                    {title}
+                </h2>
+            </div>
+            {children}
+        </section>
+    );
+}
 
 export default function CommandeDetails() {
     const { commande } = usePage().props;
-    const active = etapeActive(commande?.statut);
+    const active = statutIndex(commande?.statut?.code);
+    const paiement = commande?.paiement;
 
     const recommander = () => {
         router.post(
@@ -52,7 +94,7 @@ export default function CommandeDetails() {
 
     return (
         <main className="min-h-screen bg-jse-fond pb-10 text-jse-texte">
-            <div className="mx-auto w-full max-w-2xl px-4 sm:px-6">
+            <div className="mx-auto w-full max-w-[760px] px-4 sm:px-6">
                 <header className="flex items-center justify-between pt-5 sm:pt-7">
                     <button
                         type="button"
@@ -63,120 +105,89 @@ export default function CommandeDetails() {
                         <ArrowLeft size={21} />
                     </button>
 
-                    <img
-                        src="/assets/jse_logo.png"
-                        alt="JSE Express"
-                        className="h-14 w-auto object-contain"
-                    />
+                    <div className="text-center">
+                        <p className="font-sans text-[9px] font-semibold uppercase tracking-[0.14em] text-jse-texte/35">
+                            Commande
+                        </p>
+                        <h1 className="font-sans text-base font-bold text-jse-principal sm:text-lg">
+                            #{commande.reference}
+                        </h1>
+                    </div>
 
                     <div className="flex size-11 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm ring-1 ring-jse-texte/5">
                         <ClipboardList size={19} />
                     </div>
                 </header>
 
-                <section className="pt-8">
-                    <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.15em] text-jse-texte/35">
-                        Commande #{commande.reference}
-                    </p>
-                    <h1 className="mt-2 font-against text-[2.7rem] leading-[0.95] text-jse-principal sm:text-[3.2rem]">
-                        Détails de la commande
-                    </h1>
-                    <p className="mt-2 font-sans text-xs text-jse-texte/55">
-                        {commande.date_commande}
-                    </p>
-                </section>
+                <section className="mt-5 overflow-hidden rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-jse-texte/5 sm:p-5">
+                    <div className="flex gap-4">
+                        <div className="size-[116px] shrink-0 overflow-hidden rounded-[20px] bg-jse-fond sm:size-[140px]">
+                            <img
+                                src={commande.restaurant?.image || imageFallback}
+                                alt={commande.restaurant?.nom || "Restaurant"}
+                                className="h-full w-full object-cover"
+                                onError={(event) => {
+                                    event.currentTarget.onerror = null;
+                                    event.currentTarget.src = imageFallback;
+                                }}
+                            />
+                        </div>
 
-                <section className="mt-6 overflow-hidden rounded-[28px] bg-white p-5 shadow-sm ring-1 ring-jse-texte/5">
-                    <div className="flex items-start justify-between gap-4">
-                        <div>
-                            <p className="font-sans text-[10px] uppercase tracking-[0.12em] text-jse-texte/35">
-                                Restaurant
-                            </p>
-                            <h2 className="mt-1 font-against text-2xl leading-none text-jse-principal">
-                                {commande.restaurant?.nom || "Restaurant JSE Express"}
+                        <div className="min-w-0 flex-1">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-jse-secondaire/10 px-3 py-2 font-sans text-[10px] font-semibold text-jse-secondaire">
+                                <Check size={14} />
+                                {commande.statut?.libelle || "Commande reçue"}
+                            </span>
+
+                            <h2 className="mt-2 font-against text-[1.65rem] leading-[0.95] text-jse-principal sm:text-2xl">
+                                {commande.restaurant?.nom ||
+                                    "Restaurant JSE Express"}
                             </h2>
-                            {commande.restaurant?.adresse && (
-                                <p className="mt-2 flex items-center gap-1.5 font-sans text-xs text-jse-texte/50">
-                                    <MapPin size={13} />
-                                    {commande.restaurant.adresse}
-                                </p>
+
+                            <p className="mt-1 font-sans text-xs text-jse-texte/60">
+                                Restaurant local
+                            </p>
+
+                            <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 font-sans text-[10px] text-jse-texte/50">
+                                <span className="flex items-center gap-1">
+                                    <ClipboardList size={13} />
+                                    {commande.date_commande}
+                                </span>
+                                {commande.heure_commande && (
+                                    <>
+                                        <span>•</span>
+                                        <span>{commande.heure_commande}</span>
+                                    </>
+                                )}
+                            </div>
+
+                            {commande.restaurant?.id && (
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        router.visit(
+                                            "/restaurants/" +
+                                                commande.restaurant.id,
+                                        )
+                                    }
+                                    className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-jse-fond px-4 py-2.5 font-sans text-[10px] font-semibold text-jse-principal"
+                                >
+                                    Voir le restaurant
+                                    <ChevronRight size={14} />
+                                </button>
                             )}
                         </div>
-
-                        <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-jse-secondaire/10 px-3 py-2 font-sans text-[10px] font-semibold text-jse-secondaire">
-                            <Check size={14} />
-                            {commande.statut?.libelle || "Commande"}
-                        </span>
                     </div>
-
-                    {active >= 0 && (
-                        <div className="mt-7">
-                            <div className="relative flex items-start justify-between">
-                                <div className="absolute left-[7%] right-[7%] top-3 h-[2px] bg-jse-texte/10" />
-                                <div
-                                    className="absolute left-[7%] top-3 h-[2px] bg-jse-secondaire"
-                                    style={{
-                                        width:
-                                            active === 0
-                                                ? "0%"
-                                                : (active / 4) * 86 + "%",
-                                    }}
-                                />
-
-                                {etapes.map((etape, index) => (
-                                    <div
-                                        key={etape}
-                                        className="relative z-10 flex w-[20%] flex-col items-center text-center"
-                                    >
-                                        <span
-                                            className={[
-                                                "flex size-6 items-center justify-center rounded-full border-2 bg-white",
-                                                index <= active
-                                                    ? "border-jse-secondaire"
-                                                    : "border-jse-texte/15",
-                                            ].join(" ")}
-                                        >
-                                            <span
-                                                className={[
-                                                    "size-2.5 rounded-full",
-                                                    index <= active
-                                                        ? "bg-jse-secondaire"
-                                                        : "bg-jse-texte/15",
-                                                ].join(" ")}
-                                            />
-                                        </span>
-                                        <span
-                                            className={[
-                                                "mt-2 font-sans text-[9px] leading-3",
-                                                index <= active
-                                                    ? "text-jse-secondaire"
-                                                    : "text-jse-texte/45",
-                                            ].join(" ")}
-                                        >
-                                            {etape}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </section>
 
-                <section className="mt-4 rounded-[28px] bg-white p-5 shadow-sm ring-1 ring-jse-texte/5">
-                    <div className="flex items-center gap-2">
-                        <Package size={19} className="text-jse-secondaire" />
-                        <h2 className="font-against text-2xl text-jse-principal">
-                            Articles
-                        </h2>
-                    </div>
-
-                    <div className="mt-4 space-y-3">
-                        {commande.lignes?.map((ligne) => (
+                <Card title="Articles commandés" icon={Package}>
+                    <div className="mt-4 divide-y divide-jse-texte/8">
+                        {(commande.lignes || []).map((ligne) => (
                             <div
                                 key={ligne.id}
-                                className="flex items-center gap-3 rounded-[20px] bg-jse-fond/70 p-2.5"
+                                className="flex gap-3 py-3 first:pt-0 last:pb-0"
                             >
-                                <div className="size-16 shrink-0 overflow-hidden rounded-[16px] bg-white">
+                                <div className="size-[72px] shrink-0 overflow-hidden rounded-[16px] bg-jse-fond">
                                     <img
                                         src={ligne.image || imageFallback}
                                         alt={ligne.nom}
@@ -190,74 +201,212 @@ export default function CommandeDetails() {
                                 </div>
 
                                 <div className="min-w-0 flex-1">
-                                    <p className="line-clamp-2 font-sans text-xs font-semibold text-jse-texte">
+                                    <h3 className="font-sans text-sm font-bold text-jse-principal">
                                         {ligne.nom}
-                                    </p>
-                                    <p className="mt-1 font-sans text-[10px] text-jse-texte/45">
-                                        {ligne.quantite} ×{" "}
-                                        {formatMontant(ligne.prix_unitaire)}
+                                    </h3>
+                                    <p className="mt-1 line-clamp-2 font-sans text-xs leading-4 text-jse-texte/55">
+                                        {ligne.description ||
+                                            "Article commandé"}
                                     </p>
                                 </div>
 
-                                <p className="shrink-0 font-sans text-xs font-bold text-jse-principal">
-                                    {formatMontant(ligne.total)}
-                                </p>
+                                <div className="flex min-w-[78px] flex-col items-end justify-center">
+                                    <span className="font-sans text-xs font-bold text-jse-principal">
+                                        x{ligne.quantite}
+                                    </span>
+                                    <span className="mt-1 font-sans text-sm font-bold text-jse-principal">
+                                        {formatMontant(ligne.total)}
+                                    </span>
+                                    <span className="mt-0.5 font-sans text-[10px] text-jse-texte/45">
+                                        {formatMontant(ligne.prix_unitaire)}
+                                    </span>
+                                </div>
                             </div>
                         ))}
                     </div>
-                </section>
+                </Card>
 
-                <section className="mt-4 rounded-[28px] bg-white p-5 shadow-sm ring-1 ring-jse-texte/5">
-                    <div className="flex items-center gap-2">
-                        <Truck size={19} className="text-jse-secondaire" />
-                        <h2 className="font-against text-2xl text-jse-principal">
-                            Livraison
-                        </h2>
+                <Card title="Livraison" icon={Bike}>
+                    <div className="mt-4 rounded-[22px] bg-jse-fond/70 p-4">
+                        <div className="flex items-start gap-3">
+                            <span className="flex size-12 shrink-0 items-center justify-center rounded-[16px] bg-jse-secondaire/10 text-jse-principal">
+                                <MapPin size={23} />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                                <p className="font-sans text-xs font-bold text-jse-principal">
+                                    {commande.adresse_livraison}
+                                </p>
+                                <p className="mt-1 font-sans text-xs leading-5 text-jse-texte/55">
+                                    {commande.zone?.nom || "Zone non précisée"}
+                                </p>
+                                <p className="mt-1 font-sans text-xs text-jse-texte/55">
+                                    {commande.telephone_livraison}
+                                </p>
+                            </div>
+                            <div className="border-l border-jse-texte/10 pl-4 text-right">
+                                <p className="font-sans text-sm font-bold text-jse-principal">
+                                    {formatMontant(commande.frais_livraison)}
+                                </p>
+                                <p className="mt-1 font-sans text-[10px] text-jse-texte/45">
+                                    Frais de livraison
+                                </p>
+                            </div>
+                        </div>
                     </div>
+                </Card>
 
-                    <div className="mt-4 rounded-[20px] bg-jse-fond/70 p-4">
-                        <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.12em] text-jse-texte/35">
-                            Adresse
-                        </p>
-                        <p className="mt-1 font-sans text-sm font-medium text-jse-texte">
-                            {commande.adresse_livraison}
-                        </p>
-                        <p className="mt-2 font-sans text-xs text-jse-texte/50">
-                            {commande.zone?.nom || "Zone non précisée"} ·{" "}
-                            {commande.telephone_livraison}
-                        </p>
-                    </div>
-                </section>
+                <Card title="Paiement" icon={CreditCard}>
+                    {paiement ? (
+                        <div className="mt-4 rounded-[22px] bg-jse-fond/70 p-4">
+                            <div className="flex items-center justify-between gap-3">
+                                <div>
+                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-jse-secondaire/10 px-3 py-2 font-sans text-[10px] font-semibold text-jse-secondaire">
+                                        <Check size={13} />
+                                        {libellePaiement(paiement.statut)}
+                                    </span>
+                                    <p className="mt-3 font-sans text-sm font-bold text-jse-principal">
+                                        {paiement.moyen || "Paiement mobile"}
+                                    </p>
+                                    {paiement.reference_transaction && (
+                                        <p className="mt-1 font-sans text-[10px] text-jse-texte/45">
+                                            Réf. {paiement.reference_transaction}
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-sans text-lg font-bold text-jse-principal">
+                                        {formatMontant(paiement.montant)}
+                                    </p>
+                                    {paiement.date && (
+                                        <p className="mt-1 font-sans text-[10px] text-jse-texte/45">
+                                            Payé le {paiement.date}
+                                            {paiement.heure
+                                                ? " · " + paiement.heure
+                                                : ""}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="mt-4 rounded-[22px] bg-jse-fond/70 p-4">
+                            <p className="font-sans text-sm font-semibold text-jse-principal">
+                                Aucun paiement enregistré
+                            </p>
+                            <p className="mt-1 font-sans text-xs leading-5 text-jse-texte/50">
+                                Le paiement de cette commande n’est pas encore
+                                enregistré dans JSE Express.
+                            </p>
+                        </div>
+                    )}
+                </Card>
 
-                <section className="mt-4 rounded-[28px] bg-white p-5 shadow-sm ring-1 ring-jse-texte/5">
-                    <div className="space-y-3 font-sans text-sm">
+                <Card title="Résumé" icon={ClipboardList}>
+                    <div className="mt-4 space-y-3 font-sans text-sm">
                         <div className="flex justify-between text-jse-texte/60">
                             <span>Sous-total</span>
                             <span>{formatMontant(commande.sous_total)}</span>
                         </div>
                         <div className="flex justify-between text-jse-texte/60">
-                            <span>Livraison</span>
-                            <span>{formatMontant(commande.frais_livraison)}</span>
+                            <span>Frais de livraison</span>
+                            <span>
+                                {formatMontant(commande.frais_livraison)}
+                            </span>
                         </div>
                         <div className="my-3 border-t border-jse-texte/10" />
                         <div className="flex items-center justify-between">
-                            <span className="font-semibold text-jse-principal">
+                            <span className="font-bold text-jse-principal">
                                 Total
                             </span>
-                            <span className="font-against text-2xl text-jse-principal">
+                            <span className="font-against text-2xl text-jse-secondaire">
                                 {formatMontant(commande.montant_total)}
                             </span>
                         </div>
                     </div>
-                </section>
+                </Card>
+
+                <Card title="Suivi de la commande" icon={Clock3}>
+                    <div className="mt-6 overflow-x-auto pb-1 scrollbar-none">
+                        <div className="min-w-[650px] px-1">
+                            <div className="relative">
+                                <div className="absolute left-[5%] right-[5%] top-3 h-[3px] rounded-full bg-jse-texte/10" />
+                                {active > 0 && (
+                                    <div
+                                        className="absolute left-[5%] top-3 h-[3px] rounded-full bg-jse-secondaire"
+                                        style={{
+                                            width:
+                                                (active / (etapes.length - 1)) *
+                                                    90 +
+                                                "%",
+                                        }}
+                                    />
+                                )}
+
+                                <div className="relative grid grid-cols-6">
+                                    {etapes.map((etape, index) => {
+                                        const atteint = index < active;
+                                        const actuel = index === active;
+
+                                        return (
+                                            <div
+                                                key={etape.code}
+                                                className="flex min-w-0 flex-col items-center text-center"
+                                            >
+                                                <div className="relative flex h-7 items-center justify-center">
+                                                    {actuel && (
+                                                        <span className="absolute size-7 rounded-full border-2 border-jse-secondaire/25" />
+                                                    )}
+                                                    <span
+                                                        className={[
+                                                            "relative z-10 flex size-6 items-center justify-center rounded-full border-[2px] bg-white",
+                                                            atteint || actuel
+                                                                ? "border-jse-secondaire bg-jse-secondaire"
+                                                                : "border-jse-texte/20",
+                                                        ].join(" ")}
+                                                    >
+                                                        {atteint || actuel ? (
+                                                            <Check
+                                                                size={12}
+                                                                strokeWidth={3}
+                                                                className="text-white"
+                                                            />
+                                                        ) : (
+                                                            <span className="size-2 rounded-full bg-jse-texte/20" />
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <p
+                                                    className={[
+                                                        "mt-2 max-w-[88px] font-sans text-[10px] font-semibold leading-3",
+                                                        atteint || actuel
+                                                            ? "text-jse-secondaire"
+                                                            : "text-jse-texte/45",
+                                                    ].join(" ")}
+                                                >
+                                                    {etape.label}
+                                                </p>
+                                                <p className="mt-1 font-sans text-[9px] text-jse-texte/45">
+                                                    {formatHistorique(
+                                                        commande,
+                                                        etape.code,
+                                                    )}
+                                                </p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Card>
 
                 {commande.statut?.code === "LIVREE" && (
                     <button
                         type="button"
                         onClick={recommander}
-                        className="mt-5 flex h-13 w-full items-center justify-center gap-2 rounded-full bg-jse-accent px-5 py-3.5 font-sans text-sm font-semibold text-white shadow-sm"
+                        className="mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-jse-accent px-5 font-sans text-sm font-semibold text-white shadow-lg shadow-jse-accent/20"
                     >
-                        <RefreshCcw size={18} />
+                        <RefreshCcw size={19} />
                         Commander à nouveau
                         <ChevronRight size={16} />
                     </button>
