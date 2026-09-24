@@ -101,53 +101,72 @@ function ProgressionCommande({ statut }) {
     if (active < 0) return null;
 
     return (
-        <div className="mt-6 px-1">
-            <div className="relative flex items-start justify-between">
-                <div className="absolute left-[7%] right-[7%] top-3 h-[2px] bg-jse-texte/10" />
+        <div className="mt-6 px-1 sm:px-2">
+            <div className="relative">
+                <div className="absolute left-[10%] right-[10%] top-[10px] h-[3px] rounded-full bg-jse-texte/10" />
                 <div
-                    className="absolute left-[7%] top-3 h-[2px] bg-jse-secondaire transition-all"
+                    className="absolute left-[10%] top-[10px] h-[3px] rounded-full bg-jse-secondaire transition-[width] duration-500"
                     style={{
-                        width: active === 0 ? "0%" : (active / 4) * 86 + "%",
+                        width: active === 0 ? "0%" : (active / 4) * 80 + "%",
                     }}
                 />
 
-                {etapes.map((etape, index) => {
-                    const termine = index <= active;
-                    const actuel = index === active;
+                <div className="relative grid grid-cols-5">
+                    {etapes.map((etape, index) => {
+                        const atteint = index < active;
+                        const actuel = index === active;
+                        const futur = index > active;
 
-                    return (
-                        <div
-                            key={etape.code}
-                            className="relative z-10 flex w-[20%] flex-col items-center text-center"
-                        >
-                            <span
-                                className={[
-                                    "flex size-6 items-center justify-center rounded-full border-[2px] bg-white transition-all",
-                                    termine
-                                        ? "border-jse-secondaire text-jse-secondaire"
-                                        : "border-jse-texte/15 text-jse-texte/20",
-                                    actuel ? "ring-4 ring-jse-secondaire/10" : "",
-                                ].join(" ")}
+                        return (
+                            <div
+                                key={etape.code}
+                                className="flex min-w-0 flex-col items-center"
                             >
-                                {termine ? (
-                                    <span className="size-2.5 rounded-full bg-jse-secondaire" />
-                                ) : (
-                                    <span className="size-2 rounded-full bg-jse-texte/15" />
-                                )}
-                            </span>
-                            <span
-                                className={[
-                                    "mt-2 font-sans text-[9px] leading-3 sm:text-[10px]",
-                                    termine
-                                        ? "font-medium text-jse-secondaire"
-                                        : "text-jse-texte/45",
-                                ].join(" ")}
-                            >
-                                {etape.label}
-                            </span>
-                        </div>
-                    );
-                })}
+                                <div className="relative flex h-[22px] items-center justify-center">
+                                    {actuel && (
+                                        <span className="absolute size-[25px] rounded-full border-2 border-jse-secondaire/25" />
+                                    )}
+
+                                    <span
+                                        className={[
+                                            "relative z-10 flex size-[20px] items-center justify-center rounded-full border-[3px] bg-white transition-all duration-300",
+                                            atteint || actuel
+                                                ? "border-jse-secondaire"
+                                                : "border-jse-texte/20",
+                                            actuel
+                                                ? "size-[22px] shadow-[0_0_0_3px_rgba(69,185,119,0.10)]"
+                                                : "",
+                                        ].join(" ")}
+                                    >
+                                        <span
+                                            className={[
+                                                "rounded-full transition-all",
+                                                atteint
+                                                    ? "size-[8px] bg-jse-secondaire"
+                                                    : actuel
+                                                      ? "size-[8px] bg-jse-secondaire"
+                                                      : futur
+                                                        ? "size-[7px] bg-jse-texte/20"
+                                                        : "",
+                                            ].join(" ")}
+                                        />
+                                    </span>
+                                </div>
+
+                                <span
+                                    className={[
+                                        "mt-3 max-w-[70px] text-center font-sans text-[9px] leading-[1.15] sm:max-w-none sm:text-[10px]",
+                                        atteint || actuel
+                                            ? "font-medium text-jse-secondaire"
+                                            : "text-jse-texte/45",
+                                    ].join(" ")}
+                                >
+                                    {etape.label}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
