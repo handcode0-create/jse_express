@@ -275,6 +275,7 @@ Route::get('/commandes/{commande}', function (Commande $commande) {
             'restaurant' => $commande->restaurant ? [
                 'id' => $commande->restaurant->id,
                 'nom' => $commande->restaurant->nom,
+                'image' => $commande->lignesCommande->first()?->produit?->image,
                 'adresse' => $commande->restaurant->adresse,
                 'telephone' => $commande->restaurant->telephone,
             ] : null,
