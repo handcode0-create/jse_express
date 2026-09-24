@@ -17,12 +17,16 @@
     /* Typographie */
     --font-sans: "Poppins", sans-serif;
 
-    /* Rayons */
+    /* Rayons — noms conservés pour compatibilité */
     --radius-jse-petit: 8px;
     --radius-jse-moyen: 12px;
     --radius-jse-grand: 16px;
     --radius-jse-xl: 20px;
     --radius-jse-xxl: 24px;
+
+    /* Surfaces */
+    --shadow-jse-carte: 0 8px 30px rgb(18 60 50 / 0.06);
+    --shadow-jse-elevated: 0 18px 50px rgb(18 60 50 / 0.10);
 }
 
 :root {
