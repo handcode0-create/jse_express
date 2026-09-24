@@ -28,6 +28,8 @@ export default function Authentification() {
     const [afficherConfirmation, setAfficherConfirmation] =
         useState(false);
 
+    const [soumissionEnCours, setSoumissionEnCours] = useState(false);
+
     const [formulaire, setFormulaire] = useState({
         nom: "",
         prenom: "",
@@ -67,6 +69,12 @@ export default function Authentification() {
     const erreurs = Object.values(errors || {});
 
     const afficherErreurs = erreurs.length > 0;
+
+    useEffect(() => {
+        if (Object.keys(errors || {}).length > 0) {
+            setSoumissionEnCours(false);
+        }
+    }, [errors]);
 
     /*
     |--------------------------------------------------------------------------
@@ -123,16 +131,33 @@ export default function Authentification() {
     const soumettre = (event) => {
         event.preventDefault();
 
+        if (soumissionEnCours) {
+            return;
+        }
+
+        setSoumissionEnCours(true);
+
         const route = mode === "inscription" ? "/inscription" : "/connexion";
 
         router.post(route, formulaire, {
             preserveScroll: true,
+            preserveState: true,
 
             onSuccess: () => {
+                setSoumissionEnCours(false);
+
                 if (mode === "inscription") {
                     reinitialiserFormulaire();
                     setMode("connexion");
                 }
+            },
+
+            onError: () => {
+                setSoumissionEnCours(false);
+            },
+
+            onFinish: () => {
+                setSoumissionEnCours(false);
             },
         });
     };
@@ -700,9 +725,11 @@ export default function Authentification() {
                                 type="submit"
                                 className="flex h-13 w-full items-center justify-center rounded-2xl bg-jse-principal px-6 text-sm font-semibold text-white shadow-lg shadow-jse-principal/15 transition hover:bg-jse-principal/90 active:scale-[0.99]"
                             >
-                                {mode === "connexion"
-                                    ? "Se connecter"
-                                    : "Créer mon compte"}
+                                {soumissionEnCours
+                                    ? "Connexion en cours..."
+                                    : mode === "connexion"
+                                      ? "Se connecter"
+                                      : "Créer mon compte"}
                             </button>
                         </form>
 
