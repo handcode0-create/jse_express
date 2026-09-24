@@ -837,6 +837,11 @@ Route::get('/restaurants/{restaurant}', function (Restaurant $restaurant) {
         ->latest('id')
         ->first();
 
+    $estFavori = Favori::query()
+        ->where('user_id', Auth::id())
+        ->where('restaurant_id', $restaurant->id)
+        ->exists();
+
     return Inertia::render('RestaurantDetail', [
         'restaurant' => [
             'id' => $restaurant->id,
@@ -848,6 +853,7 @@ Route::get('/restaurants/{restaurant}', function (Restaurant $restaurant) {
             'zone' => $restaurant->zone ? ['id' => $restaurant->zone->id, 'nom' => $restaurant->zone->nom] : null,
         ],
         'categories' => $categories,
+        'estFavori' => $estFavori,
         'panier' => [
             'nombre_articles' => $panier?->lignesPanier->sum('quantite') ?? 0,
             'montant_total' => $panier ? (float) $panier->lignesPanier->sum(fn ($ligne) => $ligne->quantite * $ligne->prix_unitaire) : 0,
@@ -981,9 +987,16 @@ Route::get('/accueil', function (Request $request) {
         ->latest('id')
         ->first();
 
+    $favorisRestaurantIds = Favori::query()
+        ->where('user_id', Auth::id())
+        ->pluck('restaurant_id')
+        ->map(fn ($id) => (int) $id)
+        ->values();
+
     return Inertia::render('Accueil', [
         'categories' => $categories,
         'restaurants' => $restaurants,
+        'favorisRestaurantIds' => $favorisRestaurantIds,
         'recherche' => $recherche,
         'panier' => [
             'nombre_articles' => $panier?->lignesPanier->sum('quantite') ?? 0,
