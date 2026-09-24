@@ -110,7 +110,8 @@ function NavigationItem({ item, compact = false }) {
     return (
         <button
             type="button"
-            disabled={!item.active}
+            onClick={() => item.route && router.visit(item.route)}
+            disabled={!item.active && !item.route}
             title={item.active ? item.label : `${item.label} — disponible prochainement`}
             className={[
                 "group flex items-center transition-all",
