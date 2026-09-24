@@ -144,6 +144,7 @@ export default function Accueil() {
     const [filtreOuvert, setFiltreOuvert] = useState(false);
     const [zoneSelectionnee, setZoneSelectionnee] = useState("Toutes les zones");
     const [zoneTemporaire, setZoneTemporaire] = useState("Toutes les zones");
+    const [categorieSelectionnee, setCategorieSelectionnee] = useState("Restaurants");
     const nombreArticles = Number(panier?.nombre_articles ?? 0);
 
     const zones = useMemo(() => {
@@ -178,9 +179,18 @@ export default function Accueil() {
                 .join(" ")
                 .toLowerCase();
 
-            return correspondZone && (!terme || texte.includes(terme));
+            const correspondCategorie =
+                categorieSelectionnee === "Restaurants" ||
+                (categorieSelectionnee === "Fast food" &&
+                    /fast.?food|burger|snack|pizza|sandwich|grill/i.test(texte)) ||
+                (categorieSelectionnee === "Boissons" &&
+                    /boisson|jus|glacier|café|bar/i.test(texte)) ||
+                (categorieSelectionnee === "Promotions" &&
+                    /promo|promotion|offre|réduction/i.test(texte));
+
+            return correspondZone && correspondCategorie && (!terme || texte.includes(terme));
         });
-    }, [restaurantsDisponibles, recherche, zoneSelectionnee]);
+    }, [restaurantsDisponibles, recherche, zoneSelectionnee, categorieSelectionnee]);
 
     useEffect(() => {
         const intervalle = window.setInterval(() => {
@@ -329,9 +339,14 @@ export default function Accueil() {
                                     <button
                                         key={raccourci.nom}
                                         type="button"
-                                        disabled
-                                        title="Disponible prochainement"
-                                        className="group min-w-0 rounded-[22px] bg-white p-2 text-center shadow-sm ring-1 ring-jse-texte/5 sm:p-3 lg:p-3.5 disabled:cursor-default"
+                                        onClick={() => {
+                                            setCategorieSelectionnee(raccourci.nom);
+                                            window.setTimeout(() => document.getElementById("restaurants-populaires")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+                                        }}
+                                        className={[
+                                            "group min-w-0 rounded-[22px] bg-white p-2 text-center shadow-sm ring-1 ring-jse-texte/5 transition sm:p-3 lg:p-3.5",
+                                            categorieSelectionnee === raccourci.nom ? "ring-2 ring-jse-secondaire" : "hover:-translate-y-0.5 hover:shadow-md",
+                                        ].join(" ")}
                                     >
                                         <div className="aspect-square overflow-hidden rounded-[18px] bg-jse-fond">
                                             <img
