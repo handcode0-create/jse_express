@@ -139,6 +139,7 @@ export default function Accueil() {
         panier = {},
         recherche = "",
         favorisRestaurantIds = [],
+        notificationsCount = 0,
     } = usePage().props;
 
     const utilisateur = auth?.user ?? null;
@@ -324,8 +325,13 @@ export default function Accueil() {
                                 </button>
 
                                 <div className="flex items-center gap-2">
-                                    <button type="button" onClick={() => router.visit("/notifications")} className="relative flex size-11 items-center justify-center rounded-full bg-transparent text-jse-principal lg:bg-white lg:shadow-sm lg:ring-1 lg:ring-jse-texte/5" aria-label="Notifications">
+                                    <button type="button" onClick={() => router.visit("/notifications")} className="relative flex size-11 items-center justify-center rounded-full bg-transparent text-jse-principal lg:bg-white lg:shadow-sm lg:ring-1 lg:ring-jse-texte/5" aria-label={`Notifications${notificationsCount > 0 ? ` : ${notificationsCount} notification${notificationsCount > 1 ? "s" : ""}` : ""}`}>
                                         <Bell size={26} strokeWidth={1.8} />
+                                        {notificationsCount > 0 && (
+                                            <span className="absolute -right-1 -top-1 flex min-w-5 h-5 items-center justify-center rounded-full bg-jse-accent px-1 font-sans text-[9px] font-bold text-white">
+                                                {notificationsCount > 9 ? "9+" : notificationsCount}
+                                            </span>
+                                        )}
                                     </button>
                                     <button type="button" onClick={() => router.visit("/panier")} className="relative hidden size-11 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm ring-1 ring-jse-texte/5 sm:flex" aria-label="Panier">
                                         <ShoppingBag size={19} strokeWidth={1.8} />
