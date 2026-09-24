@@ -17,11 +17,6 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
         ]);
     })
-    ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [
-            HandleInertiaRequests::class,
-        ]);
-    })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->redirectGuestsTo('/authentification');
         $exceptions->shouldRenderJsonWhen(
