@@ -334,7 +334,21 @@ Route::patch('/profil/adresses/{adresseLivraison}/defaut', function (AdresseLivr
 Route::delete('/profil/adresses/{adresseLivraison}', function (AdresseLivraison $adresseLivraison) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
     abort_unless((int) $adresseLivraison->user_id === (int) Auth::id(), 404);
-    $adresseLivraison->delete();
+
+    DB::transaction(function () use ($adresseLivraison) {
+        $etaitParDefaut = (bool) $adresseLivraison->par_defaut;
+        $adresseLivraison->delete();
+
+        if ($etaitParDefaut) {
+            $adresseSuivante = AdresseLivraison::query()
+                ->where('user_id', Auth::id())
+                ->where('statut', 'actif')
+                ->latest('id')
+                ->first();
+
+            $adresseSuivante?->update(['par_defaut' => true]);
+        }
+    });
 
     return back()->with('success', 'Adresse supprimée.');
 })->whereNumber('adresseLivraison')->middleware('auth')->name('profil.adresse.supprimer');
@@ -376,7 +390,21 @@ Route::patch('/profil/moyens-paiement/{moyenPaiement}/defaut', function (MoyenPa
 Route::delete('/profil/moyens-paiement/{moyenPaiement}', function (MoyenPaiement $moyenPaiement) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
     abort_unless((int) $moyenPaiement->user_id === (int) Auth::id(), 404);
-    $moyenPaiement->delete();
+
+    DB::transaction(function () use ($moyenPaiement) {
+        $etaitParDefaut = (bool) $moyenPaiement->par_defaut;
+        $moyenPaiement->delete();
+
+        if ($etaitParDefaut) {
+            $moyenSuivant = MoyenPaiement::query()
+                ->where('user_id', Auth::id())
+                ->where('statut', 'actif')
+                ->latest('id')
+                ->first();
+
+            $moyenSuivant?->update(['par_defaut' => true]);
+        }
+    });
 
     return back()->with('success', 'Moyen de paiement supprimé.');
 })->whereNumber('moyenPaiement')->middleware('auth')->name('profil.paiement.supprimer');
