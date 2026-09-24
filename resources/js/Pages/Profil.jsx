@@ -5,6 +5,7 @@ import {
     MapPin, Package, Plus, Settings, Trash2, UserRound, WalletCards, X,
 } from "lucide-react";
 import { BoutonChargement } from "../Composants/Interface/EtatsChargement";
+import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 
 function NavigationItem({ label, icon: Icon, active = false, onClick }) {
     return <button type="button" onClick={onClick} className={["flex min-w-[66px] flex-col items-center justify-center gap-1 rounded-[20px] px-2.5 py-2 transition-all", active ? "bg-jse-secondaire text-white shadow-sm" : "text-jse-texte/80 hover:bg-jse-fond"].join(" ")}>
@@ -89,16 +90,7 @@ export default function Profil() {
     return <main className="min-h-screen bg-jse-fond pb-28 text-jse-texte">
         <div className="mx-auto min-h-screen w-full max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-10">
-                <aside className="hidden lg:block"><div className="sticky top-6 pt-6">
-                    <button type="button" onClick={() => router.visit("/accueil")} className="flex size-12 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm ring-1 ring-jse-texte/5"><Home size={20} /></button>
-                    <div className="mt-8"><img src="/assets/jse_logo.png" alt="JSE Express" className="h-14 w-auto object-contain" /></div>
-                    <nav className="mt-10 space-y-2">
-                        <NavigationItem label="Accueil" icon={Home} onClick={() => router.visit("/accueil")} />
-                        <NavigationItem label="Commandes" icon={Package} onClick={() => router.visit("/commandes")} />
-                        <NavigationItem label="Favoris" icon={Heart} onClick={() => router.visit("/favoris")} />
-                        <NavigationItem label="Profil" icon={UserRound} active />
-                    </nav>
-                </div></aside>
+                <SidebarJSE active="profil" />
 
                 <div className="mx-auto w-full max-w-3xl lg:mx-0">
                     <section className="-mx-4 overflow-hidden rounded-b-[34px] bg-jse-principal px-5 pb-8 pt-6 sm:-mx-6 sm:px-8 lg:mx-0 lg:rounded-[34px] lg:pt-8">
