@@ -396,7 +396,11 @@ export default function Accueil() {
                                     {restaurantsFiltres.map((restaurant, index) => (
                                         <article
                                             key={restaurant.id}
-                                            className="w-[calc(100vw-72px)] max-w-[310px] shrink-0 snap-start snap-always overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-jse-texte/5 sm:w-[300px] lg:w-auto lg:max-w-none"
+                                            onClick={() => Number.isInteger(Number(restaurant.id)) && router.visit(`/restaurants/${restaurant.id}`)}
+                                            className={[
+                                                "w-[calc(100vw-72px)] max-w-[310px] shrink-0 snap-start snap-always overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-jse-texte/5 sm:w-[300px] lg:w-auto lg:max-w-none",
+                                                Number.isInteger(Number(restaurant.id)) ? "cursor-pointer transition-transform hover:-translate-y-0.5" : "cursor-default",
+                                            ].join(" ")}
                                         >
                                             <div className="relative aspect-[1.45/1] overflow-hidden bg-jse-principal">
                                                 <img
