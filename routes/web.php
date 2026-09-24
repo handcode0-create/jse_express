@@ -228,18 +228,6 @@ Route::delete('/favoris/{restaurant}', function (Restaurant $restaurant) {
     return back();
 })->whereNumber('restaurant')->middleware('auth')->name('favoris.supprimer');
 
-Route::patch('/favoris/{restaurant}/defaut', function (Restaurant $restaurant) {
-    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
-    abort_unless($restaurant->statut === 'actif', 404);
-
-    Favori::firstOrCreate([
-        'user_id' => Auth::id(),
-        'restaurant_id' => $restaurant->id,
-    ]);
-
-    return back();
-})->whereNumber('restaurant')->middleware('auth')->name('favoris.defaut');
-
 Route::get('/profil', function () {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
 
