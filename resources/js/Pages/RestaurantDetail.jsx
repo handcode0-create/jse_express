@@ -20,13 +20,18 @@ function Action({ label, onClick, active = false, children }) {
 }
 
 export default function RestaurantDetail() {
-    const { restaurant, categories = [], panier = {} } = usePage().props;
+    const { restaurant, categories = [], panier = {}, estFavori: favoriServeur = false } = usePage().props;
     const [onglet, setOnglet] = useState("menu");
     const [recherche, setRecherche] = useState("");
     const [categorie, setCategorie] = useState("Toutes");
-    const [favori, setFavori] = useState(false);
+    const [favori, setFavori] = useState(Boolean(favoriServeur));
 
     useEffect(() => {
+        if (Number.isInteger(Number(restaurant?.id))) {
+            setFavori(Boolean(favoriServeur));
+            return;
+        }
+
         const synchroniser = () => setFavori(estFavori(restaurant?.id));
         synchroniser();
         window.addEventListener("jse:favoris-change", synchroniser);
@@ -35,7 +40,7 @@ export default function RestaurantDetail() {
             window.removeEventListener("jse:favoris-change", synchroniser);
             window.removeEventListener("storage", synchroniser);
         };
-    }, [restaurant?.id]);
+    }, [restaurant?.id, favoriServeur]);
     const [panierOuvert, setPanierOuvert] = useState(false);
     const [ajout, setAjout] = useState(null);
 
@@ -83,7 +88,28 @@ export default function RestaurantDetail() {
                     <div className="absolute inset-x-0 top-0 flex items-center justify-between px-5 pt-6 sm:px-7 sm:pt-7">
                         <Action label="Retour" onClick={() => router.visit("/accueil")}><ArrowLeft size={22} /></Action>
                         <div className="flex gap-2.5">
-                            <Action label={favori ? "Retirer des favoris" : "Ajouter aux favoris"} active={favori} onClick={() => { const nouveauxFavoris = basculerFavori({ ...restaurant, image: imageRestaurant }); setFavori(nouveauxFavoris.some((item) => String(item.id) === String(restaurant?.id))); }}><Heart size={22} fill={favori ? "currentColor" : "none"} /></Action>
+                            <Action
+    label={favori ? "Retirer des favoris" : "Ajouter aux favoris"}
+    active={favori}
+    onClick={() => {
+        if (Number.isInteger(Number(restaurant?.id))) {
+            const id = Number(restaurant.id);
+            setFavori((actuel) => !actuel);
+            router.visit(`/favoris/${id}`, {
+                method: favori ? "delete" : "post",
+                preserveScroll: true,
+                preserveState: true,
+                onError: () => setFavori((actuel) => !actuel),
+            });
+            return;
+        }
+
+        const nouveauxFavoris = basculerFavori({ ...restaurant, image: imageRestaurant });
+        setFavori(nouveauxFavoris.some((item) => String(item.id) === String(restaurant?.id)));
+    }}
+>
+    <Heart size={22} fill={favori ? "currentColor" : "none"} />
+</Action>
                             <Action label="Partager" onClick={partager}><Share2 size={21} /></Action>
                         </div>
                     </div>
