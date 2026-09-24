@@ -320,7 +320,7 @@ export default function Commandes() {
                                     icon={ClipboardList}
                                     active
                                 />
-                                <NavigationItem label="Favoris" icon={Heart} />
+                                <NavigationItem label="Favoris" icon={Heart} onClick={() => router.visit("/favoris")} />
                                 <NavigationItem label="Profil" icon={UserRound} />
                             </nav>
                         </div>
