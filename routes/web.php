@@ -6,6 +6,7 @@ use App\Models\Panier;
 use App\Models\Produit;
 use App\Models\Restaurant;
 use App\Models\User;
+use App\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
