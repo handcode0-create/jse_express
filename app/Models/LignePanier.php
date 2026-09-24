@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class LignePanier extends Model
 {
+    protected $table = 'ligne_panier';
 
     public $timestamps = false;
+
     protected $fillable = [
         'panier_id',
         'produit_id',
@@ -26,5 +28,4 @@ class LignePanier extends Model
     {
         return $this->belongsTo(Produit::class, 'produit_id', 'id');
     }
-
 }
