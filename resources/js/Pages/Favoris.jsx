@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { router, usePage } from "@inertiajs/react";
 import { ArrowLeft, ChevronRight, Heart, Home, MapPin, ShoppingBag, UserRound, X } from "lucide-react";
 import { basculerFavori, lireFavoris } from "../lib/favoris";
+import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 
 const fallbacks = [
     "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=85",
@@ -41,18 +42,7 @@ export default function Favoris() {
     return <main className="min-h-screen bg-jse-fond pb-28 text-jse-texte">
         <div className="mx-auto min-h-screen w-full max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-10">
-                <aside className="hidden lg:block">
-                    <div className="sticky top-6 pt-6">
-                        <button type="button" onClick={() => router.visit("/accueil")} className="flex size-12 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm ring-1 ring-jse-texte/5"><ArrowLeft size={21} /></button>
-                        <div className="mt-8"><img src="/assets/jse_logo.png" alt="JSE Express" className="h-14 w-auto object-contain" /></div>
-                        <nav className="mt-10 space-y-2">
-                            <NavigationItem label="Accueil" icon={Home} onClick={() => router.visit("/accueil")} />
-                            <NavigationItem label="Commandes" icon={ShoppingBag} onClick={() => router.visit("/commandes")} />
-                            <NavigationItem label="Favoris" icon={Heart} active />
-                            <NavigationItem label="Profil" icon={UserRound} onClick={() => router.visit("/profil")} />
-                        </nav>
-                    </div>
-                </aside>
+                <SidebarJSE active="favoris" />
 
                 <div className="mx-auto w-full max-w-4xl lg:mx-0">
                     <header className="pt-5 sm:pt-7 lg:pt-10">
