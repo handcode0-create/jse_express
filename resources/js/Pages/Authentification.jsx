@@ -66,8 +66,7 @@ export default function Authentification() {
 
     const erreurs = Object.values(errors || {});
 
-    const afficherErreurs =
-        mode === "inscription" && erreurs.length > 0;
+    const afficherErreurs = erreurs.length > 0;
 
     /*
     |--------------------------------------------------------------------------
@@ -124,24 +123,18 @@ export default function Authentification() {
     const soumettre = (event) => {
         event.preventDefault();
 
-        if (mode === "inscription") {
-            router.post("/inscription", formulaire, {
-                preserveScroll: true,
+        const route = mode === "inscription" ? "/inscription" : "/connexion";
 
-                onSuccess: () => {
+        router.post(route, formulaire, {
+            preserveScroll: true,
+
+            onSuccess: () => {
+                if (mode === "inscription") {
                     reinitialiserFormulaire();
-
                     setMode("connexion");
-                },
-            });
-
-            return;
-        }
-
-        /*
-         * La connexion sera branchée lorsque
-         * la route backend correspondante sera disponible.
-         */
+                }
+            },
+        });
     };
 
     return (
