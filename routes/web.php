@@ -428,7 +428,9 @@ Route::get('/notifications', function () {
                 'operateur' => $notification->operateur,
                 'statut_envoi' => $notification->statut_envoi,
                 'tentatives' => (int) $notification->tentatives,
-                'date_envoi' => $notification->date_envoi?->toIso8601String(),
+                'date_envoi' => $notification->date_envoi
+                    ? \Illuminate\Support\Carbon::parse($notification->date_envoi)->toIso8601String()
+                    : null,
             ];
         })
         ->values();
