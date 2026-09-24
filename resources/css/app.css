@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+    /* Identité JSE Express */
+    --color-jse-principal: #123C32;
+    --color-jse-secondaire: #45B977;
+    --color-jse-accent: #F28C28;
+    --color-jse-fond: #FFF7E8;
+    --color-jse-texte: #191919;
+
+    /* États */
+    --color-jse-danger: #D94A4A;
+    --color-jse-information: #3B82F6;
+
+    /* Typographie */
+    --font-sans: "Poppins", sans-serif;
+
+    /* Rayons */
+    --radius-jse-petit: 8px;
+    --radius-jse-moyen: 12px;
+    --radius-jse-grand: 16px;
+    --radius-jse-xl: 20px;
+    --radius-jse-xxl: 24px;
+}
+
+:root {
+    font-family: "Poppins", sans-serif;
+    color: #191919;
+    background: #FFF7E8;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+    min-height: 100%;
+    background: #FFF7E8;
+}
+
+body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+
+    background: #FFF7E8;
+    color: #191919;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+::selection {
+    background: #45B977;
+    color: #FFFFFF;
+}
+
+:focus-visible {
+    outline: 2px solid #45B977;
+    outline-offset: 3px;
+}
+
+@font-face {
+    font-family: "Against";
+    src: url("/font/against_regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+.font-against {
+    font-family: "Against", sans-serif;
+}
