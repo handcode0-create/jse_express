@@ -133,6 +133,161 @@ Route::post('/deconnexion', function (Request $request) {
 })->middleware('auth')->name('deconnexion');
 
 
+Route::get('/panier', function () {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+
+    $panier = Panier::query()
+        ->where('user_id', Auth::id())
+        ->where('statut', 'actif')
+        ->with(['lignesPanier.produit.restaurant'])
+        ->latest('id')
+        ->first();
+
+    $lignes = $panier?->lignesPanier ?? collect();
+    $sousTotal = (float) $lignes->sum(fn (LignePanier $ligne) => $ligne->quantite * $ligne->prix_unitaire);
+    $restaurants = $lignes->map(fn (LignePanier $ligne) => $ligne->produit?->restaurant_id)->filter()->unique()->values();
+
+    return Inertia::render('Panier', [
+        'panier' => [
+            'nombre_articles' => (int) $lignes->sum('quantite'),
+            'sous_total' => $sousTotal,
+            'frais_livraison' => 500,
+            'montant_total' => $sousTotal + ($lignes->isNotEmpty() ? 500 : 0),
+            'restaurant_unique' => $restaurants->count() === 1 ? $restaurants->first() : null,
+            'plusieurs_restaurants' => $restaurants->count() > 1,
+            'lignes' => $lignes->map(fn (LignePanier $ligne) => [
+                'id' => $ligne->id,
+                'produit_id' => $ligne->produit_id,
+                'nom' => $ligne->produit?->nom,
+                'image' => $ligne->produit?->image,
+                'restaurant_id' => $ligne->produit?->restaurant_id,
+                'restaurant_nom' => $ligne->produit?->restaurant?->nom,
+                'quantite' => $ligne->quantite,
+                'prix_unitaire' => (float) $ligne->prix_unitaire,
+                'total' => (float) ($ligne->quantite * $ligne->prix_unitaire),
+            ])->values(),
+        ],
+    ]);
+})->middleware('auth')->name('panier');
+
+Route::get('/commande/validation', function () {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+
+    $panier = Panier::query()
+        ->where('user_id', Auth::id())
+        ->where('statut', 'actif')
+        ->with(['lignesPanier.produit.restaurant'])
+        ->latest('id')
+        ->first();
+
+    $lignes = $panier?->lignesPanier ?? collect();
+    abort_if($lignes->isEmpty(), 404);
+
+    $restaurantIds = $lignes->map(fn (LignePanier $ligne) => $ligne->produit?->restaurant_id)->filter()->unique()->values();
+    abort_if($restaurantIds->count() !== 1, 422);
+
+    $restaurant = $lignes->first()->produit?->restaurant;
+    $zones = Zone::query()->where('statut', 'actif')->orderBy('nom')->get(['id', 'nom']);
+
+    return Inertia::render('CommandeValidation', [
+        'restaurant' => $restaurant ? [
+            'id' => $restaurant->id,
+            'nom' => $restaurant->nom,
+            'adresse' => $restaurant->adresse,
+        ] : null,
+        'zones' => $zones,
+        'client' => [
+            'nom' => Auth::user()->nom,
+            'prenom' => Auth::user()->prenom,
+            'telephone' => Auth::user()->telephone,
+        ],
+        'panier' => [
+            'nombre_articles' => (int) $lignes->sum('quantite'),
+            'sous_total' => (float) $lignes->sum(fn (LignePanier $ligne) => $ligne->quantite * $ligne->prix_unitaire),
+            'frais_livraison' => 500,
+            'montant_total' => (float) $lignes->sum(fn (LignePanier $ligne) => $ligne->quantite * $ligne->prix_unitaire) + 500,
+            'lignes' => $lignes->map(fn (LignePanier $ligne) => [
+                'id' => $ligne->id,
+                'nom' => $ligne->produit?->nom,
+                'quantite' => $ligne->quantite,
+                'prix_unitaire' => (float) $ligne->prix_unitaire,
+                'total' => (float) ($ligne->quantite * $ligne->prix_unitaire),
+            ])->values(),
+        ],
+    ]);
+})->middleware('auth')->name('commande.validation');
+
+Route::post('/commande', function (Request $request) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+
+    $donnees = $request->validate([
+        'zone_id' => ['required', 'integer', 'exists:zones,id'],
+        'adresse_livraison' => ['required', 'string', 'max:500'],
+        'telephone_livraison' => ['required', 'string', 'max:30'],
+    ]);
+
+    $commande = DB::transaction(function () use ($donnees) {
+        $panier = Panier::query()
+            ->where('user_id', Auth::id())
+            ->where('statut', 'actif')
+            ->with(['lignesPanier.produit.restaurant'])
+            ->lockForUpdate()
+            ->latest('id')
+            ->first();
+
+        abort_if(! $panier || $panier->lignesPanier->isEmpty(), 422);
+
+        $lignes = $panier->lignesPanier;
+        $restaurantIds = $lignes->map(fn (LignePanier $ligne) => $ligne->produit?->restaurant_id)->filter()->unique()->values();
+        abort_if($restaurantIds->count() !== 1, 422);
+
+        $restaurant = $lignes->first()->produit?->restaurant;
+        abort_unless($restaurant && $restaurant->statut === 'actif', 422);
+
+        foreach ($lignes as $ligne) {
+            abort_unless($ligne->produit && $ligne->produit->statut === 'actif' && $ligne->produit->disponible, 422);
+        }
+
+        $sousTotal = (float) $lignes->sum(fn (LignePanier $ligne) => $ligne->quantite * $ligne->prix_unitaire);
+        $fraisLivraison = 500;
+        $reference = 'JSE-' . str_pad((string) ((Commande::max('id') ?? 0) + 1), 6, '0', STR_PAD_LEFT);
+
+        $statutId = DB::table('statuts_commandes')->where('code', 'EN_ATTENTE')->value('id');
+        abort_unless($statutId, 422);
+
+        $commande = Commande::create([
+            'reference' => $reference,
+            'user_id' => Auth::id(),
+            'restaurant_id' => $restaurant->id,
+            'zone_id' => $donnees['zone_id'],
+            'statut_id' => $statutId,
+            'adresse_livraison' => $donnees['adresse_livraison'],
+            'telephone_livraison' => $donnees['telephone_livraison'],
+            'sous_total' => $sousTotal,
+            'frais_livraison' => $fraisLivraison,
+            'montant_total' => $sousTotal + $fraisLivraison,
+            'date_commande' => now(),
+        ]);
+
+        foreach ($lignes as $ligne) {
+            LigneCommande::create([
+                'commande_id' => $commande->id,
+                'produit_id' => $ligne->produit_id,
+                'nom_produit_snapshot' => $ligne->produit->nom,
+                'quantite' => $ligne->quantite,
+                'prix_unitaire' => $ligne->prix_unitaire,
+                'total_ligne' => $ligne->quantite * $ligne->prix_unitaire,
+            ]);
+        }
+
+        $panier->lignesPanier()->delete();
+
+        return $commande;
+    });
+
+    return redirect()->route('commande.validation')->with('success', 'Commande ' . $commande->reference . ' créée avec succès.');
+})->middleware('auth')->name('commande.creer');
+
 Route::get('/restaurants/{restaurant}/produits/{produit}', function (Restaurant $restaurant, Produit $produit) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
     abort_unless($restaurant->statut === 'actif', 404);
