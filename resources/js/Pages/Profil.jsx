@@ -28,7 +28,7 @@ export default function Profil() {
     const [modal, setModal] = useState(null);
     const [chargement, setChargement] = useState(false);
     const [erreur, setErreur] = useState("");
-    const [succes, setSucces] = useState("");
+    const [succes, setSucces] = useState(flash?.success || "");
     const [formulaire, setFormulaire] = useState({
         nom: utilisateur?.nom || "", prenom: utilisateur?.prenom || "",
         telephone: utilisateur?.telephone || "", email: utilisateur?.email || "",
@@ -49,7 +49,7 @@ export default function Profil() {
         setChargement(true);
         const callbacks = {
             preserveScroll: true,
-            onSuccess: () => setSucces("Modification enregistrée."),
+            onSuccess: (page) => setSucces(page?.props?.flash?.success || "Modification enregistrée."),
             onError: (errors) => setErreur(Object.values(errors || {})[0] || "Impossible de traiter la demande."),
             onFinish: () => setChargement(false),
             ...options,
@@ -63,7 +63,7 @@ export default function Profil() {
 
     const enregistrer = (event) => {
         event.preventDefault();
-        action("patch", "/profil", formulaire, { onSuccess: () => { setSucces("Vos informations ont été mises à jour."); setModal(null); } });
+        action("patch", "/profil", formulaire, { onSuccess: (page) => { setSucces(page?.props?.flash?.success || "Vos informations ont été mises à jour."); setModal(null); } });
     };
 
     const ajouterAdresse = (event) => {
@@ -104,7 +104,7 @@ export default function Profil() {
                     <section className="-mx-4 overflow-hidden rounded-b-[34px] bg-jse-principal px-5 pb-8 pt-6 sm:-mx-6 sm:px-8 lg:mx-0 lg:rounded-[34px] lg:pt-8">
                         <div className="flex items-start justify-between">
                             <button type="button" onClick={() => router.visit("/accueil")} className="flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md lg:hidden"><Home size={18} /></button>
-                            <button type="button" onClick={() => setModal("informations")} className="flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md"><Settings size={18} /></button>
+                            <button type="button" aria-label="Modifier mon profil" onClick={() => setModal("informations")} className="flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md"><Settings size={18} /></button>
                         </div>
                         <div className="mt-2 flex items-center gap-4">
                             <div className="flex size-[78px] shrink-0 items-center justify-center rounded-full border-4 border-white/20 bg-jse-secondaire text-2xl font-semibold text-white shadow-lg">{((utilisateur?.prenom?.[0] || "") + (utilisateur?.nom?.[0] || "")).toUpperCase() || "J"}</div>
@@ -138,8 +138,8 @@ export default function Profil() {
         </div></nav>
 
         {modal && <div className="fixed inset-0 z-[80] flex items-end justify-center bg-jse-principal/25 p-0 backdrop-blur-sm sm:items-center sm:p-5" onClick={() => setModal(null)}>
-            <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-[30px] bg-white p-5 shadow-2xl sm:rounded-[30px]" onClick={(event) => event.stopPropagation()}>
-                <div className="flex items-center justify-between"><div><p className="font-sans text-[10px] font-semibold uppercase tracking-[0.15em] text-jse-texte/35">JSE Express</p><h2 className="mt-1 font-against text-2xl text-jse-principal">{modal === "informations" ? "Mes informations" : modal === "adresses" ? "Mes adresses" : modal === "paiements" ? "Mes moyens de paiement" : modal === "about" ? "À propos" : "Aide & support"}</h2></div><button type="button" onClick={() => setModal(null)} className="flex size-10 items-center justify-center rounded-full bg-jse-fond text-jse-principal"><X size={18} /></button></div>
+            <div className="max-h-[calc(100vh-1rem)] w-full max-w-md overflow-y-auto rounded-t-[30px] bg-white p-5 shadow-2xl sm:rounded-[30px]" onClick={(event) => event.stopPropagation()}>
+                <div className="flex items-center justify-between"><div><p className="font-sans text-[10px] font-semibold uppercase tracking-[0.15em] text-jse-texte/35">JSE Express</p><h2 className="mt-1 font-against text-2xl text-jse-principal">{modal === "informations" ? "Mes informations" : modal === "adresses" ? "Mes adresses" : modal === "paiements" ? "Mes moyens de paiement" : modal === "about" ? "À propos" : "Aide & support"}</h2></div><button type="button" aria-label="Fermer" onClick={() => setModal(null)} className="flex size-10 items-center justify-center rounded-full bg-jse-fond text-jse-principal"><X size={18} /></button></div>
                 {erreur && <p role="alert" className="mt-4 rounded-[16px] bg-red-50 px-4 py-3 font-sans text-xs text-red-600">{erreur}</p>}
                 {succes && <p role="status" className="mt-4 rounded-[16px] bg-jse-secondaire/10 px-4 py-3 font-sans text-xs text-jse-principal">{succes}</p>}
 
