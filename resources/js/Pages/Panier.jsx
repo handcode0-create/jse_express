@@ -1,4 +1,5 @@
 import { router, usePage } from "@inertiajs/react";
+import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 import { ArrowLeft, ChevronRight, Minus, Plus, ShoppingBag, TicketPercent, Trash2, Bike } from "lucide-react";
 
 const prix=(v)=>new Intl.NumberFormat("fr-FR",{maximumFractionDigits:0}).format(Number(v||0));
@@ -16,7 +17,10 @@ export default function Panier(){
  const commander=()=>router.visit("/commande/validation");
 
  return <main className="min-h-screen bg-jse-fond text-jse-texte">
-  <div className="mx-auto min-h-screen w-full max-w-[760px] px-5 pb-32 sm:px-8">
+  <div className="mx-auto flex min-h-screen w-full max-w-[1440px]">
+   <SidebarJSE />
+   <div className="min-w-0 flex-1">
+    <div className="mx-auto min-h-screen w-full max-w-[760px] px-5 pb-32 sm:px-8">
    <header className="flex items-center gap-4 pb-5 pt-7">
     <button type="button" onClick={()=>router.visit("/accueil")} className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-jse-texte/5 text-jse-principal"><ArrowLeft size={23}/></button>
     <div><h1 className="font-against text-[2.5rem] leading-none text-jse-principal">Mon panier</h1><p className="mt-1 font-sans text-sm text-jse-texte/55">{nombre} produit{nombre>1?"s":""} dans votre panier</p></div>
@@ -57,6 +61,8 @@ export default function Panier(){
 
     <button type="button" disabled={panier.plusieurs_restaurants} onClick={commander} className="mt-5 flex h-[70px] w-full items-center rounded-full bg-jse-secondaire px-6 text-white shadow-xl shadow-jse-secondaire/20 disabled:cursor-not-allowed disabled:opacity-45"><span className="flex-1 text-left font-sans text-base font-bold sm:text-lg">Passer la commande</span><span className="border-l border-white/25 pl-5 font-sans text-base font-bold sm:text-lg">{prix(total)} FCFA</span><ChevronRight className="ml-3" size={24}/></button>
    </>}
+    </div>
+   </div>
   </div>
  </main>
 }
