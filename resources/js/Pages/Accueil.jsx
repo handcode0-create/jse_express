@@ -47,11 +47,23 @@ const bannières = [
     },
 ];
 
-const imagesFallback = [
-    "/assets/hero_icon/resto.jpeg",
-    "/assets/hero_icon/fast_food.jpeg",
-    "/assets/hero_icon/glacier.jpeg",
-    "/assets/hero_icon/promo.jpeg",
+const raccourcisAccueil = [
+    {
+        nom: "Restaurants",
+        image: "/assets/hero_icon/resto.jpeg",
+    },
+    {
+        nom: "Fast food",
+        image: "/assets/hero_icon/fast_food.jpeg",
+    },
+    {
+        nom: "Boissons",
+        image: "/assets/hero_icon/glacier.jpeg",
+    },
+    {
+        nom: "Promotions",
+        image: "/assets/hero_icon/promo.jpeg",
+    },
 ];
 
 const imagesRestaurants = [
@@ -59,28 +71,6 @@ const imagesRestaurants = [
     "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=900&q=85",
     "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=85",
 ];
-
-const imageCategorie = (categorie, index) => {
-    const nom = String(categorie?.nom ?? "").toLowerCase();
-
-    if (nom.includes("boisson")) {
-        return "/assets/hero_icon/glacier.jpeg";
-    }
-
-    if (nom.includes("plat")) {
-        return "/assets/hero_icon/fast_food.jpeg";
-    }
-
-    if (nom.includes("fast")) {
-        return "/assets/hero_icon/fast_food.jpeg";
-    }
-
-    if (nom.includes("resto")) {
-        return "/assets/hero_icon/resto.jpeg";
-    }
-
-    return imagesFallback[index % imagesFallback.length];
-};
 
 const navigation = [
     { label: "Accueil", icon: Home, active: true },
@@ -118,7 +108,6 @@ function NavigationItem({ item, compact = false }) {
 export default function Accueil() {
     const {
         auth,
-        categories = [],
         restaurants = [],
         panier = {},
         recherche = "",
@@ -238,27 +227,35 @@ export default function Accueil() {
                                     </button>
                                 </div>
                             </form>
-
                         </header>
 
-                        {/* Catégories */}
+                        {/* Raccourcis de l'accueil */}
                         <section className="pt-7 sm:pt-8 lg:pt-9">
                             <div className="mb-4 flex items-center justify-between">
                                 <h2 className="font-against text-[1.65rem] leading-none text-jse-principal sm:text-2xl">Catégories</h2>
-                                {categories.length > 4 && <button type="button" disabled className="font-sans text-xs font-semibold text-jse-secondaire">Voir tout</button>}
                             </div>
 
                             <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
-                                {categories.length > 0 ? categories.map((categorie, index) => (
-                                    <button key={categorie.id} type="button" disabled className="group min-w-0 rounded-[22px] bg-white p-2 text-center shadow-sm ring-1 ring-jse-texte/5 sm:p-3 lg:p-3.5">
+                                {raccourcisAccueil.map((raccourci) => (
+                                    <button
+                                        key={raccourci.nom}
+                                        type="button"
+                                        disabled
+                                        title="Disponible prochainement"
+                                        className="group min-w-0 rounded-[22px] bg-white p-2 text-center shadow-sm ring-1 ring-jse-texte/5 sm:p-3 lg:p-3.5 disabled:cursor-default"
+                                    >
                                         <div className="aspect-square overflow-hidden rounded-[18px] bg-jse-fond">
-                                            <img src={categorie.image || imageCategorie(categorie, index)} alt={categorie.nom} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                                            <img
+                                                src={raccourci.image}
+                                                alt={raccourci.nom}
+                                                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                            />
                                         </div>
-                                        <p className="mt-2 truncate font-sans text-[10px] font-semibold text-jse-texte sm:text-xs">{categorie.nom}</p>
+                                        <p className="mt-2 truncate font-sans text-[10px] font-semibold text-jse-texte sm:text-xs">
+                                            {raccourci.nom}
+                                        </p>
                                     </button>
-                                )) : (
-                                    <p className="font-sans text-xs text-jse-texte/45">Aucune catégorie disponible pour le moment.</p>
-                                )}
+                                ))}
                             </div>
                         </section>
 
@@ -310,7 +307,7 @@ export default function Accueil() {
                                     {restaurants.map((restaurant, index) => (
                                         <article key={restaurant.id} className="w-[258px] shrink-0 overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-jse-texte/5 lg:w-auto">
                                             <div className="relative aspect-[1.45/1] overflow-hidden bg-jse-principal">
-                                                <img src={imagesFallback[index % imagesFallback.length]} alt="" className="h-full w-full object-cover" />
+                                                <img src={imagesRestaurants[index % imagesRestaurants.length]} alt="" className="h-full w-full object-cover" />
                                                 <button type="button" disabled className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-white/90 text-jse-principal shadow-sm" aria-label="Ajouter aux favoris">
                                                     <Heart size={16} strokeWidth={1.8} />
                                                 </button>
