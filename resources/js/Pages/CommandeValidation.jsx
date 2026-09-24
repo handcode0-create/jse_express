@@ -1,6 +1,7 @@
 import { router, usePage } from "@inertiajs/react";
 import { ArrowLeft, Bike, Check, ChevronRight, MapPin, Phone, ShoppingBag } from "lucide-react";
 import { useState } from "react";
+import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 
 const prix=(v)=>new Intl.NumberFormat("fr-FR",{maximumFractionDigits:0}).format(Number(v||0));
 
@@ -14,7 +15,7 @@ export default function CommandeValidation(){
 
  const valider=(e)=>{e.preventDefault();setErreur("");setEnvoi(true);router.post("/commande",{zone_id:zoneId,adresse_livraison:adresse,telephone_livraison:telephone},{preserveScroll:true,onError:(errors)=>{setErreur(Object.values(errors||{})[0]||"Vérifiez les informations saisies.");setEnvoi(false);},onFinish:()=>setEnvoi(false)})};
 
- return <main className="min-h-screen bg-jse-fond text-jse-texte"><div className="mx-auto w-full max-w-[760px] px-5 pb-12 sm:px-8">
+ return <main className="min-h-screen bg-jse-fond text-jse-texte"><div className="mx-auto flex min-h-screen w-full max-w-[1440px]"><SidebarJSE /><div className="min-w-0 flex-1"><div className="mx-auto w-full max-w-[760px] px-5 pb-12 sm:px-8">
   <header className="flex items-center gap-4 pt-7"><button type="button" onClick={()=>router.visit("/panier")} className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm ring-1 ring-jse-texte/5"><ArrowLeft size={23}/></button><div><h1 className="font-against text-[2.35rem] leading-none text-jse-principal">Finaliser</h1><p className="mt-1 font-sans text-sm text-jse-texte/55">Préparez votre livraison</p></div></header>
 
   <section className="mt-6 rounded-[26px] bg-white p-5 ring-1 ring-jse-texte/5"><div className="flex items-center gap-3"><div className="flex size-12 items-center justify-center rounded-full bg-jse-secondaire/10 text-jse-secondaire"><ShoppingBag size={23}/></div><div><p className="font-sans text-xs text-jse-texte/45">Restaurant</p><p className="font-sans text-base font-bold text-jse-principal">{restaurant?.nom}</p></div></div><div className="mt-4 space-y-2">{(panier.lignes||[]).map(l=><div key={l.id} className="flex justify-between font-sans text-sm"><span className="text-jse-texte/65">{l.nom} × {l.quantite}</span><span className="font-semibold">{prix(l.total)} FCFA</span></div>)}</div></section>
@@ -29,5 +30,5 @@ export default function CommandeValidation(){
    {erreur && <div className="rounded-[18px] bg-red-50 px-4 py-3 font-sans text-xs text-red-600">{erreur}</div>}
    <button disabled={envoi} type="submit" className="flex h-[68px] w-full items-center rounded-full bg-jse-secondaire px-6 text-white shadow-xl disabled:opacity-60"><span className="flex-1 text-left font-sans font-bold">{envoi?"Création de la commande...":"Confirmer la commande"}</span><ChevronRight size={24}/></button>
   </form>
- </div></main>
+ </div></div></div></main>
 }
