@@ -222,7 +222,7 @@ Route::get('/commandes', function (Request $request) {
                     'libelle' => $statut->libelle,
                     'ordre' => (int) $statut->ordre,
                 ] : null,
-                'peut_recommander' => $code !== 'ANNULEE',
+                'peut_recommander' => $statut?->code !== 'ANNULEE',
             ];
         })->values(),
     ]);
