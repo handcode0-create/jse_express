@@ -84,9 +84,21 @@ export default function RestaurantDetail() {
                     <p className="mt-2 line-clamp-2 font-sans text-sm leading-5 text-jse-texte/65">{restaurant?.description || "Aucune description renseignée."}</p>
 
                     <div className="mt-5 grid grid-cols-3 gap-2.5">
-                        <div className="rounded-[18px] bg-white/60 px-3 py-3.5 ring-1 ring-jse-texte/5"><Clock3 size={22} className="text-jse-accent" /><p className="mt-2 font-sans text-xs font-semibold">Livraison</p><p className="mt-0.5 font-sans text-[10px] text-jse-texte/50">Selon disponibilité</p></div>
-                        <div className="rounded-[18px] bg-white/60 px-3 py-3.5 ring-1 ring-jse-texte/5"><UtensilsCrossed size={22} className="text-jse-accent" /><p className="mt-2 font-sans text-xs font-semibold">Menu</p><p className="mt-0.5 font-sans text-[10px] text-jse-texte/50">{produits.length} article{produits.length > 1 ? "s" : ""}</p></div>
-                        <div className="rounded-[18px] bg-jse-secondaire/10 px-3 py-3.5"><span className="mt-1 block size-3 rounded-full bg-jse-secondaire" /><p className="mt-2 font-sans text-xs font-semibold text-jse-principal">Actif</p><p className="mt-0.5 line-clamp-1 font-sans text-[10px] text-jse-texte/50">{restaurant?.horaires || "Horaires non renseignés"}</p></div>
+                        <div className="min-w-0 rounded-[20px] bg-white px-3.5 py-3.5 shadow-sm ring-1 ring-jse-texte/6 sm:px-4">
+                            <div className="flex size-10 items-center justify-center rounded-full bg-jse-accent/10 text-jse-accent"><Clock3 size={20} strokeWidth={2.2} /></div>
+                            <p className="mt-3 font-sans text-xs font-bold text-jse-principal">Livraison</p>
+                            <p className="mt-1 truncate font-sans text-[10px] text-jse-texte/50">Selon disponibilité</p>
+                        </div>
+                        <div className="min-w-0 rounded-[20px] bg-white px-3.5 py-3.5 shadow-sm ring-1 ring-jse-texte/6 sm:px-4">
+                            <div className="flex size-10 items-center justify-center rounded-full bg-jse-accent/10 text-jse-accent"><UtensilsCrossed size={20} strokeWidth={2.2} /></div>
+                            <p className="mt-3 font-sans text-xs font-bold text-jse-principal">Menu</p>
+                            <p className="mt-1 truncate font-sans text-[10px] text-jse-texte/50">{produits.length} article{produits.length > 1 ? "s" : ""}</p>
+                        </div>
+                        <div className="min-w-0 rounded-[20px] bg-jse-secondaire/10 px-3.5 py-3.5">
+                            <div className="flex size-10 items-center justify-center rounded-full bg-jse-secondaire/10 text-jse-secondaire"><span className="size-3 rounded-full bg-jse-secondaire" /></div>
+                            <p className="mt-3 font-sans text-xs font-bold text-jse-principal">Actif</p>
+                            <p className="mt-1 truncate font-sans text-[10px] text-jse-texte/50">{restaurant?.horaires || "Horaires non renseignés"}</p>
+                        </div>
                     </div>
                 </section>
 
@@ -112,7 +124,7 @@ export default function RestaurantDetail() {
                     </div>
 
                     <div className="mt-5 space-y-3">
-                        {produitsFiltres.length ? produitsFiltres.map((produit, index) => <article key={produit.id} className="flex min-h-[126px] items-center gap-3 rounded-[22px] bg-white p-2.5 shadow-sm ring-1 ring-jse-texte/5">
+                        {produitsFiltres.length ? produitsFiltres.map((produit, index) => <article key={produit.id} onClick={() => router.visit(`/restaurants/${restaurant.id}/produits/${produit.id}`)} className="flex min-h-[126px] cursor-pointer items-center gap-3 rounded-[22px] bg-white p-2.5 shadow-sm ring-1 ring-jse-texte/5 transition hover:-translate-y-0.5 hover:shadow-md">
                             <img src={produit.image || imagesPlats[index % imagesPlats.length]} alt={produit.nom} className="h-[106px] w-[116px] shrink-0 rounded-[17px] object-cover" />
                             <div className="min-w-0 flex-1 py-1">
                                 <p className="font-sans text-base font-bold">{produit.nom}</p>
