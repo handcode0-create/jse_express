@@ -54,6 +54,34 @@ const imagesFallback = [
     "/assets/hero_icon/promo.jpeg",
 ];
 
+const imagesRestaurants = [
+    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=85",
+    "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=900&q=85",
+    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=85",
+];
+
+const imageCategorie = (categorie, index) => {
+    const nom = String(categorie?.nom ?? "").toLowerCase();
+
+    if (nom.includes("boisson")) {
+        return "/assets/hero_icon/glacier.jpeg";
+    }
+
+    if (nom.includes("plat")) {
+        return "/assets/hero_icon/fast_food.jpeg";
+    }
+
+    if (nom.includes("fast")) {
+        return "/assets/hero_icon/fast_food.jpeg";
+    }
+
+    if (nom.includes("resto")) {
+        return "/assets/hero_icon/resto.jpeg";
+    }
+
+    return imagesRestaurants[index % imagesRestaurants.length];
+};
+
 const navigation = [
     { label: "Accueil", icon: Home, active: true },
     { label: "Commandes", icon: ShoppingBag },
@@ -224,7 +252,7 @@ export default function Accueil() {
                                 {categories.length > 0 ? categories.map((categorie, index) => (
                                     <button key={categorie.id} type="button" disabled className="group min-w-0 rounded-[22px] bg-white p-2 text-center shadow-sm ring-1 ring-jse-texte/5 sm:p-3 lg:p-3.5">
                                         <div className="aspect-square overflow-hidden rounded-[18px] bg-jse-fond">
-                                            <img src={categorie.image || imagesFallback[index % imagesFallback.length]} alt={categorie.nom} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                                            <img src={categorie.image || imageCategorie(categorie, index)} alt={categorie.nom} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                                         </div>
                                         <p className="mt-2 truncate font-sans text-[10px] font-semibold text-jse-texte sm:text-xs">{categorie.nom}</p>
                                     </button>
