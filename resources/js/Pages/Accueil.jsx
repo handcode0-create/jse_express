@@ -11,8 +11,9 @@ import {
     SlidersHorizontal,
     ShoppingBag,
     UserRound,
+    X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const bannières = [
     {
@@ -116,7 +117,28 @@ export default function Accueil() {
     const utilisateur = auth?.user ?? null;
     const [indexBannière, setIndexBannière] = useState(0);
     const [rechercheLocale, setRechercheLocale] = useState(recherche);
+    const [filtreOuvert, setFiltreOuvert] = useState(false);
+    const [zoneSelectionnee, setZoneSelectionnee] = useState("Toutes les zones");
+    const [zoneTemporaire, setZoneTemporaire] = useState("Toutes les zones");
     const nombreArticles = Number(panier?.nombre_articles ?? 0);
+
+    const zones = useMemo(() => {
+        const valeurs = restaurants
+            .map((restaurant) => restaurant.zone?.nom || null)
+            .filter(Boolean);
+
+        return ["Toutes les zones", ...new Set(valeurs)];
+    }, [restaurants]);
+
+    const restaurantsFiltres = useMemo(() => {
+        if (zoneSelectionnee === "Toutes les zones") {
+            return restaurants;
+        }
+
+        return restaurants.filter(
+            (restaurant) => restaurant.zone?.nom === zoneSelectionnee,
+        );
+    }, [restaurants, zoneSelectionnee]);
 
     useEffect(() => {
         const intervalle = window.setInterval(() => {
@@ -139,6 +161,21 @@ export default function Accueil() {
             preserveState: true,
             replace: true,
         });
+    };
+
+    const ouvrirFiltres = () => {
+        setZoneTemporaire(zoneSelectionnee);
+        setFiltreOuvert(true);
+    };
+
+    const appliquerFiltres = () => {
+        setZoneSelectionnee(zoneTemporaire);
+        setFiltreOuvert(false);
+    };
+
+    const reinitialiserFiltres = () => {
+        setZoneTemporaire("Toutes les zones");
+        setZoneSelectionnee("Toutes les zones");
     };
 
     const bannière = bannières[indexBannière];
@@ -222,7 +259,17 @@ export default function Accueil() {
                                         className="min-w-0 flex-1 bg-transparent font-sans text-sm outline-none placeholder:text-jse-texte/45 sm:text-base"
                                         aria-label="Rechercher un restaurant ou un plat"
                                     />
-                                    <button type="button" disabled className="flex size-10 shrink-0 items-center justify-center border-l border-jse-texte/10 pl-3 text-jse-principal" aria-label="Filtres">
+                                    <button
+                                        type="button"
+                                        onClick={ouvrirFiltres}
+                                        className={[
+                                            "flex size-10 shrink-0 items-center justify-center border-l border-jse-texte/10 pl-3 transition-colors",
+                                            zoneSelectionnee !== "Toutes les zones"
+                                                ? "text-jse-accent"
+                                                : "text-jse-principal",
+                                        ].join(" ")}
+                                        aria-label="Ouvrir les filtres"
+                                    >
                                         <SlidersHorizontal size={22} strokeWidth={1.8} />
                                     </button>
                                 </div>
@@ -302,10 +349,13 @@ export default function Accueil() {
                                 </button>
                             </div>
 
-                            {restaurants.length > 0 ? (
-                                <div className="scrollbar-none flex gap-4 overflow-x-auto pb-2 lg:grid lg:grid-cols-3 lg:overflow-visible">
-                                    {restaurants.map((restaurant, index) => (
-                                        <article key={restaurant.id} className="w-[258px] shrink-0 overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-jse-texte/5 lg:w-auto">
+                            {restaurantsFiltres.length > 0 ? (
+                                <div className="scrollbar-none -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 sm:-mx-0 sm:px-0 sm:gap-4 lg:grid lg:grid-cols-3 lg:overflow-visible lg:snap-none lg:pb-2">
+                                    {restaurantsFiltres.map((restaurant, index) => (
+                                        <article
+                                            key={restaurant.id}
+                                            className="w-[calc(100vw-72px)] max-w-[310px] shrink-0 snap-start snap-always overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-jse-texte/5 sm:w-[300px] lg:w-auto lg:max-w-none"
+                                        >
                                             <div className="relative aspect-[1.45/1] overflow-hidden bg-jse-principal">
                                                 <img src={imagesRestaurants[index % imagesRestaurants.length]} alt="" className="h-full w-full object-cover" />
                                                 <button type="button" disabled className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-white/90 text-jse-principal shadow-sm" aria-label="Ajouter aux favoris">
@@ -331,14 +381,80 @@ export default function Accueil() {
                             ) : (
                                 <div className="rounded-[22px] border border-dashed border-jse-texte/10 bg-white/50 px-5 py-9 text-center">
                                     <ShoppingBag size={21} className="mx-auto text-jse-secondaire" />
-                                    <h3 className="mt-3 font-against text-lg text-jse-principal">{recherche ? "Aucun restaurant trouvé" : "Aucun restaurant disponible"}</h3>
-                                    <p className="mx-auto mt-1.5 max-w-[280px] font-sans text-xs leading-5 text-jse-texte/45">{recherche ? "Essayez une autre recherche." : "Les restaurants actifs apparaîtront ici dès qu’ils seront disponibles."}</p>
+                                    <h3 className="mt-3 font-against text-lg text-jse-principal">{recherche || zoneSelectionnee !== "Toutes les zones" ? "Aucun restaurant trouvé" : "Aucun restaurant disponible"}</h3>
+                                    <p className="mx-auto mt-1.5 max-w-[280px] font-sans text-xs leading-5 text-jse-texte/45">{recherche || zoneSelectionnee !== "Toutes les zones" ? "Essayez un autre filtre ou une autre recherche." : "Les restaurants actifs apparaîtront ici dès qu’ils seront disponibles."}</p>
                                 </div>
                             )}
                         </section>
                     </div>
                 </div>
             </div>
+
+            {/* Panneau de filtres */}
+            {filtreOuvert && (
+                <div className="fixed inset-0 z-50 flex items-end justify-center bg-jse-principal/20 p-0 backdrop-blur-[2px] sm:items-center sm:p-5" onClick={() => setFiltreOuvert(false)}>
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="titre-filtres"
+                        className="w-full max-w-md rounded-t-[30px] bg-white p-5 shadow-2xl sm:rounded-[30px]"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.15em] text-jse-texte/35">Recherche</p>
+                                <h2 id="titre-filtres" className="mt-1 font-against text-2xl text-jse-principal">Filtrer les restaurants</h2>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setFiltreOuvert(false)}
+                                className="flex size-10 items-center justify-center rounded-full bg-jse-fond text-jse-principal"
+                                aria-label="Fermer les filtres"
+                            >
+                                <X size={19} />
+                            </button>
+                        </div>
+
+                        <div className="mt-6">
+                            <p className="font-sans text-xs font-semibold text-jse-texte">Zone de livraison</p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                                {zones.map((zone) => (
+                                    <button
+                                        key={zone}
+                                        type="button"
+                                        onClick={() => setZoneTemporaire(zone)}
+                                        className={[
+                                            "rounded-full px-4 py-2.5 font-sans text-xs font-semibold transition-all",
+                                            zoneTemporaire === zone
+                                                ? "bg-jse-principal text-white shadow-sm"
+                                                : "bg-jse-fond text-jse-texte/65 ring-1 ring-jse-texte/5",
+                                        ].join(" ")}
+                                    >
+                                        {zone}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="mt-7 flex gap-3">
+                            <button
+                                type="button"
+                                onClick={reinitialiserFiltres}
+                                className="flex-1 rounded-full border border-jse-principal/15 px-4 py-3 font-sans text-xs font-semibold text-jse-principal"
+                            >
+                                Réinitialiser
+                            </button>
+                            <button
+                                type="button"
+                                onClick={appliquerFiltres}
+                                className="flex-1 rounded-full bg-jse-accent px-4 py-3 font-sans text-xs font-semibold text-white shadow-sm"
+                            >
+                                Appliquer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Bottom bar mobile */}
             <nav className="fixed inset-x-0 bottom-0 z-40 px-4 pb-4 lg:hidden">
