@@ -1,6 +1,9 @@
 <?php
 
 use App\Models\Categorie;
+use App\Models\AdresseLivraison;
+use App\Models\Favori;
+use App\Models\MoyenPaiement;
 use App\Models\Commande;
 use App\Models\HistoriqueCommande;
 use App\Models\Notification;
@@ -179,8 +182,63 @@ Route::get('/panier', function () {
 Route::get('/favoris', function () {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
 
-    return Inertia::render('Favoris');
+    $favoris = Favori::query()
+        ->where('user_id', Auth::id())
+        ->with(['restaurant.zone'])
+        ->latest('id')
+        ->get()
+        ->map(fn (Favori $favori) => [
+            'id' => $favori->restaurant_id,
+            'favori_id' => $favori->id,
+            'nom' => $favori->restaurant?->nom,
+            'description' => $favori->restaurant?->description,
+            'adresse' => $favori->restaurant?->adresse,
+            'horaires' => $favori->restaurant?->horaires,
+            'zone' => $favori->restaurant?->zone ? [
+                'id' => $favori->restaurant->zone->id,
+                'nom' => $favori->restaurant->zone->nom,
+            ] : null,
+        ])
+        ->filter(fn ($favori) => $favori['nom'] !== null)
+        ->values();
+
+    return Inertia::render('Favoris', ['favoris' => $favoris]);
 })->middleware('auth')->name('favoris');
+
+Route::post('/favoris/{restaurant}', function (Restaurant $restaurant) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    abort_unless($restaurant->statut === 'actif', 404);
+
+    Favori::firstOrCreate([
+        'user_id' => Auth::id(),
+        'restaurant_id' => $restaurant->id,
+    ]);
+
+    return back();
+})->whereNumber('restaurant')->middleware('auth')->name('favoris.ajouter');
+
+Route::delete('/favoris/{restaurant}', function (Restaurant $restaurant) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+
+    Favori::query()
+        ->where('user_id', Auth::id())
+        ->where('restaurant_id', $restaurant->id)
+        ->delete();
+
+    return back();
+})->whereNumber('restaurant')->middleware('auth')->name('favoris.supprimer');
+
+Route::patch('/favoris/{restaurant}/defaut', function (Restaurant $restaurant) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    abort_unless($restaurant->statut === 'actif', 404);
+
+    Favori::firstOrCreate([
+        'user_id' => Auth::id(),
+        'restaurant_id' => $restaurant->id,
+    ]);
+
+    return back();
+})->whereNumber('restaurant')->middleware('auth')->name('favoris.defaut');
 
 Route::get('/profil', function () {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -196,6 +254,36 @@ Route::get('/profil', function () {
         'notificationsCount' => Notification::query()
             ->where('user_id', Auth::id())
             ->count(),
+        'adresses' => AdresseLivraison::query()
+            ->where('user_id', Auth::id())
+            ->with('zone')
+            ->orderByDesc('par_defaut')
+            ->latest('id')
+            ->get()
+            ->map(fn (AdresseLivraison $adresse) => [
+                'id' => $adresse->id,
+                'libelle' => $adresse->libelle,
+                'adresse' => $adresse->adresse,
+                'complement' => $adresse->complement,
+                'telephone' => $adresse->telephone,
+                'par_defaut' => (bool) $adresse->par_defaut,
+                'zone' => $adresse->zone ? ['id' => $adresse->zone->id, 'nom' => $adresse->zone->nom] : null,
+            ])->values(),
+        'zones' => Zone::query()->where('statut', 'actif')->orderBy('nom')->get(['id', 'nom']),
+        'moyensPaiement' => MoyenPaiement::query()
+            ->where('user_id', Auth::id())
+            ->where('statut', 'actif')
+            ->orderByDesc('par_defaut')
+            ->latest('id')
+            ->get()
+            ->map(fn (MoyenPaiement $moyen) => [
+                'id' => $moyen->id,
+                'type' => $moyen->type,
+                'operateur' => $moyen->operateur,
+                'libelle' => $moyen->libelle,
+                'identifiant_masque' => $moyen->identifiant_masque,
+                'par_defaut' => (bool) $moyen->par_defaut,
+            ])->values(),
     ]);
 })->middleware('auth')->name('profil');
 
@@ -205,18 +293,8 @@ Route::patch('/profil', function (Request $request) {
     $donnees = $request->validate([
         'nom' => ['required', 'string', 'max:100'],
         'prenom' => ['nullable', 'string', 'max:100'],
-        'telephone' => [
-            'required',
-            'string',
-            'max:30',
-            Rule::unique('users', 'telephone')->ignore(Auth::id()),
-        ],
-        'email' => [
-            'nullable',
-            'email',
-            'max:255',
-            Rule::unique('users', 'email')->ignore(Auth::id()),
-        ],
+        'telephone' => ['required', 'string', 'max:30', Rule::unique('users', 'telephone')->ignore(Auth::id())],
+        'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore(Auth::id())],
     ], [
         'nom.required' => 'Le nom est obligatoire.',
         'telephone.required' => 'Le numéro de téléphone est obligatoire.',
@@ -229,6 +307,91 @@ Route::patch('/profil', function (Request $request) {
 
     return back()->with('success', 'Vos informations ont été mises à jour.');
 })->middleware('auth')->name('profil.modifier');
+
+Route::post('/profil/adresses', function (Request $request) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+
+    $donnees = $request->validate([
+        'libelle' => ['required', 'string', 'max:80'],
+        'adresse' => ['required', 'string', 'max:255'],
+        'complement' => ['nullable', 'string', 'max:255'],
+        'telephone' => ['nullable', 'string', 'max:30'],
+        'zone_id' => ['nullable', 'integer', 'exists:zones,id'],
+        'par_defaut' => ['boolean'],
+    ]);
+
+    DB::transaction(function () use ($donnees) {
+        if (($donnees['par_defaut'] ?? false) || ! AdresseLivraison::where('user_id', Auth::id())->exists()) {
+            AdresseLivraison::where('user_id', Auth::id())->update(['par_defaut' => false]);
+            $donnees['par_defaut'] = true;
+        }
+        AdresseLivraison::create(array_merge($donnees, ['user_id' => Auth::id(), 'statut' => 'actif']));
+    });
+
+    return back()->with('success', 'Adresse ajoutée.');
+})->middleware('auth')->name('profil.adresse.ajouter');
+
+Route::patch('/profil/adresses/{adresseLivraison}/defaut', function (AdresseLivraison $adresseLivraison) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    abort_unless((int) $adresseLivraison->user_id === (int) Auth::id(), 404);
+
+    DB::transaction(function () use ($adresseLivraison) {
+        AdresseLivraison::where('user_id', Auth::id())->update(['par_defaut' => false]);
+        $adresseLivraison->update(['par_defaut' => true]);
+    });
+
+    return back()->with('success', 'Adresse par défaut mise à jour.');
+})->whereNumber('adresseLivraison')->middleware('auth')->name('profil.adresse.defaut');
+
+Route::delete('/profil/adresses/{adresseLivraison}', function (AdresseLivraison $adresseLivraison) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    abort_unless((int) $adresseLivraison->user_id === (int) Auth::id(), 404);
+    $adresseLivraison->delete();
+
+    return back()->with('success', 'Adresse supprimée.');
+})->whereNumber('adresseLivraison')->middleware('auth')->name('profil.adresse.supprimer');
+
+Route::post('/profil/moyens-paiement', function (Request $request) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+
+    $donnees = $request->validate([
+        'type' => ['required', 'string', 'max:40'],
+        'operateur' => ['required', 'string', 'max:50'],
+        'libelle' => ['nullable', 'string', 'max:100'],
+        'identifiant_masque' => ['nullable', 'string', 'max:30'],
+    ]);
+
+    if (! MoyenPaiement::where('user_id', Auth::id())->exists()) {
+        $donnees['par_defaut'] = true;
+    }
+
+    MoyenPaiement::create(array_merge($donnees, [
+        'user_id' => Auth::id(),
+        'statut' => 'actif',
+    ]));
+
+    return back()->with('success', 'Moyen de paiement ajouté.');
+})->middleware('auth')->name('profil.paiement.ajouter');
+
+Route::patch('/profil/moyens-paiement/{moyenPaiement}/defaut', function (MoyenPaiement $moyenPaiement) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    abort_unless((int) $moyenPaiement->user_id === (int) Auth::id(), 404);
+
+    DB::transaction(function () use ($moyenPaiement) {
+        MoyenPaiement::where('user_id', Auth::id())->update(['par_defaut' => false]);
+        $moyenPaiement->update(['par_defaut' => true]);
+    });
+
+    return back()->with('success', 'Moyen de paiement par défaut mis à jour.');
+})->whereNumber('moyenPaiement')->middleware('auth')->name('profil.paiement.defaut');
+
+Route::delete('/profil/moyens-paiement/{moyenPaiement}', function (MoyenPaiement $moyenPaiement) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    abort_unless((int) $moyenPaiement->user_id === (int) Auth::id(), 404);
+    $moyenPaiement->delete();
+
+    return back()->with('success', 'Moyen de paiement supprimé.');
+})->whereNumber('moyenPaiement')->middleware('auth')->name('profil.paiement.supprimer');
 
 Route::get('/notifications', function () {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
