@@ -1,6 +1,7 @@
 import React from "react";
 import { router, usePage } from "@inertiajs/react";
 import { ArrowLeft, Bell, Heart, Home, Package, UserRound } from "lucide-react";
+import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 
 function NavigationItem({ label, icon: Icon, active = false, onClick }) {
     return <button type="button" onClick={onClick} className={["flex min-w-[66px] flex-col items-center justify-center gap-1 rounded-[20px] px-2.5 py-2 transition-all", active ? "bg-jse-secondaire text-white shadow-sm" : "text-jse-texte/80 hover:bg-jse-fond"].join(" ")}>
@@ -14,18 +15,7 @@ export default function Notifications() {
     return <main className="min-h-screen bg-jse-fond pb-28 text-jse-texte">
         <div className="mx-auto min-h-screen w-full max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-10">
-                <aside className="hidden lg:block">
-                    <div className="sticky top-6 pt-6">
-                        <button type="button" onClick={() => router.visit("/profil")} className="flex size-12 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm ring-1 ring-jse-texte/5"><ArrowLeft size={21} /></button>
-                        <div className="mt-8"><img src="/assets/jse_logo.png" alt="JSE Express" className="h-14 w-auto object-contain" /></div>
-                        <nav className="mt-10 space-y-2">
-                            <NavigationItem label="Accueil" icon={Home} onClick={() => router.visit("/accueil")} />
-                            <NavigationItem label="Commandes" icon={Package} onClick={() => router.visit("/commandes")} />
-                            <NavigationItem label="Favoris" icon={Heart} onClick={() => router.visit("/favoris")} />
-                            <NavigationItem label="Profil" icon={UserRound} onClick={() => router.visit("/profil")} />
-                        </nav>
-                    </div>
-                </aside>
+                <SidebarJSE active="profil" />
 
                 <div className="mx-auto w-full max-w-3xl lg:mx-0">
                     <header className="pt-5 sm:pt-7 lg:pt-10">
