@@ -14,6 +14,7 @@ import {
     X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { basculerFavori, lireFavoris } from "../lib/favoris";
 
 const bannières = [
     {
@@ -100,7 +101,7 @@ const restaurantsLocaux = [
 const navigation = [
     { label: "Accueil", icon: Home, active: true },
     { label: "Commandes", icon: ShoppingBag, route: "/commandes" },
-    { label: "Favoris", icon: Heart },
+    { label: "Favoris", icon: Heart, route: "/favoris" },
     { label: "Profil", icon: UserRound },
 ];
 
@@ -146,7 +147,23 @@ export default function Accueil() {
     const [zoneSelectionnee, setZoneSelectionnee] = useState("Toutes les zones");
     const [zoneTemporaire, setZoneTemporaire] = useState("Toutes les zones");
     const [categorieSelectionnee, setCategorieSelectionnee] = useState("Restaurants");
+    const [favoris, setFavoris] = useState([]);
     const nombreArticles = Number(panier?.nombre_articles ?? 0);
+
+    useEffect(() => {
+        const synchroniserFavoris = () => setFavoris(lireFavoris());
+        synchroniserFavoris();
+        window.addEventListener("jse:favoris-change", synchroniserFavoris);
+        window.addEventListener("storage", synchroniserFavoris);
+        return () => {
+            window.removeEventListener("jse:favoris-change", synchroniserFavoris);
+            window.removeEventListener("storage", synchroniserFavoris);
+        };
+    }, []);
+
+    const basculerFavoriRestaurant = (restaurant) => {
+        setFavoris(basculerFavori(restaurant));
+    };
 
     const zones = useMemo(() => {
         const valeurs = restaurants
@@ -428,8 +445,8 @@ export default function Accueil() {
                                                     }}
                                                     className="h-full w-full object-cover"
                                                 />
-                                                <button type="button" disabled className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-white/90 text-jse-principal shadow-sm" aria-label="Ajouter aux favoris">
-                                                    <Heart size={16} strokeWidth={1.8} />
+                                                <button type="button" onClick={(event) => { event.stopPropagation(); basculerFavoriRestaurant(restaurant); }} className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-white/90 shadow-sm " aria-label={favoris.some((favori) => String(favori.id) === String(restaurant.id)) ? "Retirer des favoris" : "Ajouter aux favoris"}>
+                                                    <Heart size={16} strokeWidth={1.8} className={favoris.some((favori) => String(favori.id) === String(restaurant.id)) ? "text-jse-accent" : "text-jse-principal"} fill={favoris.some((favori) => String(favori.id) === String(restaurant.id)) ? "currentColor" : "none"} />
                                                 </button>
                                             </div>
 
