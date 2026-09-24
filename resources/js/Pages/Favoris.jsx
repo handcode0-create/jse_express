@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { router } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import { ArrowLeft, ChevronRight, Heart, Home, MapPin, ShoppingBag, UserRound, X } from "lucide-react";
 import { basculerFavori, lireFavoris } from "../lib/favoris";
 
@@ -17,20 +17,26 @@ function NavigationItem({ label, icon: Icon, active = false, onClick }) {
 }
 
 export default function Favoris() {
-    const [favoris, setFavoris] = useState([]);
+    const { favoris: favorisServeur = [] } = usePage().props;
+    const [favoris, setFavoris] = useState(favorisServeur);
 
     useEffect(() => {
-        const sync = () => setFavoris(lireFavoris());
-        sync();
-        window.addEventListener("jse:favoris-change", sync);
-        window.addEventListener("storage", sync);
-        return () => {
-            window.removeEventListener("jse:favoris-change", sync);
-            window.removeEventListener("storage", sync);
-        };
-    }, []);
+        setFavoris(favorisServeur);
+    }, [favorisServeur]);
 
-    const retirer = (restaurant) => setFavoris(basculerFavori(restaurant));
+    const retirer = (restaurant) => {
+        if (Number.isInteger(Number(restaurant.id))) {
+            setFavoris((anciens) => anciens.filter((item) => String(item.id) !== String(restaurant.id)));
+            router.delete(`/favoris/${restaurant.id}`, {
+                preserveScroll: true,
+                preserveState: true,
+                onError: () => setFavoris(favorisServeur),
+            });
+            return;
+        }
+
+        setFavoris(basculerFavori(restaurant));
+    };
 
     return <main className="min-h-screen bg-jse-fond pb-28 text-jse-texte">
         <div className="mx-auto min-h-screen w-full max-w-7xl px-4 sm:px-6 lg:px-8">
