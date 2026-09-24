@@ -79,7 +79,7 @@ const imageCategorie = (categorie, index) => {
         return "/assets/hero_icon/resto.jpeg";
     }
 
-    return imagesRestaurants[index % imagesRestaurants.length];
+    return imagesFallback[index % imagesFallback.length];
 };
 
 const navigation = [
