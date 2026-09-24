@@ -615,9 +615,6 @@ export default function Accueil() {
                                                             "Adzopé"}
                                                     </span>
 
-                                                    <span className="ml-auto font-sans text-[10px] font-semibold text-jse-secondaire">
-                                                        Disponible
-                                                    </span>
                                                 </div>
                                             </div>
                                         </article>
