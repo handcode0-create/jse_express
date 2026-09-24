@@ -422,7 +422,7 @@ export default function Accueil() {
                                                 </div>
                                                 <p className="mt-1 line-clamp-1 font-sans text-[10px] text-jse-texte/45">
                                                     {restaurant.type || restaurant.description || "Restaurant"}
-                                                    {restaurant.avis > 0 ? \` · \${restaurant.avis} avis\` : " · Aucun avis"}
+                                                    {restaurant.avis > 0 ? ` · ${restaurant.avis} avis` : " · Aucun avis"}
                                                 </p>
                                                 <div className="mt-3 flex items-start gap-2 font-sans text-[10px] leading-4 text-jse-texte/50">
                                                     <MapPin size={12} className="mt-0.5 shrink-0 text-jse-secondaire" />
