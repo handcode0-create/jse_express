@@ -187,7 +187,7 @@ Route::get('/commande/{commande}', function (Commande $commande) {
             ] : null,
         ],
     ]);
-})->middleware('auth')->name('commande.confirmation');
+})->whereNumber('commande')->middleware('auth')->name('commande.confirmation');
 
 Route::get('/commande/validation', function () {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
