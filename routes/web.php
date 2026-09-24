@@ -1,11 +1,14 @@
 <?php
 
 use App\Models\Categorie;
+use App\Models\LignePanier;
 use App\Models\Panier;
+use App\Models\Produit;
 use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -128,6 +131,120 @@ Route::post('/deconnexion', function (Request $request) {
 
     return redirect()->route('bienvenue');
 })->middleware('auth')->name('deconnexion');
+
+
+Route::get('/restaurants/{restaurant}', function (Restaurant $restaurant) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    abort_unless($restaurant->statut === 'actif', 404);
+
+    $categories = Categorie::query()
+        ->where('restaurant_id', $restaurant->id)
+        ->where('statut', 'actif')
+        ->with(['produits' => function ($query) {
+            $query->where('statut', 'actif')
+                ->where('disponible', true)
+                ->orderBy('nom');
+        }])
+        ->orderBy('nom')
+        ->get()
+        ->map(fn (Categorie $categorie) => [
+            'id' => $categorie->id,
+            'nom' => $categorie->nom,
+            'description' => $categorie->description,
+            'produits' => $categorie->produits->map(fn (Produit $produit) => [
+                'id' => $produit->id,
+                'nom' => $produit->nom,
+                'description' => $produit->description,
+                'prix' => (float) $produit->prix,
+                'image' => $produit->image,
+            ])->values(),
+        ])
+        ->filter(fn ($categorie) => $categorie['produits']->isNotEmpty())
+        ->values();
+
+    $panier = Panier::query()
+        ->where('user_id', Auth::id())
+        ->where('statut', 'actif')
+        ->with('lignesPanier.produit')
+        ->latest('id')
+        ->first();
+
+    return Inertia::render('RestaurantDetail', [
+        'restaurant' => [
+            'id' => $restaurant->id,
+            'nom' => $restaurant->nom,
+            'description' => $restaurant->description,
+            'adresse' => $restaurant->adresse,
+            'horaires' => $restaurant->horaires,
+            'telephone' => $restaurant->telephone,
+            'zone' => $restaurant->zone ? ['id' => $restaurant->zone->id, 'nom' => $restaurant->zone->nom] : null,
+        ],
+        'categories' => $categories,
+        'panier' => [
+            'nombre_articles' => $panier?->lignesPanier->sum('quantite') ?? 0,
+            'montant_total' => $panier ? (float) $panier->lignesPanier->sum(fn ($ligne) => $ligne->quantite * $ligne->prix_unitaire) : 0,
+            'lignes' => $panier?->lignesPanier->map(fn (LignePanier $ligne) => [
+                'id' => $ligne->id,
+                'produit_id' => $ligne->produit_id,
+                'nom' => $ligne->produit?->nom,
+                'image' => $ligne->produit?->image,
+                'quantite' => $ligne->quantite,
+                'prix_unitaire' => (float) $ligne->prix_unitaire,
+                'total' => (float) ($ligne->quantite * $ligne->prix_unitaire),
+            ])->values() ?? collect(),
+        ],
+    ]);
+})->middleware('auth')->name('restaurant.detail');
+
+Route::post('/panier/produits/{produit}/ajouter', function (Request $request, Produit $produit) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    abort_unless($produit->statut === 'actif' && $produit->disponible, 404);
+    abort_unless($produit->restaurant?->statut === 'actif', 404);
+
+    $panier = Panier::firstOrCreate(['user_id' => Auth::id(), 'statut' => 'actif']);
+    $quantite = max(1, (int) $request->input('quantite', 1));
+
+    DB::transaction(function () use ($panier, $produit, $quantite) {
+        $ligne = LignePanier::query()
+            ->where('panier_id', $panier->id)
+            ->where('produit_id', $produit->id)
+            ->lockForUpdate()
+            ->first();
+
+        if ($ligne) {
+            $ligne->increment('quantite', $quantite);
+        } else {
+            LignePanier::create([
+                'panier_id' => $panier->id,
+                'produit_id' => $produit->id,
+                'quantite' => $quantite,
+                'prix_unitaire' => $produit->prix,
+            ]);
+        }
+    });
+
+    return back();
+})->middleware('auth')->name('panier.ajouter');
+
+Route::patch('/panier/lignes/{lignePanier}', function (Request $request, LignePanier $lignePanier) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    $lignePanier->load('panier');
+    abort_unless($lignePanier->panier?->user_id === Auth::id() && $lignePanier->panier?->statut === 'actif', 404);
+
+    $quantite = (int) $request->input('quantite', 1);
+    $quantite > 0 ? $lignePanier->update(['quantite' => $quantite]) : $lignePanier->delete();
+
+    return back();
+})->middleware('auth')->name('panier.ligne.modifier');
+
+Route::delete('/panier/lignes/{lignePanier}', function (LignePanier $lignePanier) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    $lignePanier->load('panier');
+    abort_unless($lignePanier->panier?->user_id === Auth::id() && $lignePanier->panier?->statut === 'actif', 404);
+    $lignePanier->delete();
+
+    return back();
+})->middleware('auth')->name('panier.ligne.supprimer');
 
 Route::get('/politique-de-confidentialite', function () {
     return Inertia::render('PolitiqueConfidentialite');
