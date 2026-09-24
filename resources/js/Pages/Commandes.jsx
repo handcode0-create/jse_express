@@ -321,7 +321,7 @@ export default function Commandes() {
                                     active
                                 />
                                 <NavigationItem label="Favoris" icon={Heart} onClick={() => router.visit("/favoris")} />
-                                <NavigationItem label="Profil" icon={UserRound} />
+                                <NavigationItem label="Profil" icon={UserRound} onClick={() => router.visit("/profil")} />
                             </nav>
                         </div>
                     </aside>
@@ -427,7 +427,7 @@ export default function Commandes() {
                         icon={ClipboardList}
                         active
                     />
-                    <NavigationItem label="Favoris" icon={Heart} />
+                    <NavigationItem label="Favoris" icon={Heart} onClick={() => router.visit("/favoris")} />
                     <NavigationItem label="Profil" icon={UserRound} />
                 </div>
             </nav>
