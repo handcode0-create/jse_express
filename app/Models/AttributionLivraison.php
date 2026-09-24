@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class AttributionLivraison extends Model
 {
+    protected $table = 'attributions_livraison';
 
     public $timestamps = false;
+
     protected $fillable = [
         'livraison_id',
         'livreur_id',
