@@ -128,8 +128,6 @@ export default function Accueil() {
 
     return (
         <main className="min-h-screen bg-jse-fond text-jse-texte">
-            {
-
             <div className="mx-auto flex min-h-screen w-full max-w-[1440px]">
                 {/* Sidebar desktop */}
                 <aside className="sticky top-0 hidden h-screen w-[238px] shrink-0 flex-col border-r border-jse-texte/5 bg-white/75 px-4 py-7 backdrop-blur-xl lg:flex">
