@@ -259,9 +259,11 @@ Route::get('/commandes/{commande}', function (Commande $commande) {
                 'code' => $element->statut?->code,
                 'libelle' => $element->statut?->libelle,
                 'date' => $element->date_changement
-                    ? \Illuminate\Support\Carbon::parse($element->date_changement)->format('d/m/Y'),
+                    ? \Illuminate\Support\Carbon::parse($element->date_changement)->format('d/m/Y')
+                    : null,
                 'heure' => $element->date_changement
-                    ? \Illuminate\Support\Carbon::parse($element->date_changement)->format('H:i'),
+                    ? \Illuminate\Support\Carbon::parse($element->date_changement)->format('H:i')
+                    : null,
             ];
         })
         ->values();
@@ -308,9 +310,11 @@ Route::get('/commandes/{commande}', function (Commande $commande) {
                 'montant' => (float) $paiement->montant,
                 'statut' => $paiement->statut,
                 'date' => $paiement->date_paiement
-                    ? \Illuminate\Support\Carbon::parse($paiement->date_paiement)->format('d/m/Y'),
+                    ? \Illuminate\Support\Carbon::parse($paiement->date_paiement)->format('d/m/Y')
+                    : null,
                 'heure' => $paiement->date_paiement
-                    ? \Illuminate\Support\Carbon::parse($paiement->date_paiement)->format('H:i'),
+                    ? \Illuminate\Support\Carbon::parse($paiement->date_paiement)->format('H:i')
+                    : null,
             ] : null,
             'historique' => $historique,
         ],
