@@ -170,6 +170,25 @@ Route::get('/panier', function () {
     ]);
 })->middleware('auth')->name('panier');
 
+Route::get('/commande/{commande}', function (Commande $commande) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    abort_unless((int) $commande->user_id === (int) Auth::id(), 404);
+    $commande->load('restaurant');
+
+    return Inertia::render('CommandeConfirmation', [
+        'commande' => [
+            'id' => $commande->id,
+            'reference' => $commande->reference,
+            'montant_total' => (float) $commande->montant_total,
+            'restaurant_nom' => $commande->restaurant?->nom,
+            'statut' => $commande->statutCommande ? [
+                'code' => $commande->statutCommande->code,
+                'libelle' => $commande->statutCommande->libelle,
+            ] : null,
+        ],
+    ]);
+})->middleware('auth')->name('commande.confirmation');
+
 Route::get('/commande/validation', function () {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
 
@@ -285,7 +304,7 @@ Route::post('/commande', function (Request $request) {
         return $commande;
     });
 
-    return redirect()->route('commande.validation')->with('success', 'Commande ' . $commande->reference . ' créée avec succès.');
+    return redirect()->route('commande.confirmation', ['commande' => $commande->id]);
 })->middleware('auth')->name('commande.creer');
 
 Route::get('/restaurants/{restaurant}/produits/{produit}', function (Restaurant $restaurant, Produit $produit) {
