@@ -102,7 +102,7 @@ const navigation = [
     { label: "Accueil", icon: Home, active: true },
     { label: "Commandes", icon: ShoppingBag, route: "/commandes" },
     { label: "Favoris", icon: Heart, route: "/favoris" },
-    { label: "Profil", icon: UserRound },
+    { label: "Profil", icon: UserRound, route: "/profil" },
 ];
 
 function NavigationItem({ item, compact = false }) {
