@@ -87,3 +87,13 @@ button:disabled {
 .font-against {
     font-family: "Against", sans-serif;
 }
+
+/* Utilitaire JSE — conserve le scroll tactile sans afficher la barre. */
+.scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
+}
