@@ -138,6 +138,7 @@ export default function Accueil() {
         restaurants = [],
         panier = {},
         recherche = "",
+        favorisRestaurantIds = [],
     } = usePage().props;
 
     const utilisateur = auth?.user ?? null;
@@ -148,20 +149,42 @@ export default function Accueil() {
     const [zoneTemporaire, setZoneTemporaire] = useState("Toutes les zones");
     const [categorieSelectionnee, setCategorieSelectionnee] = useState("Restaurants");
     const [favoris, setFavoris] = useState([]);
+    const [favorisServeur, setFavorisServeur] = useState(
+        (favorisRestaurantIds || []).map(Number),
+    );
     const nombreArticles = Number(panier?.nombre_articles ?? 0);
 
     useEffect(() => {
-        const synchroniserFavoris = () => setFavoris(lireFavoris());
-        synchroniserFavoris();
-        window.addEventListener("jse:favoris-change", synchroniserFavoris);
-        window.addEventListener("storage", synchroniserFavoris);
+        const synchroniserFavorisLocaux = () => setFavoris(lireFavoris());
+        synchroniserFavorisLocaux();
+        window.addEventListener("jse:favoris-change", synchroniserFavorisLocaux);
+        window.addEventListener("storage", synchroniserFavorisLocaux);
         return () => {
-            window.removeEventListener("jse:favoris-change", synchroniserFavoris);
-            window.removeEventListener("storage", synchroniserFavoris);
+            window.removeEventListener("jse:favoris-change", synchroniserFavorisLocaux);
+            window.removeEventListener("storage", synchroniserFavorisLocaux);
         };
     }, []);
 
     const basculerFavoriRestaurant = (restaurant) => {
+        if (Number.isInteger(Number(restaurant.id))) {
+            const id = Number(restaurant.id);
+            const estActuel = favorisServeur.includes(id);
+            setFavorisServeur((anciens) =>
+                estActuel ? anciens.filter((item) => item !== id) : [...anciens, id],
+            );
+            router.visit(estActuel ? `/favoris/${id}` : `/favoris/${id}`, {
+                method: estActuel ? "delete" : "post",
+                preserveScroll: true,
+                preserveState: true,
+                onError: () => {
+                    setFavorisServeur((anciens) =>
+                        estActuel ? [...anciens, id] : anciens.filter((item) => item !== id),
+                    );
+                },
+            });
+            return;
+        }
+
         setFavoris(basculerFavori(restaurant));
     };
 
@@ -445,7 +468,7 @@ export default function Accueil() {
                                                     }}
                                                     className="h-full w-full object-cover"
                                                 />
-                                                <button type="button" onClick={(event) => { event.stopPropagation(); basculerFavoriRestaurant(restaurant); }} className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-white/90 shadow-sm " aria-label={favoris.some((favori) => String(favori.id) === String(restaurant.id)) ? "Retirer des favoris" : "Ajouter aux favoris"}>
+                                                <button type="button" onClick={(event) => { event.stopPropagation(); basculerFavoriRestaurant(restaurant); }} className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-white/90 shadow-sm " aria-label={(Number.isInteger(Number(restaurant.id)) ? favorisServeur.includes(Number(restaurant.id)) : favoris.some((favori) => String(favori.id) === String(restaurant.id))) ? "Retirer des favoris" : "Ajouter aux favoris"}>
                                                     <Heart size={16} strokeWidth={1.8} className={favoris.some((favori) => String(favori.id) === String(restaurant.id)) ? "text-jse-accent" : "text-jse-principal"} fill={favoris.some((favori) => String(favori.id) === String(restaurant.id)) ? "currentColor" : "none"} />
                                                 </button>
                                             </div>
