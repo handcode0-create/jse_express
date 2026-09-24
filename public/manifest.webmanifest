@@ -1,0 +1,19 @@
+{
+    "name": "JSE Express",
+    "short_name": "JSE Express",
+    "description": "Commandez vos plats préférés à Adzopé avec JSE Express.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#FFF7E8",
+    "theme_color": "#123C32",
+    "icons": [
+        {
+            "src": "/assets/jse_logo.png",
+            "sizes": "any",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
