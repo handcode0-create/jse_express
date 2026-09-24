@@ -213,12 +213,6 @@ export default function Accueil() {
                                 </div>
                             </form>
 
-                            <div className="mt-6 lg:mt-8">
-                                <p className="font-sans text-sm font-semibold text-jse-secondaire sm:text-base">Bonjour !</p>
-                                <h1 className="mt-1 max-w-[760px] font-against text-[2.15rem] leading-[0.98] text-jse-principal sm:text-[2.65rem] lg:text-[3.2rem]">
-                                    Qu’est-ce qu’on vous sert aujourd’hui ?
-                                </h1>
-                            </div>
                         </header>
 
                         {/* Catégories */}
