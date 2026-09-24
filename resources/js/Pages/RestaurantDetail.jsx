@@ -2,6 +2,7 @@ import { router, usePage } from "@inertiajs/react";
 import { ArrowLeft, Check, ChevronRight, Bike, Clock3, Heart, Info, MapPin, MessageCircle, Minus, Plus, Search, Share2, ShoppingBag, UtensilsCrossed, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { basculerFavori, estFavori } from "../lib/favoris";
+import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 
 const imagesRestaurants = [
     "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=90",
@@ -80,7 +81,9 @@ export default function RestaurantDetail() {
     const total = Number(panier?.montant_total || 0);
 
     return <main className="min-h-screen bg-jse-fond text-jse-texte">
-        <div className="mx-auto min-h-screen w-full max-w-[1440px] lg:px-8">
+        <div className="mx-auto flex min-h-screen w-full max-w-[1440px] lg:px-8">
+            <SidebarJSE />
+            <div className="min-w-0 flex-1">
             <div className="relative mx-auto min-h-screen w-full max-w-[760px] overflow-hidden bg-jse-fond shadow-none lg:my-6 lg:rounded-[32px] lg:shadow-2xl">
                 <section className="relative h-[345px] overflow-hidden bg-jse-principal sm:h-[390px]">
                     <img src={imageRestaurant} alt={restaurant?.nom || "Restaurant"} className="absolute inset-0 h-full w-full object-cover" />
@@ -190,6 +193,7 @@ export default function RestaurantDetail() {
                         <div className="mt-5 flex items-start gap-3"><Info size={20} className="mt-0.5 shrink-0 text-jse-principal" /><div><p className="font-sans text-xs font-semibold">Contact</p><p className="mt-1 font-sans text-sm text-jse-texte/60">{restaurant?.telephone || "Téléphone non renseigné."}</p></div></div>
                     </div>
                 </div></section>}
+            </div>
             </div>
 
             {nombre > 0 && <>
