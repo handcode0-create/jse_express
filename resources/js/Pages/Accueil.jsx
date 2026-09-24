@@ -11,11 +11,11 @@ import {
 import { useEffect, useState } from "react";
 
 const bannières = [
-    { image: "/assets/banners/banner-livraison.jpg", label: "JSE Express", titre: "Vos plats préférés, livrés à Adzopé.", description: "Commandez simplement et profitez de vos restaurants locaux." },
-    { image: "/assets/banners/banner-plat-ivoirien.jpg", label: "Saveurs locales", titre: "Une envie de bon plat ?", description: "Découvrez les plats proposés par les restaurants disponibles." },
-    { image: "/assets/banners/banner-restaurants.jpg", label: "Restaurants locaux", titre: "Découvrez les restaurants d'Adzopé.", description: "Explorez les établissements disponibles près de chez vous." },
-    { image: "/assets/banners/banner-commande-simple.jpg", label: "Simple et pratique", titre: "Commandez sans vous déplacer.", description: "Quelques étapes suffisent pour préparer votre commande." },
-    { image: "/assets/banners/banner-decouverte.jpg", label: "À découvrir", titre: "Variez les plaisirs.", description: "Trouvez différentes propositions au même endroit." },
+    { image: "/assets/banner-livraison.jpg", label: "JSE Express", titre: "Vos plats préférés, livrés à Adzopé.", description: "Commandez simplement et profitez de vos restaurants locaux." },
+    { image: "/assets/banner-plat-ivoirien.jpg", label: "Saveurs locales", titre: "Une envie de bon plat ?", description: "Découvrez les plats proposés par les restaurants disponibles." },
+    { image: "/assets/banner-restaurants.jpg", label: "Restaurants locaux", titre: "Découvrez les restaurants d'Adzopé.", description: "Explorez les établissements disponibles près de chez vous." },
+    { image: "/assets/banner-commande-simple.jpg", label: "Simple et pratique", titre: "Commandez sans vous déplacer.", description: "Quelques étapes suffisent pour préparer votre commande." },
+    { image: "/assets/banner-decouverte.jpg", label: "À découvrir", titre: "Variez les plaisirs.", description: "Trouvez différentes propositions au même endroit." },
 ];
 
 const imagesFallback = [
