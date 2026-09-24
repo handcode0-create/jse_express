@@ -419,13 +419,16 @@ Route::get('/notifications', function () {
         ->map(function (Notification $notification) {
             return [
                 'id' => $notification->id,
-                'type' => $notification->type_evenement,
+                'type_evenement' => $notification->type_evenement,
                 'contenu' => $notification->contenu,
+                'commande_id' => $notification->commande_id,
+                'livraison_id' => $notification->livraison_id,
                 'canal' => $notification->canal,
-                'statut' => $notification->statut_envoi,
-                'date' => $notification->date_envoi
-                    ? \Illuminate\Support\Carbon::parse($notification->date_envoi)->format('d/m/Y H:i')
-                    : null,
+                'telephone_destination' => $notification->telephone_destination,
+                'operateur' => $notification->operateur,
+                'statut_envoi' => $notification->statut_envoi,
+                'tentatives' => (int) $notification->tentatives,
+                'date_envoi' => $notification->date_envoi?->toIso8601String(),
             ];
         })
         ->values();
@@ -1010,6 +1013,9 @@ Route::get('/accueil', function (Request $request) {
         ->values();
 
     return Inertia::render('Accueil', [
+        'notificationsCount' => Notification::query()
+            ->where('user_id', Auth::id())
+            ->count(),
         'categories' => $categories,
         'restaurants' => $restaurants,
         'favorisRestaurantIds' => $favorisRestaurantIds,
