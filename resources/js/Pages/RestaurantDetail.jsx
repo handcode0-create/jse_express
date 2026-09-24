@@ -15,7 +15,7 @@ const imagesPlats = [
 const prix = (value) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(Number(value || 0));
 
 function Action({ label, onClick, active = false, children }) {
-    return <button type="button" onClick={onClick} aria-label={label} className={\`flex size-11 items-center justify-center rounded-full bg-white/95 text-jse-principal shadow-lg shadow-black/10 backdrop-blur-md active:scale-95 \${active ? "text-jse-accent" : ""}\`}>{children}</button>;
+    return <button type="button" onClick={onClick} aria-label={label} className={`flex size-11 items-center justify-center rounded-full bg-white/95 text-jse-principal shadow-lg shadow-black/10 backdrop-blur-md active:scale-95 ${active ? "text-jse-accent" : ""}`}>{children}</button>;
 }
 
 export default function RestaurantDetail() {
@@ -40,18 +40,18 @@ export default function RestaurantDetail() {
 
     const ajouter = (produit) => {
         setAjout(produit.id);
-        router.post(\`/panier/produits/\${produit.id}/ajouter\`, { quantite: 1 }, {
+        router.post(`/panier/produits/${produit.id}/ajouter`, { quantite: 1 }, {
             preserveScroll: true,
             preserveState: true,
             onFinish: () => setAjout(null),
         });
     };
-    const modifier = (ligne, quantite) => router.patch(\`/panier/lignes/\${ligne.id}\`, { quantite }, { preserveScroll: true, preserveState: true });
-    const supprimer = (ligne) => router.delete(\`/panier/lignes/\${ligne.id}\`, { preserveScroll: true, preserveState: true });
+    const modifier = (ligne, quantite) => router.patch(`/panier/lignes/${ligne.id}`, { quantite }, { preserveScroll: true, preserveState: true });
+    const supprimer = (ligne) => router.delete(`/panier/lignes/${ligne.id}`, { preserveScroll: true, preserveState: true });
     const partager = async () => {
         const url = window.location.href;
         if (navigator.share) {
-            await navigator.share({ title: restaurant?.nom || "JSE Express", text: \`Découvrez \${restaurant?.nom || "ce restaurant"} sur JSE Express.\`, url });
+            await navigator.share({ title: restaurant?.nom || "JSE Express", text: `Découvrez ${restaurant?.nom || "ce restaurant"} sur JSE Express.`, url });
         } else if (navigator.clipboard) {
             await navigator.clipboard.writeText(url);
             window.alert("Lien du restaurant copié.");
@@ -93,7 +93,7 @@ export default function RestaurantDetail() {
                 <nav className="sticky top-0 z-30 mt-5 grid grid-cols-3 border-y border-jse-texte/5 bg-jse-fond/95 backdrop-blur-xl">
                     {[["menu","Menu",UtensilsCrossed],["avis","Avis",MessageCircle],["infos","Infos",Info]].map(([id,label,Icon]) => {
                         const active = onglet === id;
-                        return <button key={id} type="button" onClick={() => setOnglet(id)} className={\`relative flex h-[62px] items-center justify-center gap-2 font-sans text-sm font-semibold \${active ? "text-jse-principal" : "text-jse-texte/45"}\`}>
+                        return <button key={id} type="button" onClick={() => setOnglet(id)} className={`relative flex h-[62px] items-center justify-center gap-2 font-sans text-sm font-semibold ${active ? "text-jse-principal" : "text-jse-texte/45"}`}>
                             <Icon size={21} strokeWidth={active ? 2 : 1.7} />{label}{active && <span className="absolute bottom-0 left-1/2 h-1 w-[82%] -translate-x-1/2 rounded-full bg-jse-secondaire" />}
                         </button>;
                     })}
@@ -107,8 +107,8 @@ export default function RestaurantDetail() {
                     </div>
 
                     <div className="scrollbar-none mt-4 flex gap-2.5 overflow-x-auto pb-1">
-                        <button type="button" onClick={() => setCategorie("Toutes")} className={\`shrink-0 rounded-full px-6 py-3 font-sans text-sm font-semibold \${categorie === "Toutes" ? "bg-jse-principal text-white" : "bg-white text-jse-texte/65 ring-1 ring-jse-texte/5"}\`}>Tout</button>
-                        {categories.map((cat) => <button key={cat.id} type="button" onClick={() => setCategorie(cat.id)} className={\`shrink-0 rounded-full px-6 py-3 font-sans text-sm font-semibold \${categorie === cat.id ? "bg-jse-principal text-white" : "bg-white text-jse-texte/65 ring-1 ring-jse-texte/5"}\`}>{cat.nom}</button>)}
+                        <button type="button" onClick={() => setCategorie("Toutes")} className={`shrink-0 rounded-full px-6 py-3 font-sans text-sm font-semibold ${categorie === "Toutes" ? "bg-jse-principal text-white" : "bg-white text-jse-texte/65 ring-1 ring-jse-texte/5"}`}>Tout</button>
+                        {categories.map((cat) => <button key={cat.id} type="button" onClick={() => setCategorie(cat.id)} className={`shrink-0 rounded-full px-6 py-3 font-sans text-sm font-semibold ${categorie === cat.id ? "bg-jse-principal text-white" : "bg-white text-jse-texte/65 ring-1 ring-jse-texte/5"}`}>{cat.nom}</button>)}
                     </div>
 
                     <div className="mt-5 space-y-3">
