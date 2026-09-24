@@ -133,6 +133,52 @@ Route::post('/deconnexion', function (Request $request) {
 })->middleware('auth')->name('deconnexion');
 
 
+Route::get('/restaurants/{restaurant}/produits/{produit}', function (Restaurant $restaurant, Produit $produit) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    abort_unless($restaurant->statut === 'actif', 404);
+    abort_unless((int) $produit->restaurant_id === (int) $restaurant->id, 404);
+    abort_unless($produit->statut === 'actif' && $produit->disponible, 404);
+
+    $produit->load('categorie');
+
+    $panier = Panier::query()
+        ->where('user_id', Auth::id())
+        ->where('statut', 'actif')
+        ->with('lignesPanier.produit')
+        ->latest('id')
+        ->first();
+
+    return Inertia::render('ProduitDetail', [
+        'restaurant' => [
+            'id' => $restaurant->id,
+            'nom' => $restaurant->nom,
+            'description' => $restaurant->description,
+            'adresse' => $restaurant->adresse,
+            'horaires' => $restaurant->horaires,
+            'telephone' => $restaurant->telephone,
+            'zone' => $restaurant->zone ? ['id' => $restaurant->zone->id, 'nom' => $restaurant->zone->nom] : null,
+        ],
+        'produit' => [
+            'id' => $produit->id,
+            'nom' => $produit->nom,
+            'description' => $produit->description,
+            'prix' => (float) $produit->prix,
+            'image' => $produit->image,
+            'disponible' => (bool) $produit->disponible,
+            'categorie' => $produit->categorie ? [
+                'id' => $produit->categorie->id,
+                'nom' => $produit->categorie->nom,
+            ] : null,
+        ],
+        'panier' => [
+            'nombre_articles' => $panier?->lignesPanier->sum('quantite') ?? 0,
+            'montant_total' => $panier
+                ? (float) $panier->lignesPanier->sum(fn ($ligne) => $ligne->quantite * $ligne->prix_unitaire)
+                : 0,
+        ],
+    ]);
+})->middleware('auth')->name('produit.detail');
+
 Route::get('/restaurants/{restaurant}', function (Restaurant $restaurant) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
     abort_unless($restaurant->statut === 'actif', 404);
