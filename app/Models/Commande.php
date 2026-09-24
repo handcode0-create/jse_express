@@ -12,6 +12,13 @@ class Commande extends Model
 {
 
     public $timestamps = false;
+    protected $casts = [
+        'date_commande' => 'datetime',
+        'sous_total' => 'decimal:2',
+        'frais_livraison' => 'decimal:2',
+        'montant_total' => 'decimal:2',
+    ];
+
     protected $fillable = [
         'reference',
         'user_id',
