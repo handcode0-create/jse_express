@@ -83,7 +83,7 @@ export default function RestaurantDetail() {
                     <div className="absolute inset-x-0 top-0 flex items-center justify-between px-5 pt-6 sm:px-7 sm:pt-7">
                         <Action label="Retour" onClick={() => router.visit("/accueil")}><ArrowLeft size={22} /></Action>
                         <div className="flex gap-2.5">
-                            <Action label={favori ? "Retirer des favoris" : "Ajouter aux favoris"} active={favori} onClick={() => { setFavori(basculerFavori({ ...restaurant, image: imageRestaurant })); }}><Heart size={22} fill={favori ? "currentColor" : "none"} /></Action>
+                            <Action label={favori ? "Retirer des favoris" : "Ajouter aux favoris"} active={favori} onClick={() => { const nouveauxFavoris = basculerFavori({ ...restaurant, image: imageRestaurant }); setFavori(nouveauxFavoris.some((item) => String(item.id) === String(restaurant?.id))); }}><Heart size={22} fill={favori ? "currentColor" : "none"} /></Action>
                             <Action label="Partager" onClick={partager}><Share2 size={21} /></Action>
                         </div>
                     </div>
