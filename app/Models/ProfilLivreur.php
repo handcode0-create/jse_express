@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProfilLivreur extends Model
 {
+    protected $table = 'profils_livreurs';
 
     public $timestamps = false;
+
     protected $fillable = [
         'user_id',
         'matricule',
@@ -27,9 +29,4 @@ class ProfilLivreur extends Model
     {
         return $this->belongsTo(Zone::class, 'zone_id', 'id');
     }
-
 }
-
-
-
-
