@@ -44,12 +44,17 @@ export default function Profil() {
     const action = (method, url, data = {}, options = {}) => {
         setErreur("");
         setChargement(true);
-        router[method](url, data, {
+        const callbacks = {
             preserveScroll: true,
             onError: (errors) => setErreur(Object.values(errors || {})[0] || "Impossible de traiter la demande."),
             onFinish: () => setChargement(false),
             ...options,
-        });
+        };
+        if (method === "delete") {
+            router.delete(url, callbacks);
+        } else {
+            router[method](url, data, callbacks);
+        }
     };
 
     const enregistrer = (event) => {
