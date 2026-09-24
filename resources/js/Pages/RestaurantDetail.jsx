@@ -219,8 +219,8 @@ export default function RestaurantDetail() {
                     </div>
                 </div>}
             </>}
-        </div>
             </div>
         </div>
+    </div>
     </main>;
 }
