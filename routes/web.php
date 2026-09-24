@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\Categorie;
+use App\Models\Commande;
+use App\Models\LigneCommande;
 use App\Models\LignePanier;
 use App\Models\Panier;
 use App\Models\Produit;
@@ -170,6 +172,158 @@ Route::get('/panier', function () {
         ],
     ]);
 })->middleware('auth')->name('panier');
+
+Route::get('/commandes', function (Request $request) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+
+    $filtre = (string) $request->query('filtre', 'toutes');
+
+    $commandes = Commande::query()
+        ->where('user_id', Auth::id())
+        ->with([
+            'restaurant',
+            'statutCommande',
+            'lignesCommande.produit',
+        ])
+        ->latest('date_commande')
+        ->get();
+
+    $commandes = $commandes->filter(function (Commande $commande) use ($filtre) {
+        $code = $commande->statutCommande?->code;
+
+        return match ($filtre) {
+            'en_cours' => $code !== 'LIVREE' && $code !== 'ANNULEE',
+            'terminees' => $code === 'LIVREE',
+            'annulees' => $code === 'ANNULEE',
+            default => true,
+        };
+    })->values();
+
+    return Inertia::render('Commandes', [
+        'filtreActif' => $filtre,
+        'commandes' => $commandes->map(function (Commande $commande) {
+            $premiereLigne = $commande->lignesCommande->first();
+            $statut = $commande->statutCommande;
+
+            return [
+                'id' => $commande->id,
+                'reference' => $commande->reference,
+                'date_commande' => $commande->date_commande?->format('d/m/Y'),
+                'date_brute' => $commande->date_commande?->toIso8601String(),
+                'restaurant' => $commande->restaurant ? [
+                    'id' => $commande->restaurant->id,
+                    'nom' => $commande->restaurant->nom,
+                ] : null,
+                'image' => $premiereLigne?->produit?->image,
+                'nombre_articles' => (int) $commande->lignesCommande->sum('quantite'),
+                'montant_total' => (float) $commande->montant_total,
+                'statut' => $statut ? [
+                    'code' => $statut->code,
+                    'libelle' => $statut->libelle,
+                    'ordre' => (int) $statut->ordre,
+                ] : null,
+                'peut_recommander' => $code !== 'ANNULEE',
+            ];
+        })->values(),
+    ]);
+})->middleware('auth')->name('commandes');
+
+Route::get('/commandes/{commande}', function (Commande $commande) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    abort_unless((int) $commande->user_id === (int) Auth::id(), 404);
+
+    $commande->load([
+        'restaurant',
+        'zone',
+        'statutCommande',
+        'lignesCommande.produit',
+    ]);
+
+    return Inertia::render('CommandeDetails', [
+        'commande' => [
+            'id' => $commande->id,
+            'reference' => $commande->reference,
+            'date_commande' => $commande->date_commande?->format('d/m/Y à H:i'),
+            'restaurant' => $commande->restaurant ? [
+                'id' => $commande->restaurant->id,
+                'nom' => $commande->restaurant->nom,
+                'adresse' => $commande->restaurant->adresse,
+            ] : null,
+            'zone' => $commande->zone ? [
+                'id' => $commande->zone->id,
+                'nom' => $commande->zone->nom,
+            ] : null,
+            'adresse_livraison' => $commande->adresse_livraison,
+            'telephone_livraison' => $commande->telephone_livraison,
+            'sous_total' => (float) $commande->sous_total,
+            'frais_livraison' => (float) $commande->frais_livraison,
+            'montant_total' => (float) $commande->montant_total,
+            'statut' => $commande->statutCommande ? [
+                'code' => $commande->statutCommande->code,
+                'libelle' => $commande->statutCommande->libelle,
+                'ordre' => (int) $commande->statutCommande->ordre,
+            ] : null,
+            'lignes' => $commande->lignesCommande->map(fn (LigneCommande $ligne) => [
+                'id' => $ligne->id,
+                'nom' => $ligne->nom_produit_snapshot,
+                'quantite' => (int) $ligne->quantite,
+                'prix_unitaire' => (float) $ligne->prix_unitaire,
+                'total' => (float) $ligne->total_ligne,
+                'image' => $ligne->produit?->image,
+            ])->values(),
+        ],
+    ]);
+})->whereNumber('commande')->middleware('auth')->name('commandes.details');
+
+Route::post('/commandes/{commande}/recommander', function (Commande $commande) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    abort_unless((int) $commande->user_id === (int) Auth::id(), 404);
+
+    $commande->load('lignesCommande.produit');
+
+    $ajouts = 0;
+
+    DB::transaction(function () use ($commande, &$ajouts) {
+        $panier = Panier::firstOrCreate([
+            'user_id' => Auth::id(),
+            'statut' => 'actif',
+        ]);
+
+        foreach ($commande->lignesCommande as $ligneCommande) {
+            $produit = $ligneCommande->produit;
+
+            if (! $produit || $produit->statut !== 'actif' || ! $produit->disponible) {
+                continue;
+            }
+
+            $lignePanier = LignePanier::query()
+                ->where('panier_id', $panier->id)
+                ->where('produit_id', $produit->id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($lignePanier) {
+                $lignePanier->increment('quantite', $ligneCommande->quantite);
+            } else {
+                LignePanier::create([
+                    'panier_id' => $panier->id,
+                    'produit_id' => $produit->id,
+                    'quantite' => $ligneCommande->quantite,
+                    'prix_unitaire' => $produit->prix,
+                ]);
+            }
+
+            $ajouts += $ligneCommande->quantite;
+        }
+    });
+
+    return redirect()->route('panier')->with(
+        $ajouts > 0 ? 'success' : 'error',
+        $ajouts > 0
+            ? 'Les articles disponibles ont été ajoutés à votre panier.'
+            : 'Aucun article de cette commande n’est actuellement disponible.'
+    );
+})->whereNumber('commande')->middleware('auth')->name('commandes.recommander');
 
 Route::get('/commande/{commande}', function (Commande $commande) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
