@@ -7,11 +7,10 @@ import {
     Home,
     LogOut,
     MapPin,
-    Menu,
     Search,
+    SlidersHorizontal,
     ShoppingBag,
     UserRound,
-    X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -100,7 +99,6 @@ export default function Accueil() {
     const utilisateur = auth?.user ?? null;
     const [indexBannière, setIndexBannière] = useState(0);
     const [rechercheLocale, setRechercheLocale] = useState(recherche);
-    const [menuMobileOuvert, setMenuMobileOuvert] = useState(false);
     const nombreArticles = Number(panier?.nombre_articles ?? 0);
 
     useEffect(() => {
@@ -130,36 +128,7 @@ export default function Accueil() {
 
     return (
         <main className="min-h-screen bg-jse-fond text-jse-texte">
-            {/* Menu mobile */}
-            <div className={[`fixed inset-0 z-50 lg:hidden`, menuMobileOuvert ? "pointer-events-auto" : "pointer-events-none"].join(" ")}>
-                <button
-                    type="button"
-                    onClick={() => setMenuMobileOuvert(false)}
-                    className={[`absolute inset-0 bg-jse-principal/25 backdrop-blur-sm transition-opacity`, menuMobileOuvert ? "opacity-100" : "opacity-0"].join(" ")}
-                    aria-label="Fermer le menu"
-                />
-                <aside className={[`absolute left-0 top-0 flex h-full w-[280px] flex-col bg-white p-5 shadow-2xl transition-transform duration-300`, menuMobileOuvert ? "translate-x-0" : "-translate-x-full"].join(" ")}>
-                    <div className="flex items-center justify-between">
-                        <img src="/assets/jse_logo.png" alt="JSE Express" className="h-11 w-auto object-contain" />
-                        <button type="button" onClick={() => setMenuMobileOuvert(false)} className="flex size-10 items-center justify-center rounded-full bg-jse-fond text-jse-texte/60" aria-label="Fermer">
-                            <X size={19} />
-                        </button>
-                    </div>
-
-                    <nav className="mt-8 space-y-1.5">
-                        {navigation.map((item) => <NavigationItem key={item.label} item={item} />)}
-                    </nav>
-
-                    <button
-                        type="button"
-                        onClick={() => router.post("/deconnexion")}
-                        className="mt-auto flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left font-sans text-sm font-medium text-jse-texte/50 hover:bg-red-50 hover:text-red-600"
-                    >
-                        <LogOut size={19} strokeWidth={1.8} />
-                        Déconnexion
-                    </button>
-                </aside>
-            </div>
+            {
 
             <div className="mx-auto flex min-h-screen w-full max-w-[1440px]">
                 {/* Sidebar desktop */}
@@ -198,52 +167,48 @@ export default function Accueil() {
                     <div className="mx-auto w-full max-w-[1180px] px-4 sm:px-7 lg:px-10">
                         {/* En-tête */}
                         <header className="pt-5 sm:pt-7 lg:pt-8">
-                            <div className="flex items-center justify-between gap-3">
-                                <button type="button" onClick={() => setMenuMobileOuvert(true)} className="flex size-10 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-jse-texte/5 lg:hidden" aria-label="Ouvrir le menu">
-                                    <Menu size={19} strokeWidth={1.8} />
+                            <div className="relative flex h-11 items-center justify-between gap-3 sm:h-12">
+                                <div className="flex items-center">
+                                    <img src="/assets/jse_logo.png" alt="JSE Express" className="h-10 w-auto object-contain sm:h-11" />
+                                </div>
+
+                                <button type="button" className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white/75 px-4 py-2.5 shadow-sm ring-1 ring-jse-texte/5 lg:static lg:translate-x-0 lg:bg-transparent lg:px-3 lg:py-2 lg:shadow-none">
+                                    <MapPin size={19} strokeWidth={2.2} className="text-jse-principal" />
+                                    <span className="font-sans text-sm font-semibold text-jse-principal">Adzopé</span>
+                                    <ChevronDown size={16} strokeWidth={2.2} className="text-jse-principal/70" />
                                 </button>
 
-                                <div className="flex items-center gap-2 lg:hidden">
-                                    <img src="/assets/jse_logo.png" alt="JSE Express" className="h-9 w-auto object-contain" />
-                                </div>
-
-                                <div className="hidden items-center gap-2 lg:flex">
-                                    <div className="flex size-9 items-center justify-center rounded-full bg-jse-secondaire/10">
-                                        <MapPin size={17} className="text-jse-secondaire" />
-                                    </div>
-                                    <div>
-                                        <p className="font-sans text-[9px] font-medium uppercase tracking-[0.12em] text-jse-texte/35">Votre localisation</p>
-                                        <div className="flex items-center gap-1">
-                                            <span className="font-sans text-xs font-semibold">Adzopé</span>
-                                            <ChevronDown size={13} className="text-jse-texte/35" />
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div className="flex items-center gap-2">
-                                    <button type="button" onClick={() => window.alert("Vos notifications seront disponibles ici.")} className="relative flex size-10 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-jse-texte/5" aria-label="Notifications">
-                                        <Bell size={18} strokeWidth={1.8} className="text-jse-texte/65" />
+                                    <button type="button" onClick={() => window.alert("Vos notifications seront disponibles ici.")} className="relative flex size-11 items-center justify-center rounded-full bg-transparent text-jse-principal lg:bg-white lg:shadow-sm lg:ring-1 lg:ring-jse-texte/5" aria-label="Notifications">
+                                        <Bell size={26} strokeWidth={1.8} />
                                     </button>
-                                    <button type="button" onClick={() => window.alert("Votre panier sera accessible ici.")} className="relative flex size-10 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-jse-texte/5" aria-label="Panier">
-                                        <ShoppingBag size={18} strokeWidth={1.8} className="text-jse-texte/65" />
+                                    <button type="button" onClick={() => window.alert("Votre panier sera accessible ici.")} className="relative hidden size-11 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm ring-1 ring-jse-texte/5 sm:flex" aria-label="Panier">
+                                        <ShoppingBag size={19} strokeWidth={1.8} />
                                         {nombreArticles > 0 && <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-jse-accent font-sans text-[9px] font-bold text-white">{nombreArticles > 9 ? "9+" : nombreArticles}</span>}
                                     </button>
                                 </div>
                             </div>
 
-                            <form onSubmit={rechercher} className="mt-5">
-                                <div className="flex h-[50px] items-center gap-3 rounded-[18px] bg-white px-4 shadow-sm ring-1 ring-jse-texte/5 focus-within:ring-jse-secondaire/30 lg:mx-auto lg:max-w-[720px]">
-                                    <Search size={19} strokeWidth={1.8} className="shrink-0 text-jse-texte/35" />
+                            <div className="mt-8 lg:mt-10">
+                                <p className="font-against text-[2.7rem] leading-[0.9] text-jse-principal sm:text-[3.4rem] lg:text-[4rem]">Bonjour !</p>
+                                <p className="mt-2 font-sans text-[1.15rem] leading-tight text-jse-texte/70 sm:text-xl lg:text-2xl">
+                                    Qu’est-ce qu’on vous sert aujourd’hui ?
+                                </p>
+                            </div>
+
+                            <form onSubmit={rechercher} className="mt-6 lg:mt-7">
+                                <div className="flex h-[58px] items-center gap-3 rounded-[24px] bg-white px-5 shadow-sm ring-1 ring-jse-texte/5 focus-within:ring-jse-secondaire/30 lg:h-[62px]">
+                                    <Search size={25} strokeWidth={1.8} className="shrink-0 text-jse-principal" />
                                     <input
                                         type="search"
                                         value={rechercheLocale}
                                         onChange={(event) => setRechercheLocale(event.target.value)}
                                         placeholder="Rechercher un restaurant, un plat..."
-                                        className="min-w-0 flex-1 bg-transparent font-sans text-sm outline-none placeholder:text-jse-texte/35"
+                                        className="min-w-0 flex-1 bg-transparent font-sans text-sm outline-none placeholder:text-jse-texte/45 sm:text-base"
                                         aria-label="Rechercher un restaurant ou un plat"
                                     />
-                                    <button type="submit" className="hidden rounded-xl bg-jse-fond px-3 py-2 font-sans text-[10px] font-semibold text-jse-principal sm:block">
-                                        Rechercher
+                                    <button type="button" disabled className="flex size-10 shrink-0 items-center justify-center border-l border-jse-texte/10 pl-3 text-jse-principal" aria-label="Filtres">
+                                        <SlidersHorizontal size={22} strokeWidth={1.8} />
                                     </button>
                                 </div>
                             </form>
@@ -263,13 +228,13 @@ export default function Accueil() {
                                 {categories.length > 4 && <button type="button" disabled className="font-sans text-xs font-semibold text-jse-secondaire">Voir tout</button>}
                             </div>
 
-                            <div className="scrollbar-none flex gap-3 overflow-x-auto pb-1 sm:grid sm:grid-cols-4 sm:overflow-visible">
+                            <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
                                 {categories.length > 0 ? categories.map((categorie, index) => (
-                                    <button key={categorie.id} type="button" disabled className="group w-[128px] shrink-0 rounded-[22px] bg-white p-2.5 text-center shadow-sm ring-1 ring-jse-texte/5 sm:w-auto sm:p-3 lg:p-3.5">
+                                    <button key={categorie.id} type="button" disabled className="group min-w-0 rounded-[22px] bg-white p-2 text-center shadow-sm ring-1 ring-jse-texte/5 sm:p-3 lg:p-3.5">
                                         <div className="aspect-square overflow-hidden rounded-[18px] bg-jse-fond">
                                             <img src={categorie.image || imagesFallback[index % imagesFallback.length]} alt={categorie.nom} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                                         </div>
-                                        <p className="mt-2.5 truncate font-sans text-[11px] font-semibold text-jse-texte sm:text-xs">{categorie.nom}</p>
+                                        <p className="mt-2 truncate font-sans text-[10px] font-semibold text-jse-texte sm:text-xs">{categorie.nom}</p>
                                     </button>
                                 )) : (
                                     <p className="font-sans text-xs text-jse-texte/45">Aucune catégorie disponible pour le moment.</p>
@@ -321,9 +286,9 @@ export default function Accueil() {
                             </div>
 
                             {restaurants.length > 0 ? (
-                                <div className="scrollbar-none flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible xl:grid-cols-3">
+                                <div className="scrollbar-none flex gap-4 overflow-x-auto pb-2 lg:grid lg:grid-cols-3 lg:overflow-visible">
                                     {restaurants.map((restaurant, index) => (
-                                        <article key={restaurant.id} className="w-[258px] shrink-0 overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-jse-texte/5 sm:w-auto">
+                                        <article key={restaurant.id} className="w-[258px] shrink-0 overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-jse-texte/5 lg:w-auto">
                                             <div className="relative aspect-[1.45/1] overflow-hidden bg-jse-principal">
                                                 <img src={imagesFallback[index % imagesFallback.length]} alt="" className="h-full w-full object-cover" />
                                                 <button type="button" disabled className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-white/90 text-jse-principal shadow-sm" aria-label="Ajouter aux favoris">
