@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\AttributionLivraison;
+use App\Models\HistoriqueCommande;
 use App\Models\ProfilLivreur;
+use App\Models\StatutCommande;
+use App\Services\LivraisonService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -118,8 +122,8 @@ class LivreurController extends Controller
         abort_unless($commande->statutCommande?->code === 'PRETE', 422);
         abort_unless(in_array($livraisonModel->statut, ['en_attente', 'attribuee'], true), 422);
 
-        IlluminateSupportFacadesDB::transaction(function () use ($livraisonModel, $commande, $request) {
-            $statutEnLivraison = AppModelsStatutCommande::query()
+        DB::transaction(function () use ($livraisonModel, $commande, $request) {
+            $statutEnLivraison = StatutCommande::query()
                 ->where('code', 'EN_LIVRAISON')
                 ->firstOrFail();
 
@@ -132,7 +136,7 @@ class LivreurController extends Controller
                 'statut_id' => $statutEnLivraison->id,
             ]);
 
-            AppModelsHistoriqueCommande::create([
+            HistoriqueCommande::create([
                 'commande_id' => $commande->id,
                 'statut_id' => $statutEnLivraison->id,
                 'user_id' => $request->user()->id,
@@ -142,6 +146,40 @@ class LivreurController extends Controller
         });
 
         return back()->with('success', 'La livraison a été prise en charge.');
+    }
+
+    public function validerPin(Request $request, int $livraison, LivraisonService $livraisonService): RedirectResponse
+    {
+        $profil = $this->profil($request);
+
+        $attribution = AttributionLivraison::query()
+            ->whereKey($livraison)
+            ->where('livreur_id', $request->user()->id)
+            ->where('statut', 'active')
+            ->with(['livraison.commande.statutCommande'])
+            ->firstOrFail();
+
+        $livraisonModel = $attribution->livraison;
+        $commande = $livraisonModel?->commande;
+
+        abort_unless($livraisonModel && $commande, 404);
+        abort_unless((int) $livraisonModel->zone_id === (int) $profil->zone_id, 403);
+        abort_unless($livraisonModel->statut === 'en_cours', 422, 'La livraison n’est pas en cours.');
+        abort_unless($commande->statutCommande?->code === 'EN_LIVRAISON', 422, 'La commande n’est pas en livraison.');
+
+        $donnees = $request->validate([
+            'pin' => ['required', 'digits:6'],
+        ]);
+
+        abort_unless(
+            $livraisonService->validerPin($commande, $donnees['pin']),
+            422,
+            'Le PIN de livraison est incorrect.'
+        );
+
+        $livraisonService->cloturerLivraison($livraisonModel, $request->user()->id);
+
+        return back()->with('success', 'Livraison validée et commande clôturée.');
     }
 
     public function changerDisponibilite(Request $request): RedirectResponse
