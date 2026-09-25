@@ -212,6 +212,11 @@ export default function CommandeDetails() {
                                         {ligne.description ||
                                             "Article commandé"}
                                     </p>
+                                    {ligne.options?.length > 0 && (
+                                        <p className="mt-2 line-clamp-2 font-sans text-[10px] leading-4 text-jse-secondaire">
+                                            {ligne.options.map((option) => option.nom).join(" · ")}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="flex min-w-[78px] flex-col items-end justify-center">
