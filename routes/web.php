@@ -84,7 +84,7 @@ Route::get('/panier', function () {
             ])->values(),
         ],
     ]);
-})->middleware('auth')->name('panier');
+})->middleware(['auth', 'role:client'])->name('panier');
 
 Route::get('/favoris', function () {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -110,7 +110,7 @@ Route::get('/favoris', function () {
         ->values();
 
     return Inertia::render('Favoris', ['favoris' => $favoris]);
-})->middleware('auth')->name('favoris');
+})->middleware(['auth', 'role:client'])->name('favoris');
 
 Route::post('/favoris/{restaurant}', function (Restaurant $restaurant) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -122,7 +122,7 @@ Route::post('/favoris/{restaurant}', function (Restaurant $restaurant) {
     ]);
 
     return back();
-})->whereNumber('restaurant')->middleware('auth')->name('favoris.ajouter');
+})->whereNumber('restaurant')->middleware(['auth', 'role:client'])->name('favoris.ajouter');
 
 Route::delete('/favoris/{restaurant}', function (Restaurant $restaurant) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -133,7 +133,7 @@ Route::delete('/favoris/{restaurant}', function (Restaurant $restaurant) {
         ->delete();
 
     return back();
-})->whereNumber('restaurant')->middleware('auth')->name('favoris.supprimer');
+})->whereNumber('restaurant')->middleware(['auth', 'role:client'])->name('favoris.supprimer');
 
 Route::get('/profil', function () {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -180,7 +180,7 @@ Route::get('/profil', function () {
                 'par_defaut' => (bool) $moyen->par_defaut,
             ])->values(),
     ]);
-})->middleware('auth')->name('profil');
+})->middleware(['auth', 'role:client'])->name('profil');
 
 Route::patch('/profil', function (Request $request) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -201,7 +201,7 @@ Route::patch('/profil', function (Request $request) {
     Auth::user()->update($donnees);
 
     return back()->with('success', 'Vos informations ont été mises à jour.');
-})->middleware('auth')->name('profil.modifier');
+})->middleware(['auth', 'role:client'])->name('profil.modifier');
 
 Route::post('/profil/adresses', function (Request $request) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -224,7 +224,7 @@ Route::post('/profil/adresses', function (Request $request) {
     });
 
     return back()->with('success', 'Adresse ajoutée.');
-})->middleware('auth')->name('profil.adresse.ajouter');
+})->middleware(['auth', 'role:client'])->name('profil.adresse.ajouter');
 
 Route::patch('/profil/adresses/{adresseLivraison}/defaut', function (AdresseLivraison $adresseLivraison) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -236,7 +236,7 @@ Route::patch('/profil/adresses/{adresseLivraison}/defaut', function (AdresseLivr
     });
 
     return back()->with('success', 'Adresse par défaut mise à jour.');
-})->whereNumber('adresseLivraison')->middleware('auth')->name('profil.adresse.defaut');
+})->whereNumber('adresseLivraison')->middleware(['auth', 'role:client'])->name('profil.adresse.defaut');
 
 Route::delete('/profil/adresses/{adresseLivraison}', function (AdresseLivraison $adresseLivraison) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -258,7 +258,7 @@ Route::delete('/profil/adresses/{adresseLivraison}', function (AdresseLivraison 
     });
 
     return back()->with('success', 'Adresse supprimée.');
-})->whereNumber('adresseLivraison')->middleware('auth')->name('profil.adresse.supprimer');
+})->whereNumber('adresseLivraison')->middleware(['auth', 'role:client'])->name('profil.adresse.supprimer');
 
 Route::post('/profil/moyens-paiement', function (Request $request) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -280,7 +280,7 @@ Route::post('/profil/moyens-paiement', function (Request $request) {
     ]));
 
     return back()->with('success', 'Moyen de paiement ajouté.');
-})->middleware('auth')->name('profil.paiement.ajouter');
+})->middleware(['auth', 'role:client'])->name('profil.paiement.ajouter');
 
 Route::patch('/profil/moyens-paiement/{moyenPaiement}/defaut', function (MoyenPaiement $moyenPaiement) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -292,7 +292,7 @@ Route::patch('/profil/moyens-paiement/{moyenPaiement}/defaut', function (MoyenPa
     });
 
     return back()->with('success', 'Moyen de paiement par défaut mis à jour.');
-})->whereNumber('moyenPaiement')->middleware('auth')->name('profil.paiement.defaut');
+})->whereNumber('moyenPaiement')->middleware(['auth', 'role:client'])->name('profil.paiement.defaut');
 
 Route::delete('/profil/moyens-paiement/{moyenPaiement}', function (MoyenPaiement $moyenPaiement) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -314,7 +314,7 @@ Route::delete('/profil/moyens-paiement/{moyenPaiement}', function (MoyenPaiement
     });
 
     return back()->with('success', 'Moyen de paiement supprimé.');
-})->whereNumber('moyenPaiement')->middleware('auth')->name('profil.paiement.supprimer');
+})->whereNumber('moyenPaiement')->middleware(['auth', 'role:client'])->name('profil.paiement.supprimer');
 
 Route::get('/notifications', function () {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -345,7 +345,7 @@ Route::get('/notifications', function () {
     return Inertia::render('Notifications', [
         'notifications' => $notifications,
     ]);
-})->middleware('auth')->name('notifications');
+})->middleware(['auth', 'role:client'])->name('notifications');
 
 Route::get('/commandes', function (Request $request) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -400,7 +400,7 @@ Route::get('/commandes', function (Request $request) {
             ];
         })->values(),
     ]);
-})->middleware('auth')->name('commandes');
+})->middleware(['auth', 'role:client'])->name('commandes');
 
 Route::get('/commandes/{commande}', function (Commande $commande) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -486,7 +486,7 @@ Route::get('/commandes/{commande}', function (Commande $commande) {
             'historique' => $historique,
         ],
     ]);
-})->whereNumber('commande')->middleware('auth')->name('commandes.details');
+})->whereNumber('commande')->middleware(['auth', 'role:client'])->name('commandes.details');
 
 Route::post('/commandes/{commande}/recommander', function (Commande $commande) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -536,7 +536,7 @@ Route::post('/commandes/{commande}/recommander', function (Commande $commande) {
             ? 'Les articles disponibles ont été ajoutés à votre panier.'
             : 'Aucun article de cette commande n’est actuellement disponible.'
     );
-})->whereNumber('commande')->middleware('auth')->name('commandes.recommander');
+})->whereNumber('commande')->middleware(['auth', 'role:client'])->name('commandes.recommander');
 
 Route::get('/commande/{commande}', function (Commande $commande) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -555,7 +555,7 @@ Route::get('/commande/{commande}', function (Commande $commande) {
             ] : null,
         ],
     ]);
-})->whereNumber('commande')->middleware('auth')->name('commande.confirmation');
+})->whereNumber('commande')->middleware(['auth', 'role:client'])->name('commande.confirmation');
 
 Route::get('/commande/validation', function () {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -602,7 +602,7 @@ Route::get('/commande/validation', function () {
             ])->values(),
         ],
     ]);
-})->middleware('auth')->name('commande.validation');
+})->middleware(['auth', 'role:client'])->name('commande.validation');
 
 Route::post('/commande', function (Request $request) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -681,7 +681,7 @@ Route::post('/commande', function (Request $request) {
     });
 
     return redirect()->route('commande.confirmation', ['commande' => $commande->id]);
-})->middleware('auth')->name('commande.creer');
+})->middleware(['auth', 'role:client'])->name('commande.creer');
 
 Route::get('/restaurants/{restaurant}/produits/{produit}', function (Restaurant $restaurant, Produit $produit) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -727,7 +727,7 @@ Route::get('/restaurants/{restaurant}/produits/{produit}', function (Restaurant 
                 : 0,
         ],
     ]);
-})->middleware('auth')->name('produit.detail');
+})->middleware(['auth', 'role:client'])->name('produit.detail');
 
 Route::get('/restaurants/{restaurant}', function (Restaurant $restaurant) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -796,7 +796,7 @@ Route::get('/restaurants/{restaurant}', function (Restaurant $restaurant) {
             ])->values() ?? collect(),
         ],
     ]);
-})->middleware('auth')->name('restaurant.detail');
+})->middleware(['auth', 'role:client'])->name('restaurant.detail');
 
 Route::post('/panier/produits/{produit}/ajouter', function (Request $request, Produit $produit) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -826,7 +826,7 @@ Route::post('/panier/produits/{produit}/ajouter', function (Request $request, Pr
     });
 
     return back();
-})->middleware('auth')->name('panier.ajouter');
+})->middleware(['auth', 'role:client'])->name('panier.ajouter');
 
 Route::patch('/panier/lignes/{lignePanier}', function (Request $request, LignePanier $lignePanier) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -837,7 +837,7 @@ Route::patch('/panier/lignes/{lignePanier}', function (Request $request, LignePa
     $quantite > 0 ? $lignePanier->update(['quantite' => $quantite]) : $lignePanier->delete();
 
     return back();
-})->middleware('auth')->name('panier.ligne.modifier');
+})->middleware(['auth', 'role:client'])->name('panier.ligne.modifier');
 
 Route::delete('/panier/lignes/{lignePanier}', function (LignePanier $lignePanier) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -846,7 +846,7 @@ Route::delete('/panier/lignes/{lignePanier}', function (LignePanier $lignePanier
     $lignePanier->delete();
 
     return back();
-})->middleware('auth')->name('panier.ligne.supprimer');
+})->middleware(['auth', 'role:client'])->name('panier.ligne.supprimer');
 
 Route::get('/politique-de-confidentialite', function () {
     return Inertia::render('PolitiqueConfidentialite');
@@ -933,4 +933,4 @@ Route::get('/accueil', function (Request $request) {
             'nombre_articles' => $panier?->lignesPanier->sum('quantite') ?? 0,
         ],
     ]);
-})->middleware('auth')->name('accueil.client');
+})->middleware(['auth', 'role:client'])->name('accueil.client');
