@@ -5,12 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Categorie;
 use App\Models\Commande;
 use App\Models\HistoriqueCommande;
+use App\Models\Livraison;
 use App\Models\Notification;
 use App\Models\Paiement;
 use App\Models\Produit;
 use App\Models\Restaurant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Services\LivraisonService;
+use App\Services\NotificationService;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -276,7 +280,7 @@ class RestaurantController extends Controller
         return back()->with('success', 'Votre profil a été mis à jour.');
     }
 
-    public function changerStatutCommande(Request $request, Commande $commande): RedirectResponse
+    public function changerStatutCommande(Request $request, Commande $commande, LivraisonService $livraisonService, NotificationService $notificationService): RedirectResponse
     {
         $restaurant = $this->restaurant($request);
 
@@ -286,36 +290,104 @@ class RestaurantController extends Controller
             'statut' => ['required', 'in:CONFIRMEE,EN_PREPARATION,PRETE'],
         ]);
 
-        $commande->load('statutCommande');
+        DB::transaction(function () use ($request, $commande, $restaurant, $donnees, $livraisonService, $notificationService) {
+            $commande = Commande::query()->whereKey($commande->id)->lockForUpdate()->with(['statutCommande', 'user'])->firstOrFail();
 
-        $transitions = [
-            'EN_ATTENTE' => ['CONFIRMEE'],
-            'CONFIRMEE' => ['EN_PREPARATION'],
-            'EN_PREPARATION' => ['PRETE'],
-        ];
+            $transitions = [
+                'EN_ATTENTE' => ['CONFIRMEE'],
+                'CONFIRMEE' => ['EN_PREPARATION'],
+                'EN_PREPARATION' => ['PRETE'],
+            ];
 
-        $actuel = $commande->statutCommande?->code;
-        abort_unless(
-            $actuel && in_array($donnees['statut'], $transitions[$actuel] ?? [], true),
-            422,
-            'Cette commande ne peut pas passer à ce statut.'
-        );
+            $actuel = $commande->statutCommande?->code;
+            abort_unless($actuel && in_array($donnees['statut'], $transitions[$actuel] ?? [], true), 422, 'Cette commande ne peut pas passer à ce statut.');
 
-        $statut = \App\Models\StatutCommande::query()
-            ->where('code', $donnees['statut'])
-            ->firstOrFail();
+            $statut = \App\Models\StatutCommande::query()->where('code', $donnees['statut'])->firstOrFail();
 
-        $commande->update(['statut_id' => $statut->id]);
+            $commande->update(['statut_id' => $statut->id]);
 
-        HistoriqueCommande::create([
-            'commande_id' => $commande->id,
-            'statut_id' => $statut->id,
-            'user_id' => $request->user()->id,
-            'commentaire' => 'Statut mis à jour par le restaurant.',
-            'date_changement' => now(),
-        ]);
+            HistoriqueCommande::create([
+                'commande_id' => $commande->id,
+                'statut_id' => $statut->id,
+                'user_id' => $request->user()->id,
+                'commentaire' => 'Statut mis à jour par le restaurant.',
+                'date_changement' => now(),
+            ]);
+
+            $notificationService->sms(
+                $commande->user,
+                $donnees['statut'] === 'PRETE'
+                    ? 'Votre commande '.$commande->reference.' est prête et va être attribuée à un livreur.'
+                    : 'Le statut de votre commande '.$commande->reference.' a été mis à jour.',
+                $commande->id,
+                null,
+                'commande'
+            );
+
+            if ($donnees['statut'] === 'PRETE') {
+                $livraison = Livraison::query()->firstOrCreate(
+                    ['commande_id' => $commande->id],
+                    [
+                        'zone_id' => $commande->zone_id,
+                        'statut' => 'en_attente',
+                        'mode_attribution' => 'automatique',
+                    ]
+                );
+
+                $attribution = $livraisonService->attribuerPremierDisponible($livraison);
+
+                if ($attribution) {
+                    $attribution->load('livreur');
+                    $notificationService->sms(
+                        $attribution->livreur,
+                        'Nouvelle livraison '.$commande->reference.' à prendre en charge.',
+                        $commande->id,
+                        $livraison->id,
+                        'attribution'
+                    );
+
+                    $pin = \Illuminate\Support\Facades\Crypt::decryptString(
+                        $commande->fresh()->pin_livraison_chiffre
+                    );
+
+                    $notificationService->sms(
+                        $commande->user,
+                        'Votre code de livraison pour '.$commande->reference.' est '.$pin.'. Communiquez-le au livreur à la remise.',
+                        $commande->id,
+                        $livraison->id,
+                        'pin_livraison'
+                    );
+                }
+            }
+        });
 
         return back()->with('success', 'Le statut de la commande a été mis à jour.');
+    }
+
+    public function annulerCommande(Request $request, Commande $commande): RedirectResponse
+    {
+        $restaurant = $this->restaurant($request);
+        abort_unless((int) $commande->restaurant_id === (int) $restaurant->id, 404);
+
+        $donnees = $request->validate(['motif' => ['nullable', 'string', 'max:500']]);
+
+        DB::transaction(function () use ($request, $commande, $donnees) {
+            $commande = Commande::query()->whereKey($commande->id)->lockForUpdate()->with('statutCommande')->firstOrFail();
+            abort_unless(in_array($commande->statutCommande?->code, ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION'], true), 422, 'Cette commande ne peut plus être annulée.');
+
+            $statut = \App\Models\StatutCommande::query()->where('code', 'ANNULEE')->firstOrFail();
+            $commande->update(['statut_id' => $statut->id]);
+
+            HistoriqueCommande::create([
+                'commande_id' => $commande->id,
+                'statut_id' => $statut->id,
+                'user_id' => $request->user()->id,
+                'commentaire' => $donnees['motif'] ?? 'Commande annulée par le restaurant.',
+                'date_changement' => now(),
+            ]);
+        });
+
+        return back()->with('success', 'La commande a été annulée.');
     }
 
     public function changerDisponibiliteProduit(Request $request, Produit $produit): RedirectResponse
