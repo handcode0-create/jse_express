@@ -65,6 +65,9 @@ Route::prefix('livreur')
             ->whereNumber('livraison')
             ->name('livreur.livraisons.prise-en-charge');
 
+        Route::patch('/profil', [LivreurController::class, 'modifierProfil'])
+            ->name('livreur.profil.modifier');
+
         Route::patch('/disponibilite', [LivreurController::class, 'changerDisponibilite'])
             ->name('livreur.disponibilite');
 
