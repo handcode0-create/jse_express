@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { router, usePage } from "@inertiajs/react";
+import NavigationFlottante from "../Composants/Navigation/NavigationFlottante";
 import {
     Bell, Check, ChevronRight, Heart, HelpCircle, Home, Info, LogOut,
     MapPin, Package, Plus, Settings, Trash2, UserRound, WalletCards, X,
@@ -122,12 +123,7 @@ export default function Profil() {
             </div>
         </div>
 
-        <nav className="fixed inset-x-0 bottom-0 z-40 px-4 pb-4 lg:hidden"><div className="mx-auto flex h-[66px] w-full max-w-md items-center justify-around rounded-[24px] border border-white/80 bg-white/95 px-1 shadow-xl shadow-jse-principal/10 backdrop-blur-xl">
-            <NavigationItem label="Accueil" icon={Home} onClick={() => router.visit("/accueil")} />
-            <NavigationItem label="Commandes" icon={Package} onClick={() => router.visit("/commandes")} />
-            <NavigationItem label="Favoris" icon={Heart} onClick={() => router.visit("/favoris")} />
-            <NavigationItem label="Profil" icon={UserRound} active />
-        </div></nav>
+        <NavigationFlottante type="client" actif="accueil" />
 
         {modal && <div className="fixed inset-0 z-[80] flex items-end justify-center bg-jse-principal/25 p-0 backdrop-blur-sm sm:items-center sm:p-5" onClick={() => setModal(null)}>
             <div className="max-h-[calc(100vh-1rem)] w-full max-w-md overflow-y-auto rounded-t-[30px] bg-white p-5 shadow-2xl sm:rounded-[30px]" onClick={(event) => event.stopPropagation()}>
