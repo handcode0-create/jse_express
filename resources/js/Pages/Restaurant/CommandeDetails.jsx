@@ -75,6 +75,11 @@ export default function CommandeDetailsRestaurant() {
                                 <div className="min-w-0 flex-1">
                                     <p className="text-sm font-semibold">{ligne.nom}</p>
                                     <p className="mt-1 text-[10px] text-white/45">{ligne.quantite} × {formatMontant(ligne.prix_unitaire)}</p>
+                                    {ligne.options?.length > 0 && (
+                                        <p className="mt-2 line-clamp-2 text-[10px] leading-4 text-jse-secondaire">
+                                            {ligne.options.map((option) => option.nom).join(" · ")}
+                                        </p>
+                                    )}
                                 </div>
                                 <p className="text-sm font-bold text-white">{formatMontant(ligne.total)}</p>
                             </div>
