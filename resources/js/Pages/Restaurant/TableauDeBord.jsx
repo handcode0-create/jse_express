@@ -40,6 +40,19 @@ const navigation = [
     ["profil", "Mon profil", UserRound],
 ];
 
+const imagesDemoProduits = {
+    "Boisson": "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80",
+    "Menu complet": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80",
+    "Poulet braisé": "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=900&q=80",
+    "Attiéké poisson": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80",
+    "Pizza": "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=900&q=80",
+    "Burger": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80",
+};
+
+function imageDemoProduit(produit) {
+    return produit?.image || imagesDemoProduits[produit?.nom] || imagesDemoProduits[produit?.categorie?.nom] || "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80";
+}
+
 function montant(value) {
     return new Intl.NumberFormat("fr-FR").format(Number(value || 0)) + " FCFA";
 }
@@ -472,8 +485,8 @@ export default function TableauDeBord() {
                                         .map((item) => (
                                             <article key={item.id} className="group overflow-hidden rounded-2xl border border-white/10 bg-[#101215] transition hover:-translate-y-0.5 hover:border-white/15">
                                                 <div className="relative h-40 overflow-hidden bg-[#17191b]">
-                                                    {item.image ? (
-                                                        <img src={item.image} alt={item.nom} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" />
+                                                    {imageDemoProduit(item) ? (
+                                                        <img src={imageDemoProduit(item)} alt={item.nom} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" loading="lazy" />
                                                     ) : (
                                                         <div className="flex h-full items-center justify-center bg-gradient-to-br from-jse-principal/80 to-[#17191b]">
                                                             <UtensilsCrossed size={32} className="text-jse-accent/80" />
