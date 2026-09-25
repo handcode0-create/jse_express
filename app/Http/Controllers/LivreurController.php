@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AttributionLivraison;
 use App\Models\HistoriqueCommande;
+use App\Models\Notification;
 use App\Models\ProfilLivreur;
 use App\Models\StatutCommande;
 use App\Services\LivraisonService;
@@ -97,7 +98,7 @@ class LivreurController extends Controller
                 'adresse' => $attribution->livraison?->commande?->restaurant?->adresse,
                 'montant_total' => (float) ($attribution->livraison?->commande?->montant_total ?? 0),
                 'date' => $attribution->date_attribution
-                    ? CarbonCarbon::parse($attribution->date_attribution)->format('d/m H:i')
+                    ? \Carbon\Carbon::parse($attribution->date_attribution)->format('d/m H:i')
                     : null,
                 'statut' => $attribution->livraison?->statut,
             ])
@@ -109,6 +110,8 @@ class LivreurController extends Controller
                 'id' => $request->user()->id,
                 'nom' => trim($request->user()->prenom . ' ' . $request->user()->nom),
                 'telephone' => $request->user()->telephone,
+                'email' => $request->user()->email,
+                'telephone_secondaire' => $profil->telephone_secondaire,
                 'matricule' => $profil->matricule,
                 'disponibilite' => $profil->disponibilite,
                 'zone' => $profil->zone ? [
@@ -118,6 +121,18 @@ class LivreurController extends Controller
             ],
             'livraisons' => $livraisons,
             'historique' => $historique,
+            'notifications' => Notification::query()
+                ->where('user_id', $request->user()->id)
+                ->latest('id')
+                ->limit(20)
+                ->get()
+                ->map(fn ($notification) => [
+                    'id' => $notification->id,
+                    'type' => $notification->type_evenement,
+                    'contenu' => $notification->contenu,
+                    'statut' => $notification->statut_envoi,
+                    'date' => $notification->created_at?->diffForHumans(),
+                ])->values(),
             'statistiques' => [
                 'missions_actives' => $livraisons->count(),
                 'missions_du_jour' => AttributionLivraison::query()
@@ -218,6 +233,34 @@ class LivreurController extends Controller
         $livraisonService->cloturerLivraison($livraisonModel, $request->user()->id);
 
         return back()->with('success', 'Livraison validée et commande clôturée.');
+    }
+
+    public function modifierProfil(Request $request): RedirectResponse
+    {
+        $profil = $this->profil($request);
+
+        $donnees = $request->validate([
+            'nom' => ['required', 'string', 'max:100'],
+            'prenom' => ['nullable', 'string', 'max:100'],
+            'telephone' => ['required', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'telephone_secondaire' => ['nullable', 'string', 'max:30'],
+        ]);
+
+        DB::transaction(function () use ($request, $profil, $donnees) {
+            $request->user()->update([
+                'nom' => $donnees['nom'],
+                'prenom' => $donnees['prenom'] ?? null,
+                'telephone' => $donnees['telephone'],
+                'email' => $donnees['email'] ?? null,
+            ]);
+
+            $profil->update([
+                'telephone_secondaire' => $donnees['telephone_secondaire'] ?? null,
+            ]);
+        });
+
+        return back()->with('success', 'Profil mis à jour.');
     }
 
     public function changerDisponibilite(Request $request): RedirectResponse
