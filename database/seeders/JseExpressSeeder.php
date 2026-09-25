@@ -74,7 +74,13 @@ class JseExpressSeeder extends Seeder
             ['code' => 'LIVREE', 'libelle' => 'Livrée', 'ordre' => 6],
             ['code' => 'ANNULEE', 'libelle' => 'Annulée', 'ordre' => 7],
         ] as $data) {
-            $statuts[$data['code']] = StatutCommande::create($data);
+            $statuts[$data['code']] = StatutCommande::query()->updateOrCreate(
+                ['code' => $data['code']],
+                [
+                    'libelle' => $data['libelle'],
+                    'ordre' => $data['ordre'],
+                ]
+            );
         }
 
         /*
