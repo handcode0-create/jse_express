@@ -76,6 +76,24 @@ body {
 .bg-jse-theme-surface { background: var(--jse-theme-surface); }
 .text-jse-theme-text { color: var(--jse-theme-text); }
 .border-jse-theme-border { border-color: var(--jse-theme-border); }
+/* Surfaces qui restent volontairement sombres dans le mode clair. */
+.jse-dark-surface,
+.jse-dark-surface * {
+    --jse-force-light-text: #FFF7E8;
+}
+html[data-theme="light"] .jse-dark-surface .text-white {
+    color: #FFF7E8 !important;
+}
+html[data-theme="light"] .jse-dark-surface [class*="text-white/"] {
+    color: rgb(255 247 232 / .62) !important;
+}
+html[data-theme="light"] .jse-dark-surface [class*="border-white/"] {
+    border-color: rgb(255 255 255 / .10) !important;
+}
+html[data-theme="light"] .jse-dark-surface [class*="bg-white/"] {
+    background-color: rgb(255 255 255 / .07) !important;
+}
+
 
 html[data-theme="dark"] .bg-jse-fond { background-color: var(--jse-theme-bg) !important; }
 html[data-theme="dark"] .text-jse-texte { color: var(--jse-theme-text) !important; }
