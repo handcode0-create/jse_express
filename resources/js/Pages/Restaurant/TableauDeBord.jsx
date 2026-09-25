@@ -81,6 +81,8 @@ export default function TableauDeBord() {
 
     const [onglet, setOnglet] = useState("dashboard");
     const [modal, setModal] = useState(null);
+    const [rechercheMenu, setRechercheMenu] = useState("");
+    const [categorieMenu, setCategorieMenu] = useState("Toutes");
     const [chargement, setChargement] = useState(false);
     const [produit, setProduit] = useState({ nom: "", description: "", prix: "", categorie_id: "", image: "" });
     const [categorie, setCategorie] = useState({ nom: "", description: "" });
@@ -404,47 +406,98 @@ export default function TableauDeBord() {
 
                         {onglet === "menu" && (
                             <section>
-                                <PageTitle
-                                    eyebrow="Catalogue"
-                                    title="Menu / Produits"
-                                    description="Gérez les plats, boissons et disponibilités de votre restaurant."
-                                    action={<button type="button" onClick={() => setModal("produit")} className="inline-flex h-10 items-center gap-2 rounded-xl bg-jse-accent px-4 text-[10px] font-semibold"><Plus size={15} /> Ajouter un produit</button>}
-                                />
-
-                                <div id="categories-section" className="mt-5 rounded-2xl border border-white/10 bg-[#101215] p-5">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-white/30">Organisation</p>
-                                            <h2 className="mt-1 font-against text-2xl">Catégories</h2>
-                                        </div>
-                                        <button type="button" onClick={() => setModal("categorie")} className="flex size-9 items-center justify-center rounded-xl bg-jse-accent"><Plus size={16} /></button>
+                                <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                                    <div>
+                                        <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-jse-accent">Catalogue restaurant</p>
+                                        <h1 className="mt-1 font-against text-4xl leading-none sm:text-5xl">Menu du restaurant</h1>
+                                        <p className="mt-2 max-w-xl text-xs leading-5 text-white/45">
+                                            Gérez vos plats, boissons et leur disponibilité depuis un seul espace.
+                                        </p>
                                     </div>
-                                    <div className="mt-4 flex flex-wrap gap-2">
-                                        {categories.map((item) => (
-                                            <span key={item.id} className="rounded-full bg-white/7 px-3 py-2 text-[10px] font-medium text-white/75">
-                                                {item.nom} <span className="text-white/30">· {item.nombre_produits}</span>
-                                            </span>
-                                        ))}
+                                    <button type="button" onClick={() => setModal("produit")} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-jse-accent px-5 text-[10px] font-semibold shadow-lg shadow-jse-accent/10">
+                                        <Plus size={16} /> Ajouter un produit
+                                    </button>
+                                </div>
+
+                                <div className="mt-6 rounded-2xl border border-white/10 bg-[#101215] p-3 sm:p-4">
+                                    <div className="flex flex-col gap-3 lg:flex-row">
+                                        <div className="relative min-w-0 flex-1">
+                                            <input
+                                                value={rechercheMenu}
+                                                onChange={(event) => setRechercheMenu(event.target.value)}
+                                                placeholder="Rechercher un plat, une boisson..."
+                                                className="h-11 w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 text-xs text-white outline-none placeholder:text-white/25 focus:border-jse-accent"
+                                            />
+                                            <Menu className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={16} />
+                                        </div>
+                                        <div className="flex gap-2 overflow-x-auto pb-0.5">
+                                            {["Toutes", ...categories.map((item) => item.nom)].map((nom) => {
+                                                const actif = categorieMenu === nom;
+                                                const item = categories.find((categorie) => categorie.nom === nom);
+                                                return (
+                                                    <button
+                                                        key={nom}
+                                                        type="button"
+                                                        onClick={() => setCategorieMenu(nom)}
+                                                        className={`shrink-0 rounded-full px-4 py-2.5 text-[10px] font-semibold transition ${actif ? "bg-jse-accent text-white" : "bg-white/5 text-white/45 hover:text-white"}`}
+                                                    >
+                                                        {nom}{item ? ` · ${item.nombre_produits}` : ""}
+                                                    </button>
+                                                );
+                                            })}
+                                            <button type="button" onClick={() => setModal("categorie")} className="flex shrink-0 items-center gap-1 rounded-full border border-dashed border-white/15 px-4 py-2.5 text-[10px] font-semibold text-white/45 hover:border-jse-accent hover:text-jse-accent">
+                                                <Plus size={13} /> Catégorie
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="categories-section" className="mt-5 flex items-center justify-between">
+                                    <div>
+                                        <h2 className="font-against text-2xl">Produits</h2>
+                                        <p className="mt-1 text-[10px] text-white/35">{produits.length} produit{produits.length > 1 ? "s" : ""} dans votre catalogue</p>
+                                    </div>
+                                    <div className="hidden rounded-full bg-white/5 px-3 py-2 text-[9px] text-white/40 sm:block">
+                                        {produits.filter((item) => item.disponible).length} disponibles
                                     </div>
                                 </div>
 
                                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                                    {produits.map((item) => (
-                                        <article key={item.id} className="rounded-2xl border border-white/10 bg-[#101215] p-4">
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex size-11 items-center justify-center rounded-xl bg-jse-principal text-white"><UtensilsCrossed size={18} /></div>
-                                                <button type="button" onClick={() => executer("patch", `/restaurant/produits/${item.id}/disponibilite`)} className={`flex size-9 items-center justify-center rounded-full ${item.disponible ? "bg-jse-secondaire text-jse-texte" : "bg-white/10 text-white/40"}`}>
-                                                    <Power size={15} />
-                                                </button>
-                                            </div>
-                                            <p className="mt-4 text-sm font-semibold">{item.nom}</p>
-                                            <p className="mt-1 text-[10px] text-white/40">{item.categorie?.nom || "Sans catégorie"}</p>
-                                            <p className="mt-3 font-against text-xl text-jse-accent">{montant(item.prix)}</p>
-                                            <span className={`mt-3 inline-flex rounded-full px-2.5 py-1 text-[9px] font-semibold ${item.disponible ? "bg-jse-secondaire text-jse-texte" : "bg-jse-danger/15 text-jse-danger"}`}>
-                                                {item.disponible ? "Disponible" : "Indisponible"}
-                                            </span>
-                                        </article>
-                                    ))}
+                                    {produits
+                                        .filter((item) => categorieMenu === "Toutes" || item.categorie?.nom === categorieMenu)
+                                        .filter((item) => {
+                                            const terme = rechercheMenu.trim().toLowerCase();
+                                            return !terme || item.nom?.toLowerCase().includes(terme) || item.description?.toLowerCase().includes(terme);
+                                        })
+                                        .map((item) => (
+                                            <article key={item.id} className="group overflow-hidden rounded-2xl border border-white/10 bg-[#101215] transition hover:-translate-y-0.5 hover:border-white/15">
+                                                <div className="relative h-40 overflow-hidden bg-[#17191b]">
+                                                    {item.image ? (
+                                                        <img src={item.image} alt={item.nom} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" />
+                                                    ) : (
+                                                        <div className="flex h-full items-center justify-center bg-gradient-to-br from-jse-principal/80 to-[#17191b]">
+                                                            <UtensilsCrossed size={32} className="text-jse-accent/80" />
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-x-3 top-3 flex items-center justify-between">
+                                                        <span className={`rounded-full px-2.5 py-1 text-[8px] font-semibold backdrop-blur-md ${item.disponible ? "bg-jse-secondaire text-jse-texte" : "bg-black/60 text-white/60"}`}>
+                                                            {item.disponible ? "Disponible" : "Indisponible"}
+                                                        </span>
+                                                        <button type="button" onClick={() => executer("patch", `/restaurant/produits/${item.id}/disponibilite`)} className={`flex size-9 items-center justify-center rounded-full border border-white/10 backdrop-blur-md ${item.disponible ? "bg-black/35 text-white" : "bg-black/60 text-white/45"}`} aria-label="Changer la disponibilité">
+                                                            <Power size={15} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div className="p-4">
+                                                    <p className="text-[9px] font-medium uppercase tracking-[0.12em] text-white/30">{item.categorie?.nom || "Sans catégorie"}</p>
+                                                    <div className="mt-1 flex items-start justify-between gap-3">
+                                                        <h3 className="text-sm font-semibold">{item.nom}</h3>
+                                                        <p className="shrink-0 font-against text-xl text-jse-accent">{montant(item.prix)}</p>
+                                                    </div>
+                                                    {item.description && <p className="mt-2 line-clamp-2 text-[10px] leading-4 text-white/40">{item.description}</p>}
+                                                </div>
+                                            </article>
+                                        ))}
                                 </div>
                             </section>
                         )}
