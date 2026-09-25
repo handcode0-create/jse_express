@@ -214,7 +214,7 @@ export default function CommandeDetails() {
                                     </p>
                                     {ligne.options?.length > 0 && (
                                         <p className="mt-2 line-clamp-2 font-sans text-[10px] leading-4 text-jse-secondaire">
-                                            {ligne.options.map((option) => option.nom).join(" · ")}
+                                            {ligne.options.map((option) => option.groupe ? `${option.groupe} : ${option.nom}` : option.nom).join(" · ")}
                                         </p>
                                     )}
                                 </div>
