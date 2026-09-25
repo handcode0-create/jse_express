@@ -101,3 +101,70 @@ button:disabled {
 .scrollbar-none::-webkit-scrollbar {
     display: none;
 }
+
+
+/* JSE Express — Leaflet immersion livreur */
+.leaflet-container {
+    font-family: "Poppins", sans-serif;
+    background: #0B1112;
+}
+
+.leaflet-tile-pane {
+    filter: brightness(.58) saturate(.72) contrast(1.12);
+}
+
+.leaflet-control-zoom {
+    border: 0 !important;
+    box-shadow: 0 16px 35px rgb(0 0 0 / .35) !important;
+}
+
+.leaflet-control-zoom a {
+    width: 38px !important;
+    height: 38px !important;
+    line-height: 38px !important;
+    border: 1px solid rgb(255 255 255 / .10) !important;
+    background: rgb(11 17 18 / .92) !important;
+    color: rgb(255 247 232 / .86) !important;
+    backdrop-filter: blur(14px);
+}
+
+.leaflet-control-zoom a:first-child {
+    border-radius: 13px 13px 0 0;
+}
+
+.leaflet-control-zoom a:last-child {
+    border-radius: 0 0 13px 13px;
+}
+
+.leaflet-control-attribution {
+    background: rgb(7 11 13 / .72) !important;
+    color: rgb(255 255 255 / .35) !important;
+    border-radius: 9px 0 0 0;
+    backdrop-filter: blur(10px);
+}
+
+.leaflet-control-attribution a {
+    color: rgb(255 255 255 / .48) !important;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+    background: #101719;
+    color: #FFF7E8;
+}
+
+.leaflet-popup-content {
+    margin: 12px 14px;
+    font-family: "Poppins", sans-serif;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.leaflet-popup-close-button {
+    color: rgb(255 247 232 / .55) !important;
+}
+
+.jse-leaflet-marker {
+    background: transparent !important;
+    border: 0 !important;
+}
