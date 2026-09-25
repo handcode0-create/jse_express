@@ -669,7 +669,7 @@ function Historique({ historique = [] }) {
     );
 }
 
-function Profile({ livreur, historique = [], loading, onSave, onLogout }) {
+function Profile({ livreur, historique = [], statistiques = {}, loading, onSave, onLogout }) {
     const [edition, setEdition] = useState(false);
     const [form, setForm] = useState({
         nom: "",
@@ -681,8 +681,8 @@ function Profile({ livreur, historique = [], loading, onSave, onLogout }) {
 
     useEffect(() => {
         setForm({
-            nom: livreur?.nom?.split(" ").slice(1).join(" ") || "",
-            prenom: livreur?.nom?.split(" ")[0] || "",
+            nom: livreur?.nom || "",
+            prenom: livreur?.prenom || "",
             telephone: livreur?.telephone || "",
             email: livreur?.email || "",
             telephone_secondaire: livreur?.telephone_secondaire || "",
@@ -711,7 +711,7 @@ function Profile({ livreur, historique = [], loading, onSave, onLogout }) {
                             {initiales(livreur?.nom)}
                         </div>
                         <div className="min-w-0">
-                            <p className="text-lg font-bold">{livreur?.nom || "JSE Livreur"}</p>
+                            <p className="text-lg font-bold">{[livreur?.prenom, livreur?.nom].filter(Boolean).join(" ") || "JSE Livreur"}</p>
                             <p className="mt-1 text-[10px] text-white/55">{livreur?.telephone || "—"}</p>
                             <div className="mt-2 flex items-center gap-2">
                                 <span className="size-2 rounded-full bg-jse-secondaire" />
@@ -798,9 +798,30 @@ function Profile({ livreur, historique = [], loading, onSave, onLogout }) {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-[8px] uppercase tracking-[.12em] text-black/35">Livraisons terminées</p>
-                                <p className="mt-1 text-2xl font-bold">{livreur?.livraisons_terminees ?? historique.length}</p>
+                                <p className="mt-1 text-2xl font-bold">{statistiques.livraisons_terminees || 0}</p>
                             </div>
                             <Check className="text-jse-secondaire" size={24} />
+                        </div>
+                    </div>
+
+                    <div className="rounded-[18px] bg-white p-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-[8px] uppercase tracking-[.12em] text-black/35">Historique récent</p>
+                                <p className="mt-1 text-xs font-bold">{historique.length} livraison(s)</p>
+                            </div>
+                            <Receipt className="text-jse-accent" size={22} />
+                        </div>
+                        <div className="mt-3 space-y-2">
+                            {historique.slice(0, 4).map((item) => (
+                                <div key={item.id} className="flex items-center justify-between border-b border-black/5 py-2 last:border-0">
+                                    <div className="min-w-0">
+                                        <p className="truncate text-[10px] font-semibold">#{item.reference}</p>
+                                        <p className="text-[8px] text-black/40">{item.restaurant || "Restaurant"} · {item.date || "—"}</p>
+                                    </div>
+                                    <Check size={15} className="text-jse-secondaire" />
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
@@ -1000,6 +1021,7 @@ export default function TableauDeBord() {
                         <Profile
                             livreur={livreur}
                             historique={historique}
+                            statistiques={statistiques}
                             loading={loading}
                             onSave={(form, done) => {
                                 setLoading(true);
