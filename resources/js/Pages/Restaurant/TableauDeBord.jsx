@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { router, usePage } from "@inertiajs/react";
+import NavigationFlottante from "../../Composants/Navigation/NavigationFlottante";
 import {
     Bell,
     ChevronDown,
@@ -654,29 +655,7 @@ export default function TableauDeBord() {
                 </div>
             </div>
 
-            <nav className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[max(14px,env(safe-area-inset-bottom))] lg:hidden">
-                <div className="mx-auto flex h-[68px] max-w-[430px] items-center justify-around rounded-[34px] border border-white/10 bg-[#101215]/90 p-1.5 shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
-                    {[
-                        ["dashboard", LayoutDashboard, "Accueil"],
-                        ["commandes", ShoppingBag, "Commandes"],
-                        ["menu", UtensilsCrossed, "Menu"],
-                        ["profil", UserRound, "Profil"],
-                    ].map(([id, Icon, label]) => {
-                        const actif = onglet === id;
-                        return (
-                            <button
-                                key={id}
-                                type="button"
-                                onClick={() => aller(id)}
-                                className={`relative flex h-[54px] min-w-[54px] flex-1 items-center justify-center rounded-[28px] px-2 text-[9px] font-semibold transition-all duration-200 active:scale-95 ${actif ? "gap-1.5 bg-jse-accent text-white shadow-[0_6px_18px_rgba(242,140,40,0.28)]" : "gap-0 text-white/45 hover:text-white/75"}`}
-                            >
-                                <Icon size={18} strokeWidth={actif ? 2.4 : 1.8} />
-                                {actif && <span>{label}</span>}
-                            </button>
-                        );
-                    })}
-                </div>
-            </nav>
+            <NavigationFlottante type="restaurant" actif="dashboard" onChange={aller} />
 
             {modal && (
                 <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-5" onClick={() => setModal(null)}>
