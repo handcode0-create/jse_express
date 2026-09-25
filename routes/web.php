@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Models\Zone;
 use App\Http\Controllers\AuthentificationController;
 use App\Http\Controllers\RestaurantController;
+use App\Http\Controllers\LivreurController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -48,6 +49,17 @@ Route::post('/connexion', [AuthentificationController::class, 'connexion'])->nam
 Route::post('/deconnexion', [AuthentificationController::class, 'deconnexion'])
     ->middleware('auth')
     ->name('deconnexion');
+
+Route::prefix('livreur')
+    ->middleware(['auth', 'role:livreur'])
+    ->group(function () {
+        Route::get('/tableau-de-bord', [LivreurController::class, 'tableauDeBord'])
+            ->name('livreur.tableau-de-bord');
+
+        Route::patch('/disponibilite', [LivreurController::class, 'changerDisponibilite'])
+            ->name('livreur.disponibilite');
+    });
+
 
 Route::prefix('restaurant')
     ->middleware(['auth', 'role:restaurant'])
