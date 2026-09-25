@@ -511,6 +511,18 @@ Route::get('/commandes/{commande}', function (Commande $commande) {
         ->sortByDesc(fn ($item) => $item->date_paiement)
         ->first();
 
+    $pinLivraison = null;
+    if (
+        in_array($commande->statutCommande?->code, ['PRETE', 'EN_LIVRAISON'], true)
+        && $commande->pin_livraison_chiffre
+    ) {
+        try {
+            $pinLivraison = IlluminateSupportFacadesCrypt::decryptString($commande->pin_livraison_chiffre);
+        } catch (\Throwable $exception) {
+            $pinLivraison = null;
+        }
+    }
+
     $historique = $commande->historiquesCommande
         ->sortBy('date_changement')
         ->map(function ($element) {
@@ -549,6 +561,7 @@ Route::get('/commandes/{commande}', function (Commande $commande) {
             'sous_total' => (float) $commande->sous_total,
             'frais_livraison' => (float) $commande->frais_livraison,
             'montant_total' => (float) $commande->montant_total,
+            'pin_livraison' => $pinLivraison,
             'statut' => $commande->statutCommande ? [
                 'code' => $commande->statutCommande->code,
                 'libelle' => $commande->statutCommande->libelle,
