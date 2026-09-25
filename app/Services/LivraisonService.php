@@ -77,6 +77,51 @@ class LivraisonService
         });
     }
 
+    public function reattribuer(Livraison $livraison, int $adminId, int $livreurId, string $motif): AttributionLivraison
+    {
+        return DB::transaction(function () use ($livraison, $adminId, $livreurId, $motif) {
+            $livraison = Livraison::query()->whereKey($livraison->id)->lockForUpdate()->firstOrFail();
+
+            AttributionLivraison::query()
+                ->where('livraison_id', $livraison->id)
+                ->where('statut', 'active')
+                ->update(['statut' => 'terminee']);
+
+            $profil = ProfilLivreur::query()
+                ->where('user_id', $livreurId)
+                ->where('zone_id', $livraison->zone_id)
+                ->where('disponibilite', 'disponible')
+                ->whereHas('user', fn ($query) => $query->where('role', 'livreur')->where('statut', 'actif'))
+                ->firstOrFail();
+
+            $dejaActif = AttributionLivraison::query()
+                ->where('livreur_id', $profil->user_id)
+                ->where('statut', 'active')
+                ->exists();
+            abort_if($dejaActif, 422, 'Ce livreur possède déjà une livraison active.');
+
+            $attribution = AttributionLivraison::create([
+                'livraison_id' => $livraison->id,
+                'livreur_id' => $profil->user_id,
+                'admin_id' => $adminId,
+                'type_attribution' => 'administrative',
+                'statut' => 'active',
+                'date_attribution' => now(),
+                'motif' => $motif,
+            ]);
+
+            $livraison->update([
+                'statut' => 'attribuee',
+                'mode_attribution' => 'administrative',
+                'date_attribution' => now(),
+            ]);
+
+            $this->genererPin($livraison->commande()->firstOrFail());
+
+            return $attribution;
+        });
+    }
+
     public function genererPin(Commande $commande): string
     {
         $pin = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
