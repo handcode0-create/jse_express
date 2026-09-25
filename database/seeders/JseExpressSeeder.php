@@ -26,12 +26,6 @@ class JseExpressSeeder extends Seeder
 {
     public function run(): void
     {
-        /*
-        |--------------------------------------------------------------------------
-        | ZONES
-        |--------------------------------------------------------------------------
-        */
-
         $zoneCentre = Zone::create([
             'nom' => 'Centre',
             'description' => 'Zone centrale de desserte',
@@ -52,16 +46,6 @@ class JseExpressSeeder extends Seeder
             'zone_parent_id' => $zoneCentre->id,
             'statut' => 'actif',
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | STATUTS COMMANDE
-        |--------------------------------------------------------------------------
-        |
-        | Jeu de données de développement.
-        | Ces valeurs ne constituent pas une nouvelle spécification métier.
-        |
-        */
 
         $statuts = [];
 
@@ -87,49 +71,63 @@ class JseExpressSeeder extends Seeder
         |--------------------------------------------------------------------------
         | UTILISATEURS
         |--------------------------------------------------------------------------
+        |
+        | Les comptes de démonstration sont identifiés par leur téléphone.
+        | Le seeder peut donc être relancé sans provoquer de doublons.
+        |
         */
 
-        $admin = User::factory()
-            ->administrateur()
-            ->create([
+        $comptesDemo = [
+            'admin' => [
                 'nom' => 'Admin',
                 'prenom' => 'JSE',
                 'telephone' => '0700000001',
                 'email' => 'admin@jse-express.test',
-            ]);
-
-        $client = User::factory()
-            ->client()
-            ->create([
+                'role' => 'administrateur',
+            ],
+            'client' => [
                 'nom' => 'Client',
                 'prenom' => 'JSE',
                 'telephone' => '0700000002',
                 'email' => 'client@jse-express.test',
-            ]);
-
-        $restaurantUser = User::factory()
-            ->restaurant()
-            ->create([
+                'role' => 'client',
+            ],
+            'restaurant' => [
                 'nom' => 'Restaurant',
                 'prenom' => 'JSE',
                 'telephone' => '0700000003',
                 'email' => 'restaurant@jse-express.test',
-            ]);
-
-        $livreurUser = User::factory()
-            ->livreur()
-            ->create([
+                'role' => 'restaurant',
+            ],
+            'livreur' => [
                 'nom' => 'Livreur',
                 'prenom' => 'JSE',
                 'telephone' => '0700000004',
                 'email' => 'livreur@jse-express.test',
-            ]);
+                'role' => 'livreur',
+            ],
+        ];
 
-        /*
-        |--------------------------------------------------------------------------
-        | PROFIL LIVREUR
-        |--------------------------------------------------------------------------
-        */
+        $utilisateurs = [];
+
+        foreach ($comptesDemo as $cle => $donnees) {
+            $utilisateurs[$cle] = User::query()->updateOrCreate(
+                ['telephone' => $donnees['telephone']],
+                [
+                    'nom' => $donnees['nom'],
+                    'prenom' => $donnees['prenom'],
+                    'email' => $donnees['email'],
+                    'password' => Hash::make('password'),
+                    'role' => $donnees['role'],
+                    'statut' => 'actif',
+                ]
+            );
+        }
+
+        $admin = $utilisateurs['admin'];
+        $client = $utilisateurs['client'];
+        $restaurantUser = $utilisateurs['restaurant'];
+        $livreurUser = $utilisateurs['livreur'];
 
         $profilLivreur = ProfilLivreur::create([
             'user_id' => $livreurUser->id,
@@ -138,12 +136,6 @@ class JseExpressSeeder extends Seeder
             'disponibilite' => 'disponible',
             'telephone_secondaire' => null,
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | RESTAURANT
-        |--------------------------------------------------------------------------
-        */
 
         $restaurant = Restaurant::create([
             'user_id' => $restaurantUser->id,
@@ -156,12 +148,6 @@ class JseExpressSeeder extends Seeder
             'horaires' => '08:00-22:00',
             'statut' => 'actif',
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | CATEGORIES
-        |--------------------------------------------------------------------------
-        */
 
         $categoriePlats = Categorie::create([
             'restaurant_id' => $restaurant->id,
@@ -176,12 +162,6 @@ class JseExpressSeeder extends Seeder
             'description' => 'Boissons',
             'statut' => 'actif',
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | PRODUITS
-        |--------------------------------------------------------------------------
-        */
 
         $produit1 = Produit::create([
             'restaurant_id' => $restaurant->id,
@@ -216,12 +196,6 @@ class JseExpressSeeder extends Seeder
             'statut' => 'actif',
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | PANIER
-        |--------------------------------------------------------------------------
-        */
-
         $panier = Panier::create([
             'user_id' => $client->id,
             'statut' => 'actif',
@@ -241,16 +215,7 @@ class JseExpressSeeder extends Seeder
             'prix_unitaire' => $produit3->prix,
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | COMMANDE
-        |--------------------------------------------------------------------------
-        */
-
-        $sousTotal =
-            ($produit1->prix * 1) +
-            ($produit3->prix * 2);
-
+        $sousTotal = ($produit1->prix * 1) + ($produit3->prix * 2);
         $fraisLivraison = 500;
         $montantTotal = $sousTotal + $fraisLivraison;
 
@@ -271,12 +236,6 @@ class JseExpressSeeder extends Seeder
             'date_commande' => now(),
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | LIGNES COMMANDE
-        |--------------------------------------------------------------------------
-        */
-
         LigneCommande::create([
             'commande_id' => $commande->id,
             'produit_id' => $produit1->id,
@@ -295,12 +254,6 @@ class JseExpressSeeder extends Seeder
             'total_ligne' => $produit3->prix * 2,
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | PAIEMENT
-        |--------------------------------------------------------------------------
-        */
-
         Paiement::create([
             'commande_id' => $commande->id,
             'moyen' => 'mobile_money',
@@ -309,12 +262,6 @@ class JseExpressSeeder extends Seeder
             'statut' => 'reussi',
             'date_paiement' => now(),
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | LIVRAISON
-        |--------------------------------------------------------------------------
-        */
 
         $livraison = Livraison::create([
             'commande_id' => $commande->id,
@@ -326,12 +273,6 @@ class JseExpressSeeder extends Seeder
             'date_livraison' => null,
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | ATTRIBUTION
-        |--------------------------------------------------------------------------
-        */
-
         AttributionLivraison::create([
             'livraison_id' => $livraison->id,
             'livreur_id' => $livreurUser->id,
@@ -341,12 +282,6 @@ class JseExpressSeeder extends Seeder
             'date_attribution' => now(),
             'motif' => null,
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | HISTORIQUE
-        |--------------------------------------------------------------------------
-        */
 
         HistoriqueCommande::create([
             'commande_id' => $commande->id,
@@ -388,12 +323,6 @@ class JseExpressSeeder extends Seeder
             'date_changement' => now(),
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | NOTIFICATIONS
-        |--------------------------------------------------------------------------
-        */
-
         Notification::create([
             'user_id' => $client->id,
             'commande_id' => $commande->id,
@@ -407,12 +336,6 @@ class JseExpressSeeder extends Seeder
             'tentatives' => 0,
             'date_envoi' => null,
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | MESSAGE CONSOLE
-        |--------------------------------------------------------------------------
-        */
 
         $this->command?->info('JSE Express : données de développement créées.');
         $this->command?->info("Admin : {$admin->email}");
