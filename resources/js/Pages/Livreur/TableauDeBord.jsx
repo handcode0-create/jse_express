@@ -16,7 +16,10 @@ import {
     UserRound,
     WalletCards,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import L from "leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Circle, ZoomControl, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import { useEffect, useMemo, useState } from "react";
 
 const formatMontant = (value) =>
     new Intl.NumberFormat("fr-FR").format(Number(value || 0)) + " FCFA";
@@ -275,31 +278,204 @@ function MissionDetail({ mission, onBack, onTake, loading, onNavigate }) {
     );
 }
 
-function NavigationScreen({ mission, onBack, onArrive }) {
+
+const livreurIcon = L.divIcon({
+    className: "jse-leaflet-marker",
+    html: '<div style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#F28C28;border:4px solid #FFF7E8;box-shadow:0 0 0 10px rgba(242,140,40,.14),0 14px 32px rgba(0,0,0,.4)"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#123C32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14"/><path d="M7 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M17 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="m9 13 2-5h4l2 5"/><path d="M11 8 9 6H7"/></svg></div>',
+    iconSize: [52, 52],
+    iconAnchor: [26, 26],
+});
+
+function usePositionLivreur(active = true) {
+    const [position, setPosition] = useState(null);
+    const [accuracy, setAccuracy] = useState(null);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (!active || !("geolocation" in navigator)) {
+            setError("La géolocalisation n’est pas disponible sur cet appareil.");
+            return;
+        }
+
+        const watchId = navigator.geolocation.watchPosition(
+            (result) => {
+                setPosition([result.coords.latitude, result.coords.longitude]);
+                setAccuracy(result.coords.accuracy);
+                setError(null);
+            },
+            (reason) => {
+                setError(
+                    reason.code === 1
+                        ? "Autorisez la localisation dans votre navigateur pour utiliser la navigation."
+                        : "Impossible de récupérer votre position pour le moment.",
+                );
+            },
+            {
+                enableHighAccuracy: true,
+                maximumAge: 5000,
+                timeout: 15000,
+            },
+        );
+
+        return () => navigator.geolocation.clearWatch(watchId);
+    }, [active]);
+
+    return { position, accuracy, error };
+}
+
+function RecentrerPosition({ position }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (position) {
+            map.flyTo(position, 16, { duration: 1.1 });
+        }
+    }, [map, position]);
+
+    return null;
+}
+
+function CarteLeaflet({ compact = false }) {
+    const { position, accuracy, error } = usePositionLivreur(true);
+
+    if (error && !position) {
+        return (
+            <div className="relative flex h-full min-h-[360px] items-center justify-center overflow-hidden rounded-[28px] bg-[#0B1112] p-6">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(18,60,50,.75),transparent_65%)]" />
+                <div className="relative max-w-xs text-center">
+                    <div className="mx-auto flex size-16 items-center justify-center rounded-[22px] border border-jse-accent/20 bg-jse-accent/10 text-jse-accent">
+                        <MapPin size={28} />
+                    </div>
+                    <p className="mt-5 text-sm font-bold text-white">Localisation requise</p>
+                    <p className="mt-2 text-[10px] leading-5 text-white/45">{error}</p>
+                    <p className="mt-4 text-[9px] leading-4 text-white/25">
+                        La carte utilise la géolocalisation native du navigateur. Aucun emplacement fictif n’est utilisé.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    const center = position || [0, 0];
+
     return (
-        <div className="fixed inset-0 z-50 bg-[#070b0d] text-white">
-            <div className="mx-auto flex h-full w-full max-w-[480px] flex-col">
-                <header className="flex items-center gap-3 px-4 py-4">
-                    <button onClick={onBack} className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5"><ArrowLeft size={19} /></button>
-                    <p className="text-sm font-bold">Navigation</p>
-                </header>
-                <div className="relative flex-1 overflow-hidden bg-[radial-gradient(circle_at_50%_35%,#17362d_0,#0d1619_38%,#070b0d_75%)]">
-                    <div className="absolute inset-x-8 top-7 rounded-[18px] border border-white/10 bg-[#101719]/95 p-4">
-                        <p className="text-2xl font-bold">→ 200 m</p>
-                        <p className="mt-1 text-xs text-white/55">Tournez à droite</p>
-                        <p className="mt-2 text-[9px] text-white/35">{mission.restaurant?.adresse || "Adresse du restaurant"}</p>
+        <div className="relative h-full min-h-[360px] overflow-hidden rounded-[28px] border border-white/10 bg-[#0B1112]">
+            <MapContainer
+                center={center}
+                zoom={position ? 16 : 2}
+                zoomControl={false}
+                scrollWheelZoom={!compact}
+                className="h-full min-h-[360px] w-full"
+            >
+                <TileLayer
+                    attribution="&copy; OpenStreetMap contributors"
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <ZoomControl position="bottomright" />
+                {position && (
+                    <>
+                        <RecentrerPosition position={position} />
+                        <Circle
+                            center={position}
+                            radius={accuracy || 25}
+                            pathOptions={{
+                                color: "#F28C28",
+                                fillColor: "#F28C28",
+                                fillOpacity: 0.09,
+                                weight: 1,
+                            }}
+                        />
+                        <Marker position={position} icon={livreurIcon}>
+                            <Popup>
+                                <strong>Votre position</strong><br />
+                                Précision ± {Math.round(accuracy || 0)} m
+                            </Popup>
+                        </Marker>
+                    </>
+                )}
+            </MapContainer>
+
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(7,11,13,.38),transparent_35%,transparent_62%,rgba(7,11,13,.72))]" />
+
+            <div className="absolute left-4 right-4 top-4 z-[500] flex items-start justify-between">
+                <div className="rounded-[18px] border border-white/10 bg-[#0B1112]/90 px-4 py-3 shadow-2xl backdrop-blur-xl">
+                    <p className="text-[8px] font-semibold uppercase tracking-[.18em] text-white/35">Navigation</p>
+                    <p className="mt-1 text-xs font-bold text-white">
+                        {position ? "Position en direct" : "Recherche de position…"}
+                    </p>
+                </div>
+                {position && (
+                    <div className="flex size-11 items-center justify-center rounded-full border border-white/10 bg-[#0B1112]/90 text-jse-accent shadow-2xl backdrop-blur-xl">
+                        <MapPin size={18} />
                     </div>
-                    <div className="absolute left-[48%] top-[30%] h-[44%] w-1 -rotate-[22deg] rounded-full bg-jse-accent shadow-[0_0_20px_rgba(242,140,40,.55)]" />
-                    <div className="absolute left-[42%] top-[66%] flex size-12 items-center justify-center rounded-full bg-jse-accent text-jse-principal shadow-[0_0_35px_rgba(242,140,40,.45)]">
-                        <Navigation size={24} />
-                    </div>
-                    <div className="absolute bottom-6 left-4 right-4 rounded-[20px] border border-white/10 bg-[#101719]/95 p-4">
-                        <div className="flex items-center justify-between text-xs">
-                            <span><Clock3 className="mr-1 inline size-4" />5 min</span>
-                            <span>1,2 km</span>
+                )}
+            </div>
+
+            {position && (
+                <div className="absolute bottom-4 left-4 right-4 z-[500] rounded-[22px] border border-white/10 bg-[#0B1112]/92 p-4 shadow-2xl backdrop-blur-xl">
+                    <div className="flex items-center gap-3">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-jse-accent text-jse-principal">
+                            <Navigation size={17} />
                         </div>
-                        <button onClick={onArrive} className="mt-3 w-full rounded-full bg-jse-accent py-3 text-xs font-bold text-jse-principal">
-                            J’ai arrivé au restaurant
+                        <div className="min-w-0 flex-1">
+                            <p className="text-[9px] uppercase tracking-[.14em] text-white/35">Position actuelle</p>
+                            <p className="mt-1 truncate text-xs font-semibold text-white">
+                                GPS actif · ± {Math.round(accuracy || 0)} m
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function NavigationScreen({ mission, onBack, onArrive }) {
+    const { position, accuracy } = usePositionLivreur(true);
+
+    return (
+        <div className="fixed inset-0 z-50 bg-[#070B0D] text-white">
+            <div className="mx-auto flex h-full w-full max-w-[480px] flex-col">
+                <header className="absolute left-0 right-0 top-0 z-[600] flex items-center justify-between px-4 py-4">
+                    <button onClick={onBack} className="flex size-11 items-center justify-center rounded-full border border-white/10 bg-[#0B1112]/90 text-white shadow-2xl backdrop-blur-xl">
+                        <ArrowLeft size={18} />
+                    </button>
+                    <div className="rounded-full border border-white/10 bg-[#0B1112]/90 px-4 py-2 shadow-2xl backdrop-blur-xl">
+                        <p className="text-[8px] font-semibold uppercase tracking-[.18em] text-white/35">Navigation</p>
+                    </div>
+                    <div className="size-11" />
+                </header>
+
+                <div className="relative flex-1 overflow-hidden">
+                    <CarteLeaflet />
+
+                    <div className="pointer-events-none absolute left-4 right-4 top-[76px] z-[600] rounded-[22px] border border-white/10 bg-[#0B1112]/94 p-4 shadow-2xl backdrop-blur-xl">
+                        <div className="flex items-center gap-3">
+                            <div className="flex size-12 shrink-0 items-center justify-center rounded-[16px] bg-white text-jse-principal">
+                                <Navigation size={25} fill="currentColor" />
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold leading-none">Navigation</p>
+                                <p className="mt-1 text-[10px] text-white/45">
+                                    {position ? "GPS actif · précision ± " + Math.round(accuracy || 0) + " m" : "Activation de la localisation…"}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="absolute bottom-4 left-4 right-4 z-[600] rounded-[25px] border border-white/10 bg-[#0B1112]/94 p-4 shadow-2xl backdrop-blur-xl">
+                        <div className="flex items-center gap-3">
+                            <div className="flex size-12 shrink-0 items-center justify-center rounded-[16px] bg-jse-accent text-jse-principal">
+                                <Store size={21} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-[8px] font-semibold uppercase tracking-[.16em] text-white/30">Prochaine étape</p>
+                                <p className="mt-1 text-sm font-bold">Retrait au restaurant</p>
+                                <p className="mt-1 truncate text-[9px] text-white/40">{mission.restaurant?.adresse || "Adresse non précisée"}</p>
+                            </div>
+                        </div>
+                        <button onClick={onArrive} className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-jse-accent py-4 text-xs font-bold text-jse-principal">
+                            <Check size={16} /> J’ai arrivé au restaurant
                         </button>
                     </div>
                 </div>
@@ -590,17 +766,10 @@ export default function TableauDeBord() {
 
                     {onglet === "carte" && (
                         <section>
-                            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">Navigation</p>
-                            <h2 className="mt-1 font-against text-3xl">Carte</h2>
-                            <div className="relative mt-4 h-[430px] overflow-hidden rounded-[24px] border border-white/8 bg-[radial-gradient(circle_at_50%_35%,#17362d_0,#0d1619_40%,#070b0d_78%)]">
-                                <div className="absolute inset-5 rounded-[20px] border border-white/5 opacity-60" />
-                                <div className="absolute left-[45%] top-[20%] h-[62%] w-1 rotate-[25deg] rounded-full bg-jse-accent shadow-[0_0_20px_rgba(242,140,40,.5)]" />
-                                <div className="absolute left-[31%] top-[65%] flex size-12 items-center justify-center rounded-full bg-jse-accent text-jse-principal"><Navigation size={22} /></div>
-                                <div className="absolute right-[16%] top-[22%] flex size-11 items-center justify-center rounded-full bg-jse-secondaire text-white"><Store size={19} /></div>
-                                <div className="absolute bottom-4 left-4 right-4 rounded-[20px] bg-[#101719]/95 p-4">
-                                    <p className="text-xs font-bold">{active[0]?.restaurant?.nom || "Aucune mission active"}</p>
-                                    <p className="mt-1 text-[9px] text-white/45">{active[0]?.restaurant?.adresse || "La navigation GPS temps réel reste hors MVP."}</p>
-                                </div>
+                            <p className="text-[9px] font-semibold uppercase tracking-[.2em] text-white/30">Géolocalisation</p>
+                            <h2 className="mt-1 font-against text-4xl">Ma carte</h2>
+                            <div className="mt-4 h-[520px]">
+                                <CarteLeaflet />
                             </div>
                         </section>
                     )}
