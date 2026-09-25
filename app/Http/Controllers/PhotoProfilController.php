@@ -36,10 +36,16 @@ class PhotoProfilController extends Controller
         $nom = Str::uuid()->toString() . '.' . $extension;
         $donnees['photo']->move($directory, $nom);
 
-        $utilisateur->update([
+        $utilisateur->forceFill([
             'photo_profil' => '/uploads/profils/' . $nom,
-        ]);
+        ])->save();
 
-        return back()->with('success', 'Photo de profil mise à jour.');
+        return match ($utilisateur->role) {
+            'client' => to_route('profil')->with('success', 'Photo de profil mise à jour.'),
+            'livreur' => to_route('livreur.tableau-de-bord')->with('success', 'Photo de profil mise à jour.'),
+            'restaurant' => to_route('restaurant.tableau-de-bord')->with('success', 'Photo de profil mise à jour.'),
+            'administrateur' => to_route('admin.tableau-de-bord')->with('success', 'Photo de profil mise à jour.'),
+            default => back()->with('success', 'Photo de profil mise à jour.'),
+        };
     }
 }
