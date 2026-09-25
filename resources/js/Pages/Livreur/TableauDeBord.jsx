@@ -979,7 +979,7 @@ export default function TableauDeBord() {
                                 </div>
                                 <span className="text-[10px] font-bold text-jse-accent">Voir tout →</span>
                             </div>
-                            <div className="mt-4 space-y-3">
+                            <div className="mt-4 grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
                                 {active.length ? active.map((item) => (
                                     <MissionCard key={item.attribution_id} mission={item} onOpen={ouvrirMission} />
                                 )) : (
@@ -997,7 +997,7 @@ export default function TableauDeBord() {
                         <>
                             <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">Suivi</p>
                             <h2 className="mt-1 font-against text-3xl">Mes missions</h2>
-                            <div className="mt-4 space-y-3">
+                            <div className="mt-4 grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
                                 {livraisons.map((item) => <MissionCard key={item.attribution_id} mission={item} onOpen={ouvrirMission} />)}
                             </div>
                         </>
