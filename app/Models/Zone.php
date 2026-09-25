@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Zone extends Model
 {
-    public $timestamps = false;
+    
+    use HasFactory;
+public $timestamps = false;
 
     protected $fillable = [
         'nom',
