@@ -431,7 +431,7 @@ function CarteLeaflet({ compact = false, position, accuracy, error }) {
 }
 
 function NavigationScreen({ mission, onBack, onArrive }) {
-    const { position, accuracy } = usePositionLivreur(true);
+    const { position, accuracy, error } = usePositionLivreur(true);
 
     return (
         <div className="fixed inset-0 z-50 bg-[#070B0D] text-white">
@@ -447,7 +447,7 @@ function NavigationScreen({ mission, onBack, onArrive }) {
                 </header>
 
                 <div className="relative flex-1 overflow-hidden">
-                    <CarteLeaflet position={position} accuracy={accuracy} error={null} />
+                    <CarteLeaflet position={position} accuracy={accuracy} error={error} />
 
                     <div className="pointer-events-none absolute left-4 right-4 top-[76px] z-[600] rounded-[22px] border border-white/10 bg-[#0B1112]/94 p-4 shadow-2xl backdrop-blur-xl">
                         <div className="flex items-center gap-3">
