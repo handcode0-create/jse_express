@@ -83,6 +83,10 @@ Route::prefix('restaurant')
             ->whereNumber('produit')
             ->name('restaurant.produits.disponibilite');
 
+        Route::patch('/produits/{produit}/options', [RestaurantController::class, 'modifierOptionsProduit'])
+            ->whereNumber('produit')
+            ->name('restaurant.produits.options');
+
         Route::post('/categories', [RestaurantController::class, 'creerCategorie'])
             ->name('restaurant.categories.creer');
 
@@ -131,6 +135,7 @@ Route::get('/panier', function () {
                 'restaurant_nom' => $ligne->produit?->restaurant?->nom,
                 'quantite' => $ligne->quantite,
                 'prix_unitaire' => (float) $ligne->prix_unitaire,
+                'options' => $ligne->options ?? [],
                 'total' => (float) ($ligne->quantite * $ligne->prix_unitaire),
             ])->values(),
         ],
@@ -520,6 +525,7 @@ Route::get('/commandes/{commande}', function (Commande $commande) {
                 'quantite' => (int) $ligne->quantite,
                 'prix_unitaire' => (float) $ligne->prix_unitaire,
                 'total' => (float) $ligne->total_ligne,
+                'options' => $ligne->options ?? [],
                 'image' => $ligne->produit?->image,
             ])->values(),
             'paiement' => $paiement ? [
@@ -723,6 +729,7 @@ Route::post('/commande', function (Request $request) {
                 'quantite' => $ligne->quantite,
                 'prix_unitaire' => $ligne->prix_unitaire,
                 'total_ligne' => $ligne->quantite * $ligne->prix_unitaire,
+                'options' => $ligne->options ?? [],
             ]);
         }
 
@@ -765,6 +772,7 @@ Route::get('/restaurants/{restaurant}/produits/{produit}', function (Restaurant 
             'description' => $produit->description,
             'prix' => (float) $produit->prix,
             'image' => $produit->image,
+            'options' => $produit->options ?? [],
             'disponible' => (bool) $produit->disponible,
             'categorie' => $produit->categorie ? [
                 'id' => $produit->categorie->id,
@@ -804,6 +812,7 @@ Route::get('/restaurants/{restaurant}', function (Restaurant $restaurant) {
                 'description' => $produit->description,
                 'prix' => (float) $produit->prix,
                 'image' => $produit->image,
+                'options' => $produit->options ?? [],
             ])->values(),
         ])
         ->filter(fn ($categorie) => $categorie['produits']->isNotEmpty())
@@ -854,15 +863,67 @@ Route::post('/panier/produits/{produit}/ajouter', function (Request $request, Pr
     abort_unless($produit->statut === 'actif' && $produit->disponible, 404);
     abort_unless($produit->restaurant?->statut === 'actif', 404);
 
-    $panier = Panier::firstOrCreate(['user_id' => Auth::id(), 'statut' => 'actif']);
-    $quantite = max(1, (int) $request->input('quantite', 1));
+    $donnees = $request->validate([
+        'quantite' => ['nullable', 'integer', 'min:1', 'max:50'],
+        'options' => ['nullable', 'array', 'max:30'],
+        'options.*' => ['array:groupe,nom'],
+        'options.*.groupe' => ['required', 'string', 'max:100'],
+        'options.*.nom' => ['required', 'string', 'max:100'],
+    ]);
 
-    DB::transaction(function () use ($panier, $produit, $quantite) {
-        $ligne = LignePanier::query()
+    $quantite = (int) ($donnees['quantite'] ?? 1);
+    $configuration = collect($produit->options ?? []);
+    $selectionDemandee = collect($donnees['options'] ?? []);
+
+    $selection = $selectionDemandee->map(function (array $choix) use ($configuration) {
+        $groupe = $configuration->first(fn ($item) => ($item['name'] ?? '') === $choix['groupe']);
+        abort_unless($groupe, 422, 'Une option sélectionnée n’existe plus.');
+
+        $item = collect($groupe['items'] ?? [])->first(fn ($element) =>
+            ($element['name'] ?? '') === $choix['nom'] && (bool) ($element['disponible'] ?? true)
+        );
+        abort_unless($item, 422, 'Une option sélectionnée n’est plus disponible.');
+
+        return [
+            'groupe' => $groupe['name'],
+            'nom' => $item['name'],
+            'prix' => (float) $item['prix'],
+        ];
+    })->values();
+
+    foreach ($configuration as $groupe) {
+        $nomGroupe = $groupe['name'] ?? '';
+        $selectionGroupe = $selection->where('groupe', $nomGroupe);
+        $nombre = $selectionGroupe->count();
+        $minimum = (int) ($groupe['min'] ?? 0);
+        $maximum = (int) ($groupe['max'] ?? 1);
+
+        if (($groupe['obligatoire'] ?? false) && $minimum < 1) {
+            $minimum = 1;
+        }
+
+        abort_unless($nombre >= $minimum, 422, "Veuillez sélectionner une option dans « {$nomGroupe} ».");
+        abort_unless($nombre <= $maximum, 422, "Trop d’options sélectionnées dans « {$nomGroupe} ».");
+
+        if (! ($groupe['multiple'] ?? false)) {
+            abort_unless($nombre <= 1, 422, "Une seule option est autorisée dans « {$nomGroupe} ».");
+        }
+    }
+
+    $prixUnitaire = (float) $produit->prix + (float) $selection->sum('prix');
+    $panier = Panier::firstOrCreate(['user_id' => Auth::id(), 'statut' => 'actif']);
+
+    DB::transaction(function () use ($panier, $produit, $quantite, $prixUnitaire, $selection) {
+        $lignes = LignePanier::query()
             ->where('panier_id', $panier->id)
             ->where('produit_id', $produit->id)
             ->lockForUpdate()
-            ->first();
+            ->get();
+
+        $options = $selection->values()->all();
+        $ligne = $lignes->first(fn (LignePanier $candidate) =>
+            ($candidate->options ?? []) === $options
+        );
 
         if ($ligne) {
             $ligne->increment('quantite', $quantite);
@@ -871,12 +932,13 @@ Route::post('/panier/produits/{produit}/ajouter', function (Request $request, Pr
                 'panier_id' => $panier->id,
                 'produit_id' => $produit->id,
                 'quantite' => $quantite,
-                'prix_unitaire' => $produit->prix,
+                'prix_unitaire' => $prixUnitaire,
+                'options' => $options,
             ]);
         }
     });
 
-    return back();
+    return back()->with('success', 'Produit personnalisé ajouté au panier.');
 })->middleware(['auth', 'role:client'])->name('panier.ajouter');
 
 Route::patch('/panier/lignes/{lignePanier}', function (Request $request, LignePanier $lignePanier) {
