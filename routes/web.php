@@ -967,8 +967,6 @@ Route::get('/politique-de-confidentialite', function () {
     return Inertia::render('PolitiqueConfidentialite');
 })->name('politique.confidentialite');
 
-Route::get('/accueil', function (Request $request) {
-    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
 
     $recherche = trim((string) $request->query('recherche', ''));
 
@@ -1000,3 +998,52 @@ Route::get('/accueil', function (Request $request) {
 
     $categories = Categorie::query()
         ->where('statut', 'actif')
+        ->whereHas('restaurant', function ($query) {
+            $query->where('statut', 'actif');
+        })
+        ->orderBy('nom')
+        ->get(['id', 'nom'])
+        ->unique('nom')
+        ->values();
+
+    $imagesCategories = [
+        '/assets/hero_icon/fast_food.jpeg',
+        '/assets/hero_icon/glacier.jpeg',
+        '/assets/hero_icon/promo.jpeg',
+        '/assets/hero_icon/resto.jpeg',
+    ];
+
+    $categories = $categories->map(function ($categorie, $index) use ($imagesCategories) {
+        return [
+            'id' => $categorie->id,
+            'nom' => $categorie->nom,
+            'image' => $imagesCategories[$index % count($imagesCategories)],
+        ];
+    })->values();
+
+    $panier = Panier::query()
+        ->where('user_id', Auth::id())
+        ->where('statut', 'actif')
+        ->with('lignesPanier')
+        ->latest('id')
+        ->first();
+
+    $favorisRestaurantIds = Favori::query()
+        ->where('user_id', Auth::id())
+        ->pluck('restaurant_id')
+        ->map(fn ($id) => (int) $id)
+        ->values();
+
+    return Inertia::render('Accueil', [
+        'notificationsCount' => Notification::query()
+            ->where('user_id', Auth::id())
+            ->count(),
+        'categories' => $categories,
+        'restaurants' => $restaurants,
+        'favorisRestaurantIds' => $favorisRestaurantIds,
+        'recherche' => $recherche,
+        'panier' => [
+            'nombre_articles' => $panier?->lignesPanier->sum('quantite') ?? 0,
+        ],
+    ]);
+})->middleware(['auth', 'role:client'])->name('accueil.client');
