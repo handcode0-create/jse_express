@@ -7,6 +7,7 @@ use App\Models\HistoriqueCommande;
 use App\Models\StatutCommande;
 use App\Models\Livraison;
 use App\Services\LivraisonService;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -49,7 +50,7 @@ class AdministrationController extends Controller
         return back()->with('success', 'La commande a été annulée.');
     }
 
-    public function reattribuerLivraison(Request $request, Livraison $livraison, LivraisonService $livraisonService): RedirectResponse
+    public function reattribuerLivraison(Request $request, Livraison $livraison, LivraisonService $livraisonService, NotificationService $notificationService): RedirectResponse
     {
         $donnees = $request->validate([
             'livreur_id' => ['required', 'integer', 'exists:users,id'],
@@ -60,6 +61,11 @@ class AdministrationController extends Controller
         abort_unless($livreur->profilLivreur?->zone_id === $livraison->zone_id, 422, 'Le livreur doit appartenir à la zone de la livraison.');
 
         $livraisonService->reattribuer($livraison, $request->user()->id, $livreur->id, $donnees['motif']);
+        $livraison->load('commande.user');
+        $commande = $livraison->commande;
+        $pin = \Illuminate\Support\Facades\Crypt::decryptString($commande->pin_livraison_chiffre);
+        $notificationService->sms($livreur, 'Une livraison '.$commande->reference.' vous a été attribuée par l’administration.', $commande->id, $livraison->id, 'attribution');
+        $notificationService->sms($commande->user, 'Votre code de livraison pour '.$commande->reference.' est '.$pin.'.', $commande->id, $livraison->id, 'pin_livraison');
         return back()->with('success', 'La livraison a été réattribuée.');
     }
 
