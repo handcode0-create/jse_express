@@ -289,7 +289,7 @@ export default function ProduitDetail() {
                                                     )}
                                                 </div>
 
-                                                <div className="mt-3 space-y-2">
+                                                <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
                                                     {(groupe.items || []).filter((item) => item.disponible !== false).map((item) => {
                                                         const active = valeurs.includes(item.name);
                                                         const bloque = !active && valeurs.length >= maximum;
@@ -300,30 +300,29 @@ export default function ProduitDetail() {
                                                                 type="button"
                                                                 disabled={bloque}
                                                                 onClick={() => basculerOption(groupe, item)}
-                                                                className={`flex w-full items-center gap-3 rounded-[18px] border px-3.5 py-3 text-left transition active:scale-[0.99] ${
+                                                                className={`min-h-[74px] rounded-[18px] border px-3 py-3 text-left transition active:scale-[0.98] ${
                                                                     active
                                                                         ? "border-jse-secondaire bg-jse-secondaire/10"
-                                                                        : "border-jse-texte/7 bg-jse-fond/45 hover:border-jse-secondaire/40"
+                                                                        : "border-jse-texte/10 bg-jse-fond/35 hover:border-jse-secondaire/40"
                                                                 } ${bloque ? "cursor-not-allowed opacity-35" : ""}`}
                                                             >
-                                                                <span className={`flex size-5 shrink-0 items-center justify-center rounded-full border ${
-                                                                    active
-                                                                        ? "border-jse-secondaire bg-jse-secondaire text-white"
-                                                                        : "border-jse-texte/20 text-transparent"
-                                                                }`}>
-                                                                    <CircleCheck size={14} />
-                                                                </span>
-                                                                <span className="min-w-0 flex-1">
-                                                                    <span className="block font-sans text-xs font-semibold text-jse-principal">
-                                                                        {item.name}
+                                                                <div className="flex items-start gap-2">
+                                                                    <span className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border ${
+                                                                        active
+                                                                            ? "border-jse-secondaire bg-jse-secondaire text-white"
+                                                                            : "border-jse-texte/25 text-transparent"
+                                                                    }`}>
+                                                                        {groupe.multiple ? <Check size={12} /> : <span className="size-2 rounded-full bg-current" />}
                                                                     </span>
-                                                                    <span className="mt-0.5 block font-sans text-[10px] text-jse-texte/40">
-                                                                        {Number(item.prix || 0) > 0
-                                                                            ? `+${prix(item.prix)} FCFA`
-                                                                            : "Inclus"}
+                                                                    <span className="min-w-0 flex-1">
+                                                                        <span className="block font-sans text-[11px] font-semibold leading-4 text-jse-principal">
+                                                                            {item.name}
+                                                                        </span>
+                                                                        <span className="mt-1 block font-sans text-[9px] text-jse-texte/45">
+                                                                            {Number(item.prix || 0) > 0 ? `+${prix(item.prix)} FCFA` : "Inclus"}
+                                                                        </span>
                                                                     </span>
-                                                                </span>
-                                                                {active && <Check size={17} className="text-jse-secondaire" />}
+                                                                </div>
                                                             </button>
                                                         );
                                                     })}
