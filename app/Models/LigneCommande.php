@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class LigneCommande extends Model
 {
-    public $timestamps = false;
+    
+    use HasFactory;
+public $timestamps = false;
     protected $fillable = [
         'commande_id',
         'produit_id',
