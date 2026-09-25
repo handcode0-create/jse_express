@@ -655,6 +655,7 @@ Route::get('/commande/validation', function () {
                 'nom' => $ligne->produit?->nom,
                 'quantite' => $ligne->quantite,
                 'prix_unitaire' => (float) $ligne->prix_unitaire,
+                'options' => $ligne->options ?? [],
                 'total' => (float) ($ligne->quantite * $ligne->prix_unitaire),
             ])->values(),
         ],
@@ -852,6 +853,7 @@ Route::get('/restaurants/{restaurant}', function (Restaurant $restaurant) {
                 'image' => $ligne->produit?->image,
                 'quantite' => $ligne->quantite,
                 'prix_unitaire' => (float) $ligne->prix_unitaire,
+                'options' => $ligne->options ?? [],
                 'total' => (float) ($ligne->quantite * $ligne->prix_unitaire),
             ])->values() ?? collect(),
         ],
@@ -998,52 +1000,3 @@ Route::get('/accueil', function (Request $request) {
 
     $categories = Categorie::query()
         ->where('statut', 'actif')
-        ->whereHas('restaurant', function ($query) {
-            $query->where('statut', 'actif');
-        })
-        ->orderBy('nom')
-        ->get(['id', 'nom'])
-        ->unique('nom')
-        ->values();
-
-    $imagesCategories = [
-        '/assets/hero_icon/fast_food.jpeg',
-        '/assets/hero_icon/glacier.jpeg',
-        '/assets/hero_icon/promo.jpeg',
-        '/assets/hero_icon/resto.jpeg',
-    ];
-
-    $categories = $categories->map(function ($categorie, $index) use ($imagesCategories) {
-        return [
-            'id' => $categorie->id,
-            'nom' => $categorie->nom,
-            'image' => $imagesCategories[$index % count($imagesCategories)],
-        ];
-    })->values();
-
-    $panier = Panier::query()
-        ->where('user_id', Auth::id())
-        ->where('statut', 'actif')
-        ->with('lignesPanier')
-        ->latest('id')
-        ->first();
-
-    $favorisRestaurantIds = Favori::query()
-        ->where('user_id', Auth::id())
-        ->pluck('restaurant_id')
-        ->map(fn ($id) => (int) $id)
-        ->values();
-
-    return Inertia::render('Accueil', [
-        'notificationsCount' => Notification::query()
-            ->where('user_id', Auth::id())
-            ->count(),
-        'categories' => $categories,
-        'restaurants' => $restaurants,
-        'favorisRestaurantIds' => $favorisRestaurantIds,
-        'recherche' => $recherche,
-        'panier' => [
-            'nombre_articles' => $panier?->lignesPanier->sum('quantite') ?? 0,
-        ],
-    ]);
-})->middleware(['auth', 'role:client'])->name('accueil.client');
