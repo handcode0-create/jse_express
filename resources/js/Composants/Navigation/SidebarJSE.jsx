@@ -1,5 +1,5 @@
 import { router, usePage } from "@inertiajs/react";
-import { Heart, Home, LogOut, Moon, ShoppingBag, UserRound } from "lucide-react";
+import { Heart, Home, LogOut, ShoppingBag, UserRound } from "lucide-react";
 import ThemeToggle from "../Interface/ThemeToggle";
 
 const navigation = [
