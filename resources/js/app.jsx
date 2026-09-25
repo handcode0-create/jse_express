@@ -7,6 +7,9 @@ import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import { ChargementPage } from "./Composants/Interface/EtatsChargement";
 import InstallationApplication from "./Composants/Interface/InstallationApplication";
 
+const themeInitial = localStorage.getItem("jse-theme") || "light";
+document.documentElement.dataset.theme = themeInitial;
+
 createInertiaApp({
     title: (title) => `${title} - JSE Express`,
 
