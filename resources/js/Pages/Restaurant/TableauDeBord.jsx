@@ -98,6 +98,8 @@ export default function TableauDeBord() {
     const [categorieMenu, setCategorieMenu] = useState("Toutes");
     const [chargement, setChargement] = useState(false);
     const [produit, setProduit] = useState({ nom: "", description: "", prix: "", categorie_id: "", image: "" });
+    const [produitSelectionne, setProduitSelectionne] = useState(null);
+    const [optionsProduit, setOptionsProduit] = useState([]);
     const [categorie, setCategorie] = useState({ nom: "", description: "" });
     const [profil, setProfil] = useState({
         nom: restaurant?.nom || "",
@@ -145,6 +147,98 @@ export default function TableauDeBord() {
         event.preventDefault();
         executer("post", "/restaurant/categories", categorie);
         setCategorie({ nom: "", description: "" });
+    };
+
+    const ouvrirOptionsProduit = (item) => {
+        setProduitSelectionne(item);
+        setOptionsProduit(Array.isArray(item.options) ? item.options : []);
+        setModal("options");
+    };
+
+    const ajouterGroupeOption = () => {
+        setOptionsProduit((groupes) => [
+            ...groupes,
+            {
+                name: "Accompagnement",
+                obligatoire: false,
+                multiple: false,
+                min: 0,
+                max: 1,
+                items: [],
+            },
+        ]);
+    };
+
+    const modifierGroupeOption = (index, champ, valeur) => {
+        setOptionsProduit((groupes) =>
+            groupes.map((groupe, indexGroupe) =>
+                indexGroupe === index ? { ...groupe, [champ]: valeur } : groupe,
+            ),
+        );
+    };
+
+    const supprimerGroupeOption = (index) => {
+        setOptionsProduit((groupes) => groupes.filter((_, indexGroupe) => indexGroupe !== index));
+    };
+
+    const ajouterItemOption = (indexGroupe) => {
+        setOptionsProduit((groupes) =>
+            groupes.map((groupe, index) =>
+                index === indexGroupe
+                    ? {
+                          ...groupe,
+                          items: [
+                              ...(groupe.items || []),
+                              { name: "Nouvel accompagnement", prix: 0, disponible: true },
+                          ],
+                      }
+                    : groupe,
+            ),
+        );
+    };
+
+    const modifierItemOption = (indexGroupe, indexItem, champ, valeur) => {
+        setOptionsProduit((groupes) =>
+            groupes.map((groupe, index) =>
+                index === indexGroupe
+                    ? {
+                          ...groupe,
+                          items: (groupe.items || []).map((item, itemIndex) =>
+                              itemIndex === indexItem ? { ...item, [champ]: valeur } : item,
+                          ),
+                      }
+                    : groupe,
+            ),
+        );
+    };
+
+    const supprimerItemOption = (indexGroupe, indexItem) => {
+        setOptionsProduit((groupes) =>
+            groupes.map((groupe, index) =>
+                index === indexGroupe
+                    ? {
+                          ...groupe,
+                          items: (groupe.items || []).filter((_, itemIndex) => itemIndex !== indexItem),
+                      }
+                    : groupe,
+            ),
+        );
+    };
+
+    const sauvegarderOptionsProduit = (event) => {
+        event.preventDefault();
+        if (!produitSelectionne) return;
+
+        setChargement(true);
+        router.patch(
+            `/restaurant/produits/${produitSelectionne.id}/options`,
+            { options: optionsProduit },
+            {
+                preserveScroll: true,
+                onFinish: () => setChargement(false),
+                onSuccess: () => setModal(null),
+            },
+        );
     };
 
     return (
@@ -483,7 +577,11 @@ export default function TableauDeBord() {
                                             return !terme || item.nom?.toLowerCase().includes(terme) || item.description?.toLowerCase().includes(terme);
                                         })
                                         .map((item) => (
-                                            <article key={item.id} className="group overflow-hidden rounded-2xl border border-white/10 bg-[#101215] transition hover:-translate-y-0.5 hover:border-white/15">
+                                            <article
+                                                key={item.id}
+                                                onClick={() => ouvrirOptionsProduit(item)}
+                                                className="group cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-[#101215] transition hover:-translate-y-0.5 hover:border-jse-accent/35"
+                                            >
                                                 <div className="relative h-40 overflow-hidden bg-[#17191b]">
                                                     {imageDemoProduit(item) ? (
                                                         <img src={imageDemoProduit(item)} alt={item.nom} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" loading="lazy" />
@@ -553,7 +651,151 @@ export default function TableauDeBord() {
                             <button type="button" onClick={() => setModal(null)} className="flex size-9 items-center justify-center rounded-full bg-white/7"><X size={16} /></button>
                         </div>
 
-                        {modal === "categorie" ? (
+                        {modal === "options" ? (
+                            <form onSubmit={sauvegarderOptionsProduit} className="mt-5 space-y-4">
+                                <div className="rounded-2xl border border-jse-accent/20 bg-jse-accent/5 p-4">
+                                    <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-jse-accent">Personnalisation du produit</p>
+                                    <h3 className="mt-1 text-base font-semibold">{produitSelectionne?.nom}</h3>
+                                    <p className="mt-1 text-[10px] text-white/40">
+                                        Créez les accompagnements, sauces, suppléments ou boissons disponibles avec ce produit.
+                                    </p>
+                                </div>
+
+                                <div className="max-h-[58vh] space-y-3 overflow-y-auto pr-1">
+                                    {optionsProduit.map((groupe, indexGroupe) => (
+                                        <div key={indexGroupe} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                                            <div className="flex items-start gap-2">
+                                                <div className="min-w-0 flex-1">
+                                                    <ChampDark
+                                                        value={groupe.name}
+                                                        onChange={(e) => modifierGroupeOption(indexGroupe, "name", e.target.value)}
+                                                        placeholder="Nom du groupe : Accompagnement"
+                                                    />
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => supprimerGroupeOption(indexGroupe)}
+                                                    className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-jse-danger/10 text-jse-danger"
+                                                    aria-label="Supprimer le groupe"
+                                                >
+                                                    <X size={15} />
+                                                </button>
+                                            </div>
+
+                                            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                                                <label className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2.5 text-[10px] text-white/65">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={Boolean(groupe.obligatoire)}
+                                                        onChange={(e) => modifierGroupeOption(indexGroupe, "obligatoire", e.target.checked)}
+                                                        className="accent-[var(--jse-accent)]"
+                                                    />
+                                                    Choix obligatoire
+                                                </label>
+                                                <label className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2.5 text-[10px] text-white/65">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={Boolean(groupe.multiple)}
+                                                        onChange={(e) => modifierGroupeOption(indexGroupe, "multiple", e.target.checked)}
+                                                        className="accent-[var(--jse-accent)]"
+                                                    />
+                                                    Plusieurs choix
+                                                </label>
+                                            </div>
+
+                                            <div className="mt-3 grid grid-cols-2 gap-2">
+                                                <ChampDark
+                                                    type="number"
+                                                    min="0"
+                                                    max="20"
+                                                    value={groupe.min ?? 0}
+                                                    onChange={(e) => modifierGroupeOption(indexGroupe, "min", Number(e.target.value))}
+                                                    placeholder="Minimum"
+                                                />
+                                                <ChampDark
+                                                    type="number"
+                                                    min="1"
+                                                    max="20"
+                                                    value={groupe.max ?? 1}
+                                                    onChange={(e) => modifierGroupeOption(indexGroupe, "max", Number(e.target.value))}
+                                                    placeholder="Maximum"
+                                                />
+                                            </div>
+
+                                            <div className="mt-3 space-y-2">
+                                                {(groupe.items || []).map((item, indexItem) => (
+                                                    <div key={indexItem} className="flex items-center gap-2 rounded-xl bg-white/5 p-2">
+                                                        <div className="min-w-0 flex-1">
+                                                            <input
+                                                                value={item.name}
+                                                                onChange={(e) => modifierItemOption(indexGroupe, indexItem, "name", e.target.value)}
+                                                                placeholder="Nom de l'option"
+                                                                className="h-9 w-full bg-transparent px-2 text-[11px] text-white outline-none placeholder:text-white/25"
+                                                            />
+                                                        </div>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            step="50"
+                                                            value={item.prix}
+                                                            onChange={(e) => modifierItemOption(indexGroupe, indexItem, "prix", Number(e.target.value))}
+                                                            className="h-9 w-24 rounded-lg bg-black/20 px-2 text-[10px] text-white outline-none"
+                                                            aria-label="Prix du supplément"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => modifierItemOption(indexGroupe, indexItem, "disponible", !item.disponible)}
+                                                            className={`rounded-full px-2.5 py-1 text-[8px] font-semibold ${item.disponible ? "bg-jse-secondaire/15 text-jse-secondaire" : "bg-white/5 text-white/35"}`}
+                                                        >
+                                                            {item.disponible ? "Actif" : "Off"}
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => supprimerItemOption(indexGroupe, indexItem)}
+                                                            className="flex size-8 items-center justify-center rounded-lg text-white/35 hover:bg-white/5 hover:text-white"
+                                                        >
+                                                            <X size={14} />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => ajouterItemOption(indexGroupe)}
+                                                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 py-2.5 text-[9px] font-semibold text-white/45 hover:border-jse-accent hover:text-jse-accent"
+                                            >
+                                                <Plus size={13} /> Ajouter une option
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                    {optionsProduit.length === 0 && (
+                                        <div className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center">
+                                            <UtensilsCrossed size={24} className="mx-auto text-white/20" />
+                                            <p className="mt-2 text-xs font-semibold">Aucune personnalisation</p>
+                                            <p className="mt-1 text-[10px] text-white/35">Ajoutez par exemple un accompagnement ou une sauce.</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={ajouterGroupeOption}
+                                    className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-jse-accent/35 bg-jse-accent/5 text-[10px] font-semibold text-jse-accent"
+                                >
+                                    <Plus size={15} /> Ajouter un groupe d'options
+                                </button>
+
+                                <button
+                                    disabled={chargement}
+                                    className="h-11 w-full rounded-xl bg-jse-accent text-[10px] font-semibold disabled:opacity-50"
+                                >
+                                    {chargement ? "Enregistrement..." : "Enregistrer les options"}
+                                </button>
+                            </form>
+                        ) : (
+                                                    {modal === "categorie" ? (
                             <form onSubmit={creerCategorie} className="mt-6 space-y-4">
                                 <ChampDark value={categorie.nom} onChange={(e) => setCategorie({ ...categorie, nom: e.target.value })} placeholder="Nom de la catégorie" required />
                                 <textarea value={categorie.description} onChange={(e) => setCategorie({ ...categorie, description: e.target.value })} placeholder="Description (facultatif)" className="min-h-24 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-jse-accent" />
