@@ -1,5 +1,5 @@
 import { router, usePage } from "@inertiajs/react";
-import { ArrowLeft, Check, ChevronRight, Clock3, Heart, Info, Minus, Plus, Share2, ShoppingCart, UtensilsCrossed } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, Clock3, Heart, Info, Minus, Plus, Share2, ShoppingCart, UtensilsCrossed, CircleCheck } from "lucide-react";
 import { useState } from "react";
 import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 
@@ -59,19 +59,69 @@ export default function ProduitDetail() {
     const [favori, setFavori] = useState(false);
     const [quantite, setQuantite] = useState(1);
     const [ajout, setAjout] = useState(false);
+    const [selection, setSelection] = useState({});
+
+    const groupesOptions = Array.isArray(produit?.options) ? produit.options : [];
+
+    const basculerOption = (groupe, item) => {
+        setSelection((ancienne) => {
+            const nomGroupe = groupe?.name || "";
+            const valeurs = Array.isArray(ancienne[nomGroupe]) ? ancienne[nomGroupe] : [];
+            const multiple = Boolean(groupe?.multiple);
+
+            if (multiple) {
+                return {
+                    ...ancienne,
+                    [nomGroupe]: valeurs.includes(item.name)
+                        ? valeurs.filter((nom) => nom !== item.name)
+                        : [...valeurs, item.name],
+                };
+            }
+
+            return {
+                ...ancienne,
+                [nomGroupe]: valeurs.includes(item.name) ? [] : [item.name],
+            };
+        });
+    };
+
+    const optionsSelectionnees = groupesOptions.flatMap((groupe) =>
+        (selection[groupe?.name] || []).map((nom) => ({
+            groupe: groupe.name,
+            nom,
+        })),
+    );
+
+    const supplement = optionsSelectionnees.reduce((total, choix) => {
+        const groupe = groupesOptions.find((item) => item.name === choix.groupe);
+        const option = groupe?.items?.find((item) => item.name === choix.nom);
+        return total + Number(option?.prix || 0);
+    }, 0);
+
+    const total = (Number(produit?.prix || 0) + supplement) * quantite;
+
+    const erreursOptions = groupesOptions.filter((groupe) => {
+        const valeurs = selection[groupe?.name] || [];
+        const minimum = groupe?.obligatoire ? Math.max(1, Number(groupe?.min || 0)) : Number(groupe?.min || 0);
+        return valeurs.length < minimum;
+    });
 
     const image =
         produit?.image ||
         imagesPlats[(Number(produit?.id || 1) - 1) % imagesPlats.length];
 
-    const total = Number(produit?.prix || 0) * quantite;
-
     const ajouterAuPanier = () => {
+        if (erreursOptions.length > 0) {
+            const groupe = erreursOptions[0];
+            window.alert(`Veuillez choisir une option dans « ${groupe.name} ».`);
+            return;
+        }
+
         setAjout(true);
 
         router.post(
             `/panier/produits/${produit.id}/ajouter`,
-            { quantite },
+            { quantite, options: optionsSelectionnees },
             {
                 preserveScroll: true,
                 preserveState: true,
@@ -241,6 +291,94 @@ export default function ProduitDetail() {
                                 </button>
                             </div>
                         </section>
+
+                        {groupesOptions.length > 0 && (
+                            <section className="mt-7">
+                                <div>
+                                    <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.16em] text-jse-texte/40">
+                                        Personnalisation
+                                    </p>
+                                    <h2 className="mt-1 font-against text-2xl text-jse-principal">
+                                        Accompagnements & options
+                                    </h2>
+                                    <p className="mt-1 font-sans text-xs leading-5 text-jse-texte/50">
+                                        Personnalisez votre plat avant de l'ajouter au panier.
+                                    </p>
+                                </div>
+
+                                <div className="mt-4 space-y-4">
+                                    {groupesOptions.map((groupe) => {
+                                        const valeurs = selection[groupe.name] || [];
+                                        const minimum = groupe.obligatoire ? Math.max(1, Number(groupe.min || 0)) : Number(groupe.min || 0);
+                                        const maximum = Number(groupe.max || (groupe.multiple ? 20 : 1));
+                                        const manque = valeurs.length < minimum;
+
+                                        return (
+                                            <div key={groupe.name} className="rounded-[24px] bg-white p-4 ring-1 ring-jse-texte/7">
+                                                <div className="flex items-start justify-between gap-3">
+                                                    <div>
+                                                        <h3 className="font-sans text-sm font-bold text-jse-principal">
+                                                            {groupe.name}
+                                                        </h3>
+                                                        <p className="mt-1 font-sans text-[10px] text-jse-texte/45">
+                                                            {groupe.multiple
+                                                                ? `Choisissez jusqu'à ${maximum} option${maximum > 1 ? "s" : ""}`
+                                                                : "Choisissez une option"}
+                                                            {groupe.obligatoire ? " · obligatoire" : " · facultatif"}
+                                                        </p>
+                                                    </div>
+                                                    {manque && (
+                                                        <span className="rounded-full bg-jse-accent/10 px-2.5 py-1 font-sans text-[9px] font-bold text-jse-accent">
+                                                            À choisir
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div className="mt-3 space-y-2">
+                                                    {(groupe.items || []).filter((item) => item.disponible !== false).map((item) => {
+                                                        const active = valeurs.includes(item.name);
+                                                        const bloque = !active && valeurs.length >= maximum;
+
+                                                        return (
+                                                            <button
+                                                                key={item.name}
+                                                                type="button"
+                                                                disabled={bloque}
+                                                                onClick={() => basculerOption(groupe, item)}
+                                                                className={`flex w-full items-center gap-3 rounded-[18px] border px-3.5 py-3 text-left transition active:scale-[0.99] ${
+                                                                    active
+                                                                        ? "border-jse-secondaire bg-jse-secondaire/10"
+                                                                        : "border-jse-texte/7 bg-jse-fond/45 hover:border-jse-secondaire/40"
+                                                                } ${bloque ? "cursor-not-allowed opacity-35" : ""}`}
+                                                            >
+                                                                <span className={`flex size-5 shrink-0 items-center justify-center rounded-full border ${
+                                                                    active
+                                                                        ? "border-jse-secondaire bg-jse-secondaire text-white"
+                                                                        : "border-jse-texte/20 text-transparent"
+                                                                }`}>
+                                                                    <CircleCheck size={14} />
+                                                                </span>
+                                                                <span className="min-w-0 flex-1">
+                                                                    <span className="block font-sans text-xs font-semibold text-jse-principal">
+                                                                        {item.name}
+                                                                    </span>
+                                                                    <span className="mt-0.5 block font-sans text-[10px] text-jse-texte/40">
+                                                                        {Number(item.prix || 0) > 0
+                                                                            ? `+${prix(item.prix)} FCFA`
+                                                                            : "Inclus"}
+                                                                    </span>
+                                                                </span>
+                                                                {active && <Check size={17} className="text-jse-secondaire" />}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </section>
+                        )}
 
                         <section className="mt-7 rounded-[24px] bg-white/65 p-4 ring-1 ring-jse-texte/6">
                             <p className="font-sans text-xs font-semibold text-jse-principal">
