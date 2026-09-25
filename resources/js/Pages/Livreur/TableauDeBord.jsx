@@ -669,6 +669,57 @@ export default function TableauDeBord() {
 
     const active = useMemo(() => livraisons.filter((item) => item.statut_livraison !== "livree"), [livraisons]);
 
+    const cleFlux = (attributionId) => `jse-livreur-flux-${attributionId}`;
+
+    const changerEcran = (nouvelEcran) => {
+        setEcran(nouvelEcran);
+
+        if (!mission?.attribution_id) return;
+
+        try {
+            if (nouvelEcran === "success") {
+                window.localStorage.removeItem(cleFlux(mission.attribution_id));
+            } else {
+                window.localStorage.setItem(
+                    cleFlux(mission.attribution_id),
+                    JSON.stringify({ ecran: nouvelEcran, updated_at: Date.now() }),
+                );
+            }
+        } catch {
+            // Le flux reste fonctionnel même si le stockage local est indisponible.
+        }
+    };
+
+    const ouvrirMission = (selected) => {
+        setMission(selected);
+
+        let ecranInitial = selected.statut_livraison === "en_cours" ? "navigation" : "detail";
+
+        try {
+            const sauvegarde = window.localStorage.getItem(cleFlux(selected.attribution_id));
+
+            if (sauvegarde) {
+                const flux = JSON.parse(sauvegarde);
+
+                if (
+                    selected.statut_livraison === "en_cours" &&
+                    ["navigation", "pickup", "delivery"].includes(flux?.ecran)
+                ) {
+                    ecranInitial = flux.ecran;
+                }
+            }
+        } catch {
+            // On retombe sur l'étape déduite du statut serveur.
+        }
+
+        setEcran(ecranInitial);
+    };
+
+    const quitterFlux = () => {
+        setEcran(null);
+        setMission(null);
+    };
+
     const toggleDisponibilite = () => {
         setLoading(true);
         router.patch(
@@ -685,7 +736,7 @@ export default function TableauDeBord() {
             {},
             {
                 preserveScroll: true,
-                onSuccess: () => setEcran("navigation"),
+                onSuccess: () => changerEcran("navigation"),
                 onFinish: () => setLoading(false),
             },
         );
@@ -698,26 +749,26 @@ export default function TableauDeBord() {
             { pin },
             {
                 preserveScroll: true,
-                onSuccess: () => setEcran("success"),
+                onSuccess: () => changerEcran("success"),
                 onFinish: () => setLoading(false),
             },
         );
     };
 
     if (ecran === "navigation" && mission) {
-        return <NavigationScreen mission={mission} onBack={() => setEcran(null)} onArrive={() => setEcran("pickup")} />;
+        return <NavigationScreen mission={mission} onBack={() => changerEcran(null)} onArrive={() => changerEcran("pickup")} />;
     }
 
     if (ecran === "pickup" && mission) {
-        return <PickupScreen mission={mission} onBack={() => setEcran("navigation")} onStart={() => setEcran("delivery")} />;
+        return <PickupScreen mission={mission} onBack={() => changerEcran("navigation")} onStart={() => changerEcran("delivery")} />;
     }
 
     if (ecran === "delivery" && mission) {
-        return <DeliveryScreen mission={mission} onBack={() => setEcran("pickup")} onValidate={validatePin} loading={loading} />;
+        return <DeliveryScreen mission={mission} onBack={() => changerEcran("pickup")} onValidate={validatePin} loading={loading} />;
     }
 
     if (ecran === "success" && mission) {
-        return <SuccessScreen mission={mission} onBack={() => { setEcran(null); setMission(null); }} />;
+        return <SuccessScreen mission={mission} onBack={quitterFlux} />;
     }
 
     return (
@@ -747,7 +798,7 @@ export default function TableauDeBord() {
                             </div>
                             <div className="mt-4 space-y-3">
                                 {active.length ? active.map((item) => (
-                                    <MissionCard key={item.attribution_id} mission={item} onOpen={(selected) => { setMission(selected); setEcran("detail"); }} />
+                                    <MissionCard key={item.attribution_id} mission={item} onOpen={ouvrirMission} />
                                 )) : (
                                     <div className="rounded-[22px] border border-white/8 bg-[#101719] p-8 text-center">
                                         <Bike className="mx-auto text-white/20" size={28} />
@@ -764,7 +815,7 @@ export default function TableauDeBord() {
                             <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">Suivi</p>
                             <h2 className="mt-1 font-against text-3xl">Mes missions</h2>
                             <div className="mt-4 space-y-3">
-                                {livraisons.map((item) => <MissionCard key={item.attribution_id} mission={item} onOpen={(selected) => { setMission(selected); setEcran("detail"); }} />)}
+                                {livraisons.map((item) => <MissionCard key={item.attribution_id} mission={item} onOpen={ouvrirMission} />)}
                             </div>
                         </>
                     )}
@@ -792,7 +843,7 @@ export default function TableauDeBord() {
                     onBack={() => { setMission(null); setEcran(null); }}
                     onTake={takeMission}
                     loading={loading}
-                    onNavigate={() => setEcran("navigation")}
+                    onNavigate={() => changerEcran("navigation")}
                 />
             )}
         </main>
