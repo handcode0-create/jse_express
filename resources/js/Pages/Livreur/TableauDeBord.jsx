@@ -475,7 +475,7 @@ function NavigationScreen({ mission, onBack, onArrive }) {
                             </div>
                         </div>
                         <button onClick={onArrive} className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-jse-accent py-4 text-xs font-bold text-jse-principal">
-                            <Check size={16} /> J’ai arrivé au restaurant
+                            <Check size={16} /> Je suis arrivé
                         </button>
                     </div>
                 </div>
