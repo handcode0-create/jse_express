@@ -715,7 +715,10 @@ export default function TableauDeBord() {
                                                 <div className="grid grid-cols-2 gap-2">
                                                     <button
                                                         type="button"
-                                                        onClick={() => modifierGroupeOption(indexGroupe, "multiple", false)}
+                                                        onClick={() => {
+                                                            modifierGroupeOption(indexGroupe, "multiple", false);
+                                                            modifierGroupeOption(indexGroupe, "max", 1);
+                                                        }}
                                                         className={`rounded-xl border px-3 py-3 text-left transition ${!groupe.multiple ? "border-jse-secondaire bg-jse-secondaire/10 text-white" : "border-white/10 bg-white/5 text-white/45"}`}
                                                     >
                                                         <span className="block text-[10px] font-semibold">Un seul choix</span>
@@ -723,7 +726,10 @@ export default function TableauDeBord() {
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        onClick={() => modifierGroupeOption(indexGroupe, "multiple", true)}
+                                                        onClick={() => {
+                                                            modifierGroupeOption(indexGroupe, "multiple", true);
+                                                            modifierGroupeOption(indexGroupe, "max", 20);
+                                                        }}
                                                         className={`rounded-xl border px-3 py-3 text-left transition ${groupe.multiple ? "border-jse-secondaire bg-jse-secondaire/10 text-white" : "border-white/10 bg-white/5 text-white/45"}`}
                                                     >
                                                         <span className="block text-[10px] font-semibold">Plusieurs choix</span>
