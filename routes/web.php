@@ -55,6 +55,10 @@ Route::post('/deconnexion', [AuthentificationController::class, 'deconnexion'])
     ->middleware('auth')
     ->name('deconnexion');
 
+Route::post('/profil/photo', [\App\Http\Controllers\PhotoProfilController::class, 'modifier'])
+    ->middleware('auth')
+    ->name('profil.photo.modifier');
+
 Route::prefix('livreur')
     ->middleware(['auth', 'role:livreur'])
     ->group(function () {
