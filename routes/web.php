@@ -85,6 +85,10 @@ Route::prefix('restaurant')
             ->whereNumber('commande')
             ->name('restaurant.commandes.statut');
 
+        Route::post('/commandes/{commande}/annuler', [RestaurantController::class, 'annulerCommande'])
+            ->whereNumber('commande')
+            ->name('restaurant.commandes.annuler');
+
         Route::patch('/produits/{produit}/disponibilite', [RestaurantController::class, 'changerDisponibiliteProduit'])
             ->whereNumber('produit')
             ->name('restaurant.produits.disponibilite');
