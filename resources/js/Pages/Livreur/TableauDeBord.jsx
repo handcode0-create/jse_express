@@ -2,16 +2,19 @@ import { router, usePage } from "@inertiajs/react";
 import {
     ArrowLeft,
     Bike,
+    Bell,
     Check,
     ChevronRight,
     Clock3,
+    Home,
     MapPin,
     Navigation,
     Phone,
     Power,
+    Receipt,
     Store,
     UserRound,
-    X,
+    WalletCards,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -19,8 +22,8 @@ const formatMontant = (value) =>
     new Intl.NumberFormat("fr-FR").format(Number(value || 0)) + " FCFA";
 
 const statutLabel = {
-    en_attente: "En attente",
-    attribuee: "Nouvelle",
+    en_attente: "Nouveau",
+    attribuee: "Nouveau",
     en_cours: "En livraison",
     livree: "Livrée",
 };
@@ -31,83 +34,129 @@ const initiales = (nom = "") =>
         .filter(Boolean)
         .slice(0, 2)
         .map((partie) => partie[0]?.toUpperCase())
-        .join("") || "L";
+        .join("") || "JL";
 
-function Pill({ children, active = false }) {
-    return (
-        <span
-            className={
-                "inline-flex items-center rounded-full px-3 py-1.5 text-[10px] font-semibold " +
-                (active
-                    ? "bg-jse-secondaire text-jse-principal"
-                    : "bg-white/10 text-white/70")
-            }
-        >
-            {children}
-        </span>
-    );
-}
+function TopBar({ livreur, onNotifications }) {
+    const disponible = livreur?.disponibilite === "disponible";
 
-function SectionTitle({ eyebrow, title, action }) {
     return (
-        <div className="flex items-end justify-between gap-4">
-            <div>
-                <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">
-                    {eyebrow}
-                </p>
-                <h2 className="mt-1 font-against text-[1.65rem] leading-none text-white sm:text-[1.9rem]">
-                    {title}
-                </h2>
+        <header className="relative overflow-hidden bg-jse-principal px-5 pb-5 pt-5">
+            <div className="absolute -right-20 -top-24 size-64 rounded-full bg-jse-secondaire/10 blur-3xl" />
+            <div className="relative flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="flex size-12 items-center justify-center overflow-hidden rounded-full bg-jse-fond text-jse-principal">
+                        <UserRound size={24} />
+                    </div>
+                    <div>
+                        <p className="text-[8px] font-semibold uppercase tracking-[0.22em] text-white/40">
+                            JSE Express
+                        </p>
+                        <p className="mt-1 text-sm font-bold text-white">
+                            {livreur?.nom || "JSE Livreur"}
+                        </p>
+                        <p className="mt-1 flex items-center gap-1 text-[9px] text-white/55">
+                            <span className={"size-1.5 rounded-full " + (disponible ? "bg-jse-secondaire" : "bg-white/25")} />
+                            {disponible ? "En ligne" : "Hors ligne"}
+                        </p>
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    onClick={onNotifications}
+                    className="relative flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white"
+                >
+                    <Bell size={18} />
+                    <span className="absolute right-2 top-2 size-1.5 rounded-full bg-jse-accent" />
+                </button>
             </div>
-            {action}
-        </div>
+        </header>
     );
 }
 
-function MissionCard({ mission, onOpen }) {
-    const nouvelle = mission.statut_livraison === "attribuee";
-    const enCours = mission.statut_livraison === "en_cours";
+function Availability({ livreur, onToggle, loading }) {
+    const disponible = livreur?.disponibilite === "disponible";
 
     return (
         <button
             type="button"
+            disabled={loading}
+            onClick={onToggle}
+            className="mt-3 flex h-[54px] w-full items-center justify-between rounded-[17px] bg-jse-accent px-4 text-left text-jse-principal disabled:opacity-60"
+        >
+            <span className="text-xs font-bold">
+                {disponible ? "En ligne" : "Hors ligne"}
+            </span>
+            <span className="flex size-9 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm">
+                <Power size={17} />
+            </span>
+        </button>
+    );
+}
+
+function Stats({ statistiques, zone }) {
+    return (
+        <section className="rounded-[20px] bg-[#101719] px-3 py-4">
+            <div className="grid grid-cols-3 divide-x divide-white/10 text-center">
+                <div>
+                    <p className="text-xl font-bold text-jse-accent">{statistiques.missions_du_jour || 0}</p>
+                    <p className="mt-1 text-[8px] text-white/45">Livraisons</p>
+                </div>
+                <div>
+                    <p className="text-xl font-bold text-jse-accent">{statistiques.missions_actives || 0}</p>
+                    <p className="mt-1 text-[8px] text-white/45">Actives</p>
+                </div>
+                <div>
+                    <p className="text-xl font-bold text-jse-accent">{zone?.nom || "—"}</p>
+                    <p className="mt-1 text-[8px] text-white/45">Zone</p>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function MissionCard({ mission, onOpen }) {
+    return (
+        <button
+            type="button"
             onClick={() => onOpen(mission)}
-            className="w-full rounded-[24px] border border-white/8 bg-[#11171a] p-3 text-left shadow-[0_14px_40px_rgba(0,0,0,.16)] transition hover:border-jse-accent/40"
+            className="w-full rounded-[21px] border border-white/8 bg-[#101719] p-3 text-left transition hover:border-jse-accent/40"
         >
             <div className="flex gap-3">
-                <div className="flex size-16 shrink-0 items-center justify-center rounded-[18px] bg-jse-principal text-jse-secondaire">
-                    {enCours ? <Navigation size={24} /> : <Store size={24} />}
+                <div className="flex size-[58px] shrink-0 items-center justify-center overflow-hidden rounded-[16px] bg-jse-principal">
+                    {mission.articles?.[0]?.image ? (
+                        <img src={mission.articles[0].image} alt="" className="size-full object-cover" />
+                    ) : (
+                        <Store size={23} className="text-jse-accent" />
+                    )}
                 </div>
 
                 <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
-                        <div>
-                            <p className="text-[9px] uppercase tracking-[0.12em] text-white/35">
+                        <div className="min-w-0">
+                            <p className="text-[8px] uppercase tracking-[0.13em] text-white/30">
                                 #{mission.reference}
                             </p>
-                            <h3 className="mt-1 truncate text-sm font-bold text-white">
+                            <p className="mt-1 truncate text-xs font-bold text-white">
                                 {mission.restaurant?.nom || "Restaurant"}
-                            </h3>
+                            </p>
                         </div>
-                        <Pill active={nouvelle}>
-                            {statutLabel[mission.statut_livraison] ||
-                                "Assignée"}
-                        </Pill>
-                    </div>
-
-                    <div className="mt-2 flex items-center gap-1.5 text-[10px] text-white/50">
-                        <MapPin size={13} className="text-jse-accent" />
-                        <span className="truncate">
-                            {mission.zone || "Zone non définie"}
+                        <span className="rounded-full bg-jse-accent/15 px-2.5 py-1 text-[8px] font-semibold text-jse-accent">
+                            {statutLabel[mission.statut_livraison] || "Mission"}
                         </span>
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between">
-                        <span className="text-[10px] text-white/45">
-                            {mission.date_attribution || "Attribution récente"}
+                    <div className="mt-2 flex items-center gap-1.5 text-[9px] text-white/45">
+                        <MapPin size={12} className="text-jse-accent" />
+                        {mission.zone || "Zone non définie"}
+                    </div>
+
+                    <div className="mt-2 flex items-center justify-between">
+                        <span className="text-[9px] text-white/35">
+                            {mission.date_attribution || "—"}
                         </span>
-                        <span className="flex items-center gap-1 text-[10px] font-semibold text-jse-accent">
-                            Voir la mission <ChevronRight size={13} />
+                        <span className="flex items-center gap-1 text-[9px] font-bold text-jse-accent">
+                            Voir la mission <ChevronRight size={12} />
                         </span>
                     </div>
                 </div>
@@ -116,202 +165,310 @@ function MissionCard({ mission, onOpen }) {
     );
 }
 
-function MissionDetails({ mission, onClose }) {
-    const [chargement, setChargement] = useState(false);
-    const [pin, setPin] = useState("");
-
-    const prendreEnCharge = () => {
-        setChargement(true);
-        router.patch(
-            "/livreur/livraisons/" + mission.attribution_id + "/prise-en-charge",
-            {},
-            {
-                preserveScroll: true,
-                onFinish: () => setChargement(false),
-            },
-        );
-    };
-
-    const validerPin = () => {
-        if (pin.length !== 6) return;
-
-        setChargement(true);
-        router.post(
-            "/livreur/livraisons/" + mission.attribution_id + "/valider-pin",
-            { pin },
-            {
-                preserveScroll: true,
-                onFinish: () => setChargement(false),
-            },
-        );
-    };
-
+function MissionDetail({ mission, onBack, onTake, loading, onNavigate }) {
     const enCours = mission.statut_livraison === "en_cours";
-    const attribuee = mission.statut_livraison === "attribuee";
+    const attribuee = ["attribuee", "en_attente"].includes(mission.statut_livraison);
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-[#070b0d]/95 px-4 py-5 backdrop-blur-xl">
-            <div className="mx-auto min-h-full w-full max-w-[520px]">
-                <header className="flex items-center justify-between">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="flex size-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white"
-                    >
-                        <ArrowLeft size={20} />
+        <div className="fixed inset-0 z-50 bg-[#070b0d] text-white">
+            <div className="mx-auto h-full w-full max-w-[480px] overflow-y-auto px-4 pb-8">
+                <div className="flex items-center justify-between py-4">
+                    <button onClick={onBack} className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5">
+                        <ArrowLeft size={19} />
                     </button>
                     <div className="text-center">
-                        <p className="text-[8px] uppercase tracking-[0.2em] text-white/35">
-                            Détail de la mission
-                        </p>
-                        <p className="mt-1 text-sm font-bold text-white">
-                            #{mission.reference}
-                        </p>
+                        <p className="text-[8px] uppercase tracking-[0.2em] text-white/35">Détail de la mission</p>
+                        <p className="mt-1 text-xs font-bold">{mission.reference}</p>
                     </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="flex size-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50"
-                    >
-                        <X size={18} />
-                    </button>
-                </header>
+                    <div className="size-10" />
+                </div>
 
-                <section className="mt-5 rounded-[28px] border border-white/8 bg-[#101719] p-4">
-                    <div className="flex items-start justify-between gap-3">
-                        <div>
-                            <Pill active={attribuee}>
-                                {statutLabel[mission.statut_livraison] ||
-                                    "Mission"}
-                            </Pill>
-                            <h1 className="mt-3 font-against text-[2rem] leading-none text-white">
-                                {mission.restaurant?.nom || "Restaurant"}
-                            </h1>
-                            <p className="mt-2 text-xs text-white/45">
-                                {mission.restaurant?.adresse ||
-                                    "Adresse du restaurant non précisée"}
-                            </p>
+                <section className="rounded-[20px] border border-white/8 bg-[#101719] p-3">
+                    <div className="flex gap-3">
+                        <div className="size-[64px] shrink-0 overflow-hidden rounded-[16px] bg-jse-principal">
+                            {mission.articles?.[0]?.image ? (
+                                <img src={mission.articles[0].image} alt="" className="size-full object-cover" />
+                            ) : <div className="flex size-full items-center justify-center"><Store size={24} className="text-jse-accent" /></div>}
                         </div>
-                        {mission.restaurant?.telephone && (
-                            <a
-                                href={"tel:" + mission.restaurant.telephone}
-                                className="flex size-11 shrink-0 items-center justify-center rounded-full bg-jse-accent text-jse-principal"
-                            >
-                                <Phone size={18} />
-                            </a>
-                        )}
+                        <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-2">
+                                <div>
+                                    <p className="text-sm font-bold">{mission.restaurant?.nom || "Restaurant"}</p>
+                                    <p className="mt-1 text-[9px] text-white/45">{mission.restaurant?.adresse || "Adresse non précisée"}</p>
+                                </div>
+                                {mission.restaurant?.telephone && (
+                                    <a href={"tel:" + mission.restaurant.telephone} className="flex size-9 items-center justify-center rounded-full bg-jse-accent text-jse-principal">
+                                        <Phone size={15} />
+                                    </a>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </section>
 
-                <section className="mt-3 rounded-[26px] border border-white/8 bg-[#101719] p-4">
-                    <div className="flex gap-4">
-                        <div className="flex w-1 flex-col items-center">
+                <section className="mt-3 rounded-[20px] border border-white/8 bg-[#101719] p-4">
+                    <div className="flex items-stretch gap-3">
+                        <div className="flex w-5 flex-col items-center">
                             <span className="mt-1 size-2.5 rounded-full bg-jse-accent" />
                             <span className="my-1 flex-1 border-l border-dashed border-white/15" />
                             <span className="size-2.5 rounded-full bg-jse-secondaire" />
                         </div>
                         <div className="flex-1 space-y-5">
                             <div>
-                                <p className="text-[9px] uppercase tracking-[0.14em] text-white/35">
-                                    Retrait au restaurant
-                                </p>
-                                <p className="mt-1 text-sm font-semibold text-white">
-                                    {mission.restaurant?.adresse || "—"}
-                                </p>
-                                <p className="mt-1 text-[10px] text-white/45">
-                                    {mission.zone || "Zone non définie"}
-                                </p>
+                                <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/35">Retrait au restaurant</p>
+                                <p className="mt-1 text-xs font-semibold">{mission.restaurant?.adresse || "—"}</p>
                             </div>
                             <div>
-                                <p className="text-[9px] uppercase tracking-[0.14em] text-white/35">
-                                    Livraison au client
-                                </p>
-                                <p className="mt-1 text-sm font-semibold text-white">
-                                    {mission.adresse_livraison || "—"}
-                                </p>
-                                <p className="mt-1 text-[10px] text-white/45">
-                                    {mission.client?.nom || "Client"} ·{" "}
-                                    {mission.telephone_livraison || "—"}
-                                </p>
+                                <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/35">Livraison au client</p>
+                                <p className="mt-1 text-xs font-semibold">{mission.adresse_livraison || "—"}</p>
+                                <p className="mt-1 text-[9px] text-white/40">{mission.client?.nom || "Client"} · {mission.telephone_livraison || "—"}</p>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <section className="mt-3 rounded-[26px] border border-white/8 bg-[#101719] p-4">
+                <section className="mt-3 rounded-[20px] border border-white/8 bg-[#101719] p-4">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs text-white/45">
-                            Montant de la commande
-                        </span>
-                        <strong className="text-sm text-jse-accent">
-                            {formatMontant(mission.montant_total)}
-                        </strong>
+                        <span className="text-xs text-white/45">Commande</span>
+                        <span className="text-xs font-bold text-jse-accent">{formatMontant(mission.montant_total)}</span>
                     </div>
-                    <div className="mt-3 flex items-center justify-between border-t border-white/8 pt-3">
-                        <span className="text-xs text-white/45">Client</span>
-                        <span className="text-xs font-semibold text-white">
-                            {mission.client?.nom || "Client"}
-                        </span>
+                    <p className="mt-3 text-[9px] uppercase tracking-[0.12em] text-white/30">Articles à livrer ({mission.articles?.length || 0})</p>
+                    <div className="mt-2 space-y-2">
+                        {(mission.articles || []).map((article, index) => (
+                            <div key={index} className="flex items-center gap-2 rounded-xl bg-white/[0.035] px-2 py-2">
+                                <div className="size-9 overflow-hidden rounded-lg bg-jse-principal">
+                                    {article.image && <img src={article.image} alt="" className="size-full object-cover" />}
+                                </div>
+                                <p className="min-w-0 flex-1 truncate text-[10px] font-semibold">{article.nom}</p>
+                                <span className="text-[10px] text-white/45">x{article.quantite}</span>
+                            </div>
+                        ))}
                     </div>
                 </section>
-
-                {enCours && (
-                    <section className="mt-3 rounded-[26px] border border-jse-accent/20 bg-jse-accent/5 p-4">
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-jse-accent">
-                            Confirmation de livraison
-                        </p>
-                        <p className="mt-2 text-sm font-semibold text-white">
-                            Demandez le code PIN au client
-                        </p>
-                        <div className="mt-4 grid grid-cols-6 gap-2">
-                            {[0, 1, 2, 3, 4, 5].map((index) => (
-                                <input
-                                    key={index}
-                                    value={pin[index] || ""}
-                                    onChange={(event) => {
-                                        const valeur =
-                                            event.target.value.replace(
-                                                /\D/g,
-                                                "",
-                                            );
-                                        if (!valeur) return;
-                                        const nouveauPin =
-                                            pin.slice(0, index) +
-                                            valeur.slice(-1) +
-                                            pin.slice(index + 1);
-                                        setPin(nouveauPin.slice(0, 6));
-                                    }}
-                                    inputMode="numeric"
-                                    maxLength={1}
-                                    className="h-12 w-full rounded-xl border border-white/10 bg-[#0a0f11] text-center text-lg font-bold text-white outline-none focus:border-jse-accent"
-                                />
-                            ))}
-                        </div>
-                        <button
-                            type="button"
-                            disabled={chargement || pin.length !== 6}
-                            onClick={validerPin}
-                            className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-jse-accent text-sm font-bold text-jse-principal disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                            <Check size={18} />
-                            Terminer la livraison
-                        </button>
-                    </section>
-                )}
 
                 {attribuee && (
                     <button
                         type="button"
-                        disabled={chargement}
-                        onClick={prendreEnCharge}
-                        className="mt-4 flex h-13 w-full items-center justify-center gap-2 rounded-full bg-jse-accent py-4 text-sm font-bold text-jse-principal shadow-[0_10px_30px_rgba(242,140,40,.18)] disabled:opacity-50"
+                        disabled={loading}
+                        onClick={onTake}
+                        className="mt-4 flex h-13 w-full items-center justify-center gap-2 rounded-full bg-jse-accent py-4 text-sm font-bold text-jse-principal disabled:opacity-50"
                     >
                         <Bike size={18} />
-                        Prendre en charge
+                        Accepter la mission
                     </button>
+                )}
+
+                {enCours && (
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                        <button type="button" onClick={onNavigate} className="flex items-center justify-center gap-2 rounded-full bg-jse-accent py-3 text-xs font-bold text-jse-principal">
+                            <Navigation size={16} /> Navigation
+                        </button>
+                        {mission.telephone_livraison && (
+                            <a href={"tel:" + mission.telephone_livraison} className="flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 py-3 text-xs font-bold">
+                                <Phone size={16} /> Appeler
+                            </a>
+                        )}
+                    </div>
                 )}
             </div>
         </div>
+    );
+}
+
+function NavigationScreen({ mission, onBack, onArrive }) {
+    return (
+        <div className="fixed inset-0 z-50 bg-[#070b0d] text-white">
+            <div className="mx-auto flex h-full w-full max-w-[480px] flex-col">
+                <header className="flex items-center gap-3 px-4 py-4">
+                    <button onClick={onBack} className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5"><ArrowLeft size={19} /></button>
+                    <p className="text-sm font-bold">Navigation</p>
+                </header>
+                <div className="relative flex-1 overflow-hidden bg-[radial-gradient(circle_at_50%_35%,#17362d_0,#0d1619_38%,#070b0d_75%)]">
+                    <div className="absolute inset-x-8 top-7 rounded-[18px] border border-white/10 bg-[#101719]/95 p-4">
+                        <p className="text-2xl font-bold">→ 200 m</p>
+                        <p className="mt-1 text-xs text-white/55">Tournez à droite</p>
+                        <p className="mt-2 text-[9px] text-white/35">{mission.restaurant?.adresse || "Adresse du restaurant"}</p>
+                    </div>
+                    <div className="absolute left-[48%] top-[30%] h-[44%] w-1 -rotate-[22deg] rounded-full bg-jse-accent shadow-[0_0_20px_rgba(242,140,40,.55)]" />
+                    <div className="absolute left-[42%] top-[66%] flex size-12 items-center justify-center rounded-full bg-jse-accent text-jse-principal shadow-[0_0_35px_rgba(242,140,40,.45)]">
+                        <Navigation size={24} />
+                    </div>
+                    <div className="absolute bottom-6 left-4 right-4 rounded-[20px] border border-white/10 bg-[#101719]/95 p-4">
+                        <div className="flex items-center justify-between text-xs">
+                            <span><Clock3 className="mr-1 inline size-4" />5 min</span>
+                            <span>1,2 km</span>
+                        </div>
+                        <button onClick={onArrive} className="mt-3 w-full rounded-full bg-jse-accent py-3 text-xs font-bold text-jse-principal">
+                            J’ai arrivé au restaurant
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function PickupScreen({ mission, onBack, onStart }) {
+    return (
+        <div className="fixed inset-0 z-50 bg-[#070b0d] text-white">
+            <div className="mx-auto h-full w-full max-w-[480px] overflow-y-auto px-4 pb-8">
+                <header className="flex items-center gap-3 py-4">
+                    <button onClick={onBack} className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5"><ArrowLeft size={19} /></button>
+                    <p className="text-sm font-bold">Retrait de la commande</p>
+                </header>
+                <section className="rounded-[20px] border border-white/8 bg-[#101719] p-3">
+                    <p className="text-sm font-bold">{mission.restaurant?.nom || "Restaurant"}</p>
+                    <p className="mt-1 text-[9px] text-white/45">{mission.restaurant?.adresse || "Adresse"}</p>
+                    <div className="mt-4 space-y-2">
+                        {(mission.articles || []).map((article, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                                <div className="size-9 overflow-hidden rounded-lg bg-jse-principal">{article.image && <img src={article.image} alt="" className="size-full object-cover" />}</div>
+                                <span className="min-w-0 flex-1 truncate text-[10px]">{article.nom}</span>
+                                <span className="text-[10px] text-white/45">x{article.quantite}</span>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+                <div className="mt-10 text-center">
+                    <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-jse-secondaire text-white"><Check size={38} /></div>
+                    <p className="mt-4 text-base font-bold text-jse-secondaire">Commande récupérée</p>
+                    <p className="mt-2 text-[10px] leading-5 text-white/45">Vérifiez que tous les articles sont bien présents avant de commencer la livraison.</p>
+                </div>
+                <button onClick={onStart} className="mt-8 w-full rounded-full bg-jse-accent py-4 text-xs font-bold text-jse-principal">
+                    Commencer la livraison
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function DeliveryScreen({ mission, onBack, onValidate, loading }) {
+    const [pin, setPin] = useState("");
+
+    const submit = () => {
+        if (pin.length === 6) onValidate(pin);
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 bg-[#070b0d] text-white">
+            <div className="mx-auto h-full w-full max-w-[480px] overflow-y-auto px-4 pb-8">
+                <header className="flex items-center gap-3 py-4">
+                    <button onClick={onBack} className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5"><ArrowLeft size={19} /></button>
+                    <p className="text-sm font-bold">En livraison</p>
+                </header>
+
+                <section className="rounded-[20px] border border-white/8 bg-[#101719] p-4">
+                    <p className="text-xs font-bold">{mission.client?.nom || "Client"}</p>
+                    <p className="mt-1 text-[9px] text-white/45">{mission.adresse_livraison || "Adresse client"}</p>
+                    <div className="mt-3 flex items-center gap-2 text-[10px] text-white/45"><Clock3 size={13} /> Livraison en cours</div>
+                </section>
+
+                <div className="relative mt-3 h-[300px] overflow-hidden rounded-[24px] bg-[radial-gradient(circle_at_50%_35%,#17362d_0,#0d1619_40%,#070b0d_78%)]">
+                    <div className="absolute left-[58%] top-[25%] h-[52%] w-1 rotate-[35deg] rounded-full bg-jse-accent" />
+                    <div className="absolute left-[32%] top-[65%] flex size-12 items-center justify-center rounded-full bg-jse-accent text-jse-principal"><Navigation size={24} /></div>
+                    <div className="absolute right-[16%] top-[18%] flex size-11 items-center justify-center rounded-full bg-jse-secondaire text-white"><Home size={20} /></div>
+                </div>
+
+                <section className="mt-3 rounded-[20px] border border-jse-accent/20 bg-jse-accent/5 p-4">
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-jse-accent">Confirmation de livraison</p>
+                    <p className="mt-2 text-xs font-semibold">Demandez le code PIN au client</p>
+                    <div className="mt-4 grid grid-cols-6 gap-2">
+                        {Array.from({ length: 6 }).map((_, index) => (
+                            <input
+                                key={index}
+                                value={pin[index] || ""}
+                                onChange={(event) => {
+                                    const value = event.target.value.replace(/\D/g, "").slice(-1);
+                                    if (!value) return;
+                                    setPin((current) => (current.slice(0, index) + value + current.slice(index + 1)).slice(0, 6));
+                                }}
+                                inputMode="numeric"
+                                maxLength={1}
+                                className="h-12 rounded-xl border border-white/10 bg-[#0a0f11] text-center text-lg font-bold text-white outline-none focus:border-jse-accent"
+                            />
+                        ))}
+                    </div>
+                    <button disabled={loading || pin.length !== 6} onClick={submit} className="mt-4 w-full rounded-full bg-jse-accent py-4 text-xs font-bold text-jse-principal disabled:opacity-40">
+                        Terminer la livraison
+                    </button>
+                </section>
+            </div>
+        </div>
+    );
+}
+
+function SuccessScreen({ mission, onBack }) {
+    return (
+        <div className="fixed inset-0 z-50 bg-[#070b0d] text-white">
+            <div className="mx-auto flex h-full w-full max-w-[480px] flex-col items-center justify-center px-5 text-center">
+                <div className="flex size-24 items-center justify-center rounded-full bg-jse-secondaire shadow-[0_0_60px_rgba(69,185,119,.2)]"><Check size={48} /></div>
+                <p className="mt-7 font-against text-3xl">Livraison réussie !</p>
+                <p className="mt-2 text-xs text-white/45">Commande #{mission.reference}</p>
+                <div className="mt-8 w-full rounded-[22px] border border-white/8 bg-[#101719] p-5">
+                    <p className="text-[9px] uppercase tracking-[0.14em] text-white/35">Commande clôturée</p>
+                    <p className="mt-2 text-sm font-bold">{mission.restaurant?.nom || "Restaurant"} → {mission.client?.nom || "Client"}</p>
+                </div>
+                <button onClick={onBack} className="mt-5 w-full rounded-full border border-white/10 py-4 text-xs font-bold">Voir mes missions</button>
+            </div>
+        </div>
+    );
+}
+
+function Gains({ statistiques, historique }) {
+    return (
+        <section>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">Cette semaine</p>
+            <h2 className="mt-1 font-against text-3xl">Mes gains</h2>
+            <div className="mt-5 rounded-[22px] border border-white/8 bg-[#101719] p-5">
+                <p className="text-[9px] text-white/40">Gains du livreur</p>
+                <p className="mt-2 text-3xl font-bold text-jse-accent">Non défini</p>
+                <p className="mt-2 text-[10px] leading-5 text-white/40">
+                    Le MLD actuel ne contient pas encore de montant de rémunération du livreur. Aucun montant n’est donc inventé.
+                </p>
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+                <div className="rounded-[20px] bg-[#101719] p-4">
+                    <p className="text-xl font-bold text-white">{statistiques.livraisons_terminees || 0}</p>
+                    <p className="mt-1 text-[9px] text-white/40">Livraisons terminées</p>
+                </div>
+                <div className="rounded-[20px] bg-[#101719] p-4">
+                    <p className="text-xl font-bold text-white">{historique.length}</p>
+                    <p className="mt-1 text-[9px] text-white/40">Historique chargé</p>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function Profile({ livreur }) {
+    return (
+        <section>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">Compte</p>
+            <h2 className="mt-1 font-against text-3xl">Mon profil</h2>
+            <div className="mt-5 rounded-[24px] border border-white/8 bg-[#101719] p-5">
+                <div className="flex items-center gap-4">
+                    <div className="flex size-16 items-center justify-center rounded-full bg-jse-accent text-lg font-bold text-jse-principal">{initiales(livreur?.nom)}</div>
+                    <div>
+                        <p className="text-base font-bold">{livreur?.nom || "JSE Livreur"}</p>
+                        <p className="mt-1 text-[10px] text-white/45">{livreur?.telephone || "—"}</p>
+                        <span className="mt-2 inline-flex rounded-full bg-jse-secondaire/15 px-2 py-1 text-[8px] font-semibold text-jse-secondaire">Livreur vérifié</span>
+                    </div>
+                </div>
+                <div className="mt-6 space-y-2">
+                    {[
+                        ["Mes informations", livreur?.telephone || "—"],
+                        ["Ma zone de desserte", livreur?.zone?.nom || "—"],
+                        ["Matricule", livreur?.matricule || "—"],
+                    ].map(([label, value]) => (
+                        <div key={label} className="flex items-center justify-between rounded-2xl bg-white/[0.035] px-4 py-3">
+                            <span className="text-[10px] text-white/45">{label}</span>
+                            <span className="text-[10px] font-semibold">{value}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <button className="mt-3 w-full rounded-full border border-red-500/60 py-3 text-xs font-semibold text-red-400">Se déconnecter</button>
+        </section>
     );
 }
 
@@ -319,160 +476,103 @@ export default function TableauDeBord() {
     const {
         livreur,
         livraisons = [],
+        historique = [],
         statistiques = {},
         flash = {},
     } = usePage().props;
 
-    const [chargement, setChargement] = useState(false);
-    const [missionSelectionnee, setMissionSelectionnee] = useState(null);
     const [onglet, setOnglet] = useState("accueil");
+    const [mission, setMission] = useState(null);
+    const [ecran, setEcran] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-    const disponible = livreur?.disponibilite === "disponible";
+    const active = useMemo(() => livraisons.filter((item) => item.statut_livraison !== "livree"), [livraisons]);
 
-    const missions = useMemo(
-        () => livraisons.filter((mission) => mission.statut_livraison !== "livree"),
-        [livraisons],
-    );
-
-    const changerDisponibilite = () => {
-        setChargement(true);
+    const toggleDisponibilite = () => {
+        setLoading(true);
         router.patch(
             "/livreur/disponibilite",
-            {
-                disponibilite: disponible
-                    ? "indisponible"
-                    : "disponible",
-            },
+            { disponibilite: livreur?.disponibilite === "disponible" ? "indisponible" : "disponible" },
+            { preserveScroll: true, onFinish: () => setLoading(false) },
+        );
+    };
+
+    const takeMission = () => {
+        setLoading(true);
+        router.patch(
+            "/livreur/livraisons/" + mission.attribution_id + "/prise-en-charge",
+            {},
             {
                 preserveScroll: true,
-                onFinish: () => setChargement(false),
+                onSuccess: () => setEcran("navigation"),
+                onFinish: () => setLoading(false),
             },
         );
     };
 
+    const validatePin = (pin) => {
+        setLoading(true);
+        router.post(
+            "/livreur/livraisons/" + mission.attribution_id + "/valider-pin",
+            { pin },
+            {
+                preserveScroll: true,
+                onSuccess: () => setEcran("success"),
+                onFinish: () => setLoading(false),
+            },
+        );
+    };
+
+    if (ecran === "navigation" && mission) {
+        return <NavigationScreen mission={mission} onBack={() => setEcran(null)} onArrive={() => setEcran("pickup")} />;
+    }
+
+    if (ecran === "pickup" && mission) {
+        return <PickupScreen mission={mission} onBack={() => setEcran("navigation")} onStart={() => setEcran("delivery")} />;
+    }
+
+    if (ecran === "delivery" && mission) {
+        return <DeliveryScreen mission={mission} onBack={() => setEcran("pickup")} onValidate={validatePin} loading={loading} />;
+    }
+
+    if (ecran === "success" && mission) {
+        return <SuccessScreen mission={mission} onBack={() => { setEcran(null); setMission(null); }} />;
+    }
+
     return (
         <main className="min-h-screen bg-[#070b0d] pb-28 text-white">
-            <div className="mx-auto w-full max-w-[560px]">
-                <header className="relative overflow-hidden bg-jse-principal px-5 pb-6 pt-7">
-                    <div className="absolute -right-16 -top-20 size-52 rounded-full bg-jse-accent/15 blur-3xl" />
-                    <div className="relative flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="flex size-12 items-center justify-center rounded-full bg-jse-fond text-jse-principal">
-                                <UserRound size={23} />
-                            </div>
-                            <div>
-                                <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/45">
-                                    JSE Express
-                                </p>
-                                <h1 className="mt-1 text-base font-bold">
-                                    {livreur?.nom || "Livreur"}
-                                </h1>
-                                <p className="mt-1 flex items-center gap-1 text-[9px] text-white/50">
-                                    <span
-                                        className={
-                                            "size-1.5 rounded-full " +
-                                            (disponible
-                                                ? "bg-jse-secondaire"
-                                                : "bg-white/25")
-                                        }
-                                    />
-                                    {disponible ? "En ligne" : "Hors ligne"}
-                                </p>
-                            </div>
+            <div className="mx-auto w-full max-w-[480px]">
+                <TopBar livreur={livreur} onNotifications={() => {}} />
+                <div className="bg-jse-principal px-5 pb-5">
+                    <Stats statistiques={statistiques} zone={livreur?.zone} />
+                    <Availability livreur={livreur} onToggle={toggleDisponibilite} loading={loading} />
+                </div>
+
+                <div className="px-4 pt-7">
+                    {flash?.success && (
+                        <div className="mb-4 rounded-2xl border border-jse-secondaire/20 bg-jse-secondaire/10 px-4 py-3 text-[10px] font-semibold text-jse-secondaire">
+                            {flash.success}
                         </div>
-                        <div className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5">
-                            <Bike size={19} />
-                        </div>
-                    </div>
+                    )}
 
-                    <div className="mt-5 rounded-[22px] border border-white/8 bg-[#101719]/80 p-4 backdrop-blur-xl">
-                        <div className="grid grid-cols-3 divide-x divide-white/10 text-center">
-                            <div>
-                                <p className="text-xl font-bold text-jse-accent">
-                                    {statistiques.missions_actives || 0}
-                                </p>
-                                <p className="mt-1 text-[8px] text-white/45">
-                                    Missions actives
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-xl font-bold text-jse-accent">
-                                    {statistiques.missions_du_jour || 0}
-                                </p>
-                                <p className="mt-1 text-[8px] text-white/45">
-                                    Aujourd'hui
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-xl font-bold text-jse-accent">
-                                    {livreur?.zone?.nom || "—"}
-                                </p>
-                                <p className="mt-1 text-[8px] text-white/45">
-                                    Zone
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button
-                        type="button"
-                        disabled={chargement}
-                        onClick={changerDisponibilite}
-                        className="mt-3 flex w-full items-center justify-between rounded-[18px] bg-jse-accent px-4 py-3 text-left text-jse-principal disabled:opacity-50"
-                    >
-                        <span className="text-xs font-bold">
-                            {disponible
-                                ? "Vous êtes en ligne"
-                                : "Passer en ligne"}
-                        </span>
-                        <span className="flex size-8 items-center justify-center rounded-full bg-white/90">
-                            <Power size={16} />
-                        </span>
-                    </button>
-                </header>
-
-                {flash?.success && (
-                    <div className="mx-4 mt-3 rounded-2xl border border-jse-secondaire/20 bg-jse-secondaire/10 px-4 py-3 text-xs font-semibold text-jse-secondaire">
-                        {flash.success}
-                    </div>
-                )}
-
-                <div className="px-4 pt-6">
                     {onglet === "accueil" && (
                         <>
-                            <SectionTitle
-                                eyebrow="Missions disponibles"
-                                title="Mes missions"
-                                action={
-                                    <span className="rounded-full bg-white/5 px-3 py-2 text-[9px] font-semibold text-white/60">
-                                        {missions.length}
-                                    </span>
-                                }
-                            />
-
+                            <div className="flex items-end justify-between">
+                                <div>
+                                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">Aujourd’hui</p>
+                                    <h2 className="mt-1 font-against text-3xl">Missions disponibles</h2>
+                                </div>
+                                <span className="text-[10px] font-bold text-jse-accent">Voir tout →</span>
+                            </div>
                             <div className="mt-4 space-y-3">
-                                {missions.length === 0 ? (
-                                    <div className="rounded-[26px] border border-white/8 bg-[#101719] p-8 text-center">
-                                        <Bike
-                                            className="mx-auto text-white/20"
-                                            size={30}
-                                        />
-                                        <p className="mt-3 text-sm font-semibold">
-                                            Aucune mission active
-                                        </p>
-                                        <p className="mt-1 text-[11px] text-white/40">
-                                            Les missions attribuées à votre
-                                            profil apparaîtront ici.
-                                        </p>
+                                {active.length ? active.map((item) => (
+                                    <MissionCard key={item.attribution_id} mission={item} onOpen={(selected) => { setMission(selected); setEcran("detail"); }} />
+                                )) : (
+                                    <div className="rounded-[22px] border border-white/8 bg-[#101719] p-8 text-center">
+                                        <Bike className="mx-auto text-white/20" size={28} />
+                                        <p className="mt-3 text-sm font-semibold">Aucune mission disponible</p>
+                                        <p className="mt-1 text-[10px] text-white/40">Les missions qui vous sont attribuées apparaîtront ici.</p>
                                     </div>
-                                ) : (
-                                    missions.map((mission) => (
-                                        <MissionCard
-                                            key={mission.attribution_id}
-                                            mission={mission}
-                                            onOpen={setMissionSelectionnee}
-                                        />
-                                    ))
                                 )}
                             </div>
                         </>
@@ -480,105 +580,66 @@ export default function TableauDeBord() {
 
                     {onglet === "missions" && (
                         <>
-                            <SectionTitle
-                                eyebrow="Suivi"
-                                title="Toutes mes missions"
-                            />
+                            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">Suivi</p>
+                            <h2 className="mt-1 font-against text-3xl">Mes missions</h2>
                             <div className="mt-4 space-y-3">
-                                {livraisons.map((mission) => (
-                                    <MissionCard
-                                        key={mission.attribution_id}
-                                        mission={mission}
-                                        onOpen={setMissionSelectionnee}
-                                    />
-                                ))}
+                                {livraisons.map((item) => <MissionCard key={item.attribution_id} mission={item} onOpen={(selected) => { setMission(selected); setEcran("detail"); }} />)}
                             </div>
                         </>
                     )}
 
-                    {onglet === "profil" && (
-                        <section className="rounded-[28px] border border-white/8 bg-[#101719] p-5">
-                            <div className="flex items-center gap-4">
-                                <div className="flex size-16 items-center justify-center rounded-full bg-jse-accent text-xl font-bold text-jse-principal">
-                                    {initiales(livreur?.nom)}
-                                </div>
-                                <div>
-                                    <p className="text-lg font-bold">
-                                        {livreur?.nom || "Livreur"}
-                                    </p>
-                                    <p className="mt-1 text-xs text-white/45">
-                                        Matricule {livreur?.matricule || "—"}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="mt-6 space-y-2">
-                                <div className="flex items-center justify-between rounded-2xl bg-white/5 px-4 py-3">
-                                    <span className="text-xs text-white/45">
-                                        Téléphone
-                                    </span>
-                                    <span className="text-xs font-semibold">
-                                        {livreur?.telephone || "—"}
-                                    </span>
-                                </div>
-                                <div className="flex items-center justify-between rounded-2xl bg-white/5 px-4 py-3">
-                                    <span className="text-xs text-white/45">
-                                        Zone de desserte
-                                    </span>
-                                    <span className="text-xs font-semibold">
-                                        {livreur?.zone?.nom || "—"}
-                                    </span>
-                                </div>
-                                <div className="flex items-center justify-between rounded-2xl bg-white/5 px-4 py-3">
-                                    <span className="text-xs text-white/45">
-                                        Disponibilité
-                                    </span>
-                                    <span className="text-xs font-semibold text-jse-secondaire">
-                                        {disponible
-                                            ? "Disponible"
-                                            : "Indisponible"}
-                                    </span>
+                    {onglet === "carte" && (
+                        <section>
+                            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">Navigation</p>
+                            <h2 className="mt-1 font-against text-3xl">Carte</h2>
+                            <div className="relative mt-4 h-[430px] overflow-hidden rounded-[24px] border border-white/8 bg-[radial-gradient(circle_at_50%_35%,#17362d_0,#0d1619_40%,#070b0d_78%)]">
+                                <div className="absolute inset-5 rounded-[20px] border border-white/5 opacity-60" />
+                                <div className="absolute left-[45%] top-[20%] h-[62%] w-1 rotate-[25deg] rounded-full bg-jse-accent shadow-[0_0_20px_rgba(242,140,40,.5)]" />
+                                <div className="absolute left-[31%] top-[65%] flex size-12 items-center justify-center rounded-full bg-jse-accent text-jse-principal"><Navigation size={22} /></div>
+                                <div className="absolute right-[16%] top-[22%] flex size-11 items-center justify-center rounded-full bg-jse-secondaire text-white"><Store size={19} /></div>
+                                <div className="absolute bottom-4 left-4 right-4 rounded-[20px] bg-[#101719]/95 p-4">
+                                    <p className="text-xs font-bold">{active[0]?.restaurant?.nom || "Aucune mission active"}</p>
+                                    <p className="mt-1 text-[9px] text-white/45">{active[0]?.restaurant?.adresse || "La navigation GPS temps réel reste hors MVP."}</p>
                                 </div>
                             </div>
                         </section>
                     )}
+
+                    {onglet === "gains" && <Gains statistiques={statistiques} historique={historique} />}
+                    {onglet === "profil" && <Profile livreur={livreur} />}
                 </div>
 
-                <nav className="fixed bottom-4 left-1/2 z-40 flex h-[68px] w-[calc(100%-24px)] max-w-[536px] -translate-x-1/2 items-center justify-around rounded-[34px] border border-white/10 bg-[#101719]/95 px-2 shadow-[0_20px_60px_rgba(0,0,0,.45)] backdrop-blur-2xl">
+                <nav className="fixed bottom-4 left-1/2 z-40 flex h-[68px] w-[calc(100%-24px)] max-w-[456px] -translate-x-1/2 items-center justify-around rounded-[34px] border border-white/10 bg-[#101719]/95 px-2 shadow-[0_20px_60px_rgba(0,0,0,.5)] backdrop-blur-2xl">
                     {[
-                        { id: "accueil", label: "Accueil", icon: Bike },
-                        { id: "missions", label: "Missions", icon: Store },
-                        { id: "profil", label: "Profil", icon: UserRound },
-                    ].map(({ id, label, icon: Icon }) => {
-                        const active = onglet === id;
+                        ["accueil", "Accueil", Home],
+                        ["missions", "Missions", Receipt],
+                        ["carte", "Carte", MapPin],
+                        ["gains", "Gains", WalletCards],
+                        ["profil", "Profil", UserRound],
+                    ].map(([id, label, Icon]) => {
+                        const selected = onglet === id;
                         return (
                             <button
                                 key={id}
                                 type="button"
                                 onClick={() => setOnglet(id)}
-                                className={
-                                    "flex items-center gap-2 rounded-full px-4 py-3 transition " +
-                                    (active
-                                        ? "bg-jse-accent text-jse-principal"
-                                        : "text-white/45")
-                                }
+                                className={"flex items-center gap-1.5 rounded-full px-3 py-3 transition " + (selected ? "bg-jse-accent text-jse-principal" : "text-white/45")}
                             >
-                                <Icon size={18} />
-                                {active && (
-                                    <span className="text-[10px] font-bold">
-                                        {label}
-                                    </span>
-                                )}
+                                <Icon size={17} />
+                                {selected && <span className="text-[9px] font-bold">{label}</span>}
                             </button>
                         );
                     })}
                 </nav>
             </div>
 
-            {missionSelectionnee && (
-                <MissionDetails
-                    mission={missionSelectionnee}
-                    onClose={() => setMissionSelectionnee(null)}
+            {mission && ecran === "detail" && (
+                <MissionDetail
+                    mission={mission}
+                    onBack={() => { setMission(null); setEcran(null); }}
+                    onTake={takeMission}
+                    loading={loading}
+                    onNavigate={() => setEcran("navigation")}
                 />
             )}
         </main>
