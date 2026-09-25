@@ -40,6 +40,13 @@ const navigation = [
     ["profil", "Mon profil", UserRound],
 ];
 
+const accompagnementsRapides = [
+    "Attiéké",
+    "Riz",
+    "Foutou",
+    "Alloco",
+];
+
 const imagesDemoProduits = {
     "Boisson": "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80",
     "Menu complet": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80",
@@ -155,10 +162,10 @@ export default function TableauDeBord() {
         setModal("options");
     };
 
-    const ajouterGroupeOption = () => {
+    const ajouterGroupeOption = (configuration = null) => {
         setOptionsProduit((groupes) => [
             ...groupes,
-            {
+            configuration || {
                 name: "Accompagnement",
                 obligatoire: true,
                 multiple: false,
@@ -167,6 +174,37 @@ export default function TableauDeBord() {
                 items: [],
             },
         ]);
+    };
+
+    const ajouterGroupeAccompagnement = () => {
+        ajouterGroupeOption({
+            name: "Accompagnement",
+            obligatoire: true,
+            multiple: false,
+            min: 1,
+            max: 1,
+            items: accompagnementsRapides.map((name) => ({
+                name,
+                prix: 0,
+                disponible: true,
+            })),
+        });
+    };
+
+    const ajouterAccompagnementRapide = (indexGroupe, nom) => {
+        setOptionsProduit((groupes) =>
+            groupes.map((groupe, index) => {
+                if (index !== indexGroupe) return groupe;
+                const items = groupe.items || [];
+                if (items.some((item) => item.name?.trim().toLowerCase() === nom.toLowerCase())) {
+                    return groupe;
+                }
+                return {
+                    ...groupe,
+                    items: [...items, { name: nom, prix: 0, disponible: true }],
+                };
+            }),
+        );
     };
 
     const modifierGroupeOption = (index, champ, valeur) => {
@@ -682,6 +720,35 @@ export default function TableauDeBord() {
                                 </div>
 
                                 <div className="max-h-[58vh] space-y-4 overflow-y-auto pr-1">
+                                    <div className="rounded-2xl border border-jse-accent/20 bg-jse-accent/5 p-4">
+                                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                            <div>
+                                                <p className="text-[10px] font-semibold text-white/85">Accompagnements du restaurant</p>
+                                                <p className="mt-1 max-w-lg text-[9px] leading-4 text-white/40">
+                                                    Ajoutez en un clic les accompagnements proposés avec ce plat. Vous pourrez ensuite modifier le prix et activer ou désactiver chaque accompagnement.
+                                                </p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={ajouterGroupeAccompagnement}
+                                                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-jse-accent px-4 text-[9px] font-semibold text-white shadow-lg shadow-jse-accent/10"
+                                            >
+                                                <Plus size={14} />
+                                                Ajouter Attiéké, Riz, Foutou…
+                                            </button>
+                                        </div>
+                                        <div className="mt-3 flex flex-wrap gap-1.5">
+                                            {accompagnementsRapides.map((nom) => (
+                                                <span key={nom} className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[8px] text-white/45">
+                                                    {nom}
+                                                </span>
+                                            ))}
+                                            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[8px] text-white/30">
+                                                + vos propres accompagnements
+                                            </span>
+                                        </div>
+                                    </div>
+
                                     <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                                         <p className="text-[10px] font-semibold text-white/80">Personnalisation du plat</p>
                                         <p className="mt-1 text-[10px] leading-4 text-white/35">
@@ -762,6 +829,25 @@ export default function TableauDeBord() {
                                                 </div>
                                                 <span className="rounded-full bg-jse-accent/10 px-2.5 py-1 text-[8px] font-semibold text-jse-accent">{(groupe.items || []).length} option{(groupe.items || []).length > 1 ? "s" : ""}</span>
                                             </div>
+
+                                            {String(groupe.name || "").trim().toLowerCase() === "accompagnement" && (
+                                                <div className="mt-3 rounded-xl bg-jse-secondaire/5 p-3">
+                                                    <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-jse-secondaire">Ajout rapide</p>
+                                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                                        {accompagnementsRapides.map((nom) => (
+                                                            <button
+                                                                key={nom}
+                                                                type="button"
+                                                                onClick={() => ajouterAccompagnementRapide(indexGroupe, nom)}
+                                                                disabled={(groupe.items || []).some((item) => item.name?.trim().toLowerCase() === nom.toLowerCase())}
+                                                                className="rounded-full border border-jse-secondaire/20 bg-jse-secondaire/10 px-2.5 py-1.5 text-[8px] font-semibold text-jse-secondaire disabled:cursor-not-allowed disabled:opacity-30"
+                                                            >
+                                                                + {nom}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
 
                                             <div className="mt-3 space-y-2">
                                                 {(groupe.items || []).map((item, indexItem) => (
