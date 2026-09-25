@@ -2,6 +2,7 @@ import { router, usePage } from "@inertiajs/react";
 import NavigationFlottante from "../../Composants/Navigation/NavigationFlottante";
 import SidebarLivreur from "../../Composants/Navigation/SidebarLivreur";
 import PhotoProfil from "../../Composants/Profil/PhotoProfil";
+import ThemeToggle from "../../Composants/Interface/ThemeToggle";
 import {
     ArrowLeft,
     Bike,
@@ -698,7 +699,10 @@ function Profile({ livreur, zones = [], historique = [], statistiques = {}, load
     return (
         <section>
             <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-white/35">Compte livreur</p>
-            <h2 className="mt-1 font-against text-3xl text-white">Mon profil</h2>
+            <div className="flex items-center justify-between gap-3">
+                <h2 className="mt-1 font-against text-3xl text-white">Mon profil</h2>
+                <ThemeToggle />
+            </div>
 
             <div className="mt-5 overflow-hidden rounded-[26px] border border-white/10 bg-[#101719] shadow-[0_24px_70px_rgba(0,0,0,.28)]">
                 <div className="relative overflow-hidden bg-jse-principal px-5 pb-7 pt-6">
