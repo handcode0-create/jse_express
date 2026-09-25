@@ -26,26 +26,32 @@ class JseExpressSeeder extends Seeder
 {
     public function run(): void
     {
-        $zoneCentre = Zone::create([
-            'nom' => 'Centre',
-            'description' => 'Zone centrale de desserte',
-            'zone_parent_id' => null,
-            'statut' => 'actif',
-        ]);
+        $zoneCentre = Zone::query()->updateOrCreate(
+            ['nom' => 'Centre'],
+            [
+                'description' => 'Zone centrale de desserte',
+                'zone_parent_id' => null,
+                'statut' => 'actif',
+            ]
+        );
 
-        $zoneNord = Zone::create([
-            'nom' => 'Nord',
-            'description' => 'Zone nord de desserte',
-            'zone_parent_id' => $zoneCentre->id,
-            'statut' => 'actif',
-        ]);
+        $zoneNord = Zone::query()->updateOrCreate(
+            ['nom' => 'Nord'],
+            [
+                'description' => 'Zone nord de desserte',
+                'zone_parent_id' => $zoneCentre->id,
+                'statut' => 'actif',
+            ]
+        );
 
-        $zoneSud = Zone::create([
-            'nom' => 'Sud',
-            'description' => 'Zone sud de desserte',
-            'zone_parent_id' => $zoneCentre->id,
-            'statut' => 'actif',
-        ]);
+        $zoneSud = Zone::query()->updateOrCreate(
+            ['nom' => 'Sud'],
+            [
+                'description' => 'Zone sud de desserte',
+                'zone_parent_id' => $zoneCentre->id,
+                'statut' => 'actif',
+            ]
+        );
 
         $statuts = [];
 
@@ -66,16 +72,6 @@ class JseExpressSeeder extends Seeder
                 ]
             );
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | UTILISATEURS
-        |--------------------------------------------------------------------------
-        |
-        | Les comptes de démonstration sont identifiés par leur téléphone.
-        | Le seeder peut donc être relancé sans provoquer de doublons.
-        |
-        */
 
         $comptesDemo = [
             'admin' => [
@@ -129,72 +125,105 @@ class JseExpressSeeder extends Seeder
         $restaurantUser = $utilisateurs['restaurant'];
         $livreurUser = $utilisateurs['livreur'];
 
-        $profilLivreur = ProfilLivreur::create([
-            'user_id' => $livreurUser->id,
-            'matricule' => 'JSE-LIV-0001',
-            'zone_id' => $zoneCentre->id,
-            'disponibilite' => 'disponible',
-            'telephone_secondaire' => null,
-        ]);
+        $profilLivreur = ProfilLivreur::query()->updateOrCreate(
+            ['user_id' => $livreurUser->id],
+            [
+                'matricule' => 'JSE-LIV-0001',
+                'zone_id' => $zoneCentre->id,
+                'disponibilite' => 'disponible',
+                'telephone_secondaire' => null,
+            ]
+        );
 
-        $restaurant = Restaurant::create([
-            'user_id' => $restaurantUser->id,
-            'zone_id' => $zoneCentre->id,
-            'nom' => 'JSE Kitchen',
-            'description' => 'Restaurant de démonstration JSE Express.',
-            'telephone' => '0700000003',
-            'email' => 'restaurant@jse-express.test',
-            'adresse' => 'Centre-ville',
-            'horaires' => '08:00-22:00',
-            'statut' => 'actif',
-        ]);
+        $restaurant = Restaurant::query()->updateOrCreate(
+            ['user_id' => $restaurantUser->id],
+            [
+                'zone_id' => $zoneCentre->id,
+                'nom' => 'JSE Kitchen',
+                'description' => 'Restaurant de démonstration JSE Express.',
+                'telephone' => '0700000003',
+                'email' => 'restaurant@jse-express.test',
+                'adresse' => 'Centre-ville',
+                'horaires' => '08:00-22:00',
+                'statut' => 'actif',
+            ]
+        );
 
-        $categoriePlats = Categorie::create([
-            'restaurant_id' => $restaurant->id,
-            'nom' => 'Plats',
-            'description' => 'Plats principaux',
-            'statut' => 'actif',
-        ]);
+        $categoriePlats = Categorie::query()->updateOrCreate(
+            ['restaurant_id' => $restaurant->id, 'nom' => 'Plats'],
+            [
+                'description' => 'Plats principaux',
+                'statut' => 'actif',
+            ]
+        );
 
-        $categorieBoissons = Categorie::create([
-            'restaurant_id' => $restaurant->id,
-            'nom' => 'Boissons',
-            'description' => 'Boissons',
-            'statut' => 'actif',
-        ]);
+        $categorieBoissons = Categorie::query()->updateOrCreate(
+            ['restaurant_id' => $restaurant->id, 'nom' => 'Boissons'],
+            [
+                'description' => 'Boissons',
+                'statut' => 'actif',
+            ]
+        );
 
-        $produit1 = Produit::create([
-            'restaurant_id' => $restaurant->id,
-            'categorie_id' => $categoriePlats->id,
-            'nom' => 'Plat de démonstration',
-            'description' => 'Produit de test JSE Express.',
-            'prix' => 3500,
-            'image' => null,
-            'disponible' => true,
-            'statut' => 'actif',
-        ]);
+        $produit1 = Produit::query()->updateOrCreate(
+            ['restaurant_id' => $restaurant->id, 'nom' => 'Plat de démonstration'],
+            [
+                'categorie_id' => $categoriePlats->id,
+                'description' => 'Produit de test JSE Express.',
+                'prix' => 3500,
+                'image' => null,
+                'disponible' => true,
+                'statut' => 'actif',
+            ]
+        );
 
-        $produit2 = Produit::create([
-            'restaurant_id' => $restaurant->id,
-            'categorie_id' => $categoriePlats->id,
-            'nom' => 'Menu complet',
-            'description' => 'Menu de démonstration.',
-            'prix' => 5000,
-            'image' => null,
-            'disponible' => true,
-            'statut' => 'actif',
-        ]);
+        $produit2 = Produit::query()->updateOrCreate(
+            ['restaurant_id' => $restaurant->id, 'nom' => 'Menu complet'],
+            [
+                'categorie_id' => $categoriePlats->id,
+                'description' => 'Menu de démonstration.',
+                'prix' => 5000,
+                'image' => null,
+                'disponible' => true,
+                'statut' => 'actif',
+            ]
+        );
 
-        $produit3 = Produit::create([
-            'restaurant_id' => $restaurant->id,
-            'categorie_id' => $categorieBoissons->id,
-            'nom' => 'Boisson',
-            'description' => 'Boisson de démonstration.',
-            'prix' => 1000,
-            'image' => null,
-            'disponible' => true,
-            'statut' => 'actif',
-        ]);
+        $produit3 = Produit::query()->updateOrCreate(
+            ['restaurant_id' => $restaurant->id, 'nom' => 'Boisson'],
+            [
+                'categorie_id' => $categorieBoissons->id,
+                'description' => 'Boisson de démonstration.',
+                'prix' => 1000,
+                'image' => null,
+                'disponible' => true,
+                'statut' => 'actif',
+            ]
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | COMMANDE DE DÉMONSTRATION
+        |--------------------------------------------------------------------------
+        |
+        | Si elle existe déjà, le seeder s'arrête ici afin de ne pas recréer
+        | les lignes, paiements, livraisons et notifications associées.
+        |
+        */
+
+        $commandeExistante = Commande::query()
+            ->where('reference', 'JSE-000001')
+            ->first();
+
+        if ($commandeExistante) {
+            $this->command?->info('JSE Express : données de développement déjà présentes.');
+            $this->command?->info("Admin : {$admin->email}");
+            $this->command?->info("Client : {$client->email}");
+            $this->command?->info("Restaurant : {$restaurantUser->email}");
+            $this->command?->info("Livreur : {$livreurUser->email}");
+
+            return;
+        }
 
         $panier = Panier::create([
             'user_id' => $client->id,
@@ -283,45 +312,21 @@ class JseExpressSeeder extends Seeder
             'motif' => null,
         ]);
 
-        HistoriqueCommande::create([
-            'commande_id' => $commande->id,
-            'statut_id' => $statuts['EN_ATTENTE']->id,
-            'user_id' => $client->id,
-            'commentaire' => 'Commande créée.',
-            'date_changement' => now()->subMinutes(20),
-        ]);
-
-        HistoriqueCommande::create([
-            'commande_id' => $commande->id,
-            'statut_id' => $statuts['CONFIRMEE']->id,
-            'user_id' => $restaurantUser->id,
-            'commentaire' => 'Commande confirmée par le restaurant.',
-            'date_changement' => now()->subMinutes(15),
-        ]);
-
-        HistoriqueCommande::create([
-            'commande_id' => $commande->id,
-            'statut_id' => $statuts['EN_PREPARATION']->id,
-            'user_id' => $restaurantUser->id,
-            'commentaire' => 'Commande en préparation.',
-            'date_changement' => now()->subMinutes(10),
-        ]);
-
-        HistoriqueCommande::create([
-            'commande_id' => $commande->id,
-            'statut_id' => $statuts['PRETE']->id,
-            'user_id' => $restaurantUser->id,
-            'commentaire' => 'Commande prête.',
-            'date_changement' => now()->subMinutes(5),
-        ]);
-
-        HistoriqueCommande::create([
-            'commande_id' => $commande->id,
-            'statut_id' => $statuts['EN_LIVRAISON']->id,
-            'user_id' => $livreurUser->id,
-            'commentaire' => 'Commande prise en charge pour livraison.',
-            'date_changement' => now(),
-        ]);
+        foreach ([
+            ['code' => 'EN_ATTENTE', 'user_id' => $client->id, 'commentaire' => 'Commande créée.', 'minutes' => 20],
+            ['code' => 'CONFIRMEE', 'user_id' => $restaurantUser->id, 'commentaire' => 'Commande confirmée par le restaurant.', 'minutes' => 15],
+            ['code' => 'EN_PREPARATION', 'user_id' => $restaurantUser->id, 'commentaire' => 'Commande en préparation.', 'minutes' => 10],
+            ['code' => 'PRETE', 'user_id' => $restaurantUser->id, 'commentaire' => 'Commande prête.', 'minutes' => 5],
+            ['code' => 'EN_LIVRAISON', 'user_id' => $livreurUser->id, 'commentaire' => 'Commande prise en charge pour livraison.', 'minutes' => 0],
+        ] as $historique) {
+            HistoriqueCommande::create([
+                'commande_id' => $commande->id,
+                'statut_id' => $statuts[$historique['code']]->id,
+                'user_id' => $historique['user_id'],
+                'commentaire' => $historique['commentaire'],
+                'date_changement' => now()->subMinutes($historique['minutes']),
+            ]);
+        }
 
         Notification::create([
             'user_id' => $client->id,
