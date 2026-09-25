@@ -12,6 +12,12 @@ class ProfilLivreur extends Model
     use HasFactory;
 protected $table = 'profils_livreurs';
 
+    protected $primaryKey = 'user_id';
+
+    public $incrementing = false;
+
+    protected $keyType = 'int';
+
     public $timestamps = false;
 
     protected $fillable = [
