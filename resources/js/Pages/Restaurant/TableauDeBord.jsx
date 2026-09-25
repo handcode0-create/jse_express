@@ -10,8 +10,6 @@ import {
     RefreshCw,
     UtensilsCrossed,
 } from "lucide-react";
-import SidebarJSE from "../../Composants/Navigation/SidebarJSE";
-
 const statutSuivant = {
     EN_ATTENTE: { code: "CONFIRMEE", label: "Confirmer" },
     CONFIRMEE: { code: "EN_PREPARATION", label: "Démarrer la préparation" },
@@ -66,7 +64,25 @@ export default function TableauDeBord() {
         <main className="min-h-screen bg-jse-fond pb-8 text-jse-texte">
             <div className="mx-auto min-h-screen w-full max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-10">
-                    <SidebarJSE />
+                    <aside className="hidden lg:flex lg:flex-col lg:py-8">
+                        <div className="flex size-10 items-center justify-center rounded-xl bg-jse-principal">
+                            <img src="/assets/jse_logo.png" alt="JSE Express" className="size-7 object-contain" />
+                        </div>
+                        <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.16em] text-jse-texte/35">Espace restaurant</p>
+                        <nav className="mt-4 space-y-2">
+                            <button type="button" onClick={() => setOnglet("commandes")} className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-xs font-semibold ${onglet === "commandes" ? "bg-jse-secondaire/10 text-jse-principal" : "text-jse-texte/55 hover:bg-white"}`}>
+                                <Package size={17} /> Commandes
+                            </button>
+                            <button type="button" onClick={() => setOnglet("menu")} className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-xs font-semibold ${onglet === "menu" ? "bg-jse-secondaire/10 text-jse-principal" : "text-jse-texte/55 hover:bg-white"}`}>
+                                <UtensilsCrossed size={17} /> Menu
+                            </button>
+                        </nav>
+                        <div className="mt-auto">
+                            <button type="button" onClick={() => router.post("/deconnexion")} className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-xs font-semibold text-jse-texte/45 hover:bg-white">
+                                <RefreshCw size={17} /> Déconnexion
+                            </button>
+                        </div>
+                    </aside>
 
                     <div className="w-full">
                         <header className="rounded-b-[32px] bg-jse-principal px-5 pb-7 pt-7 text-white lg:rounded-[32px]">
@@ -215,6 +231,20 @@ export default function TableauDeBord() {
                     </div>
                 </div>
             </div>
+
+            <nav className="fixed inset-x-0 bottom-0 z-40 px-4 pb-4 lg:hidden">
+                <div className="mx-auto flex h-[66px] max-w-md items-center justify-around rounded-[24px] bg-white/95 px-1 shadow-xl shadow-jse-principal/10 backdrop-blur-xl ring-1 ring-jse-texte/5">
+                    <button type="button" onClick={() => setOnglet("commandes")} className={`flex flex-1 flex-col items-center gap-1 rounded-[20px] py-2 text-[10px] font-semibold ${onglet === "commandes" ? "bg-jse-secondaire text-white" : "text-jse-texte/55"}`}>
+                        <Package size={20} /> Commandes
+                    </button>
+                    <button type="button" onClick={() => setOnglet("menu")} className={`flex flex-1 flex-col items-center gap-1 rounded-[20px] py-2 text-[10px] font-semibold ${onglet === "menu" ? "bg-jse-secondaire text-white" : "text-jse-texte/55"}`}>
+                        <UtensilsCrossed size={20} /> Menu
+                    </button>
+                    <button type="button" onClick={() => router.post("/deconnexion")} className="flex flex-1 flex-col items-center gap-1 py-2 text-[10px] font-semibold text-jse-texte/55">
+                        <RefreshCw size={20} /> Sortir
+                    </button>
+                </div>
+            </nav>
 
             {modal && (
                 <div className="fixed inset-0 z-[90] flex items-end justify-center bg-jse-principal/25 p-0 backdrop-blur-sm sm:items-center sm:p-5" onClick={() => setModal(null)}>
