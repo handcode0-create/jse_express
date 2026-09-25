@@ -114,6 +114,13 @@ Route::prefix('restaurant')
     });
 
 
+Route::prefix('administration')
+    ->middleware(['auth', 'role:administrateur'])
+    ->group(function () {
+        Route::get('/tableau-de-bord', [AdministrationController::class, 'tableauDeBord'])
+            ->name('admin.tableau-de-bord');
+    });
+
 Route::get('/panier', function () {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
 
