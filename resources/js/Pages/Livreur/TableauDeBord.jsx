@@ -672,11 +672,7 @@ function Historique({ historique = [] }) {
 function Profile({ livreur, historique = [], statistiques = {}, loading, onSave, onLogout }) {
     const [edition, setEdition] = useState(false);
     const [form, setForm] = useState({
-        nom: "",
-        prenom: "",
-        telephone: "",
-        email: "",
-        telephone_secondaire: "",
+        nom: "", prenom: "", telephone: "", email: "", telephone_secondaire: "",
     });
 
     useEffect(() => {
@@ -689,154 +685,138 @@ function Profile({ livreur, historique = [], statistiques = {}, loading, onSave,
         });
     }, [livreur]);
 
-    const modifier = (champ, valeur) => {
-        setForm((current) => ({ ...current, [champ]: valeur }));
-    };
-
+    const modifier = (champ, valeur) => setForm((current) => ({ ...current, [champ]: valeur }));
     const submit = (event) => {
         event.preventDefault();
         onSave(form, () => setEdition(false));
     };
+    const nomComplet = [livreur?.prenom, livreur?.nom].filter(Boolean).join(" ") || "JSE Livreur";
+    const disponible = livreur?.disponibilite === "disponible";
 
     return (
         <section>
-            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">Compte livreur</p>
-            <h2 className="mt-1 font-against text-3xl">Mon profil</h2>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-white/35">Compte livreur</p>
+            <h2 className="mt-1 font-against text-3xl text-white">Mon profil</h2>
 
-            <div className="mt-5 overflow-hidden rounded-[26px] bg-jse-fond text-jse-principal">
-                <div className="relative bg-jse-principal px-5 pb-7 pt-6 text-white">
-                    <div className="absolute -right-16 -top-16 size-40 rounded-full bg-jse-secondaire/15" />
+            <div className="mt-5 overflow-hidden rounded-[26px] border border-white/10 bg-[#101719] shadow-[0_24px_70px_rgba(0,0,0,.28)]">
+                <div className="relative overflow-hidden bg-jse-principal px-5 pb-7 pt-6">
+                    <div className="absolute -right-20 -top-20 size-48 rounded-full border border-white/5 bg-jse-secondaire/10" />
+                    <div className="absolute -bottom-24 -left-16 size-36 rounded-full bg-jse-accent/5 blur-2xl" />
                     <div className="relative flex items-center gap-4">
-                        <div className="flex size-[72px] shrink-0 items-center justify-center rounded-full border-4 border-jse-fond bg-jse-accent text-xl font-bold text-jse-principal">
-                            {initiales(livreur?.nom)}
+                        <div className="relative flex size-[72px] shrink-0 items-center justify-center rounded-full border-4 border-[#101719] bg-jse-accent text-xl font-bold text-jse-principal shadow-[0_8px_30px_rgba(242,140,40,.2)]">
+                            {initiales(nomComplet)}
+                            <span className={"absolute bottom-0 right-0 size-4 rounded-full border-[3px] border-jse-principal " + (disponible ? "bg-jse-secondaire" : "bg-white/25")} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-lg font-bold">{[livreur?.prenom, livreur?.nom].filter(Boolean).join(" ") || "JSE Livreur"}</p>
-                            <p className="mt-1 text-[10px] text-white/55">{livreur?.telephone || "—"}</p>
-                            <div className="mt-2 flex items-center gap-2">
-                                <span className="size-2 rounded-full bg-jse-secondaire" />
-                                <span className="text-[9px] font-semibold text-white/70">
-                                    {livreur?.disponibilite === "disponible" ? "Disponible" : "Indisponible"}
-                                </span>
+                            <p className="text-lg font-bold text-white">{nomComplet}</p>
+                            <p className="mt-1 text-[10px] text-white/45">{livreur?.telephone || "—"}</p>
+                            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/5 px-2.5 py-1">
+                                <span className={"size-1.5 rounded-full " + (disponible ? "bg-jse-secondaire" : "bg-white/30")} />
+                                <span className="text-[8px] font-semibold text-white/65">{disponible ? "Disponible" : "Indisponible"}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="space-y-2 p-4">
-                    <div className="grid grid-cols-2 gap-2">
-                        <div className="rounded-[18px] bg-white p-3">
-                            <p className="text-[8px] uppercase tracking-[.12em] text-black/35">Matricule</p>
-                            <p className="mt-1 text-xs font-bold">{livreur?.matricule || "—"}</p>
+                <div className="space-y-3 p-4">
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-[18px] border border-white/7 bg-[#0b1112] p-3.5">
+                            <div className="flex items-center gap-2 text-white/35"><Receipt size={13} /><p className="text-[8px] uppercase tracking-[.12em]">Matricule</p></div>
+                            <p className="mt-2 text-xs font-bold text-white">{livreur?.matricule || "—"}</p>
                         </div>
-                        <div className="rounded-[18px] bg-white p-3">
-                            <p className="text-[8px] uppercase tracking-[.12em] text-black/35">Zone</p>
-                            <p className="mt-1 truncate text-xs font-bold">{livreur?.zone?.nom || "—"}</p>
+                        <div className="rounded-[18px] border border-white/7 bg-[#0b1112] p-3.5">
+                            <div className="flex items-center gap-2 text-white/35"><MapPin size={13} /><p className="text-[8px] uppercase tracking-[.12em]">Zone</p></div>
+                            <p className="mt-2 truncate text-xs font-bold text-white">{livreur?.zone?.nom || "—"}</p>
                         </div>
                     </div>
 
                     {!edition ? (
                         <>
-                            <div className="rounded-[18px] bg-white p-4">
-                                <p className="text-[8px] uppercase tracking-[.12em] text-black/35">Informations personnelles</p>
-                                <div className="mt-3 space-y-2">
+                            <div className="rounded-[20px] border border-white/7 bg-[#0b1112] p-4">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-[8px] font-semibold uppercase tracking-[.14em] text-white/35">Informations personnelles</p>
+                                    <UserRound size={15} className="text-white/20" />
+                                </div>
+                                <div className="mt-3 divide-y divide-white/6">
                                     {[
-                                        ["Téléphone", livreur?.telephone || "—"],
-                                        ["Téléphone secondaire", livreur?.telephone_secondaire || "Non renseigné"],
-                                        ["E-mail", livreur?.email || "Non renseigné"],
-                                    ].map(([label, value]) => (
-                                        <div key={label} className="flex items-center justify-between gap-3 border-b border-black/5 py-2 last:border-0">
-                                            <span className="text-[9px] text-black/45">{label}</span>
-                                            <span className="max-w-[60%] truncate text-right text-[10px] font-semibold">{value}</span>
+                                        ["Téléphone", livreur?.telephone || "—", Phone],
+                                        ["Téléphone secondaire", livreur?.telephone_secondaire || "Non renseigné", Phone],
+                                        ["E-mail", livreur?.email || "Non renseigné", Bell],
+                                    ].map(([label, value, Icon]) => (
+                                        <div key={label} className="flex items-center gap-3 py-3">
+                                            <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-white/5 text-white/35"><Icon size={13} /></div>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-[8px] text-white/30">{label}</p>
+                                                <p className="mt-0.5 truncate text-[10px] font-semibold text-white/80">{value}</p>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
-
-                            <button
-                                type="button"
-                                onClick={() => setEdition(true)}
-                                className="w-full rounded-full bg-jse-accent py-3.5 text-xs font-bold text-jse-principal"
-                            >
-                                Modifier mes informations
+                            <button type="button" onClick={() => setEdition(true)} className="flex w-full items-center justify-center gap-2 rounded-full bg-jse-accent py-3.5 text-xs font-bold text-jse-principal shadow-[0_10px_30px_rgba(242,140,40,.16)] transition active:scale-[.98]">
+                                <UserRound size={15} /> Modifier mes informations
                             </button>
                         </>
                     ) : (
-                        <form onSubmit={submit} className="rounded-[18px] bg-white p-4">
-                            <p className="text-[8px] uppercase tracking-[.12em] text-black/35">Modifier mes informations</p>
-                            <div className="mt-3 space-y-2">
+                        <form onSubmit={submit} className="rounded-[20px] border border-white/7 bg-[#0b1112] p-4">
+                            <div className="flex items-center justify-between">
+                                <div><p className="text-[8px] font-semibold uppercase tracking-[.14em] text-white/35">Édition</p><p className="mt-1 text-xs font-bold text-white">Mes informations</p></div>
+                                <UserRound size={16} className="text-jse-accent" />
+                            </div>
+                            <div className="mt-4 space-y-3">
+                                
                                 {[
-                                    ["prenom", "Prénom", "text"],
-                                    ["nom", "Nom", "text"],
-                                    ["telephone", "Téléphone", "tel"],
-                                    ["telephone_secondaire", "Téléphone secondaire", "tel"],
-                                    ["email", "E-mail", "email"],
+                                    ["prenom", "Prénom", "text"], ["nom", "Nom", "text"], ["telephone", "Téléphone", "tel"],
+                                    ["telephone_secondaire", "Téléphone secondaire", "tel"], ["email", "E-mail", "email"],
                                 ].map(([name, label, type]) => (
                                     <label key={name} className="block">
-                                        <span className="text-[9px] font-semibold text-black/45">{label}</span>
-                                        <input
-                                            type={type}
-                                            value={form[name]}
-                                            onChange={(event) => modifier(name, event.target.value)}
-                                            className="mt-1 h-11 w-full rounded-xl border border-black/10 bg-[#FFF7E8] px-3 text-xs text-jse-principal outline-none focus:border-jse-accent"
-                                        />
+                                        <span className="text-[9px] font-semibold text-white/40">{label}</span>
+                                        <input type={type} value={form[name]} onChange={(event) => modifier(name, event.target.value)}
+                                            className="mt-1 h-11 w-full rounded-xl border border-white/8 bg-[#070b0d] px-3 text-xs text-white outline-none focus:border-jse-accent/70" />
                                     </label>
                                 ))}
                             </div>
-                            <div className="mt-3 grid grid-cols-2 gap-2">
-                                <button type="button" onClick={() => setEdition(false)} className="rounded-full border border-black/10 py-3 text-xs font-semibold">
-                                    Annuler
-                                </button>
-                                <button disabled={loading} type="submit" className="rounded-full bg-jse-accent py-3 text-xs font-bold text-jse-principal disabled:opacity-50">
-                                    {loading ? "Enregistrement…" : "Enregistrer"}
-                                </button>
+                            <div className="mt-4 grid grid-cols-2 gap-2">
+                                <button type="button" onClick={() => setEdition(false)} className="rounded-full border border-white/10 py-3 text-xs font-semibold text-white/65">Annuler</button>
+                                <button disabled={loading} type="submit" className="rounded-full bg-jse-accent py-3 text-xs font-bold text-jse-principal disabled:opacity-50">{loading ? "Enregistrement…" : "Enregistrer"}</button>
                             </div>
                         </form>
                     )}
 
-                    <div className="rounded-[18px] bg-white p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-[8px] uppercase tracking-[.12em] text-black/35">Livraisons terminées</p>
-                                <p className="mt-1 text-2xl font-bold">{statistiques.livraisons_terminees || 0}</p>
-                            </div>
-                            <Check className="text-jse-secondaire" size={24} />
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-[20px] border border-white/7 bg-[#0b1112] p-4">
+                            <p className="text-[8px] uppercase tracking-[.14em] text-white/30">Livraisons terminées</p>
+                            <div className="mt-2 flex items-end justify-between"><p className="text-2xl font-bold text-white">{statistiques.livraisons_terminees || 0}</p><span className="flex size-8 items-center justify-center rounded-full bg-jse-secondaire/10 text-jse-secondaire"><Check size={15} /></span></div>
+                        </div>
+                        <div className="rounded-[20px] border border-white/7 bg-[#0b1112] p-4">
+                            <p className="text-[8px] uppercase tracking-[.14em] text-white/30">Historique récent</p>
+                            <div className="mt-2 flex items-end justify-between"><p className="text-2xl font-bold text-white">{historique.length}</p><span className="flex size-8 items-center justify-center rounded-full bg-jse-accent/10 text-jse-accent"><Receipt size={15} /></span></div>
                         </div>
                     </div>
 
-                    <div className="rounded-[18px] bg-white p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-[8px] uppercase tracking-[.12em] text-black/35">Historique récent</p>
-                                <p className="mt-1 text-xs font-bold">{historique.length} livraison(s)</p>
-                            </div>
-                            <Receipt className="text-jse-accent" size={22} />
-                        </div>
-                        <div className="mt-3 space-y-2">
-                            {historique.slice(0, 4).map((item) => (
-                                <div key={item.id} className="flex items-center justify-between border-b border-black/5 py-2 last:border-0">
-                                    <div className="min-w-0">
-                                        <p className="truncate text-[10px] font-semibold">#{item.reference}</p>
-                                        <p className="text-[8px] text-black/40">{item.restaurant || "Restaurant"} · {item.date || "—"}</p>
+                    {historique.length > 0 && (
+                        <div className="rounded-[20px] border border-white/7 bg-[#0b1112] p-4">
+                            <p className="text-[8px] font-semibold uppercase tracking-[.14em] text-white/30">Dernières livraisons</p>
+                            <div className="mt-3 space-y-1">
+                                {historique.slice(0, 3).map((item) => (
+                                    <div key={item.id} className="flex items-center gap-3 border-b border-white/6 py-2.5 last:border-0">
+                                        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-jse-secondaire/10 text-jse-secondaire"><Check size={13} /></div>
+                                        <div className="min-w-0 flex-1"><p className="truncate text-[10px] font-semibold text-white">#{item.reference}</p><p className="mt-0.5 truncate text-[8px] text-white/35">{item.restaurant || "Restaurant"} · {item.date || "—"}</p></div>
                                     </div>
-                                    <Check size={15} className="text-jse-secondaire" />
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
 
-            <button
-                type="button"
-                onClick={onLogout}
-                className="mt-3 w-full rounded-full border border-red-500/50 py-3.5 text-xs font-semibold text-red-400"
-            >
-                Se déconnecter
+            <button type="button" onClick={onLogout} className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-red-500/30 bg-red-500/5 py-3.5 text-xs font-semibold text-red-400 transition hover:bg-red-500/10 active:scale-[.98]">
+                <Power size={15} /> Se déconnecter
             </button>
         </section>
     );
 }
+
 export default function TableauDeBord() {
     const {
         livreur,
