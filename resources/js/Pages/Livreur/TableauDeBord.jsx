@@ -49,9 +49,7 @@ function TopBar({ livreur, onNotifications }) {
             <div className="absolute -right-20 -top-24 size-64 rounded-full bg-jse-secondaire/10 blur-3xl" />
             <div className="relative flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="flex size-12 items-center justify-center overflow-hidden rounded-full bg-jse-fond text-jse-principal">
-                        <UserRound size={24} />
-                    </div>
+                    <PhotoProfil user={livreur} size="size-12" dark />
                     <div>
                         <p className="text-[8px] font-semibold uppercase tracking-[0.22em] text-white/40">
                             JSE Express
