@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Categorie;
 use App\Models\Commande;
 use App\Models\HistoriqueCommande;
+use App\Models\Notification;
+use App\Models\Paiement;
 use App\Models\Produit;
 use App\Models\Restaurant;
 use Illuminate\Http\RedirectResponse;
@@ -111,6 +113,14 @@ class RestaurantController extends Controller
                     ->where('restaurant_id', $restaurant->id)
                     ->where('statut', 'actif')
                     ->where('disponible', true)
+                    ->count(),
+                'revenus_du_jour' => (float) Paiement::query()
+                    ->whereHas('commande', fn ($query) => $query->where('restaurant_id', $restaurant->id))
+                    ->where('statut', 'reussi')
+                    ->whereDate('date_paiement', today())
+                    ->sum('montant'),
+                'notifications' => Notification::query()
+                    ->where('user_id', $request->user()->id)
                     ->count(),
             ],
         ]);
