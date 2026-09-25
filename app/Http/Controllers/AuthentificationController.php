@@ -89,7 +89,7 @@ class AuthentificationController extends Controller
         $utilisateur = User::query()
             ->where('telephone', $donnees['telephone'])
             ->where('statut', 'actif')
-            ->whereIn('role', ['client', 'restaurant', 'livreur'])
+            ->whereIn('role', ['client', 'restaurant', 'livreur', 'administrateur'])
             ->first();
 
         if (! $utilisateur || ! Hash::check($donnees['mot_de_passe'], $utilisateur->password)) {
@@ -107,6 +107,7 @@ class AuthentificationController extends Controller
     private function routeApresConnexion(User $utilisateur): string
     {
         return match ($utilisateur->role) {
+            'administrateur' => route('admin.tableau-de-bord'),
             'restaurant' => route('restaurant.tableau-de-bord'),
             'livreur' => route('livreur.tableau-de-bord'),
             default => route('accueil.client'),
@@ -118,6 +119,7 @@ class AuthentificationController extends Controller
         $utilisateur = Auth::user();
 
         return redirect()->route(match ($utilisateur->role) {
+            'administrateur' => 'admin.tableau-de-bord',
             'restaurant' => 'restaurant.tableau-de-bord',
             'livreur' => 'livreur.tableau-de-bord',
             default => 'accueil.client',
