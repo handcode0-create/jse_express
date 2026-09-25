@@ -18,6 +18,11 @@ public $timestamps = false;
         'quantite',
         'prix_unitaire',
         'total_ligne',
+        'options',
+    ];
+
+    protected $casts = [
+        'options' => 'array',
     ];
 
     public function commande(): BelongsTo
