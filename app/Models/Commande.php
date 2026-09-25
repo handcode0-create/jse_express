@@ -11,7 +11,9 @@ use Illuminate\Database\Eloquent\Model;
 class Commande extends Model
 {
 
-    public $timestamps = false;
+    
+    use HasFactory;
+public $timestamps = false;
     protected $casts = [
         'date_commande' => 'datetime',
         'sous_total' => 'decimal:2',
