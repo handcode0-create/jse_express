@@ -1,5 +1,6 @@
 import { router, usePage } from "@inertiajs/react";
-import { Heart, Home, LogOut, ShoppingBag, UserRound } from "lucide-react";
+import { Heart, Home, LogOut, Moon, ShoppingBag, UserRound } from "lucide-react";
+import ThemeToggle from "../Interface/ThemeToggle";
 
 const navigation = [
     { label: "Accueil", icon: Home, route: "/accueil", key: "accueil" },
@@ -34,12 +35,13 @@ export default function SidebarJSE({ active }) {
 
     return (
         <aside className="sticky top-0 hidden h-screen w-[238px] shrink-0 flex-col border-r border-jse-texte/5 bg-white/75 px-4 py-7 backdrop-blur-xl lg:flex">
-            <div className="px-4">
+            <div className="flex items-center justify-between px-4">
                 <img
                     src="/assets/jse_logo.png"
                     alt="JSE Express"
                     className="h-11 w-auto object-contain"
                 />
+                <ThemeToggle compact />
             </div>
 
             <div className="mt-10">
