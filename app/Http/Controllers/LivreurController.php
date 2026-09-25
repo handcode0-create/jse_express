@@ -113,6 +113,7 @@ class LivreurController extends Controller
                 'prenom' => $request->user()->prenom,
                 'telephone' => $request->user()->telephone,
                 'email' => $request->user()->email,
+                'photo_profil' => $request->user()->photo_profil,
                 'telephone_secondaire' => $profil->telephone_secondaire,
                 'zone_id' => $profil->zone_id,
                 'matricule' => $profil->matricule,
