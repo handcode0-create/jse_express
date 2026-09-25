@@ -113,44 +113,44 @@ export default function InstallationApplication() {
 
     return (
         <aside
-            className="fixed inset-x-4 bottom-5 z-[120] mx-auto max-w-xl overflow-hidden rounded-[24px] border border-[#F28C28]/25 bg-[#191512]/[0.98] shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+            className="fixed inset-x-4 bottom-5 z-[120] mx-auto max-w-xl overflow-hidden rounded-[26px] border border-jse-secondaire/25 bg-jse-principal shadow-[0_20px_60px_rgba(18,60,50,0.28)] backdrop-blur-xl"
             role="dialog"
             aria-label="Installer JSE Express"
         >
             <div className="flex gap-4 p-5 sm:p-6">
-                <div className="flex size-14 shrink-0 items-center justify-center rounded-[18px] bg-[#F28C28]/10 text-[#F28C28] ring-1 ring-[#F28C28]/15">
+                <div className="flex size-14 shrink-0 items-center justify-center rounded-[18px] bg-jse-secondaire/15 text-jse-secondaire ring-1 ring-jse-secondaire/25">
                     <Download size={28} strokeWidth={2.2} />
                 </div>
 
                 <div className="min-w-0 flex-1 pr-6">
-                    <h2 className="font-sans text-lg font-semibold tracking-[-0.02em] text-[#FFF7E8]">
+                    <h2 className="font-sans text-lg font-semibold tracking-[-0.02em] text-jse-fond">
                         Installer JSE Express
                     </h2>
 
                     {ios ? (
-                        <p className="mt-2 text-sm leading-6 text-[#FFF7E8]/65">
+                        <p className="mt-2 text-sm leading-6 text-jse-fond/70">
                             Ajoute l’appli à ton écran d’accueil pour un accès
                             direct, et pour garder tes commandes facilement
                             accessibles hors ligne.
                         </p>
                     ) : (
-                        <p className="mt-2 text-sm leading-6 text-[#FFF7E8]/65">
+                        <p className="mt-2 text-sm leading-6 text-jse-fond/70">
                             Ajoute l’appli à ton écran d’accueil pour un accès
                             direct et une expérience plus rapide.
                         </p>
                     )}
 
                     {ios ? (
-                        <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm leading-6 text-[#FFF7E8]/75">
+                        <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm leading-6 text-jse-fond/80">
                             <span>Appuie sur</span>
                             <span
-                                className="inline-flex size-7 items-center justify-center rounded-lg bg-[#F28C28]/10 text-[#F28C28]"
+                                className="inline-flex size-7 items-center justify-center rounded-lg bg-jse-secondaire/15 text-jse-secondaire"
                                 aria-hidden="true"
                             >
                                 <Share size={17} strokeWidth={2.4} />
                             </span>
                             <span>puis</span>
-                            <strong className="font-semibold text-[#FFF7E8]">
+                            <strong className="font-semibold text-jse-fond">
                                 + Sur l’écran d’accueil
                             </strong>
                         </div>
@@ -158,7 +158,7 @@ export default function InstallationApplication() {
                         <button
                             type="button"
                             onClick={installer}
-                            className="mt-4 inline-flex items-center justify-center rounded-xl bg-[#F28C28] px-4 py-2.5 text-sm font-semibold text-[#191919] transition-transform active:scale-[0.98]"
+                            className="mt-4 inline-flex items-center justify-center rounded-xl bg-jse-accent px-4 py-2.5 text-sm font-semibold text-jse-texte transition-transform hover:brightness-105 active:scale-[0.98]"
                         >
                             Installer l’application
                         </button>
@@ -168,7 +168,7 @@ export default function InstallationApplication() {
                 <button
                     type="button"
                     onClick={fermer}
-                    className="absolute right-3 top-3 flex size-10 items-center justify-center rounded-full text-[#FFF7E8]/45 transition-colors hover:bg-white/5 hover:text-[#FFF7E8]"
+                    className="absolute right-3 top-3 flex size-10 items-center justify-center rounded-full text-jse-fond/55 transition-colors hover:bg-white/10 hover:text-jse-fond"
                     aria-label="Fermer"
                 >
                     <X size={22} />
