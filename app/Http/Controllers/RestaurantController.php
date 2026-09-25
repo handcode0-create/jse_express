@@ -158,7 +158,9 @@ class RestaurantController extends Controller
             'statutCommande:id,code,libelle,ordre',
             'lignesCommande.produit:id,nom,description,image',
             'paiements' => fn ($query) => $query->latest('id'),
-            'livraison.attributions.livreur:id,nom,prenom,telephone',
+            'livraison.attributions' => fn ($query) => $query
+                ->where('statut', 'active')
+                ->with('livreur:id,nom,prenom,telephone'),
             'historiquesCommande.statut:id,code,libelle,ordre',
         ]);
 
