@@ -19,10 +19,13 @@ use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\LivreurController;
 use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\AdministrationController;
+use App\Services\PanierService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -713,7 +716,7 @@ Route::get('/commande/validation', function () {
     ]);
 })->middleware(['auth', 'role:client'])->name('commande.validation');
 
-Route::post('/commande', function (Request $request) {
+Route::post('/commande', function (Request $request, PanierService $panierService, NotificationService $notificationService) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
 
     $donnees = $request->validate([
@@ -744,9 +747,15 @@ Route::post('/commande', function (Request $request) {
             abort_unless($ligne->produit && $ligne->produit->statut === 'actif' && $ligne->produit->disponible, 422);
         }
 
-        $sousTotal = (float) $lignes->sum(fn (LignePanier $ligne) => $ligne->quantite * $ligne->prix_unitaire);
+        $sousTotal = 0;
+        foreach ($lignes as $ligne) {
+            $ligne->loadMissing('produit');
+            $prixUnitaire = $panierService->prixUnitaire($ligne);
+            $ligne->update(['prix_unitaire' => $prixUnitaire]);
+            $sousTotal += $ligne->quantite * $prixUnitaire;
+        }
         $fraisLivraison = 500;
-        $reference = 'JSE-' . str_pad((string) ((Commande::max('id') ?? 0) + 1), 6, '0', STR_PAD_LEFT);
+        $reference = 'JSE-TMP-' . Str::uuid()->toString();
 
         $statutId = DB::table('statuts_commandes')->where('code', 'EN_ATTENTE')->value('id');
         abort_unless($statutId, 422);
@@ -763,6 +772,10 @@ Route::post('/commande', function (Request $request) {
             'frais_livraison' => $fraisLivraison,
             'montant_total' => $sousTotal + $fraisLivraison,
             'date_commande' => now(),
+        ]);
+
+        $commande->update([
+            'reference' => 'JSE-' . str_pad((string) $commande->id, 6, '0', STR_PAD_LEFT),
         ]);
 
         HistoriqueCommande::create([
@@ -786,6 +799,24 @@ Route::post('/commande', function (Request $request) {
         }
 
         $panier->lignesPanier()->delete();
+
+        $livraison = \App\Models\Livraison::create([
+            'commande_id' => $commande->id,
+            'zone_id' => $commande->zone_id,
+            'statut' => 'en_attente',
+            'mode_attribution' => 'automatique',
+            'date_attribution' => null,
+            'date_prise_en_charge' => null,
+            'date_livraison' => null,
+        ]);
+
+        $notificationService->sms(
+            $restaurant->user,
+            'Nouvelle commande '.$commande->reference.' reçue sur JSE Express.',
+            $commande->id,
+            $livraison->id,
+            'commande'
+        );
 
         return $commande;
     });
