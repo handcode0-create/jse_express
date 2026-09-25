@@ -35,6 +35,11 @@ class LivraisonService
                 return $active;
             }
 
+            if (! $livraison->commande->pin_livraison_hash) {
+                $this->genererPin($livraison->commande);
+                $livraison->commande->refresh();
+            }
+
             $candidats = ProfilLivreur::query()
                 ->where('zone_id', $livraison->zone_id)
                 ->where('disponibilite', 'disponible')
@@ -86,8 +91,6 @@ class LivraisonService
                 'date_attribution' => now(),
             ]);
 
-            $this->genererPin($livraison->commande);
-
             return $attribution;
         });
     }
@@ -131,7 +134,10 @@ class LivraisonService
                 'date_attribution' => now(),
             ]);
 
-            $this->genererPin($livraison->commande()->firstOrFail());
+            $commande = $livraison->commande()->firstOrFail();
+            if (! $commande->pin_livraison_hash) {
+                $this->genererPin($commande);
+            }
 
             return $attribution;
         });
