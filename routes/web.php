@@ -566,11 +566,31 @@ Route::post('/commandes/{commande}/recommander', function (Commande $commande) {
                 continue;
             }
 
+            $optionsCommande = collect($ligneCommande->options ?? []);
+            $configuration = collect($produit->options ?? []);
+
+            // Une ré-commande réutilise les personnalisations enregistrées dans
+            // la commande. Si une option n'existe plus ou est indisponible,
+            // l'article est ajouté sans cette personnalisation afin de ne pas
+            // réintroduire une option devenue invalide.
+            $optionsValides = $optionsCommande->filter(function (array $option) use ($configuration) {
+                $groupe = $configuration->first(fn ($item) => ($item['name'] ?? '') === ($option['groupe'] ?? ''));
+                if (! $groupe) return false;
+
+                return collect($groupe['items'] ?? [])->contains(fn ($item) =>
+                    ($item['name'] ?? '') === ($option['nom'] ?? '') && (bool) ($item['disponible'] ?? true)
+                );
+            })->values();
+
+            $prixOptions = $optionsValides->sum('prix');
+            $prixUnitaire = (float) $produit->prix + (float) $prixOptions;
+
             $lignePanier = LignePanier::query()
                 ->where('panier_id', $panier->id)
                 ->where('produit_id', $produit->id)
                 ->lockForUpdate()
-                ->first();
+                ->get()
+                ->first(fn (LignePanier $ligne) => ($ligne->options ?? []) === $optionsValides->all());
 
             if ($lignePanier) {
                 $lignePanier->increment('quantite', $ligneCommande->quantite);
@@ -579,7 +599,8 @@ Route::post('/commandes/{commande}/recommander', function (Commande $commande) {
                     'panier_id' => $panier->id,
                     'produit_id' => $produit->id,
                     'quantite' => $ligneCommande->quantite,
-                    'prix_unitaire' => $produit->prix,
+                    'prix_unitaire' => $prixUnitaire,
+                    'options' => $optionsValides->all(),
                 ]);
             }
 
