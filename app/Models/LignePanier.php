@@ -17,6 +17,11 @@ class LignePanier extends Model
         'produit_id',
         'quantite',
         'prix_unitaire',
+        'options',
+    ];
+
+    protected $casts = [
+        'options' => 'array',
     ];
 
     public function panier(): BelongsTo
