@@ -15,6 +15,7 @@ use App\Models\Restaurant;
 use App\Models\User;
 use App\Models\Zone;
 use App\Http\Controllers\AuthentificationController;
+use App\Http\Controllers\RestaurantController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -47,6 +48,27 @@ Route::post('/connexion', [AuthentificationController::class, 'connexion'])->nam
 Route::post('/deconnexion', [AuthentificationController::class, 'deconnexion'])
     ->middleware('auth')
     ->name('deconnexion');
+
+Route::prefix('restaurant')
+    ->middleware(['auth', 'role:restaurant'])
+    ->group(function () {
+        Route::get('/tableau-de-bord', [RestaurantController::class, 'tableauDeBord'])
+            ->name('restaurant.tableau-de-bord');
+
+        Route::patch('/commandes/{commande}/statut', [RestaurantController::class, 'changerStatutCommande'])
+            ->whereNumber('commande')
+            ->name('restaurant.commandes.statut');
+
+        Route::patch('/produits/{produit}/disponibilite', [RestaurantController::class, 'changerDisponibiliteProduit'])
+            ->whereNumber('produit')
+            ->name('restaurant.produits.disponibilite');
+
+        Route::post('/categories', [RestaurantController::class, 'creerCategorie'])
+            ->name('restaurant.categories.creer');
+
+        Route::post('/produits', [RestaurantController::class, 'creerProduit'])
+            ->name('restaurant.produits.creer');
+    });
 
 
 Route::get('/panier', function () {
