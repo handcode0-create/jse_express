@@ -116,6 +116,93 @@ class RestaurantController extends Controller
         ]);
     }
 
+    public function detailsCommande(Request $request, Commande $commande): Response
+    {
+        $restaurant = $this->restaurant($request);
+
+        abort_unless((int) $commande->restaurant_id === (int) $restaurant->id, 404);
+
+        $commande->load([
+            'user:id,nom,prenom,telephone,email',
+            'zone:id,nom',
+            'statutCommande:id,code,libelle,ordre',
+            'lignesCommande.produit:id,nom,description,image',
+            'paiements' => fn ($query) => $query->latest('id'),
+            'livraison.livraisonsAttributions.livreur:id,nom,prenom,telephone',
+            'historiquesCommande.statutCommande:id,code,libelle,ordre',
+        ]);
+
+        $paiement = $commande->paiements->first();
+
+        return Inertia::render('Restaurant/CommandeDetails', [
+            'restaurant' => [
+                'id' => $restaurant->id,
+                'nom' => $restaurant->nom,
+            ],
+            'commande' => [
+                'id' => $commande->id,
+                'reference' => $commande->reference,
+                'client' => $commande->user ? [
+                    'nom' => trim($commande->user->prenom . ' ' . $commande->user->nom),
+                    'telephone' => $commande->user->telephone,
+                    'email' => $commande->user->email,
+                ] : null,
+                'adresse_livraison' => $commande->adresse_livraison,
+                'telephone_livraison' => $commande->telephone_livraison,
+                'zone' => $commande->zone ? [
+                    'id' => $commande->zone->id,
+                    'nom' => $commande->zone->nom,
+                ] : null,
+                'sous_total' => (float) $commande->sous_total,
+                'frais_livraison' => (float) $commande->frais_livraison,
+                'montant_total' => (float) $commande->montant_total,
+                'date_commande' => $commande->date_commande?->format('d/m/Y'),
+                'heure_commande' => $commande->date_commande?->format('H:i'),
+                'statut' => $commande->statutCommande ? [
+                    'code' => $commande->statutCommande->code,
+                    'libelle' => $commande->statutCommande->libelle,
+                ] : null,
+                'lignes' => $commande->lignesCommande->map(fn ($ligne) => [
+                    'id' => $ligne->id,
+                    'nom' => $ligne->nom_produit_snapshot,
+                    'description' => $ligne->produit?->description,
+                    'image' => $ligne->produit?->image,
+                    'quantite' => (int) $ligne->quantite,
+                    'prix_unitaire' => (float) $ligne->prix_unitaire,
+                    'total' => (float) $ligne->total_ligne,
+                ])->values(),
+                'paiement' => $paiement ? [
+                    'moyen' => $paiement->moyen,
+                    'reference_transaction' => $paiement->reference_transaction,
+                    'montant' => (float) $paiement->montant,
+                    'statut' => $paiement->statut,
+                    'date' => $paiement->date_paiement?->format('d/m/Y'),
+                    'heure' => $paiement->date_paiement?->format('H:i'),
+                ] : null,
+                'livraison' => $commande->livraison ? [
+                    'statut' => $commande->livraison->statut,
+                    'mode_attribution' => $commande->livraison->mode_attribution,
+                    'livreur' => $commande->livraison->livraisonsAttributions->first()?->livreur ? [
+                        'nom' => trim(
+                            $commande->livraison->livraisonsAttributions->first()->livreur->prenom . ' ' .
+                            $commande->livraison->livraisonsAttributions->first()->livreur->nom
+                        ),
+                        'telephone' => $commande->livraison->livraisonsAttributions->first()->livreur->telephone,
+                    ] : null,
+                ] : null,
+                'historique' => $commande->historiquesCommande
+                    ->sortBy('date_changement')
+                    ->map(fn ($historique) => [
+                        'code' => $historique->statutCommande?->code,
+                        'libelle' => $historique->statutCommande?->libelle,
+                        'commentaire' => $historique->commentaire,
+                        'date' => $historique->date_changement?->format('d/m/Y'),
+                        'heure' => $historique->date_changement?->format('H:i'),
+                    ])->values(),
+            ],
+        ]);
+    }
+
     public function changerStatutCommande(Request $request, Commande $commande): RedirectResponse
     {
         $restaurant = $this->restaurant($request);
