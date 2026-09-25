@@ -1,6 +1,7 @@
 import React from 'react';
 import { Head, usePage } from '@inertiajs/react';
 import PhotoProfil from '../../Composants/Profil/PhotoProfil';
+import ThemeToggle from '../../Composants/Interface/ThemeToggle';
 
 export default function TableauDeBord({ statistiques = [] }) {
     const { auth } = usePage().props;
@@ -17,8 +18,13 @@ export default function TableauDeBord({ statistiques = [] }) {
             <Head title="Administration — JSE Express" />
             <main className="min-h-screen bg-[#0B0D0E] px-5 py-8 text-white md:px-10">
                 <div className="mx-auto max-w-7xl">
-                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#45B977]">JSE Express</p>
-                    <h1 className="mt-2 text-3xl font-semibold">Administration</h1>
+                    <div className="flex items-start justify-between gap-4">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#45B977]">JSE Express</p>
+                            <h1 className="mt-2 text-3xl font-semibold">Administration</h1>
+                        </div>
+                        <ThemeToggle />
+                    </div>
                     <section className="mt-8 flex items-center gap-4 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
                         <PhotoProfil user={utilisateur} size="size-16" dark />
                         <div className="min-w-0">
