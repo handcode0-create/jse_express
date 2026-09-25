@@ -12,6 +12,7 @@ import {
     Plus,
     Search,
     Share2,
+    ShoppingBag,
     UtensilsCrossed,
     X,
 } from "lucide-react";
