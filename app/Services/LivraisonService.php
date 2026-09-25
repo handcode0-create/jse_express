@@ -35,21 +35,36 @@ class LivraisonService
                 return $active;
             }
 
-            $profil = ProfilLivreur::query()
+            $candidats = ProfilLivreur::query()
                 ->where('zone_id', $livraison->zone_id)
                 ->where('disponibilite', 'disponible')
                 ->whereHas('user', fn ($query) => $query
                     ->where('role', 'livreur')
                     ->where('statut', 'actif'))
-                ->whereNotExists(function ($query) {
-                    $query->select(DB::raw(1))
-                        ->from('attributions_livraison as active_attribution')
-                        ->whereColumn('active_attribution.livreur_id', 'profils_livreurs.user_id')
-                        ->where('active_attribution.statut', 'active');
-                })
                 ->orderBy('id')
-                ->lockForUpdate()
-                ->first();
+                ->pluck('id');
+
+            $profil = null;
+
+            foreach ($candidats as $profilId) {
+                $candidate = ProfilLivreur::query()->whereKey($profilId)->lockForUpdate()->first();
+
+                if (! $candidate || $candidate->disponibilite !== 'disponible') {
+                    continue;
+                }
+
+                $occupe = AttributionLivraison::query()
+                    ->where('livreur_id', $candidate->user_id)
+                    ->where('statut', 'active')
+                    ->exists();
+
+                if ($occupe) {
+                    continue;
+                }
+
+                $profil = $candidate;
+                break;
+            }
 
             if (! $profil) {
                 return null;
