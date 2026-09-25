@@ -36,6 +36,8 @@ class LivreurController extends Controller
                 'livraison.commande.restaurant:id,nom,telephone,adresse',
                 'livraison.commande.zone:id,nom',
                 'livraison.commande.statutCommande:id,code,libelle,ordre',
+                'livraison.commande.lignesCommande:id,commande_id,produit_id,nom_produit_snapshot,quantite,prix_unitaire,total_ligne,options',
+                'livraison.commande.lignesCommande.produit:id,nom,image',
                 'livraison.zone:id,nom',
             ])
             ->latest('date_attribution')
@@ -68,6 +70,12 @@ class LivreurController extends Controller
                 'telephone_livraison' => $attribution->livraison->commande->telephone_livraison,
                 'zone' => $attribution->livraison->zone?->nom,
                 'montant_total' => (float) $attribution->livraison->commande->montant_total,
+                'articles' => $attribution->livraison->commande->lignesCommande->map(fn ($ligne) => [
+                    'nom' => $ligne->nom_produit_snapshot ?: $ligne->produit?->nom ?: 'Article',
+                    'quantite' => (int) $ligne->quantite,
+                    'image' => $ligne->produit?->image,
+                    'total_ligne' => (float) $ligne->total_ligne,
+                ])->values(),
                 'date_attribution' => $attribution->date_attribution ? \Carbon\Carbon::parse($attribution->date_attribution)->format('d/m/Y H:i') : null,
             ])->values();
 
@@ -89,6 +97,10 @@ class LivreurController extends Controller
                 'missions_du_jour' => AttributionLivraison::query()
                     ->where('livreur_id', $request->user()->id)
                     ->whereDate('date_attribution', today())
+                    ->count(),
+                'livraisons_terminees' => AttributionLivraison::query()
+                    ->where('livreur_id', $request->user()->id)
+                    ->where('statut', 'terminee')
                     ->count(),
             ],
         ]);
