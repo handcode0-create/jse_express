@@ -1,4 +1,5 @@
 import { router, usePage } from "@inertiajs/react";
+import NavigationFlottante from "../Composants/Navigation/NavigationFlottante";
 import {
     Bell,
     ChevronDown,
@@ -580,11 +581,7 @@ export default function Accueil() {
             )}
 
             {/* Bottom bar mobile */}
-            <nav className="fixed inset-x-0 bottom-0 z-40 px-4 pb-4 lg:hidden">
-                <div className="mx-auto flex h-[66px] w-full max-w-md items-center justify-around rounded-[24px] border border-white/80 bg-white/95 px-1 shadow-xl shadow-jse-principal/10 backdrop-blur-xl">
-                    {navigation.map((item) => <NavigationItem key={item.label} item={item} compact />)}
-                </div>
-            </nav>
+            <NavigationFlottante type="client" actif="accueil" />
         </main>
     );
 }
