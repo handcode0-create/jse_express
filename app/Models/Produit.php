@@ -20,8 +20,14 @@ public $timestamps = false;
         'description',
         'prix',
         'image',
+        'options',
         'disponible',
         'statut',
+    ];
+
+    protected $casts = [
+        'options' => 'array',
+        'disponible' => 'boolean',
     ];
 
     public function restaurant(): BelongsTo
