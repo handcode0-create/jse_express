@@ -1,5 +1,6 @@
 import { router, usePage } from "@inertiajs/react";
 import NavigationFlottante from "../../Composants/Navigation/NavigationFlottante";
+import PhotoProfil from "../../Composants/Profil/PhotoProfil";
 import {
     ArrowLeft,
     Bike,
@@ -705,10 +706,7 @@ function Profile({ livreur, zones = [], historique = [], statistiques = {}, load
                     <div className="absolute -right-20 -top-20 size-48 rounded-full border border-white/5 bg-jse-secondaire/10" />
                     <div className="absolute -bottom-24 -left-16 size-36 rounded-full bg-jse-accent/5 blur-2xl" />
                     <div className="relative flex items-center gap-4">
-                        <div className="relative flex size-[72px] shrink-0 items-center justify-center rounded-full border-4 border-[#101719] bg-jse-accent text-xl font-bold text-jse-principal shadow-[0_8px_30px_rgba(242,140,40,.2)]">
-                            {initiales(nomComplet)}
-                            <span className={"absolute bottom-0 right-0 size-4 rounded-full border-[3px] border-jse-principal " + (disponible ? "bg-jse-secondaire" : "bg-white/25")} />
-                        </div>
+                        <PhotoProfil user={livreur} size="size-[72px]" dark />
                         <div className="min-w-0">
                             <p className="text-lg font-bold text-white">{nomComplet}</p>
                             <p className="mt-1 text-[10px] text-white/45">{livreur?.telephone || "—"}</p>
