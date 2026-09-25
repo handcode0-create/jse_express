@@ -1,4 +1,5 @@
 import { router, usePage } from "@inertiajs/react";
+import NavigationFlottante from "../../Composants/Navigation/NavigationFlottante";
 import {
     ArrowLeft,
     Bike,
@@ -778,28 +779,7 @@ export default function TableauDeBord() {
                     {onglet === "profil" && <Profile livreur={livreur} />}
                 </div>
 
-                <nav className="fixed bottom-4 left-1/2 z-40 flex h-[68px] w-[calc(100%-24px)] max-w-[456px] -translate-x-1/2 items-center justify-around rounded-[34px] border border-white/10 bg-[#101719]/95 px-2 shadow-[0_20px_60px_rgba(0,0,0,.5)] backdrop-blur-2xl">
-                    {[
-                        ["accueil", "Accueil", Home],
-                        ["missions", "Missions", Receipt],
-                        ["carte", "Carte", MapPin],
-                        ["gains", "Gains", WalletCards],
-                        ["profil", "Profil", UserRound],
-                    ].map(([id, label, Icon]) => {
-                        const selected = onglet === id;
-                        return (
-                            <button
-                                key={id}
-                                type="button"
-                                onClick={() => setOnglet(id)}
-                                className={"flex items-center gap-1.5 rounded-full px-3 py-3 transition " + (selected ? "bg-jse-accent text-jse-principal" : "text-white/45")}
-                            >
-                                <Icon size={17} />
-                                {selected && <span className="text-[9px] font-bold">{label}</span>}
-                            </button>
-                        );
-                    })}
-                </nav>
+                <NavigationFlottante type="livreur" actif="accueil" onChange={setOnglet} />
             </div>
 
             {mission && ecran === "detail" && (
