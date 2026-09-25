@@ -64,7 +64,7 @@ class LivreurController extends Controller
                 'telephone_livraison' => $attribution->livraison->commande->telephone_livraison,
                 'zone' => $attribution->livraison->zone?->nom,
                 'montant_total' => (float) $attribution->livraison->commande->montant_total,
-                'date_attribution' => $attribution->date_attribution?->format('d/m/Y H:i'),
+                'date_attribution' => $attribution->date_attribution ? \Carbon\Carbon::parse($attribution->date_attribution)->format('d/m/Y H:i') : null,
             ])->values();
 
         return Inertia::render('Livreur/TableauDeBord', [
