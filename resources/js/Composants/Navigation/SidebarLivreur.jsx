@@ -9,6 +9,7 @@ import {
     UserRound,
 } from "lucide-react";
 import PhotoProfil from "../Profil/PhotoProfil";
+import ThemeToggle from "../Interface/ThemeToggle";
 
 const navigation = [
     { id: "accueil", label: "Tableau de bord", icon: Home },
@@ -24,10 +25,11 @@ export default function SidebarLivreur({ actif, livreur, onChange }) {
 
     return (
         <aside className="sticky top-0 hidden h-screen w-[260px] shrink-0 flex-col border-r border-white/8 bg-[#0B1011] px-4 py-6 lg:flex">
-            <div className="flex items-center gap-3 px-2">
+            <div className="flex items-center justify-between gap-3 px-2">
                 <div className="flex size-11 items-center justify-center rounded-2xl bg-jse-accent text-jse-principal shadow-lg shadow-jse-accent/10">
                     <Bike size={22} strokeWidth={2.2} />
                 </div>
+                <ThemeToggle compact />
                 <div>
                     <p className="text-[8px] font-semibold uppercase tracking-[0.24em] text-white/35">JSE Express</p>
                     <p className="mt-1 text-sm font-bold text-white">Espace livreur</p>
