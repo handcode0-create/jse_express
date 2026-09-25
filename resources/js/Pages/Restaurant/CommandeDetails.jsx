@@ -42,10 +42,10 @@ export default function CommandeDetailsRestaurant() {
                         <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/35">{restaurant?.nom || "Restaurant"}</p>
                         <h1 className="mt-1 text-base font-bold text-white">#{commande?.reference}</h1>
                     </div>
-                    <div className="flex size-11 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm ring-1 ring-jse-texte/5"><ClipboardList size={19} /></div>
+                    <div className="flex size-11 items-center justify-center rounded-full bg-[#101215] text-white shadow-sm ring-1 ring-white/10"><ClipboardList size={19} /></div>
                 </header>
 
-                {flash?.success && <div className="rounded-2xl bg-jse-secondaire/10 px-4 py-3 text-xs font-semibold text-jse-principal">{flash.success}</div>}
+                {flash?.success && <div className="rounded-2xl bg-jse-secondaire/10 px-4 py-3 text-xs font-semibold text-white">{flash.success}</div>}
 
                 <section className="mt-2 rounded-[28px] bg-jse-principal p-5 text-white shadow-sm sm:p-6">
                     <div className="flex items-start justify-between gap-4">
@@ -63,7 +63,7 @@ export default function CommandeDetailsRestaurant() {
                     <div className="mt-4 rounded-[20px] bg-white/5 p-4">
                         <p className="text-sm font-bold text-white">{commande?.client?.nom || "Client"}</p>
                         <p className="mt-1 text-xs text-white/55">{commande?.client?.telephone}</p>
-                        {commande?.client?.email && <p className="mt-1 text-xs text-jse-texte/55">{commande.client.email}</p>}
+                        {commande?.client?.email && <p className="mt-1 text-xs text-white/55">{commande.client.email}</p>}
                     </div>
                 </Section>
 
@@ -71,7 +71,7 @@ export default function CommandeDetailsRestaurant() {
                     <div className="mt-4 divide-y divide-jse-texte/8">
                         {(commande?.lignes || []).map((ligne) => (
                             <div key={ligne.id} className="flex items-center gap-3 py-4 first:pt-0 last:pb-0">
-                                <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-jse-fond text-jse-principal"><Package size={18} /></div>
+                                <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#0b0d0f] text-white"><Package size={18} /></div>
                                 <div className="min-w-0 flex-1">
                                     <p className="text-sm font-semibold">{ligne.nom}</p>
                                     <p className="mt-1 text-[10px] text-white/45">{ligne.quantite} × {formatMontant(ligne.prix_unitaire)}</p>
@@ -83,39 +83,39 @@ export default function CommandeDetailsRestaurant() {
                 </Section>
 
                 <Section title="Livraison" icon={Bike}>
-                    <div className="mt-4 rounded-[20px] bg-jse-fond p-4">
+                    <div className="mt-4 rounded-[20px] bg-[#0b0d0f] p-4">
                         <div className="flex gap-3">
                             <MapPin size={19} className="mt-0.5 shrink-0 text-jse-secondaire" />
                             <div>
                                 <p className="text-sm font-semibold">{commande?.adresse_livraison}</p>
                                 <p className="mt-1 text-xs text-white/50">{commande?.zone?.nom || "Zone non précisée"}</p>
-                                <p className="mt-1 text-xs text-jse-texte/50">{commande?.telephone_livraison}</p>
+                                <p className="mt-1 text-xs text-white/50">{commande?.telephone_livraison}</p>
                             </div>
                         </div>
                         {commande?.livraison?.livreur && (
                             <div className="mt-4 border-t border-jse-texte/8 pt-4">
-                                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-jse-texte/35">Livreur attribué</p>
+                                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Livreur attribué</p>
                                 <p className="mt-1 text-sm font-semibold">{commande.livraison.livreur.nom}</p>
-                                <p className="mt-1 text-xs text-jse-texte/50">{commande.livraison.livreur.telephone}</p>
+                                <p className="mt-1 text-xs text-white/50">{commande.livraison.livreur.telephone}</p>
                             </div>
                         )}
                     </div>
                 </Section>
 
                 <Section title="Paiement" icon={CreditCard}>
-                    <div className="mt-4 flex items-center justify-between rounded-[20px] bg-jse-fond p-4">
+                    <div className="mt-4 flex items-center justify-between rounded-[20px] bg-[#0b0d0f] p-4">
                         <div>
                             <p className="text-sm font-semibold">{commande?.paiement?.moyen || "Non enregistré"}</p>
-                            <p className="mt-1 text-[10px] text-jse-texte/45">{commande?.paiement?.statut || "Aucun paiement"}</p>
+                            <p className="mt-1 text-[10px] text-white/45">{commande?.paiement?.statut || "Aucun paiement"}</p>
                         </div>
-                        <p className="text-lg font-bold text-jse-principal">{formatMontant(commande?.paiement?.montant ?? commande?.montant_total)}</p>
+                        <p className="text-lg font-bold text-white">{formatMontant(commande?.paiement?.montant ?? commande?.montant_total)}</p>
                     </div>
                 </Section>
 
                 <Section title="Total" icon={ClipboardList}>
                     <div className="mt-4 space-y-3 text-sm">
-                        <div className="flex justify-between text-jse-texte/55"><span>Sous-total</span><span>{formatMontant(commande?.sous_total)}</span></div>
-                        <div className="flex justify-between text-jse-texte/55"><span>Livraison</span><span>{formatMontant(commande?.frais_livraison)}</span></div>
+                        <div className="flex justify-between text-white/55"><span>Sous-total</span><span>{formatMontant(commande?.sous_total)}</span></div>
+                        <div className="flex justify-between text-white/55"><span>Livraison</span><span>{formatMontant(commande?.frais_livraison)}</span></div>
                         <div className="border-t border-jse-texte/10 pt-3"><div className="flex items-center justify-between"><span className="font-bold">Total</span><span className="font-against text-2xl text-jse-secondaire">{formatMontant(commande?.montant_total)}</span></div></div>
                     </div>
                 </Section>
@@ -127,7 +127,7 @@ export default function CommandeDetailsRestaurant() {
                                 <span className="mt-1 size-2 shrink-0 rounded-full bg-jse-secondaire" />
                                 <div>
                                     <p className="text-xs font-semibold">{item.libelle}</p>
-                                    <p className="mt-1 text-[10px] text-jse-texte/45">{item.date} · {item.heure}{item.commentaire ? ` · ${item.commentaire}` : ""}</p>
+                                    <p className="mt-1 text-[10px] text-white/45">{item.date} · {item.heure}{item.commentaire ? ` · ${item.commentaire}` : ""}</p>
                                 </div>
                             </div>
                         ))}
