@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://db.onlinewebfonts.com/c/893fdce7fe8ecb381f012ce2edd2dd6c?family=against-Regular');
 
 @import "tailwindcss";
 
@@ -78,14 +79,6 @@ button:disabled {
 :focus-visible {
     outline: 2px solid #45B977;
     outline-offset: 3px;
-}
-
-@font-face {
-    font-family: "Against";
-    src: url("/font/against_regular.ttf") format("truetype");
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
 }
 
 .font-against {
