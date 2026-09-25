@@ -669,10 +669,11 @@ function Historique({ historique = [] }) {
     );
 }
 
-function Profile({ livreur, historique = [], statistiques = {}, loading, onSave, onLogout }) {
+function Profile({ livreur, zones = [], historique = [], statistiques = {}, loading, onSave, onLogout }) {
     const [edition, setEdition] = useState(false);
     const [form, setForm] = useState({
         nom: "", prenom: "", telephone: "", email: "", telephone_secondaire: "",
+        zone_id: "",
     });
 
     useEffect(() => {
@@ -682,6 +683,7 @@ function Profile({ livreur, historique = [], statistiques = {}, loading, onSave,
             telephone: livreur?.telephone || "",
             email: livreur?.email || "",
             telephone_secondaire: livreur?.telephone_secondaire || "",
+            zone_id: livreur?.zone_id || "",
         });
     }, [livreur]);
 
@@ -775,6 +777,19 @@ function Profile({ livreur, historique = [], statistiques = {}, loading, onSave,
                                             className="mt-1 h-11 w-full rounded-xl border border-white/8 bg-[#070b0d] px-3 text-xs text-white outline-none focus:border-jse-accent/70" />
                                     </label>
                                 ))}
+                                <label className="block">
+                                    <span className="text-[9px] font-semibold text-white/40">Zone de desserte</span>
+                                    <select
+                                        value={form.zone_id}
+                                        onChange={(event) => modifier("zone_id", event.target.value)}
+                                        className="mt-1 h-11 w-full rounded-xl border border-white/8 bg-[#070b0d] px-3 text-xs text-white outline-none focus:border-jse-accent/70"
+                                    >
+                                        <option value="" disabled>Sélectionner une zone</option>
+                                        {zones.map((zone) => (
+                                            <option key={zone.id} value={zone.id}>{zone.nom}</option>
+                                        ))}
+                                    </select>
+                                </label>
                             </div>
                             <div className="mt-4 grid grid-cols-2 gap-2">
                                 <button type="button" onClick={() => setEdition(false)} className="rounded-full border border-white/10 py-3 text-xs font-semibold text-white/65">Annuler</button>
@@ -825,6 +840,7 @@ export default function TableauDeBord() {
         statistiques = {},
         flash = {},
         notifications = [],
+        zones = [],
     } = usePage().props;
 
     const [onglet, setOnglet] = useState("accueil");
@@ -1000,6 +1016,7 @@ export default function TableauDeBord() {
                     {onglet === "profil" && (
                         <Profile
                             livreur={livreur}
+                            zones={zones}
                             historique={historique}
                             statistiques={statistiques}
                             loading={loading}
