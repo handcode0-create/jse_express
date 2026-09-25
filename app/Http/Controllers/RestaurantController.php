@@ -122,6 +122,21 @@ class RestaurantController extends Controller
                 'notifications' => Notification::query()
                     ->where('user_id', $request->user()->id)
                     ->count(),
+                'commandes_total' => Commande::query()
+                    ->where('restaurant_id', $restaurant->id)
+                    ->count(),
+                'commandes_livrees' => Commande::query()
+                    ->where('restaurant_id', $restaurant->id)
+                    ->whereHas('statutCommande', fn ($query) => $query->where('code', 'LIVREE'))
+                    ->count(),
+                'revenus_total' => (float) Paiement::query()
+                    ->whereHas('commande', fn ($query) => $query->where('restaurant_id', $restaurant->id))
+                    ->where('statut', 'reussi')
+                    ->sum('montant'),
+                'panier_moyen' => (float) Paiement::query()
+                    ->whereHas('commande', fn ($query) => $query->where('restaurant_id', $restaurant->id))
+                    ->where('statut', 'reussi')
+                    ->avg('montant'),
             ],
         ]);
     }
@@ -211,6 +226,52 @@ class RestaurantController extends Controller
                     ])->values(),
             ],
         ]);
+    }
+
+    public function modifierProfilRestaurant(Request $request): RedirectResponse
+    {
+        $restaurant = $this->restaurant($request);
+
+        $donnees = $request->validate([
+            'nom' => ['required', 'string', 'max:150'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'telephone' => ['required', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:150'],
+            'adresse' => ['required', 'string', 'max:255'],
+        ]);
+
+        $restaurant->update($donnees);
+
+        return back()->with('success', 'Les informations du restaurant ont été mises à jour.');
+    }
+
+    public function modifierHoraires(Request $request): RedirectResponse
+    {
+        $restaurant = $this->restaurant($request);
+
+        $donnees = $request->validate([
+            'horaires' => ['required', 'string', 'max:500'],
+        ]);
+
+        $restaurant->update(['horaires' => $donnees['horaires']]);
+
+        return back()->with('success', 'Les horaires ont été mis à jour.');
+    }
+
+    public function modifierCompte(Request $request): RedirectResponse
+    {
+        $utilisateur = $request->user();
+
+        $donnees = $request->validate([
+            'prenom' => ['required', 'string', 'max:100'],
+            'nom' => ['required', 'string', 'max:100'],
+            'telephone' => ['required', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:150'],
+        ]);
+
+        $utilisateur->update($donnees);
+
+        return back()->with('success', 'Votre profil a été mis à jour.');
     }
 
     public function changerStatutCommande(Request $request, Commande $commande): RedirectResponse
