@@ -1,5 +1,6 @@
 import { router, usePage } from "@inertiajs/react";
 import NavigationFlottante from "../../Composants/Navigation/NavigationFlottante";
+import SidebarLivreur from "../../Composants/Navigation/SidebarLivreur";
 import PhotoProfil from "../../Composants/Profil/PhotoProfil";
 import {
     ArrowLeft,
@@ -950,15 +951,19 @@ export default function TableauDeBord() {
     }
 
     return (
-        <main className="min-h-screen bg-[#070b0d] pb-28 text-white">
-            <div className="mx-auto w-full max-w-[480px]">
-                <TopBar livreur={livreur} onNotifications={() => setOnglet("notifications")} />
-                <div className="bg-jse-principal px-5 pb-5">
+        <main className="min-h-screen bg-[#070b0d] pb-28 text-white lg:pb-0">
+            <div className="flex min-h-screen">
+                <SidebarLivreur actif={onglet} livreur={livreur} onChange={setOnglet} />
+
+                <div className="min-w-0 flex-1">
+                    <div className="mx-auto w-full max-w-[1480px]">
+                        <TopBar livreur={livreur} onNotifications={() => setOnglet("notifications")} />
+                        <div className="bg-jse-principal px-5 pb-5 lg:px-8 lg:pb-7">
                     <Stats statistiques={statistiques} zone={livreur?.zone} />
                     <Availability livreur={livreur} onToggle={toggleDisponibilite} loading={loading} />
                 </div>
 
-                <div className="px-4 pt-7">
+                        <div className="px-4 pt-7 lg:px-8 lg:pt-9">
                     {flash?.success && (
                         <div className="mb-4 rounded-2xl border border-jse-secondaire/20 bg-jse-secondaire/10 px-4 py-3 text-[10px] font-semibold text-jse-secondaire">
                             {flash.success}
@@ -1029,7 +1034,9 @@ export default function TableauDeBord() {
                     )}
                 </div>
 
-                <NavigationFlottante type="livreur" actif={onglet} onChange={setOnglet} />
+                        <NavigationFlottante type="livreur" actif={onglet} onChange={setOnglet} />
+                    </div>
+                </div>
             </div>
 
             {mission && ecran === "detail" && (
