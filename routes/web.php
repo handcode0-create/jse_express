@@ -645,6 +645,11 @@ Route::get('/commande/{commande}', function (Commande $commande) {
     ]);
 })->whereNumber('commande')->middleware(['auth', 'role:client'])->name('commande.confirmation');
 
+Route::post('/commande/{commande}/annuler', [CommandeController::class, 'annuler'])
+    ->whereNumber('commande')
+    ->middleware(['auth', 'role:client'])
+    ->name('commande.annuler');
+
 Route::get('/commande/validation', function () {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
 
