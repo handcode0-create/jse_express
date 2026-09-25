@@ -594,7 +594,7 @@ export default function TableauDeBord() {
                                                         <span className={`rounded-full px-2.5 py-1 text-[8px] font-semibold backdrop-blur-md ${item.disponible ? "bg-jse-secondaire text-jse-texte" : "bg-black/60 text-white/60"}`}>
                                                             {item.disponible ? "Disponible" : "Indisponible"}
                                                         </span>
-                                                        <button type="button" onClick={() => executer("patch", `/restaurant/produits/${item.id}/disponibilite`)} className={`flex size-9 items-center justify-center rounded-full border border-white/10 backdrop-blur-md ${item.disponible ? "bg-black/35 text-white" : "bg-black/60 text-white/45"}`} aria-label="Changer la disponibilité">
+                                                        <button type="button" onClick={(event) => { event.stopPropagation(); executer("patch", `/restaurant/produits/${item.id}/disponibilite`); }} className={`flex size-9 items-center justify-center rounded-full border border-white/10 backdrop-blur-md ${item.disponible ? "bg-black/35 text-white" : "bg-black/60 text-white/45"}`} aria-label="Changer la disponibilité">
                                                             <Power size={15} />
                                                         </button>
                                                     </div>
@@ -697,7 +697,7 @@ export default function TableauDeBord() {
                                                         type="checkbox"
                                                         checked={Boolean(groupe.multiple)}
                                                         onChange={(e) => modifierGroupeOption(indexGroupe, "multiple", e.target.checked)}
-                                                        className="accent-[var(--jse-accent)]"
+                                                        className="accent-[#F28C28]"
                                                     />
                                                     Plusieurs choix
                                                 </label>
