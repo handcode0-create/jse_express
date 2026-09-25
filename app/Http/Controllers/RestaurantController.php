@@ -196,6 +196,7 @@ class RestaurantController extends Controller
                     'quantite' => (int) $ligne->quantite,
                     'prix_unitaire' => (float) $ligne->prix_unitaire,
                     'total' => (float) $ligne->total_ligne,
+                    'options' => $ligne->options ?? [],
                 ])->values(),
                 'paiement' => $paiement ? [
                     'moyen' => $paiement->moyen,
