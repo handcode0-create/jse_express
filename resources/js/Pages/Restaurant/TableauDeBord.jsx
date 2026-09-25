@@ -384,14 +384,10 @@ export default function TableauDeBord() {
                                 key={id}
                                 type="button"
                                 onClick={() => aller(id)}
-                                className={`relative flex h-[54px] min-w-[72px] flex-1 flex-col items-center justify-center gap-1 rounded-[28px] px-2 text-[9px] font-semibold transition-all duration-200 active:scale-95 ${
-                                    actif
-                                        ? "bg-jse-accent text-white shadow-[0_6px_18px_rgba(242,140,40,0.28)]"
-                                        : "text-white/45 hover:text-white/75"
-                                }`}
+                                className={`relative flex h-[54px] min-w-[54px] flex-1 items-center justify-center rounded-[28px] px-2 text-[9px] font-semibold transition-all duration-200 active:scale-95 ${actif ? "gap-1.5 bg-jse-accent text-white shadow-[0_6px_18px_rgba(242,140,40,0.28)]" : "gap-0 text-white/45 hover:text-white/75"}`}
                             >
                                 <Icon size={18} strokeWidth={actif ? 2.4 : 1.8} />
-                                <span>{label}</span>
+                                {actif && <span>{label}</span>}
                             </button>
                         );
                     })}
