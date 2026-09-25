@@ -19,6 +19,8 @@ public $timestamps = false;
         'sous_total' => 'decimal:2',
         'frais_livraison' => 'decimal:2',
         'montant_total' => 'decimal:2',
+        'pin_genere_at' => 'datetime',
+        'pin_valide_at' => 'datetime',
     ];
 
     protected $fillable = [
@@ -32,6 +34,10 @@ public $timestamps = false;
         'sous_total',
         'frais_livraison',
         'montant_total',
+        'pin_livraison_hash',
+        'pin_livraison_chiffre',
+        'pin_genere_at',
+        'pin_valide_at',
         'date_commande',
     ];
 
