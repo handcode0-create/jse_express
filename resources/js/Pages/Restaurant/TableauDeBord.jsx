@@ -160,9 +160,9 @@ export default function TableauDeBord() {
             ...groupes,
             {
                 name: "Accompagnement",
-                obligatoire: false,
+                obligatoire: true,
                 multiple: false,
-                min: 0,
+                min: 1,
                 max: 1,
                 items: [],
             },
@@ -189,7 +189,7 @@ export default function TableauDeBord() {
                           ...groupe,
                           items: [
                               ...(groupe.items || []),
-                              { name: "Nouvel accompagnement", prix: 0, disponible: true },
+                              { name: "Nouvelle option", prix: 0, disponible: true },
                           ],
                       }
                     : groupe,
@@ -681,101 +681,125 @@ export default function TableauDeBord() {
                                     </div>
                                 </div>
 
-                                <div className="max-h-[58vh] space-y-3 overflow-y-auto pr-1">
+                                <div className="max-h-[58vh] space-y-4 overflow-y-auto pr-1">
+                                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                                        <p className="text-[10px] font-semibold text-white/80">Personnalisation du plat</p>
+                                        <p className="mt-1 text-[10px] leading-4 text-white/35">
+                                            Créez les groupes d’options comme dans l’expérience client : type de choix, accompagnements et suppléments.
+                                        </p>
+                                    </div>
+
                                     {optionsProduit.map((groupe, indexGroupe) => (
-                                        <div key={indexGroupe} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-                                            <div className="flex items-start gap-2">
+                                        <div key={indexGroupe} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                                            <div className="flex items-start gap-3">
                                                 <div className="min-w-0 flex-1">
+                                                    <label className="mb-1.5 block text-[9px] font-semibold uppercase tracking-[0.14em] text-white/35">Nom du groupe</label>
                                                     <ChampDark
                                                         value={groupe.name}
                                                         onChange={(e) => modifierGroupeOption(indexGroupe, "name", e.target.value)}
-                                                        placeholder="Nom du groupe : Accompagnement"
+                                                        placeholder="Ex. Type de poisson, Accompagnement, Sauce"
                                                     />
                                                 </div>
                                                 <button
                                                     type="button"
                                                     onClick={() => supprimerGroupeOption(indexGroupe)}
-                                                    className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-jse-danger/10 text-jse-danger"
+                                                    className="mt-6 flex size-11 shrink-0 items-center justify-center rounded-xl bg-jse-danger/10 text-jse-danger"
                                                     aria-label="Supprimer le groupe"
                                                 >
                                                     <X size={15} />
                                                 </button>
                                             </div>
 
-                                            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                                                <label className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2.5 text-[10px] text-white/65">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={Boolean(groupe.obligatoire)}
-                                                        onChange={(e) => modifierGroupeOption(indexGroupe, "obligatoire", e.target.checked)}
-                                                        className="accent-[#F28C28]"
-                                                    />
-                                                    Choix obligatoire
-                                                </label>
-                                                <label className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2.5 text-[10px] text-white/65">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={Boolean(groupe.multiple)}
-                                                        onChange={(e) => modifierGroupeOption(indexGroupe, "multiple", e.target.checked)}
-                                                        className="accent-[#F28C28]"
-                                                    />
-                                                    Plusieurs choix
-                                                </label>
+                                            <div className="mt-4">
+                                                <label className="mb-2 block text-[9px] font-semibold uppercase tracking-[0.14em] text-white/35">Type de choix</label>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => modifierGroupeOption(indexGroupe, "multiple", false)}
+                                                        className={`rounded-xl border px-3 py-3 text-left transition ${!groupe.multiple ? "border-jse-secondaire bg-jse-secondaire/10 text-white" : "border-white/10 bg-white/5 text-white/45"}`}
+                                                    >
+                                                        <span className="block text-[10px] font-semibold">Un seul choix</span>
+                                                        <span className="mt-1 block text-[8px] text-white/35">Ex. type de poisson</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => modifierGroupeOption(indexGroupe, "multiple", true)}
+                                                        className={`rounded-xl border px-3 py-3 text-left transition ${groupe.multiple ? "border-jse-secondaire bg-jse-secondaire/10 text-white" : "border-white/10 bg-white/5 text-white/45"}`}
+                                                    >
+                                                        <span className="block text-[10px] font-semibold">Plusieurs choix</span>
+                                                        <span className="mt-1 block text-[8px] text-white/35">Ex. sauces et suppléments</span>
+                                                    </button>
+                                                </div>
                                             </div>
 
-                                            <div className="mt-3 grid grid-cols-2 gap-2">
-                                                <ChampDark
-                                                    type="number"
-                                                    min="0"
-                                                    max="20"
-                                                    value={groupe.min ?? 0}
-                                                    onChange={(e) => modifierGroupeOption(indexGroupe, "min", Number(e.target.value))}
-                                                    placeholder="Minimum"
+                                            <label className="mt-3 flex cursor-pointer items-center justify-between rounded-xl bg-white/5 px-3 py-3">
+                                                <span>
+                                                    <span className="block text-[10px] font-semibold text-white/75">Choix obligatoire</span>
+                                                    <span className="mt-0.5 block text-[8px] text-white/30">Le client doit sélectionner une option.</span>
+                                                </span>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={Boolean(groupe.obligatoire)}
+                                                    onChange={(e) => {
+                                                        const obligatoire = e.target.checked;
+                                                        modifierGroupeOption(indexGroupe, "obligatoire", obligatoire);
+                                                        modifierGroupeOption(indexGroupe, "min", obligatoire ? 1 : 0);
+                                                    }}
+                                                    className="size-4 accent-[#45B977]"
                                                 />
-                                                <ChampDark
-                                                    type="number"
-                                                    min="1"
-                                                    max="20"
-                                                    value={groupe.max ?? 1}
-                                                    onChange={(e) => modifierGroupeOption(indexGroupe, "max", Number(e.target.value))}
-                                                    placeholder="Maximum"
-                                                />
+                                            </label>
+
+                                            <div className="mt-4 flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-[10px] font-semibold text-white/75">Choix disponibles</p>
+                                                    <p className="mt-0.5 text-[8px] text-white/30">Chaque option peut avoir un supplément.</p>
+                                                </div>
+                                                <span className="rounded-full bg-jse-accent/10 px-2.5 py-1 text-[8px] font-semibold text-jse-accent">{(groupe.items || []).length} option{(groupe.items || []).length > 1 ? "s" : ""}</span>
                                             </div>
 
                                             <div className="mt-3 space-y-2">
                                                 {(groupe.items || []).map((item, indexItem) => (
-                                                    <div key={indexItem} className="flex items-center gap-2 rounded-xl bg-white/5 p-2">
-                                                        <div className="min-w-0 flex-1">
+                                                    <div key={indexItem} className="rounded-xl border border-white/10 bg-[#0b0d0f] p-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/25">
+                                                                {groupe.multiple ? <Check size={13} /> : <span className="size-2 rounded-full border border-current" />}
+                                                            </span>
                                                             <input
                                                                 value={item.name}
                                                                 onChange={(e) => modifierItemOption(indexGroupe, indexItem, "name", e.target.value)}
-                                                                placeholder="Nom de l'option"
-                                                                className="h-9 w-full bg-transparent px-2 text-[11px] text-white outline-none placeholder:text-white/25"
+                                                                placeholder="Nom de l’option"
+                                                                className="h-9 min-w-0 flex-1 bg-transparent px-1 text-[11px] font-medium text-white outline-none placeholder:text-white/25"
                                                             />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => supprimerItemOption(indexGroupe, indexItem)}
+                                                                className="flex size-8 shrink-0 items-center justify-center rounded-lg text-white/30 hover:bg-jse-danger/10 hover:text-jse-danger"
+                                                                aria-label="Supprimer l’option"
+                                                            >
+                                                                <X size={14} />
+                                                            </button>
                                                         </div>
-                                                        <input
-                                                            type="number"
-                                                            min="0"
-                                                            step="50"
-                                                            value={item.prix}
-                                                            onChange={(e) => modifierItemOption(indexGroupe, indexItem, "prix", Number(e.target.value))}
-                                                            className="h-9 w-24 rounded-lg bg-black/20 px-2 text-[10px] text-white outline-none"
-                                                            aria-label="Prix du supplément"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => modifierItemOption(indexGroupe, indexItem, "disponible", !item.disponible)}
-                                                            className={`rounded-full px-2.5 py-1 text-[8px] font-semibold ${item.disponible ? "bg-jse-secondaire/15 text-jse-secondaire" : "bg-white/5 text-white/35"}`}
-                                                        >
-                                                            {item.disponible ? "Actif" : "Off"}
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => supprimerItemOption(indexGroupe, indexItem)}
-                                                            className="flex size-8 items-center justify-center rounded-lg text-white/35 hover:bg-white/5 hover:text-white"
-                                                        >
-                                                            <X size={14} />
-                                                        </button>
+                                                        <div className="mt-2 flex items-center gap-2 pl-9">
+                                                            <div className="relative flex-1">
+                                                                <input
+                                                                    type="number"
+                                                                    min="0"
+                                                                    step="50"
+                                                                    value={item.prix}
+                                                                    onChange={(e) => modifierItemOption(indexGroupe, indexItem, "prix", Number(e.target.value))}
+                                                                    className="h-9 w-full rounded-lg bg-white/5 px-3 pr-16 text-[10px] text-white outline-none focus:ring-1 focus:ring-jse-accent/60"
+                                                                    aria-label="Prix du supplément"
+                                                                />
+                                                                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-white/25">FCFA</span>
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => modifierItemOption(indexGroupe, indexItem, "disponible", !item.disponible)}
+                                                                className={`h-9 rounded-lg px-3 text-[8px] font-semibold ${item.disponible ? "bg-jse-secondaire/15 text-jse-secondaire" : "bg-white/5 text-white/30"}`}
+                                                            >
+                                                                {item.disponible ? "Disponible" : "Indisponible"}
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>
@@ -783,7 +807,7 @@ export default function TableauDeBord() {
                                             <button
                                                 type="button"
                                                 onClick={() => ajouterItemOption(indexGroupe)}
-                                                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 py-2.5 text-[9px] font-semibold text-white/45 hover:border-jse-accent hover:text-jse-accent"
+                                                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 py-3 text-[9px] font-semibold text-white/45 transition hover:border-jse-accent hover:text-jse-accent"
                                             >
                                                 <Plus size={13} /> Ajouter une option
                                             </button>
@@ -793,8 +817,8 @@ export default function TableauDeBord() {
                                     {optionsProduit.length === 0 && (
                                         <div className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center">
                                             <UtensilsCrossed size={24} className="mx-auto text-white/20" />
-                                            <p className="mt-2 text-xs font-semibold">Aucune personnalisation</p>
-                                            <p className="mt-1 text-[10px] text-white/35">Ajoutez par exemple un accompagnement ou une sauce.</p>
+                                            <p className="mt-2 text-xs font-semibold">Aucun groupe d’options</p>
+                                            <p className="mt-1 text-[10px] text-white/35">Ex. « Accompagnement » avec Attiéké et Alloco.</p>
                                         </div>
                                     )}
                                 </div>
