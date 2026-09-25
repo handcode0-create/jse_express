@@ -79,6 +79,7 @@ class RestaurantController extends Controller
                 'description' => $produit->description,
                 'prix' => (float) $produit->prix,
                 'image' => $produit->image,
+                'options' => $produit->options ?? [],
                 'disponible' => (bool) $produit->disponible,
                 'statut' => $produit->statut,
                 'categorie' => $produit->categorie ? [
@@ -378,10 +379,54 @@ class RestaurantController extends Controller
             'description' => $donnees['description'] ?? null,
             'prix' => $donnees['prix'],
             'image' => $donnees['image'] ?? null,
+            'options' => [],
             'disponible' => true,
             'statut' => 'actif',
         ]);
 
         return back()->with('success', 'Produit ajouté au menu.');
+    }
+
+    public function modifierOptionsProduit(Request $request, Produit $produit): RedirectResponse
+    {
+        $restaurant = $this->restaurant($request);
+
+        abort_unless((int) $produit->restaurant_id === (int) $restaurant->id, 404);
+
+        $donnees = $request->validate([
+            'options' => ['nullable', 'array', 'max:12'],
+            'options.*' => ['array:name,obligatoire,multiple,min,max,items'],
+            'options.*.name' => ['required', 'string', 'max:100'],
+            'options.*.obligatoire' => ['boolean'],
+            'options.*.multiple' => ['boolean'],
+            'options.*.min' => ['integer', 'min:0', 'max:20'],
+            'options.*.max' => ['integer', 'min:1', 'max:20'],
+            'options.*.items' => ['array', 'max:30'],
+            'options.*.items.*' => ['array:name,prix,disponible'],
+            'options.*.items.*.name' => ['required', 'string', 'max:100'],
+            'options.*.items.*.prix' => ['required', 'numeric', 'min:0', 'max:1000000'],
+            'options.*.items.*.disponible' => ['boolean'],
+        ]);
+
+        $options = collect($donnees['options'] ?? [])->map(function (array $groupe) {
+            $items = collect($groupe['items'] ?? [])->map(fn (array $item) => [
+                'name' => trim($item['name']),
+                'prix' => (float) $item['prix'],
+                'disponible' => (bool) ($item['disponible'] ?? true),
+            ])->filter(fn (array $item) => $item['name'] !== '')->values()->all();
+
+            return [
+                'name' => trim($groupe['name']),
+                'obligatoire' => (bool) ($groupe['obligatoire'] ?? false),
+                'multiple' => (bool) ($groupe['multiple'] ?? false),
+                'min' => max(0, (int) ($groupe['min'] ?? 0)),
+                'max' => max(1, (int) ($groupe['max'] ?? 1)),
+                'items' => $items,
+            ];
+        })->filter(fn (array $groupe) => $groupe['name'] !== '' && count($groupe['items']) > 0)->values()->all();
+
+        $produit->update(['options' => $options]);
+
+        return back()->with('success', 'Les options du produit ont été mises à jour.');
     }
 }
