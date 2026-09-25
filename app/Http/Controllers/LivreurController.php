@@ -108,7 +108,8 @@ class LivreurController extends Controller
         return Inertia::render('Livreur/TableauDeBord', [
             'livreur' => [
                 'id' => $request->user()->id,
-                'nom' => trim($request->user()->prenom . ' ' . $request->user()->nom),
+                'nom' => $request->user()->nom,
+                'prenom' => $request->user()->prenom,
                 'telephone' => $request->user()->telephone,
                 'email' => $request->user()->email,
                 'telephone_secondaire' => $profil->telephone_secondaire,
