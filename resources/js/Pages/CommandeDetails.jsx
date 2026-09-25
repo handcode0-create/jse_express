@@ -264,6 +264,33 @@ export default function CommandeDetails() {
                     </div>
                 </Card>
 
+                {commande.pin_livraison && !["LIVREE", "ANNULEE"].includes(commande.statut?.code) && (
+                    <section className="mt-4 overflow-hidden rounded-[28px] bg-jse-principal p-5 text-white shadow-sm sm:p-6">
+                        <div className="flex items-start gap-4">
+                            <div className="flex size-12 shrink-0 items-center justify-center rounded-[16px] bg-jse-accent text-jse-principal">
+                                <KeyRound size={23} strokeWidth={2.1} />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="font-sans text-[9px] font-semibold uppercase tracking-[0.16em] text-white/45">
+                                    Code de livraison
+                                </p>
+                                <h2 className="mt-1 font-against text-[1.65rem] leading-none text-white">
+                                    Votre PIN
+                                </h2>
+                                <p className="mt-2 max-w-xl font-sans text-[10px] leading-5 text-white/55">
+                                    Communiquez ce code uniquement au livreur lorsque votre commande vous est remise.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-5 flex items-center justify-center rounded-[22px] border border-white/10 bg-white/[0.06] py-5">
+                            <p className="font-sans text-3xl font-bold tracking-[0.38em] text-jse-accent">
+                                {commande.pin_livraison}
+                            </p>
+                        </div>
+                    </section>
+                )}
+
                 <Card title="Paiement" icon={CreditCard}>
                     {paiement ? (
                         <div className="mt-4 rounded-[22px] bg-jse-fond/70 p-4">
