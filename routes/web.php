@@ -86,6 +86,15 @@ Route::prefix('restaurant')
         Route::post('/categories', [RestaurantController::class, 'creerCategorie'])
             ->name('restaurant.categories.creer');
 
+        Route::patch('/profil', [RestaurantController::class, 'modifierProfilRestaurant'])
+            ->name('restaurant.profil.modifier');
+
+        Route::patch('/horaires', [RestaurantController::class, 'modifierHoraires'])
+            ->name('restaurant.horaires.modifier');
+
+        Route::patch('/compte', [RestaurantController::class, 'modifierCompte'])
+            ->name('restaurant.compte.modifier');
+
         Route::post('/produits', [RestaurantController::class, 'creerProduit'])
             ->name('restaurant.produits.creer');
     });
