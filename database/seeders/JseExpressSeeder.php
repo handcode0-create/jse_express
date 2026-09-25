@@ -64,12 +64,13 @@ class JseExpressSeeder extends Seeder
         $statuts = [];
 
         foreach ([
-            ['code' => 'EN_ATTENTE', 'libelle' => 'En attente', 'ordre' => 1],
+            ['code' => 'EN_ATTENTE', 'libelle' => 'Reçue', 'ordre' => 1],
             ['code' => 'CONFIRMEE', 'libelle' => 'Confirmée', 'ordre' => 2],
             ['code' => 'EN_PREPARATION', 'libelle' => 'En préparation', 'ordre' => 3],
-            ['code' => 'PRETE', 'libelle' => 'Prête', 'ordre' => 4],
+            ['code' => 'PRETE', 'libelle' => 'Prête / à récupérer', 'ordre' => 4],
             ['code' => 'EN_LIVRAISON', 'libelle' => 'En livraison', 'ordre' => 5],
             ['code' => 'LIVREE', 'libelle' => 'Livrée', 'ordre' => 6],
+            ['code' => 'ANNULEE', 'libelle' => 'Annulée', 'ordre' => 7],
         ] as $data) {
             $statuts[$data['code']] = StatutCommande::create($data);
         }
