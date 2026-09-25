@@ -236,6 +236,7 @@ Route::get('/profil', function () {
             'prenom' => Auth::user()->prenom,
             'telephone' => Auth::user()->telephone,
             'email' => Auth::user()->email,
+            'photo_profil' => Auth::user()->photo_profil,
         ],
         'notificationsCount' => Notification::query()
             ->where('user_id', Auth::id())
