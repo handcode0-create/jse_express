@@ -101,7 +101,7 @@ class AuthentificationController extends Controller
         Auth::login($utilisateur);
         $request->session()->regenerate();
 
-        return redirect()->intended($this->routeApresConnexion($utilisateur));
+        return redirect()->to($this->routeApresConnexion($utilisateur));
     }
 
     private function routeApresConnexion(User $utilisateur): string
