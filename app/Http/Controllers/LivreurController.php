@@ -79,6 +79,31 @@ class LivreurController extends Controller
                 'date_attribution' => $attribution->date_attribution ? \Carbon\Carbon::parse($attribution->date_attribution)->format('d/m/Y H:i') : null,
             ])->values();
 
+        $historique = AttributionLivraison::query()
+            ->where('livreur_id', $request->user()->id)
+            ->where('statut', 'terminee')
+            ->with([
+                'livraison.commande:id,reference,restaurant_id,montant_total,date_commande,statut_id',
+                'livraison.commande.restaurant:id,nom,adresse',
+                'livraison.commande.statutCommande:id,code,libelle',
+            ])
+            ->latest('date_attribution')
+            ->limit(12)
+            ->get()
+            ->map(fn ($attribution) => [
+                'id' => $attribution->id,
+                'reference' => $attribution->livraison?->commande?->reference,
+                'restaurant' => $attribution->livraison?->commande?->restaurant?->nom,
+                'adresse' => $attribution->livraison?->commande?->restaurant?->adresse,
+                'montant_total' => (float) ($attribution->livraison?->commande?->montant_total ?? 0),
+                'date' => $attribution->date_attribution
+                    ? CarbonCarbon::parse($attribution->date_attribution)->format('d/m H:i')
+                    : null,
+                'statut' => $attribution->livraison?->statut,
+            ])
+            ->filter(fn ($item) => $item['reference'] !== null)
+            ->values();
+
         return Inertia::render('Livreur/TableauDeBord', [
             'livreur' => [
                 'id' => $request->user()->id,
@@ -92,6 +117,7 @@ class LivreurController extends Controller
                 ] : null,
             ],
             'livraisons' => $livraisons,
+            'historique' => $historique,
             'statistiques' => [
                 'missions_actives' => $livraisons->count(),
                 'missions_du_jour' => AttributionLivraison::query()
