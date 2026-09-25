@@ -89,7 +89,7 @@ class AuthentificationController extends Controller
         $utilisateur = User::query()
             ->where('telephone', $donnees['telephone'])
             ->where('statut', 'actif')
-            ->whereIn('role', ['client', 'restaurant'])
+            ->whereIn('role', ['client', 'restaurant', 'livreur'])
             ->first();
 
         if (! $utilisateur || ! Hash::check($donnees['mot_de_passe'], $utilisateur->password)) {
@@ -106,20 +106,22 @@ class AuthentificationController extends Controller
 
     private function routeApresConnexion(User $utilisateur): string
     {
-        return $utilisateur->role === 'restaurant'
-            ? route('restaurant.tableau-de-bord')
-            : route('accueil.client');
+        return match ($utilisateur->role) {
+            'restaurant' => route('restaurant.tableau-de-bord'),
+            'livreur' => route('livreur.tableau-de-bord'),
+            default => route('accueil.client'),
+        };
     }
 
     private function redirectionApresConnexion(): RedirectResponse
     {
         $utilisateur = Auth::user();
 
-        return redirect()->route(
-            $utilisateur->role === 'restaurant'
-                ? 'restaurant.tableau-de-bord'
-                : 'accueil.client'
-        );
+        return redirect()->route(match ($utilisateur->role) {
+            'restaurant' => 'restaurant.tableau-de-bord',
+            'livreur' => 'livreur.tableau-de-bord',
+            default => 'accueil.client',
+        });
     }
 
     public function deconnexion(Request $request): RedirectResponse
