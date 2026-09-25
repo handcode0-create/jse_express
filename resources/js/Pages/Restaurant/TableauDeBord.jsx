@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { router, usePage } from "@inertiajs/react";
 import NavigationFlottante from "../../Composants/Navigation/NavigationFlottante";
+import PhotoProfil from "../../Composants/Profil/PhotoProfil";
 import {
     Bell,
     ChevronDown,
@@ -362,9 +363,7 @@ export default function TableauDeBord() {
                                     )}
                                 </button>
                                 <div className="hidden items-center gap-2 sm:flex">
-                                    <div className="flex size-10 items-center justify-center rounded-full bg-jse-principal text-[10px] font-bold">
-                                        {initiales(nomComplet)}
-                                    </div>
+                                    <PhotoProfil user={utilisateur} size="size-10" dark />
                                     <div className="hidden xl:block">
                                         <p className="text-[11px] font-semibold">{nomComplet}</p>
                                         <p className="text-[9px] text-jse-accent">Restaurant Pro</p>
@@ -522,6 +521,13 @@ export default function TableauDeBord() {
                         {onglet === "profil" && (
                             <section>
                                 <PageTitle eyebrow="Restaurant" title="Mon profil" description="Gérez les informations publiques de votre restaurant." />
+                                <div className="mb-4 flex items-center gap-4 rounded-2xl border border-white/10 bg-[#101215] p-4">
+                                    <PhotoProfil user={utilisateur} size="size-16" dark />
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-semibold">Photo de profil</p>
+                                        <p className="mt-1 text-[9px] leading-4 text-white/40">Cliquez sur votre photo pour la remplacer. JPG, PNG ou WebP · 5 Mo maximum.</p>
+                                    </div>
+                                </div>
                                 <form onSubmit={(event) => { event.preventDefault(); executer("patch", "/restaurant/profil", profil); }} className="mt-5 max-w-3xl rounded-2xl border border-white/10 bg-[#101215] p-5">
                                     <div className="grid gap-4 sm:grid-cols-2">
                                         <ChampDark value={profil.nom} onChange={(e) => setProfil({ ...profil, nom: e.target.value })} placeholder="Nom du restaurant" required />
