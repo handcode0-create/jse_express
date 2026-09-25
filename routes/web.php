@@ -725,7 +725,7 @@ Route::post('/commande', function (Request $request, PanierService $panierServic
         'telephone_livraison' => ['required', 'string', 'max:30'],
     ]);
 
-    $commande = DB::transaction(function () use ($donnees) {
+    $commande = DB::transaction(function () use ($donnees, $panierService, $notificationService) {
         $panier = Panier::query()
             ->where('user_id', Auth::id())
             ->where('statut', 'actif')
