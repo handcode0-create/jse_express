@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { router, usePage } from "@inertiajs/react";
 import NavigationFlottante from "../../Composants/Navigation/NavigationFlottante";
 import PhotoProfil from "../../Composants/Profil/PhotoProfil";
+import ThemeToggle from "../../Composants/Interface/ThemeToggle";
 import {
     Bell,
     ChevronDown,
@@ -287,10 +288,11 @@ export default function TableauDeBord() {
                 <aside className="sticky top-0 hidden h-screen w-[245px] shrink-0 border-r border-white/10 bg-[#101215] px-4 py-5 lg:flex lg:flex-col">
                     <div className="flex items-center gap-3 px-2">
                         <img src="/assets/jse_logo.png" alt="JSE Express" className="h-11 w-11 rounded-xl object-contain" />
-                        <div>
+                        <div className="min-w-0 flex-1">
                             <p className="font-against text-xl leading-none text-white">JSE</p>
                             <p className="text-[10px] font-bold italic text-jse-accent">EXPRESS</p>
                         </div>
+                        <ThemeToggle compact />
                     </div>
 
                     <nav className="mt-10 space-y-1.5">
@@ -520,7 +522,10 @@ export default function TableauDeBord() {
 
                         {onglet === "profil" && (
                             <section>
-                                <PageTitle eyebrow="Restaurant" title="Mon profil" description="Gérez les informations publiques de votre restaurant." />
+                                <div className="flex items-end justify-between gap-4">
+                                    <PageTitle eyebrow="Restaurant" title="Mon profil" description="Gérez les informations publiques de votre restaurant." />
+                                    <ThemeToggle />
+                                </div>
                                 <div className="mb-4 flex items-center gap-4 rounded-2xl border border-white/10 bg-[#101215] p-4">
                                     <PhotoProfil user={utilisateur} size="size-16" dark />
                                     <div className="min-w-0">
