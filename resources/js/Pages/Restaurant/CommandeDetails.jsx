@@ -12,10 +12,10 @@ const formatMontant = (value) =>
 
 function Section({ title, icon: Icon, children }) {
     return (
-        <section className="mt-4 rounded-[28px] bg-white p-5 shadow-sm ring-1 ring-jse-texte/5 sm:p-6">
+        <section className="mt-4 rounded-[28px] bg-[#101215] p-5 shadow-sm ring-1 ring-white/10 sm:p-6">
             <div className="flex items-center gap-2">
                 <Icon size={19} className="text-jse-secondaire" />
-                <h2 className="font-against text-[1.45rem] leading-none text-jse-principal">{title}</h2>
+                <h2 className="font-against text-[1.45rem] leading-none text-white">{title}</h2>
             </div>
             {children}
         </section>
@@ -32,15 +32,15 @@ export default function CommandeDetailsRestaurant() {
     };
 
     return (
-        <main className="min-h-screen bg-jse-fond pb-28 text-jse-texte">
+        <main className="min-h-screen bg-[#0b0d0f] pb-28 text-white">
             <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
                 <header className="flex items-center justify-between py-5">
-                    <button type="button" onClick={() => router.visit("/restaurant/tableau-de-bord")} className="flex size-11 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm ring-1 ring-jse-texte/5" aria-label="Retour">
+                    <button type="button" onClick={() => router.visit("/restaurant/tableau-de-bord")} className="flex size-11 items-center justify-center rounded-full bg-[#101215] text-white shadow-sm ring-1 ring-white/10" aria-label="Retour">
                         <ArrowLeft size={20} />
                     </button>
                     <div className="text-center">
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-jse-texte/35">{restaurant?.nom || "Restaurant"}</p>
-                        <h1 className="mt-1 text-base font-bold text-jse-principal">#{commande?.reference}</h1>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/35">{restaurant?.nom || "Restaurant"}</p>
+                        <h1 className="mt-1 text-base font-bold text-white">#{commande?.reference}</h1>
                     </div>
                     <div className="flex size-11 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm ring-1 ring-jse-texte/5"><ClipboardList size={19} /></div>
                 </header>
@@ -60,9 +60,9 @@ export default function CommandeDetailsRestaurant() {
                 </section>
 
                 <Section title="Client" icon={ClipboardList}>
-                    <div className="mt-4 rounded-[20px] bg-jse-fond p-4">
-                        <p className="text-sm font-bold text-jse-principal">{commande?.client?.nom || "Client"}</p>
-                        <p className="mt-1 text-xs text-jse-texte/55">{commande?.client?.telephone}</p>
+                    <div className="mt-4 rounded-[20px] bg-white/5 p-4">
+                        <p className="text-sm font-bold text-white">{commande?.client?.nom || "Client"}</p>
+                        <p className="mt-1 text-xs text-white/55">{commande?.client?.telephone}</p>
                         {commande?.client?.email && <p className="mt-1 text-xs text-jse-texte/55">{commande.client.email}</p>}
                     </div>
                 </Section>
@@ -74,9 +74,9 @@ export default function CommandeDetailsRestaurant() {
                                 <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-jse-fond text-jse-principal"><Package size={18} /></div>
                                 <div className="min-w-0 flex-1">
                                     <p className="text-sm font-semibold">{ligne.nom}</p>
-                                    <p className="mt-1 text-[10px] text-jse-texte/45">{ligne.quantite} × {formatMontant(ligne.prix_unitaire)}</p>
+                                    <p className="mt-1 text-[10px] text-white/45">{ligne.quantite} × {formatMontant(ligne.prix_unitaire)}</p>
                                 </div>
-                                <p className="text-sm font-bold text-jse-principal">{formatMontant(ligne.total)}</p>
+                                <p className="text-sm font-bold text-white">{formatMontant(ligne.total)}</p>
                             </div>
                         ))}
                     </div>
@@ -88,7 +88,7 @@ export default function CommandeDetailsRestaurant() {
                             <MapPin size={19} className="mt-0.5 shrink-0 text-jse-secondaire" />
                             <div>
                                 <p className="text-sm font-semibold">{commande?.adresse_livraison}</p>
-                                <p className="mt-1 text-xs text-jse-texte/50">{commande?.zone?.nom || "Zone non précisée"}</p>
+                                <p className="mt-1 text-xs text-white/50">{commande?.zone?.nom || "Zone non précisée"}</p>
                                 <p className="mt-1 text-xs text-jse-texte/50">{commande?.telephone_livraison}</p>
                             </div>
                         </div>
@@ -134,7 +134,7 @@ export default function CommandeDetailsRestaurant() {
                     </div>
                 </Section>
 
-                <button type="button" onClick={() => router.visit("/restaurant/tableau-de-bord")} className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white text-xs font-semibold text-jse-principal shadow-sm ring-1 ring-jse-texte/5">
+                <button type="button" onClick={() => router.visit("/restaurant/tableau-de-bord")} className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#101215] text-xs font-semibold text-white shadow-sm ring-1 ring-white/10">
                     Retour aux commandes <ChevronRight size={16} />
                 </button>
             </div>
