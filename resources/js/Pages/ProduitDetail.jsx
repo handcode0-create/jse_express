@@ -1,5 +1,5 @@
 import { router, usePage } from "@inertiajs/react";
-import { ArrowLeft, Check, ChevronRight, Clock3, Heart, Info, Minus, Plus, Share2, ShoppingCart, UtensilsCrossed, CircleCheck } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, Clock3, Heart, Info, Minus, Plus, Share2, ShoppingCart, UtensilsCrossed } from "lucide-react";
 import { useState } from "react";
 import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 
