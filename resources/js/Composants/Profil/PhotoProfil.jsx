@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "@inertiajs/react";
 import { Camera, Check, LoaderCircle } from "lucide-react";
 
-const MAX_UPLOAD_BYTES = 1.5 * 1024 * 1024;
-const MAX_DIMENSION = 1600;
+const MAX_UPLOAD_BYTES = 800 * 1024;
+const MAX_DIMENSION = 1400;
 
 function compresserPhoto(fichier) {
     return new Promise((resolve, reject) => {
