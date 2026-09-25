@@ -7,6 +7,7 @@ use App\Models\HistoriqueCommande;
 use App\Models\Notification;
 use App\Models\ProfilLivreur;
 use App\Models\StatutCommande;
+use App\Models\Zone;
 use App\Services\LivraisonService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -113,6 +114,7 @@ class LivreurController extends Controller
                 'telephone' => $request->user()->telephone,
                 'email' => $request->user()->email,
                 'telephone_secondaire' => $profil->telephone_secondaire,
+                'zone_id' => $profil->zone_id,
                 'matricule' => $profil->matricule,
                 'disponibilite' => $profil->disponibilite,
                 'zone' => $profil->zone ? [
@@ -122,6 +124,7 @@ class LivreurController extends Controller
             ],
             'livraisons' => $livraisons,
             'historique' => $historique,
+            'zones' => Zone::query()->where('statut', 'actif')->orderBy('nom')->get(['id', 'nom']),
             'notifications' => Notification::query()
                 ->where('user_id', $request->user()->id)
                 ->latest('id')
@@ -246,6 +249,7 @@ class LivreurController extends Controller
             'telephone' => ['required', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
             'telephone_secondaire' => ['nullable', 'string', 'max:30'],
+            'zone_id' => ['required', 'integer', 'exists:zones,id'],
         ]);
 
         DB::transaction(function () use ($request, $profil, $donnees) {
@@ -258,6 +262,7 @@ class LivreurController extends Controller
 
             $profil->update([
                 'telephone_secondaire' => $donnees['telephone_secondaire'] ?? null,
+                'zone_id' => $donnees['zone_id'],
             ]);
         });
 
