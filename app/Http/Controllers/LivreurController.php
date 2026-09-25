@@ -90,6 +90,60 @@ class LivreurController extends Controller
         ]);
     }
 
+
+    public function prendreEnCharge(Request $request, int $livraison): RedirectResponse
+    {
+        $profil = $this->profil($request);
+
+        $attribution = AttributionLivraison::query()
+            ->where('id', $livraison)
+            ->where('livreur_id', $request->user()->id)
+            ->where('statut', 'active')
+            ->with(['livraison.commande.statutCommande'])
+            ->firstOrFail();
+
+        $livraisonModel = $attribution->livraison;
+        $commande = $livraisonModel?->commande;
+
+        abort_unless($livraisonModel && $commande, 404);
+        abort_unless(
+            (int) $livraisonModel->zone_id === (int) $profil->zone_id,
+            403
+        );
+
+        if ($commande->statutCommande?->code === 'EN_LIVRAISON' && $livraisonModel->statut === 'en_cours') {
+            return back()->with('success', 'Cette livraison est déjà prise en charge.');
+        }
+
+        abort_unless($commande->statutCommande?->code === 'PRETE', 422);
+        abort_unless(in_array($livraisonModel->statut, ['en_attente', 'attribuee'], true), 422);
+
+        IlluminateSupportFacadesDB::transaction(function () use ($livraisonModel, $commande, $request) {
+            $statutEnLivraison = AppModelsStatutCommande::query()
+                ->where('code', 'EN_LIVRAISON')
+                ->firstOrFail();
+
+            $livraisonModel->update([
+                'statut' => 'en_cours',
+                'date_prise_en_charge' => now(),
+            ]);
+
+            $commande->update([
+                'statut_id' => $statutEnLivraison->id,
+            ]);
+
+            AppModelsHistoriqueCommande::create([
+                'commande_id' => $commande->id,
+                'statut_id' => $statutEnLivraison->id,
+                'user_id' => $request->user()->id,
+                'commentaire' => 'Commande prise en charge pour livraison.',
+                'date_changement' => now(),
+            ]);
+        });
+
+        return back()->with('success', 'La livraison a été prise en charge.');
+    }
+
     public function changerDisponibilite(Request $request): RedirectResponse
     {
         $profil = $this->profil($request);
