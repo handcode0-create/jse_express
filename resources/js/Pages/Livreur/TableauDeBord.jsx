@@ -187,7 +187,7 @@ function MissionDetail({ mission, onBack, onTake, loading, onNavigate }) {
                     <div className="size-10" />
                 </div>
 
-                <section className="rounded-[20px] border border-white/8 bg-[#101719] p-3">
+                <section className="animate-jse-rise rounded-[24px] border border-white/8 bg-[#101719] p-4 shadow-2xl shadow-black/20">
                     <div className="flex gap-3">
                         <div className="size-[64px] shrink-0 overflow-hidden rounded-[16px] bg-jse-principal">
                             {mission.articles?.[0]?.image ? (
@@ -336,8 +336,7 @@ function RecentrerPosition({ position }) {
     return null;
 }
 
-function CarteLeaflet({ compact = false }) {
-    const { position, accuracy, error } = usePositionLivreur(true);
+function CarteLeaflet({ compact = false, position, accuracy, error }) {
 
     if (error && !position) {
         return (
@@ -448,7 +447,7 @@ function NavigationScreen({ mission, onBack, onArrive }) {
                 </header>
 
                 <div className="relative flex-1 overflow-hidden">
-                    <CarteLeaflet />
+                    <CarteLeaflet position={position} accuracy={accuracy} error={null} />
 
                     <div className="pointer-events-none absolute left-4 right-4 top-[76px] z-[600] rounded-[22px] border border-white/10 bg-[#0B1112]/94 p-4 shadow-2xl backdrop-blur-xl">
                         <div className="flex items-center gap-3">
@@ -506,9 +505,9 @@ function PickupScreen({ mission, onBack, onStart }) {
                         ))}
                     </div>
                 </section>
-                <div className="mt-10 text-center">
-                    <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-jse-secondaire text-white"><Check size={38} /></div>
-                    <p className="mt-4 text-base font-bold text-jse-secondaire">Commande récupérée</p>
+                <div className="mt-8 text-center">
+                    <div className="mx-auto flex size-24 animate-jse-pop items-center justify-center rounded-full bg-jse-secondaire text-white shadow-[0_0_0_14px_rgba(69,185,119,.08),0_18px_50px_rgba(0,0,0,.28)]"><Check size={42} strokeWidth={2.5} /></div>
+                    <p className="mt-5 text-base font-bold text-jse-secondaire">Commande prête au retrait</p>
                     <p className="mt-2 text-[10px] leading-5 text-white/45">Vérifiez que tous les articles sont bien présents avant de commencer la livraison.</p>
                 </div>
                 <button onClick={onStart} className="mt-8 w-full rounded-full bg-jse-accent py-4 text-xs font-bold text-jse-principal">
@@ -521,6 +520,7 @@ function PickupScreen({ mission, onBack, onStart }) {
 
 function DeliveryScreen({ mission, onBack, onValidate, loading }) {
     const [pin, setPin] = useState("");
+    const { position, accuracy, error } = usePositionLivreur(true);
 
     const submit = () => {
         if (pin.length === 6) onValidate(pin);
@@ -540,10 +540,11 @@ function DeliveryScreen({ mission, onBack, onValidate, loading }) {
                     <div className="mt-3 flex items-center gap-2 text-[10px] text-white/45"><Clock3 size={13} /> Livraison en cours</div>
                 </section>
 
-                <div className="relative mt-3 h-[300px] overflow-hidden rounded-[24px] bg-[radial-gradient(circle_at_50%_35%,#17362d_0,#0d1619_40%,#070b0d_78%)]">
-                    <div className="absolute left-[58%] top-[25%] h-[52%] w-1 rotate-[35deg] rounded-full bg-jse-accent" />
-                    <div className="absolute left-[32%] top-[65%] flex size-12 items-center justify-center rounded-full bg-jse-accent text-jse-principal"><Navigation size={24} /></div>
-                    <div className="absolute right-[16%] top-[18%] flex size-11 items-center justify-center rounded-full bg-jse-secondaire text-white"><Home size={20} /></div>
+                <div className="relative mt-3 h-[310px]">
+                    <CarteLeaflet compact position={position} accuracy={accuracy} error={error} />
+                    <div className="pointer-events-none absolute left-4 top-4 z-[600] rounded-full border border-white/10 bg-[#0B1112]/90 px-3 py-2 text-[9px] font-semibold text-white shadow-xl backdrop-blur-xl">
+                        {position ? "GPS actif · ± " + Math.round(accuracy || 0) + " m" : "Localisation…"}
+                    </div>
                 </div>
 
                 <section className="mt-3 rounded-[20px] border border-jse-accent/20 bg-jse-accent/5 p-4">
@@ -578,8 +579,11 @@ function SuccessScreen({ mission, onBack }) {
     return (
         <div className="fixed inset-0 z-50 bg-[#070b0d] text-white">
             <div className="mx-auto flex h-full w-full max-w-[480px] flex-col items-center justify-center px-5 text-center">
-                <div className="flex size-24 items-center justify-center rounded-full bg-jse-secondaire shadow-[0_0_60px_rgba(69,185,119,.2)]"><Check size={48} /></div>
-                <p className="mt-7 font-against text-3xl">Livraison réussie !</p>
+                <div className="relative animate-jse-pop">
+                    <div className="absolute inset-0 animate-jse-pulse rounded-full bg-jse-secondaire/20" />
+                    <div className="relative flex size-24 items-center justify-center rounded-full bg-jse-secondaire shadow-[0_0_60px_rgba(69,185,119,.25)]"><Check size={48} strokeWidth={2.5} /></div>
+                </div>
+                <p className="mt-7 animate-jse-rise font-against text-3xl">Livraison réussie !</p>
                 <p className="mt-2 text-xs text-white/45">Commande #{mission.reference}</p>
                 <div className="mt-8 w-full rounded-[22px] border border-white/8 bg-[#101719] p-5">
                     <p className="text-[9px] uppercase tracking-[0.14em] text-white/35">Commande clôturée</p>
@@ -779,7 +783,7 @@ export default function TableauDeBord() {
                     {onglet === "profil" && <Profile livreur={livreur} />}
                 </div>
 
-                <NavigationFlottante type="livreur" actif="accueil" onChange={setOnglet} />
+                <NavigationFlottante type="livreur" actif={onglet} onChange={setOnglet} />
             </div>
 
             {mission && ecran === "detail" && (
