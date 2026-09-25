@@ -968,6 +968,9 @@ Route::get('/politique-de-confidentialite', function () {
 })->name('politique.confidentialite');
 
 
+Route::get('/accueil', function (Request $request) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+
     $recherche = trim((string) $request->query('recherche', ''));
 
     $restaurants = Restaurant::query()
