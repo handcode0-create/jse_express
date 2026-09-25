@@ -17,6 +17,8 @@ use App\Models\Zone;
 use App\Http\Controllers\AuthentificationController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\LivreurController;
+use App\Http\Controllers\CommandeController;
+use App\Http\Controllers\AdministrationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -62,6 +64,10 @@ Route::prefix('livreur')
 
         Route::patch('/disponibilite', [LivreurController::class, 'changerDisponibilite'])
             ->name('livreur.disponibilite');
+
+        Route::post('/livraisons/{livraison}/valider-pin', [LivreurController::class, 'validerPin'])
+            ->whereNumber('livraison')
+            ->name('livreur.livraisons.valider-pin');
     });
 
 
