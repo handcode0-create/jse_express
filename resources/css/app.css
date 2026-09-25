@@ -98,6 +98,12 @@ html[data-theme="light"] [class~="text-white"] { color: #191919 !important; }
 html[data-theme="light"] [class*="text-white/"] { color: rgb(25 25 25 / .55) !important; }
 html[data-theme="light"] [class*="border-white/"] { border-color: rgb(25 25 25 / .08) !important; }
 html[data-theme="light"] [class*="bg-white/"] { background-color: rgb(25 25 25 / .035) !important; }
+html[data-theme="light"] [class~="bg-[#101719]/95"] {
+    background-color: rgb(255 255 255 / .94) !important;
+    border-color: rgb(18 60 50 / .10) !important;
+    box-shadow: 0 20px 60px rgb(18 60 50 / .14) !important;
+}
+
 
 html[data-theme="light"] [class~="bg-black"],
 html[data-theme="light"] [class*="bg-black/"] {
