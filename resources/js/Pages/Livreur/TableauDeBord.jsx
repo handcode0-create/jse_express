@@ -101,7 +101,7 @@ function Availability({ livreur, onToggle, loading }) {
 
 function Stats({ statistiques, zone }) {
     return (
-        <section className="jse-dark-surface rounded-[20px] bg-[#101719] px-3 py-4">
+        <section className="rounded-[20px] bg-[#101719] px-3 py-4">
             <div className="grid grid-cols-3 divide-x divide-white/10 text-center">
                 <div>
                     <p className="text-xl font-bold text-jse-accent">{statistiques.missions_du_jour || 0}</p>
