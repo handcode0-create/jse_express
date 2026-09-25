@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Restaurant extends Model
 {
-    public $timestamps = false;
+    
+    use HasFactory;
+public $timestamps = false;
 
     protected $fillable = [
         'user_id','zone_id','nom','description','telephone','email','adresse','horaires','statut'
