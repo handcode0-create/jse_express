@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProfilLivreur extends Model
 {
-    protected $table = 'profils_livreurs';
+    
+    use HasFactory;
+protected $table = 'profils_livreurs';
 
     public $timestamps = false;
 
