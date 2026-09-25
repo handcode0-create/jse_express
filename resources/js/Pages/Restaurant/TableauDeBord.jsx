@@ -653,12 +653,32 @@ export default function TableauDeBord() {
 
                         {modal === "options" ? (
                             <form onSubmit={sauvegarderOptionsProduit} className="mt-5 space-y-4">
-                                <div className="rounded-2xl border border-jse-accent/20 bg-jse-accent/5 p-4">
-                                    <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-jse-accent">Personnalisation du produit</p>
-                                    <h3 className="mt-1 text-base font-semibold">{produitSelectionne?.nom}</h3>
-                                    <p className="mt-1 text-[10px] text-white/40">
-                                        Créez les accompagnements, sauces, suppléments ou boissons disponibles avec ce produit.
-                                    </p>
+                                <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+                                    <div className="flex flex-col sm:flex-row">
+                                        <img
+                                            src={imageDemoProduit(produitSelectionne)}
+                                            alt={produitSelectionne?.nom || "Produit"}
+                                            className="h-36 w-full object-cover sm:h-32 sm:w-40"
+                                        />
+                                        <div className="min-w-0 flex-1 p-4">
+                                            <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-jse-accent">Détail du produit</p>
+                                            <div className="mt-1 flex items-start justify-between gap-3">
+                                                <div>
+                                                    <h3 className="text-base font-semibold">{produitSelectionne?.nom}</h3>
+                                                    <p className="mt-1 text-[9px] text-white/35">{produitSelectionne?.categorie?.nom || "Sans catégorie"}</p>
+                                                </div>
+                                                <span className="shrink-0 font-against text-xl text-jse-accent">{montant(produitSelectionne?.prix)}</span>
+                                            </div>
+                                            <p className="mt-2 line-clamp-2 text-[10px] leading-4 text-white/45">
+                                                {produitSelectionne?.description || "Aucune description renseignée."}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="border-t border-white/10 bg-jse-accent/5 px-4 py-3">
+                                        <p className="text-[10px] text-white/55">
+                                            Créez les accompagnements, sauces, suppléments ou boissons disponibles avec ce produit.
+                                        </p>
+                                    </div>
                                 </div>
 
                                 <div className="max-h-[58vh] space-y-3 overflow-y-auto pr-1">
