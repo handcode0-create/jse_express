@@ -8,6 +8,7 @@ import {
 import { BoutonChargement } from "../Composants/Interface/EtatsChargement";
 import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 import PhotoProfil from "../Composants/Profil/PhotoProfil";
+import ThemeToggle from "../Composants/Interface/ThemeToggle";
 
 function NavigationItem({ label, icon: Icon, active = false, onClick }) {
     return <button type="button" onClick={onClick} className={["flex min-w-[66px] flex-col items-center justify-center gap-1 rounded-[20px] px-2.5 py-2 transition-all", active ? "bg-jse-secondaire text-white shadow-sm" : "text-jse-texte/80 hover:bg-jse-fond"].join(" ")}>
@@ -96,9 +97,12 @@ export default function Profil() {
 
                 <div className="mx-auto w-full max-w-3xl lg:mx-0">
                     <section className="-mx-4 overflow-hidden rounded-b-[34px] bg-jse-principal px-5 pb-8 pt-6 sm:-mx-6 sm:px-8 lg:mx-0 lg:rounded-[34px] lg:pt-8">
-                        <div className="flex items-start justify-between">
+                        <div className="flex items-center justify-between">
                             <button type="button" onClick={() => router.visit("/accueil")} className="flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md lg:hidden"><Home size={18} /></button>
-                            <button type="button" aria-label="Modifier mon profil" onClick={() => setModal("informations")} className="flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md"><Settings size={18} /></button>
+                            <div className="ml-auto flex items-center gap-2">
+                                <ThemeToggle compact />
+                                <button type="button" aria-label="Modifier mon profil" onClick={() => setModal("informations")} className="flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md"><Settings size={18} /></button>
+                            </div>
                         </div>
                         <div className="mt-2 flex items-center gap-4">
                             <PhotoProfil user={utilisateur} size="size-[78px]" className="border-white/20" dark />
@@ -124,7 +128,7 @@ export default function Profil() {
             </div>
         </div>
 
-        <NavigationFlottante type="client" actif="accueil" />
+        <NavigationFlottante type="client" actif="profil" />
 
         {modal && <div className="fixed inset-0 z-[80] flex items-end justify-center bg-jse-principal/25 p-0 backdrop-blur-sm sm:items-center sm:p-5" onClick={() => setModal(null)}>
             <div className="max-h-[calc(100vh-1rem)] w-full max-w-md overflow-y-auto rounded-t-[30px] bg-white p-5 shadow-2xl sm:rounded-[30px]" onClick={(event) => event.stopPropagation()}>
