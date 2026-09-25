@@ -3,6 +3,7 @@ import { router, usePage } from "@inertiajs/react";
 import { ArrowLeft, ChevronRight, Heart, Home, MapPin, ShoppingBag, UserRound, X } from "lucide-react";
 import { basculerFavori, lireFavoris } from "../lib/favoris";
 import SidebarJSE from "../Composants/Navigation/SidebarJSE";
+import NavigationFlottante from "../Composants/Navigation/NavigationFlottante";
 
 const fallbacks = [
     "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=85",
@@ -88,13 +89,6 @@ export default function Favoris() {
             </div>
         </div>
 
-        <nav className="fixed inset-x-0 bottom-0 z-40 px-4 pb-4 lg:hidden">
-            <div className="mx-auto flex h-[66px] w-full max-w-md items-center justify-around rounded-[24px] border border-white/80 bg-white/95 px-1 shadow-xl shadow-jse-principal/10 backdrop-blur-xl">
-                <NavigationItem label="Accueil" icon={Home} onClick={() => router.visit("/accueil")} />
-                <NavigationItem label="Commandes" icon={ShoppingBag} onClick={() => router.visit("/commandes")} />
-                <NavigationItem label="Favoris" icon={Heart} active />
-                <NavigationItem label="Profil" icon={UserRound} onClick={() => router.visit("/profil")} />
-            </div>
-        </nav>
+        <NavigationFlottante type="client" actif="accueil" />
     </main>;
 }
