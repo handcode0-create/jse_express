@@ -19,6 +19,8 @@ use App\Models\StatutCommande;
 use App\Models\User;
 use App\Models\Zone;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Hash;
 
 class JseExpressSeeder extends Seeder
 {
@@ -257,6 +259,9 @@ class JseExpressSeeder extends Seeder
             'sous_total' => $sousTotal,
             'frais_livraison' => $fraisLivraison,
             'montant_total' => $montantTotal,
+            'pin_livraison_hash' => Hash::make('123456'),
+            'pin_livraison_chiffre' => Crypt::encryptString('123456'),
+            'pin_genere_at' => now(),
             'date_commande' => now(),
         ]);
 
