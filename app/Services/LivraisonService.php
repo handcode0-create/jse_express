@@ -41,8 +41,8 @@ class LivraisonService
                 ->whereHas('user', fn ($query) => $query
                     ->where('role', 'livreur')
                     ->where('statut', 'actif'))
-                ->orderBy('id')
-                ->pluck('id');
+                ->orderBy('user_id')
+                ->pluck('user_id');
 
             $profil = null;
 
