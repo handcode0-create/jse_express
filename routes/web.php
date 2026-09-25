@@ -119,6 +119,14 @@ Route::prefix('administration')
     ->group(function () {
         Route::get('/tableau-de-bord', [AdministrationController::class, 'tableauDeBord'])
             ->name('admin.tableau-de-bord');
+
+        Route::post('/commandes/{commande}/annuler', [AdministrationController::class, 'annulerCommande'])
+            ->whereNumber('commande')
+            ->name('admin.commandes.annuler');
+
+        Route::post('/livraisons/{livraison}/reattribuer', [AdministrationController::class, 'reattribuerLivraison'])
+            ->whereNumber('livraison')
+            ->name('admin.livraisons.reattribuer');
     });
 
 Route::get('/panier', function () {
