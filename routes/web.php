@@ -55,6 +55,10 @@ Route::prefix('restaurant')
         Route::get('/tableau-de-bord', [RestaurantController::class, 'tableauDeBord'])
             ->name('restaurant.tableau-de-bord');
 
+        Route::get('/commandes/{commande}', [RestaurantController::class, 'detailsCommande'])
+            ->whereNumber('commande')
+            ->name('restaurant.commandes.details');
+
         Route::patch('/commandes/{commande}/statut', [RestaurantController::class, 'changerStatutCommande'])
             ->whereNumber('commande')
             ->name('restaurant.commandes.statut');
