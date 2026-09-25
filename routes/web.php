@@ -56,6 +56,10 @@ Route::prefix('livreur')
         Route::get('/tableau-de-bord', [LivreurController::class, 'tableauDeBord'])
             ->name('livreur.tableau-de-bord');
 
+        Route::patch('/livraisons/{livraison}/prise-en-charge', [LivreurController::class, 'prendreEnCharge'])
+            ->whereNumber('livraison')
+            ->name('livreur.livraisons.prise-en-charge');
+
         Route::patch('/disponibilite', [LivreurController::class, 'changerDisponibilite'])
             ->name('livreur.disponibilite');
     });
