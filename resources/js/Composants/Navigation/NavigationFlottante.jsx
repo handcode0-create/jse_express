@@ -1,5 +1,5 @@
 import { router } from "@inertiajs/react";
-import { Heart, Home, LayoutDashboard, MapPin, Receipt, ShoppingBag, UserRound, UtensilsCrossed, WalletCards } from "lucide-react";
+import { Heart, Home, LayoutDashboard, MapPin, Receipt, ShoppingBag, UserRound, UtensilsCrossed, Bell } from "lucide-react";
 
 const ensembles = {
     client: [
@@ -18,7 +18,7 @@ const ensembles = {
         { id: "accueil", label: "Accueil", icon: Home },
         { id: "missions", label: "Missions", icon: Receipt },
         { id: "carte", label: "Carte", icon: MapPin },
-        { id: "gains", label: "Gains", icon: WalletCards },
+        { id: "notifications", label: "Notifications", icon: Bell },
         { id: "profil", label: "Profil", icon: UserRound },
     ],
 };
