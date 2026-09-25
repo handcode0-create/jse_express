@@ -81,6 +81,20 @@ export default function TableauDeBord() {
     const [chargement, setChargement] = useState(false);
     const [produit, setProduit] = useState({ nom: "", description: "", prix: "", categorie_id: "", image: "" });
     const [categorie, setCategorie] = useState({ nom: "", description: "" });
+    const [profil, setProfil] = useState({
+        nom: restaurant?.nom || "",
+        description: restaurant?.description || "",
+        telephone: restaurant?.telephone || "",
+        email: restaurant?.email || "",
+        adresse: restaurant?.adresse || "",
+    });
+    const [horaires, setHoraires] = useState(restaurant?.horaires || "");
+    const [compte, setCompte] = useState({
+        prenom: utilisateur?.prenom || "",
+        nom: utilisateur?.nom || "",
+        telephone: utilisateur?.telephone || "",
+        email: utilisateur?.email || "",
+    });
 
     const utilisateur = auth?.user;
     const nomComplet = [utilisateur?.prenom, utilisateur?.nom].filter(Boolean).join(" ") || "Chef";
@@ -96,7 +110,7 @@ export default function TableauDeBord() {
     };
 
     const aller = (id) => {
-        if (["dashboard", "commandes", "menu"].includes(id)) {
+        if (["dashboard", "commandes", "menu", "statistiques", "horaires", "parametres", "profil"].includes(id)) {
             setOnglet(id);
             window.scrollTo({ top: 0, behavior: "smooth" });
         } else if (id === "categories") {
@@ -132,7 +146,7 @@ export default function TableauDeBord() {
                     <nav className="mt-10 space-y-1.5">
                         {navigation.map(([id, label, Icon]) => {
                             const actif = onglet === id || (id === "categories" && onglet === "menu");
-                            const disponible = ["dashboard", "commandes", "menu", "categories"].includes(id);
+                            const disponible = ["dashboard", "commandes", "menu", "categories", "statistiques", "horaires", "parametres", "profil"].includes(id);
                             return (
                                 <button
                                     key={id}
@@ -317,6 +331,73 @@ export default function TableauDeBord() {
                                         />
                                     ))}
                                 </div>
+                            </section>
+                        )}
+
+                        {onglet === "statistiques" && (
+                            <section>
+                                <PageTitle eyebrow="Performance" title="Statistiques" description="Consultez les indicateurs disponibles pour votre restaurant." />
+                                <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                                    <StatCard icon={ShoppingBag} label="Commandes totales" value={statistiques.commandes_total || 0} note={`${statistiques.commandes_livrees || 0} livrées`} />
+                                    <StatCard icon={CreditCard} label="Revenus cumulés" value={montant(statistiques.revenus_total)} note="Paiements réussis" />
+                                    <StatCard icon={Package} label="Panier moyen" value={montant(statistiques.panier_moyen)} note="Sur paiements réussis" />
+                                    <StatCard icon={Star} label="Produits disponibles" value={statistiques.produits_disponibles || 0} note="Actifs au menu" />
+                                </div>
+                                <div className="mt-5 rounded-2xl border border-white/10 bg-[#101215] p-5">
+                                    <h2 className="font-against text-2xl">Vue d'ensemble</h2>
+                                    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                                        <div className="rounded-xl bg-white/5 p-4">
+                                            <p className="text-[10px] text-white/40">Commandes aujourd'hui</p>
+                                            <p className="mt-2 text-2xl font-semibold">{statistiques.commandes_du_jour || 0}</p>
+                                        </div>
+                                        <div className="rounded-xl bg-white/5 p-4">
+                                            <p className="text-[10px] text-white/40">Commandes à traiter</p>
+                                            <p className="mt-2 text-2xl font-semibold">{statistiques.commandes_en_attente || 0}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        )}
+
+                        {onglet === "horaires" && (
+                            <section>
+                                <PageTitle eyebrow="Restaurant" title="Mes horaires" description="Modifiez les horaires actuellement enregistrés pour votre restaurant." />
+                                <form onSubmit={(event) => { event.preventDefault(); executer("patch", "/restaurant/horaires", { horaires }); }} className="mt-5 max-w-2xl rounded-2xl border border-white/10 bg-[#101215] p-5">
+                                    <label className="text-[10px] font-semibold text-white/60">Horaires</label>
+                                    <textarea value={horaires} onChange={(event) => setHoraires(event.target.value)} className="mt-2 min-h-32 w-full rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-jse-accent" placeholder="Ex. Lun - Dim : 08:00 - 22:00" />
+                                    <button disabled={chargement} className="mt-4 h-11 rounded-xl bg-jse-accent px-5 text-[10px] font-semibold disabled:opacity-50">Enregistrer les horaires</button>
+                                </form>
+                            </section>
+                        )}
+
+                        {onglet === "profil" && (
+                            <section>
+                                <PageTitle eyebrow="Restaurant" title="Mon profil" description="Gérez les informations publiques de votre restaurant." />
+                                <form onSubmit={(event) => { event.preventDefault(); executer("patch", "/restaurant/profil", profil); }} className="mt-5 max-w-3xl rounded-2xl border border-white/10 bg-[#101215] p-5">
+                                    <div className="grid gap-4 sm:grid-cols-2">
+                                        <ChampDark value={profil.nom} onChange={(e) => setProfil({ ...profil, nom: e.target.value })} placeholder="Nom du restaurant" required />
+                                        <ChampDark value={profil.telephone} onChange={(e) => setProfil({ ...profil, telephone: e.target.value })} placeholder="Téléphone" required />
+                                        <ChampDark value={profil.email} onChange={(e) => setProfil({ ...profil, email: e.target.value })} placeholder="Email" type="email" />
+                                        <ChampDark value={profil.adresse} onChange={(e) => setProfil({ ...profil, adresse: e.target.value })} placeholder="Adresse" required />
+                                    </div>
+                                    <textarea value={profil.description} onChange={(e) => setProfil({ ...profil, description: e.target.value })} placeholder="Description du restaurant" className="mt-4 min-h-28 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-jse-accent" />
+                                    <button disabled={chargement} className="mt-4 h-11 rounded-xl bg-jse-accent px-5 text-[10px] font-semibold disabled:opacity-50">Enregistrer le profil</button>
+                                </form>
+                            </section>
+                        )}
+
+                        {onglet === "parametres" && (
+                            <section>
+                                <PageTitle eyebrow="Compte" title="Paramètres" description="Modifiez les informations du responsable connecté." />
+                                <form onSubmit={(event) => { event.preventDefault(); executer("patch", "/restaurant/compte", compte); }} className="mt-5 max-w-3xl rounded-2xl border border-white/10 bg-[#101215] p-5">
+                                    <div className="grid gap-4 sm:grid-cols-2">
+                                        <ChampDark value={compte.prenom} onChange={(e) => setCompte({ ...compte, prenom: e.target.value })} placeholder="Prénom" required />
+                                        <ChampDark value={compte.nom} onChange={(e) => setCompte({ ...compte, nom: e.target.value })} placeholder="Nom" required />
+                                        <ChampDark value={compte.telephone} onChange={(e) => setCompte({ ...compte, telephone: e.target.value })} placeholder="Téléphone" required />
+                                        <ChampDark value={compte.email} onChange={(e) => setCompte({ ...compte, email: e.target.value })} placeholder="Email" type="email" />
+                                    </div>
+                                    <button disabled={chargement} className="mt-4 h-11 rounded-xl bg-jse-accent px-5 text-[10px] font-semibold disabled:opacity-50">Enregistrer mes informations</button>
+                                </form>
                             </section>
                         )}
 
