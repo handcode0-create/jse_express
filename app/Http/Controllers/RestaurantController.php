@@ -128,7 +128,7 @@ class RestaurantController extends Controller
             'statutCommande:id,code,libelle,ordre',
             'lignesCommande.produit:id,nom,description,image',
             'paiements' => fn ($query) => $query->latest('id'),
-            'livraison.livraisonsAttributions.livreur:id,nom,prenom,telephone',
+            'livraison.attributions.livreur:id,nom,prenom,telephone',
             'historiquesCommande.statutCommande:id,code,libelle,ordre',
         ]);
 
@@ -182,7 +182,7 @@ class RestaurantController extends Controller
                 'livraison' => $commande->livraison ? [
                     'statut' => $commande->livraison->statut,
                     'mode_attribution' => $commande->livraison->mode_attribution,
-                    'livreur' => $commande->livraison->livraisonsAttributions->first()?->livreur ? [
+                    'livreur' => $commande->livraison->attributions->first()?->livreur ? [
                         'nom' => trim(
                             $commande->livraison->livraisonsAttributions->first()->livreur->prenom . ' ' .
                             $commande->livraison->livraisonsAttributions->first()->livreur->nom
