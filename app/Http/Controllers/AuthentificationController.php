@@ -16,7 +16,7 @@ class AuthentificationController extends Controller
     public function show(Request $request): Response|RedirectResponse
     {
         if (Auth::check()) {
-            return redirect()->route('accueil.client');
+            return $this->redirectionApresConnexion();
         }
 
         return Inertia::render('Authentification', [
@@ -30,7 +30,7 @@ class AuthentificationController extends Controller
     public function inscription(Request $request): RedirectResponse
     {
         if (Auth::check()) {
-            return redirect()->route('accueil.client');
+            return $this->redirectionApresConnexion();
         }
 
         $donnees = $request->validate([
@@ -73,7 +73,7 @@ class AuthentificationController extends Controller
     public function connexion(Request $request): RedirectResponse
     {
         if (Auth::check()) {
-            return redirect()->route('accueil.client');
+            return $this->redirectionApresConnexion();
         }
 
         $donnees = $request->validate([
@@ -86,20 +86,40 @@ class AuthentificationController extends Controller
             'consentement.accepted' => 'Vous devez accepter la politique de confidentialité.',
         ]);
 
-        if (! Auth::attempt([
-            'telephone' => $donnees['telephone'],
-            'password' => $donnees['mot_de_passe'],
-            'statut' => 'actif',
-            'role' => 'client',
-        ])) {
+        $utilisateur = User::query()
+            ->where('telephone', $donnees['telephone'])
+            ->where('statut', 'actif')
+            ->whereIn('role', ['client', 'restaurant'])
+            ->first();
+
+        if (! $utilisateur || ! Hash::check($donnees['mot_de_passe'], $utilisateur->password)) {
             throw ValidationException::withMessages([
                 'telephone' => 'Le numéro de téléphone ou le mot de passe est incorrect.',
             ]);
         }
 
+        Auth::login($utilisateur);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('accueil.client'));
+        return redirect()->intended($this->routeApresConnexion($utilisateur));
+    }
+
+    private function routeApresConnexion(User $utilisateur): string
+    {
+        return $utilisateur->role === 'restaurant'
+            ? route('restaurant.tableau-de-bord')
+            : route('accueil.client');
+    }
+
+    private function redirectionApresConnexion(): RedirectResponse
+    {
+        $utilisateur = Auth::user();
+
+        return redirect()->route(
+            $utilisateur->role === 'restaurant'
+                ? 'restaurant.tableau-de-bord'
+                : 'accueil.client'
+        );
     }
 
     public function deconnexion(Request $request): RedirectResponse
