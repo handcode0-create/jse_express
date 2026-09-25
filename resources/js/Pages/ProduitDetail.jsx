@@ -247,51 +247,6 @@ export default function ProduitDetail() {
                             />
                         </div>
 
-                        <section className="mt-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.16em] text-jse-texte/40">
-                                        Personnalisation
-                                    </p>
-                                    <h2 className="mt-1 font-against text-2xl text-jse-principal">
-                                        Quantité
-                                    </h2>
-                                </div>
-                                <span className="font-sans text-xs text-jse-texte/45">
-                                    1 article = {prix(produit?.prix)} FCFA
-                                </span>
-                            </div>
-
-                            <div className="mt-4 flex h-[68px] w-full max-w-[290px] items-center justify-between rounded-[22px] bg-white p-2 ring-1 ring-jse-texte/8">
-                                <button
-                                    type="button"
-                                    disabled={quantite <= 1}
-                                    onClick={() =>
-                                        setQuantite((value) =>
-                                            Math.max(1, value - 1),
-                                        )
-                                    }
-                                    className="flex size-12 items-center justify-center rounded-full bg-jse-fond text-jse-principal transition active:scale-90 disabled:opacity-35"
-                                >
-                                    <Minus size={21} />
-                                </button>
-
-                                <span className="font-sans text-xl font-bold text-jse-principal">
-                                    {quantite}
-                                </span>
-
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setQuantite((value) => value + 1)
-                                    }
-                                    className="flex size-12 items-center justify-center rounded-full bg-jse-principal text-white transition active:scale-90"
-                                >
-                                    <Plus size={22} />
-                                </button>
-                            </div>
-                        </section>
-
                         {groupesOptions.length > 0 && (
                             <section className="mt-7">
                                 <div>
@@ -379,6 +334,51 @@ export default function ProduitDetail() {
                                 </div>
                             </section>
                         )}
+
+                        <section className="mt-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.16em] text-jse-texte/40">
+                                        Personnalisation
+                                    </p>
+                                    <h2 className="mt-1 font-against text-2xl text-jse-principal">
+                                        Quantité
+                                    </h2>
+                                </div>
+                                <span className="font-sans text-xs text-jse-texte/45">
+                                    1 article = {prix(produit?.prix)} FCFA
+                                </span>
+                            </div>
+
+                            <div className="mt-4 flex h-[68px] w-full max-w-[290px] items-center justify-between rounded-[22px] bg-white p-2 ring-1 ring-jse-texte/8">
+                                <button
+                                    type="button"
+                                    disabled={quantite <= 1}
+                                    onClick={() =>
+                                        setQuantite((value) =>
+                                            Math.max(1, value - 1),
+                                        )
+                                    }
+                                    className="flex size-12 items-center justify-center rounded-full bg-jse-fond text-jse-principal transition active:scale-90 disabled:opacity-35"
+                                >
+                                    <Minus size={21} />
+                                </button>
+
+                                <span className="font-sans text-xl font-bold text-jse-principal">
+                                    {quantite}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setQuantite((value) => value + 1)
+                                    }
+                                    className="flex size-12 items-center justify-center rounded-full bg-jse-principal text-white transition active:scale-90"
+                                >
+                                    <Plus size={22} />
+                                </button>
+                            </div>
+                        </section>
 
                         <section className="mt-7 rounded-[24px] bg-white/65 p-4 ring-1 ring-jse-texte/6">
                             <p className="font-sans text-xs font-semibold text-jse-principal">
