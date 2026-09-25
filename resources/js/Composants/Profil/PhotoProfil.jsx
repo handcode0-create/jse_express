@@ -2,6 +2,73 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "@inertiajs/react";
 import { Camera, Check, LoaderCircle } from "lucide-react";
 
+const MAX_UPLOAD_BYTES = 1.5 * 1024 * 1024;
+const MAX_DIMENSION = 1600;
+
+function compresserPhoto(fichier) {
+    return new Promise((resolve, reject) => {
+        const image = new Image();
+        const url = URL.createObjectURL(fichier);
+
+        image.onload = () => {
+            URL.revokeObjectURL(url);
+
+            const ratio = Math.min(
+                1,
+                MAX_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight),
+            );
+
+            const largeur = Math.max(1, Math.round(image.naturalWidth * ratio));
+            const hauteur = Math.max(1, Math.round(image.naturalHeight * ratio));
+
+            const canvas = document.createElement("canvas");
+            canvas.width = largeur;
+            canvas.height = hauteur;
+
+            const contexte = canvas.getContext("2d");
+            if (!contexte) {
+                reject(new Error("Impossible de préparer la photo."));
+                return;
+            }
+
+            contexte.drawImage(image, 0, 0, largeur, hauteur);
+
+            const produire = (qualite) => {
+                canvas.toBlob(
+                    (blob) => {
+                        if (!blob) {
+                            reject(new Error("Impossible de préparer la photo."));
+                            return;
+                        }
+
+                        if (blob.size <= MAX_UPLOAD_BYTES || qualite <= 0.55) {
+                            const nom = (fichier.name || "photo").replace(/\.[^.]+$/, "") + ".jpg";
+                            resolve(new File([blob], nom, {
+                                type: "image/jpeg",
+                                lastModified: Date.now(),
+                            }));
+                            return;
+                        }
+
+                        produire(Math.max(0.55, qualite - 0.08));
+                    },
+                    "image/jpeg",
+                    qualite,
+                );
+            };
+
+            produire(0.86);
+        };
+
+        image.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("La photo sélectionnée ne peut pas être lue."));
+        };
+
+        image.src = url;
+    });
+}
+
 export default function PhotoProfil({ user, size = "size-20", className = "", dark = false }) {
     const inputRef = useRef(null);
     const [apercu, setApercu] = useState(null);
@@ -30,44 +97,49 @@ export default function PhotoProfil({ user, size = "size-20", className = "", da
         if (!form.processing) inputRef.current?.click();
     };
 
-    const envoyer = (event) => {
-        const photo = event.target.files?.[0];
+    const envoyer = async (event) => {
+        const fichierOriginal = event.target.files?.[0];
         event.target.value = "";
 
-        if (!photo) return;
+        if (!fichierOriginal) return;
 
         setMessage("");
 
-        if (!["image/jpeg", "image/png", "image/webp"].includes(photo.type)) {
-            setMessage("Format non accepté.");
+        if (!["image/jpeg", "image/png", "image/webp"].includes(fichierOriginal.type)) {
+            setMessage("Format accepté : JPG, PNG ou WebP.");
             return;
         }
 
-        if (photo.size > 5 * 1024 * 1024) {
-            setMessage("La photo dépasse 5 Mo.");
-            return;
+        try {
+            const photo = await compresserPhoto(fichierOriginal);
+            const url = URL.createObjectURL(photo);
+
+            setApercu((ancien) => {
+                if (ancien) URL.revokeObjectURL(ancien);
+                return url;
+            });
+
+            form.setData("photo", photo);
+            form.post("/profil/photo", {
+                forceFormData: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    setMessage("Photo mise à jour.");
+                    setApercu(null);
+                    form.reset();
+                },
+                onError: (errors) => {
+                    setMessage(
+                        errors?.photo ||
+                        "L'envoi de la photo a échoué. Vérifiez la taille du fichier.",
+                    );
+                    setApercu(null);
+                    form.reset();
+                },
+            });
+        } catch (error) {
+            setMessage(error?.message || "Impossible de préparer la photo.");
         }
-
-        const url = URL.createObjectURL(photo);
-        setApercu((ancien) => {
-            if (ancien) URL.revokeObjectURL(ancien);
-            return url;
-        });
-
-        form.setData("photo", photo);
-        form.post("/profil/photo", {
-            forceFormData: true,
-            preserveScroll: true,
-            onSuccess: () => {
-                setMessage("Photo mise à jour.");
-                form.reset();
-            },
-            onError: (errors) => {
-                setMessage(errors?.photo || "Impossible d'enregistrer la photo.");
-                setApercu(null);
-                form.reset();
-            },
-        });
     };
 
     const source = apercu || user?.photo_profil;
@@ -111,11 +183,17 @@ export default function PhotoProfil({ user, size = "size-20", className = "", da
             </button>
 
             <span className="pointer-events-none absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full border-2 border-[#101719] bg-jse-accent text-jse-principal shadow-md">
-                {form.processing ? <LoaderCircle size={12} className="animate-spin" /> : message === "Photo mise à jour." ? <Check size={12} /> : <Camera size={12} />}
+                {form.processing ? (
+                    <LoaderCircle size={12} className="animate-spin" />
+                ) : message === "Photo mise à jour." ? (
+                    <Check size={12} />
+                ) : (
+                    <Camera size={12} />
+                )}
             </span>
 
             {message && message !== "Photo mise à jour." && (
-                <span className="absolute left-1/2 top-full z-20 mt-2 w-max max-w-48 -translate-x-1/2 rounded-lg border border-red-400/20 bg-[#101215] px-2.5 py-1.5 text-[8px] font-medium text-red-300 shadow-xl">
+                <span className="absolute left-1/2 top-full z-20 mt-2 w-max max-w-52 -translate-x-1/2 rounded-lg border border-red-400/20 bg-[#101215] px-2.5 py-1.5 text-[8px] font-medium text-red-300 shadow-xl">
                     {message}
                 </span>
             )}
