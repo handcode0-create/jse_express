@@ -370,19 +370,31 @@ export default function TableauDeBord() {
                 </div>
             </div>
 
-            <nav className="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 lg:hidden">
-                <div className="mx-auto flex max-w-md items-center justify-around rounded-2xl border border-white/10 bg-[#101215]/95 p-1.5 shadow-2xl backdrop-blur-xl">
+            <nav className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[max(14px,env(safe-area-inset-bottom))] lg:hidden">
+                <div className="mx-auto flex h-[68px] max-w-[430px] items-center justify-around rounded-[34px] border border-white/10 bg-[#101215]/90 p-1.5 shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
                     {[
                         ["dashboard", LayoutDashboard, "Accueil"],
                         ["commandes", ShoppingBag, "Commandes"],
                         ["menu", UtensilsCrossed, "Menu"],
                         ["profil", UserRound, "Profil"],
-                    ].map(([id, Icon, label]) => (
-                        <button key={id} type="button" onClick={() => aller(id)} className={`flex min-w-16 flex-col items-center gap-1 rounded-xl px-3 py-2 text-[9px] font-semibold ${onglet === id ? "bg-jse-accent text-white" : "text-white/45"}`}>
-                            <Icon size={18} />
-                            {label}
-                        </button>
-                    ))}
+                    ].map(([id, Icon, label]) => {
+                        const actif = onglet === id;
+                        return (
+                            <button
+                                key={id}
+                                type="button"
+                                onClick={() => aller(id)}
+                                className={`relative flex h-[54px] min-w-[72px] flex-1 flex-col items-center justify-center gap-1 rounded-[28px] px-2 text-[9px] font-semibold transition-all duration-200 active:scale-95 ${
+                                    actif
+                                        ? "bg-jse-accent text-white shadow-[0_6px_18px_rgba(242,140,40,0.28)]"
+                                        : "text-white/45 hover:text-white/75"
+                                }`}
+                            >
+                                <Icon size={18} strokeWidth={actif ? 2.4 : 1.8} />
+                                <span>{label}</span>
+                            </button>
+                        );
+                    })}
                 </div>
             </nav>
 
