@@ -595,64 +595,227 @@ function SuccessScreen({ mission, onBack }) {
     );
 }
 
-function Gains({ statistiques, historique }) {
+function Notifications({ notifications = [] }) {
     return (
         <section>
-            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">Cette semaine</p>
-            <h2 className="mt-1 font-against text-3xl">Mes gains</h2>
-            <div className="mt-5 rounded-[22px] border border-white/8 bg-[#101719] p-5">
-                <p className="text-[9px] text-white/40">Gains du livreur</p>
-                <p className="mt-2 text-3xl font-bold text-jse-accent">Non défini</p>
-                <p className="mt-2 text-[10px] leading-5 text-white/40">
-                    Le MLD actuel ne contient pas encore de montant de rémunération du livreur. Aucun montant n’est donc inventé.
-                </p>
-            </div>
-            <div className="mt-3 grid grid-cols-2 gap-3">
-                <div className="rounded-[20px] bg-[#101719] p-4">
-                    <p className="text-xl font-bold text-white">{statistiques.livraisons_terminees || 0}</p>
-                    <p className="mt-1 text-[9px] text-white/40">Livraisons terminées</p>
-                </div>
-                <div className="rounded-[20px] bg-[#101719] p-4">
-                    <p className="text-xl font-bold text-white">{historique.length}</p>
-                    <p className="mt-1 text-[9px] text-white/40">Historique chargé</p>
-                </div>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">Centre d’alertes</p>
+            <h2 className="mt-1 font-against text-3xl">Notifications</h2>
+
+            <div className="mt-5 space-y-2">
+                {notifications.length ? notifications.map((notification) => (
+                    <article
+                        key={notification.id}
+                        className="rounded-[20px] border border-white/8 bg-[#101719] p-4"
+                    >
+                        <div className="flex items-start gap-3">
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-jse-accent/12 text-jse-accent">
+                                <Bell size={17} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-xs font-bold text-white">
+                                    {notification.type || "JSE Express"}
+                                </p>
+                                <p className="mt-1 text-[10px] leading-5 text-white/55">
+                                    {notification.contenu || "Nouvelle notification"}
+                                </p>
+                                <p className="mt-2 text-[8px] text-white/25">
+                                    {notification.date || "À l’instant"}
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+                )) : (
+                    <div className="rounded-[22px] border border-white/8 bg-[#101719] p-8 text-center">
+                        <Bell className="mx-auto text-white/20" size={28} />
+                        <p className="mt-3 text-sm font-semibold">Aucune notification</p>
+                        <p className="mt-1 text-[10px] text-white/40">
+                            Les informations importantes concernant vos missions apparaîtront ici.
+                        </p>
+                    </div>
+                )}
             </div>
         </section>
     );
 }
 
-function Profile({ livreur }) {
+function Historique({ historique = [] }) {
     return (
         <section>
-            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">Compte</p>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">Activité</p>
+            <h2 className="mt-1 font-against text-3xl">Historique</h2>
+            <div className="mt-5 space-y-2">
+                {historique.length ? historique.map((item) => (
+                    <article key={item.id} className="rounded-[20px] border border-white/8 bg-[#101719] p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-jse-secondaire/12 text-jse-secondaire">
+                                <Check size={17} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-xs font-bold">#{item.reference}</p>
+                                <p className="mt-1 truncate text-[9px] text-white/45">
+                                    {item.restaurant || "Restaurant"} · {item.date || "—"}
+                                </p>
+                            </div>
+                            <span className="text-[9px] font-bold text-jse-secondaire">Livrée</span>
+                        </div>
+                    </article>
+                )) : (
+                    <div className="rounded-[22px] border border-white/8 bg-[#101719] p-8 text-center text-[10px] text-white/40">
+                        Aucun historique disponible.
+                    </div>
+                )}
+            </div>
+        </section>
+    );
+}
+
+function Profile({ livreur, historique = [], loading, onSave, onLogout }) {
+    const [edition, setEdition] = useState(false);
+    const [form, setForm] = useState({
+        nom: "",
+        prenom: "",
+        telephone: "",
+        email: "",
+        telephone_secondaire: "",
+    });
+
+    useEffect(() => {
+        setForm({
+            nom: livreur?.nom?.split(" ").slice(1).join(" ") || "",
+            prenom: livreur?.nom?.split(" ")[0] || "",
+            telephone: livreur?.telephone || "",
+            email: livreur?.email || "",
+            telephone_secondaire: livreur?.telephone_secondaire || "",
+        });
+    }, [livreur]);
+
+    const modifier = (champ, valeur) => {
+        setForm((current) => ({ ...current, [champ]: valeur }));
+    };
+
+    const submit = (event) => {
+        event.preventDefault();
+        onSave(form, () => setEdition(false));
+    };
+
+    return (
+        <section>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">Compte livreur</p>
             <h2 className="mt-1 font-against text-3xl">Mon profil</h2>
-            <div className="mt-5 rounded-[24px] border border-white/8 bg-[#101719] p-5">
-                <div className="flex items-center gap-4">
-                    <div className="flex size-16 items-center justify-center rounded-full bg-jse-accent text-lg font-bold text-jse-principal">{initiales(livreur?.nom)}</div>
-                    <div>
-                        <p className="text-base font-bold">{livreur?.nom || "JSE Livreur"}</p>
-                        <p className="mt-1 text-[10px] text-white/45">{livreur?.telephone || "—"}</p>
-                        <span className="mt-2 inline-flex rounded-full bg-jse-secondaire/15 px-2 py-1 text-[8px] font-semibold text-jse-secondaire">Livreur vérifié</span>
+
+            <div className="mt-5 overflow-hidden rounded-[26px] bg-jse-fond text-jse-principal">
+                <div className="relative bg-jse-principal px-5 pb-7 pt-6 text-white">
+                    <div className="absolute -right-16 -top-16 size-40 rounded-full bg-jse-secondaire/15" />
+                    <div className="relative flex items-center gap-4">
+                        <div className="flex size-[72px] shrink-0 items-center justify-center rounded-full border-4 border-jse-fond bg-jse-accent text-xl font-bold text-jse-principal">
+                            {initiales(livreur?.nom)}
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-lg font-bold">{livreur?.nom || "JSE Livreur"}</p>
+                            <p className="mt-1 text-[10px] text-white/55">{livreur?.telephone || "—"}</p>
+                            <div className="mt-2 flex items-center gap-2">
+                                <span className="size-2 rounded-full bg-jse-secondaire" />
+                                <span className="text-[9px] font-semibold text-white/70">
+                                    {livreur?.disponibilite === "disponible" ? "Disponible" : "Indisponible"}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div className="mt-6 space-y-2">
-                    {[
-                        ["Mes informations", livreur?.telephone || "—"],
-                        ["Ma zone de desserte", livreur?.zone?.nom || "—"],
-                        ["Matricule", livreur?.matricule || "—"],
-                    ].map(([label, value]) => (
-                        <div key={label} className="flex items-center justify-between rounded-2xl bg-white/[0.035] px-4 py-3">
-                            <span className="text-[10px] text-white/45">{label}</span>
-                            <span className="text-[10px] font-semibold">{value}</span>
+
+                <div className="space-y-2 p-4">
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-[18px] bg-white p-3">
+                            <p className="text-[8px] uppercase tracking-[.12em] text-black/35">Matricule</p>
+                            <p className="mt-1 text-xs font-bold">{livreur?.matricule || "—"}</p>
                         </div>
-                    ))}
+                        <div className="rounded-[18px] bg-white p-3">
+                            <p className="text-[8px] uppercase tracking-[.12em] text-black/35">Zone</p>
+                            <p className="mt-1 truncate text-xs font-bold">{livreur?.zone?.nom || "—"}</p>
+                        </div>
+                    </div>
+
+                    {!edition ? (
+                        <>
+                            <div className="rounded-[18px] bg-white p-4">
+                                <p className="text-[8px] uppercase tracking-[.12em] text-black/35">Informations personnelles</p>
+                                <div className="mt-3 space-y-2">
+                                    {[
+                                        ["Téléphone", livreur?.telephone || "—"],
+                                        ["Téléphone secondaire", livreur?.telephone_secondaire || "Non renseigné"],
+                                        ["E-mail", livreur?.email || "Non renseigné"],
+                                    ].map(([label, value]) => (
+                                        <div key={label} className="flex items-center justify-between gap-3 border-b border-black/5 py-2 last:border-0">
+                                            <span className="text-[9px] text-black/45">{label}</span>
+                                            <span className="max-w-[60%] truncate text-right text-[10px] font-semibold">{value}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => setEdition(true)}
+                                className="w-full rounded-full bg-jse-accent py-3.5 text-xs font-bold text-jse-principal"
+                            >
+                                Modifier mes informations
+                            </button>
+                        </>
+                    ) : (
+                        <form onSubmit={submit} className="rounded-[18px] bg-white p-4">
+                            <p className="text-[8px] uppercase tracking-[.12em] text-black/35">Modifier mes informations</p>
+                            <div className="mt-3 space-y-2">
+                                {[
+                                    ["prenom", "Prénom", "text"],
+                                    ["nom", "Nom", "text"],
+                                    ["telephone", "Téléphone", "tel"],
+                                    ["telephone_secondaire", "Téléphone secondaire", "tel"],
+                                    ["email", "E-mail", "email"],
+                                ].map(([name, label, type]) => (
+                                    <label key={name} className="block">
+                                        <span className="text-[9px] font-semibold text-black/45">{label}</span>
+                                        <input
+                                            type={type}
+                                            value={form[name]}
+                                            onChange={(event) => modifier(name, event.target.value)}
+                                            className="mt-1 h-11 w-full rounded-xl border border-black/10 bg-[#FFF7E8] px-3 text-xs text-jse-principal outline-none focus:border-jse-accent"
+                                        />
+                                    </label>
+                                ))}
+                            </div>
+                            <div className="mt-3 grid grid-cols-2 gap-2">
+                                <button type="button" onClick={() => setEdition(false)} className="rounded-full border border-black/10 py-3 text-xs font-semibold">
+                                    Annuler
+                                </button>
+                                <button disabled={loading} type="submit" className="rounded-full bg-jse-accent py-3 text-xs font-bold text-jse-principal disabled:opacity-50">
+                                    {loading ? "Enregistrement…" : "Enregistrer"}
+                                </button>
+                            </div>
+                        </form>
+                    )}
+
+                    <div className="rounded-[18px] bg-white p-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-[8px] uppercase tracking-[.12em] text-black/35">Livraisons terminées</p>
+                                <p className="mt-1 text-2xl font-bold">{livreur?.livraisons_terminees ?? historique.length}</p>
+                            </div>
+                            <Check className="text-jse-secondaire" size={24} />
+                        </div>
+                    </div>
                 </div>
             </div>
-            <button className="mt-3 w-full rounded-full border border-red-500/60 py-3 text-xs font-semibold text-red-400">Se déconnecter</button>
+
+            <button
+                type="button"
+                onClick={onLogout}
+                className="mt-3 w-full rounded-full border border-red-500/50 py-3.5 text-xs font-semibold text-red-400"
+            >
+                Se déconnecter
+            </button>
         </section>
     );
 }
-
 export default function TableauDeBord() {
     const {
         livreur,
@@ -660,12 +823,14 @@ export default function TableauDeBord() {
         historique = [],
         statistiques = {},
         flash = {},
+        notifications = [],
     } = usePage().props;
 
     const [onglet, setOnglet] = useState("accueil");
     const [mission, setMission] = useState(null);
     const [ecran, setEcran] = useState(null);
     const [loading, setLoading] = useState(false);
+    const { position: positionCarte, accuracy: accuracyCarte, error: errorCarte } = usePositionLivreur(onglet === "carte");
 
     const active = useMemo(() => livraisons.filter((item) => item.statut_livraison !== "livree"), [livraisons]);
 
@@ -774,7 +939,7 @@ export default function TableauDeBord() {
     return (
         <main className="min-h-screen bg-[#070b0d] pb-28 text-white">
             <div className="mx-auto w-full max-w-[480px]">
-                <TopBar livreur={livreur} onNotifications={() => {}} />
+                <TopBar livreur={livreur} onNotifications={() => setOnglet("notifications")} />
                 <div className="bg-jse-principal px-5 pb-5">
                     <Stats statistiques={statistiques} zone={livreur?.zone} />
                     <Availability livreur={livreur} onToggle={toggleDisponibilite} loading={loading} />
@@ -825,13 +990,28 @@ export default function TableauDeBord() {
                             <p className="text-[9px] font-semibold uppercase tracking-[.2em] text-white/30">Géolocalisation</p>
                             <h2 className="mt-1 font-against text-4xl">Ma carte</h2>
                             <div className="mt-4 h-[520px]">
-                                <CarteLeaflet />
+                                <CarteLeaflet position={positionCarte} accuracy={accuracyCarte} error={errorCarte} />
                             </div>
                         </section>
                     )}
 
-                    {onglet === "gains" && <Gains statistiques={statistiques} historique={historique} />}
-                    {onglet === "profil" && <Profile livreur={livreur} />}
+                    {onglet === "notifications" && <Notifications notifications={notifications} />}
+                    {onglet === "profil" && (
+                        <Profile
+                            livreur={livreur}
+                            historique={historique}
+                            loading={loading}
+                            onSave={(form, done) => {
+                                setLoading(true);
+                                router.patch("/livreur/profil", form, {
+                                    preserveScroll: true,
+                                    onSuccess: () => done(),
+                                    onFinish: () => setLoading(false),
+                                });
+                            }}
+                            onLogout={() => router.post("/deconnexion")}
+                        />
+                    )}
                 </div>
 
                 <NavigationFlottante type="livreur" actif={onglet} onChange={setOnglet} />
