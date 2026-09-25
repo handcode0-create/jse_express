@@ -26,6 +26,33 @@ class AdministrationController extends Controller
                 'livraisons_actives' => Livraison::query()->whereIn('statut', ['en_attente', 'attribuee', 'en_cours'])->count(),
                 'livreurs_disponibles' => User::query()->where('role', 'livreur')->where('statut', 'actif')->whereHas('profilLivreur', fn ($q) => $q->where('disponibilite', 'disponible'))->count(),
             ],
+            'livraisons' => Livraison::query()
+                ->with(['commande.zone:id,nom', 'commande.statutCommande:id,code,libelle', 'attributions' => fn ($q) => $q->where('statut', 'active')->with('livreur:id,nom,prenom')])
+                ->whereIn('statut', ['en_attente', 'attribuee', 'en_cours'])
+                ->latest('id')
+                ->limit(50)
+                ->get()
+                ->map(fn (Livraison $livraison) => [
+                    'id' => $livraison->id,
+                    'reference' => $livraison->commande?->reference,
+                    'zone_id' => $livraison->zone_id,
+                    'zone' => $livraison->commande?->zone?->nom,
+                    'statut' => $livraison->statut,
+                    'livreur' => $livraison->attributions->first()?->livreur ? trim($livraison->attributions->first()->livreur->prenom . ' ' . $livraison->attributions->first()->livreur->nom) : null,
+                ])->values(),
+            'livreurs' => User::query()
+                ->where('role', 'livreur')
+                ->where('statut', 'actif')
+                ->with('profilLivreur.zone:id,nom')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (User $user) => [
+                    'id' => $user->id,
+                    'nom' => trim($user->prenom . ' ' . $user->nom),
+                    'zone_id' => $user->profilLivreur?->zone_id,
+                    'zone' => $user->profilLivreur?->zone?->nom,
+                    'disponibilite' => $user->profilLivreur?->disponibilite,
+                ])->values(),
         ]);
     }
     public function annulerCommande(Request $request, Commande $commande): RedirectResponse
