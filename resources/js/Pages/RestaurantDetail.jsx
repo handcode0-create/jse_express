@@ -133,11 +133,18 @@ export default function RestaurantDetail() {
     const ajouter = (produit, event) => {
         event?.stopPropagation();
 
+        // Un produit personnalisable doit toujours passer par sa fiche
+        // afin que le client puisse sélectionner ses accompagnements/options.
+        if (Array.isArray(produit?.options) && produit.options.length > 0) {
+            router.visit(`/restaurants/${restaurant.id}/produits/${produit.id}`);
+            return;
+        }
+
         setAjout(produit.id);
 
         router.post(
             `/panier/produits/${produit.id}/ajouter`,
-            { quantite: 1 },
+            { quantite: 1, options: [] },
             {
                 preserveScroll: true,
                 preserveState: true,
@@ -443,20 +450,22 @@ export default function RestaurantDetail() {
                                                             {prix(produit.prix)}{" "}
                                                             FCFA
                                                         </p>
+                                                        {produit?.options?.length > 0 && (
+                                                            <p className="mt-1 font-sans text-[9px] font-semibold text-jse-accent">
+                                                                Personnalisable · accompagnements & options
+                                                            </p>
+                                                        )}
                                                     </div>
 
                                                     <button
                                                         type="button"
-                                                        onClick={(event) =>
-                                                            ajouter(
-                                                                produit,
-                                                                event,
-                                                            )
+                                                        onClick={(event) => ajouter(produit, event)}
+                                                        disabled={ajout === produit.id}
+                                                        aria-label={
+                                                            produit?.options?.length
+                                                                ? `Personnaliser ${produit.nom}`
+                                                                : `Ajouter ${produit.nom} au panier`
                                                         }
-                                                        disabled={
-                                                            ajout === produit.id
-                                                        }
-                                                        aria-label={`Ajouter ${produit.nom} au panier`}
                                                         className="flex size-12 shrink-0 items-center justify-center rounded-full bg-jse-secondaire text-white shadow-md active:scale-90 disabled:opacity-60"
                                                     >
                                                         {ajout === produit.id ? (
