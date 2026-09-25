@@ -129,7 +129,7 @@ class RestaurantController extends Controller
             'lignesCommande.produit:id,nom,description,image',
             'paiements' => fn ($query) => $query->latest('id'),
             'livraison.attributions.livreur:id,nom,prenom,telephone',
-            'historiquesCommande.statutCommande:id,code,libelle,ordre',
+            'historiquesCommande.statut:id,code,libelle,ordre',
         ]);
 
         $paiement = $commande->paiements->first();
@@ -176,8 +176,8 @@ class RestaurantController extends Controller
                     'reference_transaction' => $paiement->reference_transaction,
                     'montant' => (float) $paiement->montant,
                     'statut' => $paiement->statut,
-                    'date' => $paiement->date_paiement?->format('d/m/Y'),
-                    'heure' => $paiement->date_paiement?->format('H:i'),
+                    'date' => $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('d/m/Y') : null,
+                    'heure' => $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('H:i') : null,
                 ] : null,
                 'livraison' => $commande->livraison ? [
                     'statut' => $commande->livraison->statut,
@@ -194,7 +194,7 @@ class RestaurantController extends Controller
                     ->sortBy('date_changement')
                     ->map(fn ($historique) => [
                         'code' => $historique->statutCommande?->code,
-                        'libelle' => $historique->statutCommande?->libelle,
+                        'libelle' => $historique->statut?->libelle,
                         'commentaire' => $historique->commentaire,
                         'date' => $historique->date_changement?->format('d/m/Y'),
                         'heure' => $historique->date_changement?->format('H:i'),
