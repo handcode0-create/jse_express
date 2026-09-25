@@ -642,11 +642,11 @@ export default function TableauDeBord() {
 
             {modal && (
                 <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-5" onClick={() => setModal(null)}>
-                    <div className="w-full max-w-md rounded-t-3xl border border-white/10 bg-[#101215] p-5 shadow-2xl sm:rounded-3xl" onClick={(event) => event.stopPropagation()}>
+                    <div className={`w-full ${modal === "options" ? "max-w-2xl" : "max-w-md"} rounded-t-3xl border border-white/10 bg-[#101215] p-5 shadow-2xl sm:rounded-3xl`} onClick={(event) => event.stopPropagation()}>
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/30">JSE Express</p>
-                                <h2 className="mt-1 font-against text-2xl">{modal === "produit" ? "Ajouter un produit" : "Ajouter une catégorie"}</h2>
+                                <h2 className="mt-1 font-against text-2xl">{modal === "options" ? "Options du produit" : modal === "produit" ? "Ajouter un produit" : "Ajouter une catégorie"}</h2>
                             </div>
                             <button type="button" onClick={() => setModal(null)} className="flex size-9 items-center justify-center rounded-full bg-white/7"><X size={16} /></button>
                         </div>
@@ -688,7 +688,7 @@ export default function TableauDeBord() {
                                                         type="checkbox"
                                                         checked={Boolean(groupe.obligatoire)}
                                                         onChange={(e) => modifierGroupeOption(indexGroupe, "obligatoire", e.target.checked)}
-                                                        className="accent-[var(--jse-accent)]"
+                                                        className="accent-[#F28C28]"
                                                     />
                                                     Choix obligatoire
                                                 </label>
@@ -794,8 +794,7 @@ export default function TableauDeBord() {
                                     {chargement ? "Enregistrement..." : "Enregistrer les options"}
                                 </button>
                             </form>
-                        ) : (
-                                                    {modal === "categorie" ? (
+                        ) : modal === "categorie" ? (
                             <form onSubmit={creerCategorie} className="mt-6 space-y-4">
                                 <ChampDark value={categorie.nom} onChange={(e) => setCategorie({ ...categorie, nom: e.target.value })} placeholder="Nom de la catégorie" required />
                                 <textarea value={categorie.description} onChange={(e) => setCategorie({ ...categorie, description: e.target.value })} placeholder="Description (facultatif)" className="min-h-24 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-jse-accent" />
