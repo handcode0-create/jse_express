@@ -6,7 +6,6 @@ use App\Models\Commande;
 use App\Models\HistoriqueCommande;
 use App\Models\StatutCommande;
 use App\Models\Livraison;
-use App\Models\AttributionLivraison;
 use App\Services\LivraisonService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
