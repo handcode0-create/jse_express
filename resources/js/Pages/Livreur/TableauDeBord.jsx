@@ -47,7 +47,7 @@ function TopBar({ livreur, onNotifications }) {
     const disponible = livreur?.disponibilite === "disponible";
 
     return (
-        <header className="relative overflow-hidden bg-jse-principal px-5 pb-5 pt-5">
+        <header className="jse-dark-surface relative overflow-hidden bg-jse-principal px-5 pb-5 pt-5">
             <div className="absolute -right-20 -top-24 size-64 rounded-full bg-jse-secondaire/10 blur-3xl" />
             <div className="relative flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -87,7 +87,7 @@ function Availability({ livreur, onToggle, loading }) {
             type="button"
             disabled={loading}
             onClick={onToggle}
-            className="mt-3 flex h-[54px] w-full items-center justify-between rounded-[17px] bg-jse-accent px-4 text-left text-jse-principal disabled:opacity-60"
+            className="jse-dark-surface mt-3 flex h-[54px] w-full items-center justify-between rounded-[17px] bg-jse-accent px-4 text-left text-jse-principal disabled:opacity-60"
         >
             <span className="text-xs font-bold">
                 {disponible ? "En ligne" : "Hors ligne"}
@@ -101,7 +101,7 @@ function Availability({ livreur, onToggle, loading }) {
 
 function Stats({ statistiques, zone }) {
     return (
-        <section className="rounded-[20px] bg-[#101719] px-3 py-4">
+        <section className="jse-dark-surface rounded-[20px] bg-[#101719] px-3 py-4">
             <div className="grid grid-cols-3 divide-x divide-white/10 text-center">
                 <div>
                     <p className="text-xl font-bold text-jse-accent">{statistiques.missions_du_jour || 0}</p>
@@ -705,17 +705,23 @@ function Profile({ livreur, zones = [], historique = [], statistiques = {}, load
             </div>
 
             <div className="mt-5 overflow-hidden rounded-[26px] border border-white/10 bg-[#101719] shadow-[0_24px_70px_rgba(0,0,0,.28)]">
-                <div className="relative overflow-hidden bg-jse-principal px-5 pb-7 pt-6">
-                    <div className="absolute -right-20 -top-20 size-48 rounded-full border border-white/5 bg-jse-secondaire/10" />
-                    <div className="absolute -bottom-24 -left-16 size-36 rounded-full bg-jse-accent/5 blur-2xl" />
-                    <div className="relative flex items-center gap-4">
-                        <PhotoProfil user={livreur} size="size-[72px]" dark />
-                        <div className="min-w-0">
+                <div className="jse-profile-hero relative min-h-[190px] overflow-hidden px-5 pb-7 pt-6">
+                    <img
+                        src="/assets/profil_header.png"
+                        alt=""
+                        className="absolute inset-0 size-full object-cover object-center"
+                    />
+                    <div className="absolute inset-0 bg-[#123C32]/78" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#123C32]/95 via-[#123C32]/72 to-[#123C32]/42" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#123C32]/90 via-transparent to-[#123C32]/20" />
+                    <div className="relative z-10 flex min-h-[138px] items-end gap-4">
+                        <PhotoProfil user={livreur} size="size-[82px]" dark />
+                        <div className="min-w-0 pb-1">
                             <p className="text-lg font-bold text-white">{nomComplet}</p>
-                            <p className="mt-1 text-[10px] text-white/45">{livreur?.telephone || "—"}</p>
-                            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/5 px-2.5 py-1">
-                                <span className={"size-1.5 rounded-full " + (disponible ? "bg-jse-secondaire" : "bg-white/30")} />
-                                <span className="text-[8px] font-semibold text-white/65">{disponible ? "Disponible" : "Indisponible"}</span>
+                            <p className="mt-1 text-[10px] text-white/70">{livreur?.telephone || "—"}</p>
+                            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/20 px-2.5 py-1 backdrop-blur-md">
+                                <span className={"size-1.5 rounded-full " + (disponible ? "bg-jse-secondaire" : "bg-white/40")} />
+                                <span className="text-[8px] font-semibold text-white/80">{disponible ? "Disponible" : "Indisponible"}</span>
                             </div>
                         </div>
                     </div>
