@@ -76,6 +76,9 @@ export default function TableauDeBord() {
         auth,
     } = usePage().props;
 
+    const utilisateur = auth?.user;
+    const nomComplet = [utilisateur?.prenom, utilisateur?.nom].filter(Boolean).join(" ") || "Chef";
+
     const [onglet, setOnglet] = useState("dashboard");
     const [modal, setModal] = useState(null);
     const [chargement, setChargement] = useState(false);
@@ -96,8 +99,6 @@ export default function TableauDeBord() {
         email: utilisateur?.email || "",
     });
 
-    const utilisateur = auth?.user;
-    const nomComplet = [utilisateur?.prenom, utilisateur?.nom].filter(Boolean).join(" ") || "Chef";
     const commandesRecentes = useMemo(() => commandes.slice(0, 5), [commandes]);
 
     const executer = (method, url, data = {}) => {
