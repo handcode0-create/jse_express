@@ -184,20 +184,20 @@ class RestaurantController extends Controller
                     'mode_attribution' => $commande->livraison->mode_attribution,
                     'livreur' => $commande->livraison->attributions->first()?->livreur ? [
                         'nom' => trim(
-                            $commande->livraison->livraisonsAttributions->first()->livreur->prenom . ' ' .
-                            $commande->livraison->livraisonsAttributions->first()->livreur->nom
+                            $commande->livraison->attributions->first()->livreur->prenom . ' ' .
+                            $commande->livraison->attributions->first()->livreur->nom
                         ),
-                        'telephone' => $commande->livraison->livraisonsAttributions->first()->livreur->telephone,
+                        'telephone' => $commande->livraison->attributions->first()->livreur->telephone,
                     ] : null,
                 ] : null,
                 'historique' => $commande->historiquesCommande
                     ->sortBy('date_changement')
                     ->map(fn ($historique) => [
-                        'code' => $historique->statutCommande?->code,
+                        'code' => $historique->statut?->code,
                         'libelle' => $historique->statut?->libelle,
                         'commentaire' => $historique->commentaire,
-                        'date' => $historique->date_changement?->format('d/m/Y'),
-                        'heure' => $historique->date_changement?->format('H:i'),
+                        'date' => $historique->date_changement ? \Carbon\Carbon::parse($historique->date_changement)->format('d/m/Y') : null,
+                        'heure' => $historique->date_changement ? \Carbon\Carbon::parse($historique->date_changement)->format('H:i') : null,
                     ])->values(),
             ],
         ]);
