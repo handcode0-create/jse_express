@@ -12,10 +12,7 @@ export default function Splash() {
     return (
         <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-jse-principal text-white">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(69,185,119,0.16),transparent_34%),linear-gradient(145deg,#123C32_0%,#0d2d25_55%,#07110F_100%)]" />
-            <div className="pointer-events-none absolute inset-0 opacity-30">
-                <div className="absolute -left-20 top-1/4 size-72 rounded-full bg-jse-secondaire/10 blur-3xl" />
-                <div className="absolute -right-20 bottom-1/4 size-80 rounded-full bg-jse-accent/10 blur-3xl" />
-            </div>
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(69,185,119,0.10),transparent_34%),linear-gradient(to_bottom,rgba(7,17,15,0.08),rgba(7,17,15,0.30))]" />
 
             <div className="relative z-10 flex flex-col items-center px-6 text-center">
                 <div className="flex items-center justify-center rounded-[28px] border border-white/10 bg-white/[0.04] px-7 py-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
