@@ -966,7 +966,7 @@ export default function TableauDeBord() {
                 <SidebarLivreur actif={onglet} livreur={livreur} onChange={setOnglet} />
 
                 <div className="min-w-0 flex-1">
-                    <div className="mx-auto w-full max-w-[1480px]">
+                    <div className="mx-auto w-full max-w-none">
                         <TopBar livreur={livreur} onNotifications={() => setOnglet("notifications")} />
                         <div className="bg-jse-principal px-5 pb-5 lg:px-8 lg:pb-7">
                     <Stats statistiques={statistiques} zone={livreur?.zone} />
