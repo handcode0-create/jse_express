@@ -1,18 +1,9 @@
 import { useEffect } from "react";
-import { router } from "@inertiajs/react";
 
 export default function Splash() {
     useEffect(() => {
         const minuteur = window.setTimeout(() => {
-            try {
-                router.visit("/bienvenue", {
-                    replace: true,
-                    preserveState: false,
-                    preserveScroll: false,
-                });
-            } catch {
-                window.location.replace("/bienvenue");
-            }
+            window.location.replace("/bienvenue");
         }, 2500);
 
         return () => window.clearTimeout(minuteur);
