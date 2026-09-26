@@ -17,10 +17,10 @@ export default function Panier(){
  const commander=()=>router.visit("/commande/validation");
 
  return <main className="min-h-screen bg-jse-fond text-jse-texte">
-  <div className="mx-auto flex min-h-screen w-full max-w-[1440px]">
+  <div className="mx-auto flex min-h-screen w-full max-w-none">
    <SidebarJSE />
    <div className="min-w-0 flex-1">
-    <div className="mx-auto min-h-screen w-full max-w-[760px] px-5 pb-32 sm:px-8">
+    <div className="mx-auto min-h-screen w-full max-w-none px-5 pb-32 sm:px-8">
    <header className="flex items-center gap-4 pb-5 pt-7">
     <button type="button" onClick={()=>router.visit("/accueil")} className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-jse-texte/5 text-jse-principal"><ArrowLeft size={23}/></button>
     <div><h1 className="font-against text-[2.5rem] leading-none text-jse-principal">Mon panier</h1><p className="mt-1 font-sans text-sm text-jse-texte/55">{nombre} produit{nombre>1?"s":""} dans votre panier</p></div>
