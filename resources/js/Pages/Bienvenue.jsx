@@ -10,12 +10,12 @@ const slides = [
     { image: "/assets/bienvenue/dessert.png", eyebrow: "JSE Express", title: <>Découvrez.<br />Commandez.<br />Savourez.</>, description: "Une nouvelle façon de profiter des saveurs d'Adzopé." },
 ];
 
-const AUTOPLAY_DELAY = 2200;
+const AUTOPLAY_DELAY = 5200;
 
 export default function Bienvenue() {
     const pageRef = useRef(null);
     const visualRef = useRef(null);
-    const videoRef = useRef(null);
+    const backgroundRef = useRef(null);
     const imageRef = useRef(null);
     const copyRef = useRef(null);
     const pointerStart = useRef(null);
@@ -33,11 +33,11 @@ export default function Bienvenue() {
             onComplete: () => setIndex(nextIndex),
         })
             .to(image, { x: -direction * 44, opacity: 0, scale: 0.96, duration: 0.28 })
-            .to(videoRef.current, { xPercent: -direction * 1.5, scale: 1.025, duration: 0.42 }, "<")
+            .to(backgroundRef.current, { xPercent: -direction * 1.5, scale: 1.025, duration: 0.42 }, "<")
             .call(() => { image.src = next.image; })
             .set(image, { x: direction * 56, opacity: 0, scale: 0.92 })
             .to(image, { x: 0, opacity: 1, scale: 1, duration: 0.68, clearProps: "transform,opacity" })
-            .to(videoRef.current, { xPercent: 0, scale: 1, duration: 0.7, ease: "power3.out", clearProps: "transform" }, "<");
+            .to(backgroundRef.current, { xPercent: 0, scale: 1, duration: 0.7, ease: "power3.out", clearProps: "transform" }, "<");
     };
 
     const changerSlide = (direction) => {
@@ -57,23 +57,6 @@ export default function Bienvenue() {
         reprendreAutoplay();
         return pauseAutoplay;
     }, [index]);
-
-    useEffect(() => {
-        const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-        const syncVideoMotion = () => {
-            if (!videoRef.current) return;
-            if (mediaQuery.matches) {
-                videoRef.current.pause();
-            } else {
-                videoRef.current.play().catch(() => {});
-            }
-        };
-
-        syncVideoMotion();
-        mediaQuery.addEventListener?.("change", syncVideoMotion);
-
-        return () => mediaQuery.removeEventListener?.("change", syncVideoMotion);
-    }, []);
 
     useLayoutEffect(() => {
         if (!pageRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -108,33 +91,21 @@ export default function Bienvenue() {
 
     return (
         <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-[#07110F] text-jse-texte">
-            <video
-                ref={videoRef}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
+            <img
+                ref={backgroundRef}
+                src="/assets/bg.png"
+                alt=""
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 hidden h-full w-full object-cover object-center opacity-[0.34] lg:block"
-            >
-                <source src="/assets/bienvenue/livreur-bg.mp4" type="video/mp4" />
-            </video>
-            <div className="pointer-events-none absolute inset-0 bg-[#07110F]/58 backdrop-blur-[1px]" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#07110F]/72 via-[#123C32]/14 to-[#07110F]/46" />
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_48%,rgba(69,185,119,0.045),transparent_36%),linear-gradient(to_bottom,rgba(7,17,15,0.05),rgba(7,17,15,0.22))]" />
+                className="pointer-events-none absolute inset-[-2%] h-[104%] w-[104%] object-cover object-center opacity-100"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-[#07110F]/72 backdrop-blur-[3px]" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#07110F]/88 via-[#123C32]/38 to-[#07110F]/55" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_48%,rgba(69,185,119,0.10),transparent_36%),linear-gradient(to_bottom,rgba(7,17,15,0.12),rgba(7,17,15,0.38))]" />
             <div className="pointer-events-none absolute inset-0 border border-white/[0.045] bg-white/[0.018] backdrop-blur-[1px]" />
             <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[393px] flex-col px-5 lg:max-w-none lg:px-10 xl:px-16">
                 <header data-welcome-header className="flex items-center justify-between pt-6 lg:pt-8">
-                    <button
-                        type="button"
-                        onClick={() => router.visit("/")}
-                        className="flex items-center"
-                        aria-label="Accueil"
-                    >
-                        <span className="font-against text-2xl tracking-[-0.04em] text-jse-texte lg:text-3xl">
-                            JSE Express
-                        </span>
+                    <button type="button" onClick={() => router.visit("/")} className="flex items-center" aria-label="Accueil">
+                        <img src="/assets/jse_logo.png" alt="JSE Express" className="h-9 w-auto object-contain lg:h-10" />
                     </button>
                     <button type="button" onClick={() => router.visit("/authentification")} className="font-sans text-sm font-medium text-jse-texte/65 transition hover:text-jse-principal">
                         Passer
