@@ -366,7 +366,7 @@ class RestaurantController extends Controller
         return back()->with('success', 'Le statut de la commande a été mis à jour.');
     }
 
-    public function annulerCommande(Request $request, Commande $commande): RedirectResponse
+    public function annulerCommande(Request $request, Commande $commande, NotificationService $notificationService): RedirectResponse
     {
         $restaurant = $this->restaurant($request);
         abort_unless((int) $commande->restaurant_id === (int) $restaurant->id, 404);
@@ -388,6 +388,18 @@ class RestaurantController extends Controller
                 'date_changement' => now(),
             ]);
         });
+
+        $commande->load('user');
+
+        if ($commande->user) {
+            $notificationService->sms(
+                $commande->user,
+                'Votre commande '.$commande->reference.' a été annulée par le restaurant.',
+                $commande->id,
+                null,
+                'commande_annulee'
+            );
+        }
 
         return back()->with('success', 'La commande a été annulée.');
     }
