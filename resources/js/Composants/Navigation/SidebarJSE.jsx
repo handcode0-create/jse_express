@@ -2,6 +2,7 @@ import { router, usePage } from "@inertiajs/react";
 import { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { Heart, Home, LogOut, ShoppingBag, UserRound } from "lucide-react";
+import ThemeToggle from "../Interface/ThemeToggle";
 
 const navigation = [
     { label: "Accueil", icon: Home, route: "/accueil", key: "accueil" },
@@ -88,6 +89,12 @@ export default function SidebarJSE({ active }) {
                             </p>
                         </div>
                     </div>
+                </div>
+                <div className="mb-2 flex items-center justify-between rounded-2xl px-3 py-2">
+                    <span className="font-sans text-xs font-medium text-jse-texte/55">
+                        Thème
+                    </span>
+                    <ThemeToggle compact />
                 </div>
                 <button
                     type="button"
