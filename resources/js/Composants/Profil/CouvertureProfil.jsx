@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "@inertiajs/react";
-import { Camera, Check, LoaderCircle } from "lucide-react";
+import { Camera, LoaderCircle } from "lucide-react";
+import PhotoProfil from "./PhotoProfil";
 
 const MAX_UPLOAD_BYTES = 1500 * 1024;
 const MAX_WIDTH = 1800;
@@ -165,7 +166,7 @@ export default function CouvertureProfil({ user }) {
                             <div className="relative">
                                 <div className="absolute inset-0 rounded-full bg-jse-accent/25 blur-xl" />
                                 <div className="relative">
-                                    <div id="profil-couverture-avatar" />
+                                    <PhotoProfil user={user} size="size-[82px] sm:size-[92px]" className="border-white/30" dark />
                                 </div>
                             </div>
                         </div>
