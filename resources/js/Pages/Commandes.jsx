@@ -383,7 +383,7 @@ export default function Commandes() {
                 </div>
             </div>
 
-            <NavigationFlottante type="client" actif="accueil" />
+            <NavigationFlottante type="client" actif="commandes" />
         </main>
     );
 }
