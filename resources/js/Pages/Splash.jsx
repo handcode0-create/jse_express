@@ -3,28 +3,35 @@ import { router } from "@inertiajs/react";
 
 export default function Splash() {
     useEffect(() => {
-        const minuteur = setTimeout(() => {
-            router.visit("/bienvenue");
+        const minuteur = window.setTimeout(() => {
+            try {
+                router.visit("/bienvenue", {
+                    replace: true,
+                    preserveState: false,
+                    preserveScroll: false,
+                });
+            } catch {
+                window.location.replace("/bienvenue");
+            }
         }, 2500);
 
-        return () => clearTimeout(minuteur);
+        return () => window.clearTimeout(minuteur);
     }, []);
 
     return (
-        <main
-            className="relative flex min-h-screen items-center justify-center overflow-hidden bg-jse-principal bg-cover bg-center bg-no-repeat"
-            style={{
-                backgroundImage: "url('/assets/bg.png')",
-            }}
-        >
-            <div className="absolute inset-0 bg-jse-principal/10" />
+        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-jse-principal text-white">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(69,185,119,0.16),transparent_34%),linear-gradient(145deg,#123C32_0%,#0d2d25_55%,#07110F_100%)]" />
+            <div className="pointer-events-none absolute inset-0 opacity-30">
+                <div className="absolute -left-20 top-1/4 size-72 rounded-full bg-jse-secondaire/10 blur-3xl" />
+                <div className="absolute -right-20 bottom-1/4 size-80 rounded-full bg-jse-accent/10 blur-3xl" />
+            </div>
 
             <div className="relative z-10 flex flex-col items-center px-6 text-center">
-                <img
-                    src="/assets/jse_logo.png"
-                    alt="JSE Express"
-                    className="w-52 max-w-[65vw] object-contain sm:w-60"
-                />
+                <div className="flex items-center justify-center rounded-[28px] border border-white/10 bg-white/[0.04] px-7 py-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                    <span className="font-against text-4xl tracking-[-0.04em] text-white sm:text-5xl">
+                        JSE Express
+                    </span>
+                </div>
 
                 <p className="mt-8 max-w-xs text-base font-medium leading-7 text-white/95 sm:text-lg">
                     Un mouvement au service de votre quotidien.
