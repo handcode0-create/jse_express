@@ -268,6 +268,36 @@ function CommandeCard({ commande, index }) {
                         Commander à nouveau
                     </button>
                 )}
+
+                {estAnnulee && (
+                    <button
+                        type="button"
+                        onClick={() => router.visit("/accueil")}
+                        className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-jse-accent/10 font-sans text-xs font-semibold text-jse-accent transition-colors hover:bg-jse-accent/15"
+                    >
+                        <Home size={17} strokeWidth={1.9} />
+                        Nouvelle commande
+                    </button>
+                )}
+
+                {!estTerminee && !estAnnulee && commande.peut_annuler && (
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (window.confirm("Voulez-vous vraiment annuler cette commande ?")) {
+                                router.post(
+                                    "/commande/" + commande.id + "/annuler",
+                                    {},
+                                    { preserveScroll: true },
+                                );
+                            }
+                        }}
+                        className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-red-50 font-sans text-xs font-semibold text-red-600 transition-colors hover:bg-red-100"
+                    >
+                        <X size={17} strokeWidth={1.9} />
+                        Annuler la commande
+                    </button>
+                )}
             </div>
         </article>
     );
