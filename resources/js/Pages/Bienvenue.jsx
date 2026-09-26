@@ -10,7 +10,7 @@ const slides = [
     { image: "/assets/bienvenue/dessert.png", eyebrow: "JSE Express", title: <>Découvrez.<br />Commandez.<br />Savourez.</>, description: "Une nouvelle façon de profiter des saveurs d'Adzopé." },
 ];
 
-const AUTOPLAY_DELAY = 5200;
+const AUTOPLAY_DELAY = 2200;
 
 export default function Bienvenue() {
     const pageRef = useRef(null);
