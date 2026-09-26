@@ -19,9 +19,12 @@ export default function Splash() {
 
             <div className="relative z-10 flex flex-col items-center px-6 text-center">
                 <div className="flex items-center justify-center rounded-[28px] border border-white/10 bg-white/[0.04] px-7 py-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
-                    <span className="font-against text-4xl tracking-[-0.04em] text-white sm:text-5xl">
-                        JSE Express
-                    </span>
+                    <img
+                        src="/jse_logo.png"
+                        alt="JSE Express"
+                        className="h-20 w-auto object-contain sm:h-24"
+                        draggable="false"
+                    />
                 </div>
 
                 <p className="mt-8 max-w-xs text-base font-medium leading-7 text-white/95 sm:text-lg">
