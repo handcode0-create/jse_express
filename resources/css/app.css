@@ -329,3 +329,71 @@ button:disabled {
         will-change: auto;
     }
 }
+
+
+/* JSE Express — semantic contrast layer
+   Les couleurs de marque restent les mêmes visuellement, mais les
+   variantes de texte sont adaptées au fond actif afin d'éviter les
+   titres verts trop sombres en thème sombre et les textes secondaires
+   trop faibles en thème clair.
+*/
+html[data-theme="dark"] .text-jse-principal {
+    color: #74D8A1 !important;
+}
+html[data-theme="dark"] [class*="text-jse-principal/"] {
+    color: rgb(116 216 161 / .78) !important;
+}
+html[data-theme="dark"] .text-jse-secondaire {
+    color: #63D08F !important;
+}
+html[data-theme="dark"] [class*="text-jse-secondaire/"] {
+    color: rgb(99 208 143 / .82) !important;
+}
+html[data-theme="dark"] .text-jse-accent {
+    color: #F6A04A !important;
+}
+html[data-theme="dark"] [class*="text-jse-accent/"] {
+    color: rgb(246 160 74 / .84) !important;
+}
+html[data-theme="dark"] [class*="ring-jse-texte/"] {
+    --tw-ring-color: rgb(255 247 232 / .10) !important;
+}
+html[data-theme="dark"] [class*="placeholder:text-jse-texte/"]::placeholder {
+    color: rgb(255 247 232 / .48) !important;
+}
+html[data-theme="dark"] [class*="bg-white/"] {
+    background-color: rgb(255 247 232 / .06) !important;
+}
+html[data-theme="dark"] [class*="border-white/"] {
+    border-color: rgb(255 247 232 / .10) !important;
+}
+
+/* En thème clair, les couleurs destinées au texte sont assombries
+   uniquement lorsqu'elles servent de contenu, pas lorsqu'elles sont
+   utilisées comme fond de bouton. */
+html[data-theme="light"] .text-jse-secondaire {
+    color: #1F6F48 !important;
+}
+html[data-theme="light"] [class*="text-jse-secondaire/"] {
+    color: rgb(31 111 72 / .78) !important;
+}
+html[data-theme="light"] .text-jse-accent {
+    color: #A9530A !important;
+}
+html[data-theme="light"] [class*="text-jse-accent/"] {
+    color: rgb(169 83 10 / .82) !important;
+}
+html[data-theme="light"] [class*="placeholder:text-jse-texte/"]::placeholder {
+    color: rgb(25 25 25 / .48) !important;
+}
+
+/* Le texte blanc reste blanc dans les surfaces volontairement sombres. */
+html[data-theme="light"] .jse-dark-surface [class*="text-white"] {
+    color: #FFF7E8 !important;
+}
+html[data-theme="light"] .jse-dark-surface [class*="border-white/"] {
+    border-color: rgb(255 247 232 / .10) !important;
+}
+html[data-theme="light"] .jse-dark-surface [class*="bg-white/"] {
+    background-color: rgb(255 255 255 / .07) !important;
+}
