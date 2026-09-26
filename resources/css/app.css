@@ -337,6 +337,27 @@ button:disabled {
    titres verts trop sombres en thème sombre et les textes secondaires
    trop faibles en thème clair.
 */
+html[data-theme="dark"] [class~="text-white/45"],
+html[data-theme="dark"] [class~="text-white/50"],
+html[data-theme="dark"] [class~="text-white/55"] {
+    color: rgb(255 247 232 / .58) !important;
+}
+html[data-theme="dark"] [class~="text-white/60"],
+html[data-theme="dark"] [class~="text-white/65"] {
+    color: rgb(255 247 232 / .66) !important;
+}
+html[data-theme="dark"] [class~="text-white/70"],
+html[data-theme="dark"] [class~="text-white/75"] {
+    color: rgb(255 247 232 / .74) !important;
+}
+html[data-theme="dark"] [class~="text-white/80"],
+html[data-theme="dark"] [class~="text-white/85"] {
+    color: rgb(255 247 232 / .84) !important;
+}
+html[data-theme="dark"] [class~="text-white/95"] {
+    color: rgb(255 247 232 / .95) !important;
+}
+
 html[data-theme="dark"] .text-jse-principal {
     color: #74D8A1 !important;
 }
@@ -391,8 +412,11 @@ html[data-theme="light"] [class*="placeholder:text-jse-texte/"]::placeholder {
 }
 
 /* Le texte blanc reste blanc dans les surfaces volontairement sombres. */
-html[data-theme="light"] .jse-dark-surface [class*="text-white"] {
+html[data-theme="light"] .jse-dark-surface .text-white {
     color: #FFF7E8 !important;
+}
+html[data-theme="light"] .jse-dark-surface [class*="text-white/"] {
+    color: rgb(255 247 232 / .62) !important;
 }
 html[data-theme="light"] .jse-dark-surface [class*="border-white/"] {
     border-color: rgb(255 247 232 / .10) !important;
