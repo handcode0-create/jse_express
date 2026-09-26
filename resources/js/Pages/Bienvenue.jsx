@@ -16,6 +16,7 @@ export default function Bienvenue() {
     const pageRef = useRef(null);
     const visualRef = useRef(null);
     const backgroundRef = useRef(null);
+    const videoRef = useRef(null);
     const imageRef = useRef(null);
     const copyRef = useRef(null);
     const pointerStart = useRef(null);
@@ -58,6 +59,23 @@ export default function Bienvenue() {
         return pauseAutoplay;
     }, [index]);
 
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const syncVideoMotion = () => {
+            if (!videoRef.current) return;
+            if (mediaQuery.matches) {
+                videoRef.current.pause();
+            } else {
+                videoRef.current.play().catch(() => {});
+            }
+        };
+
+        syncVideoMotion();
+        mediaQuery.addEventListener?.("change", syncVideoMotion);
+
+        return () => mediaQuery.removeEventListener?.("change", syncVideoMotion);
+    }, []);
+
     useLayoutEffect(() => {
         if (!pageRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
@@ -98,8 +116,20 @@ export default function Bienvenue() {
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-[-2%] h-[104%] w-[104%] object-cover object-center opacity-100"
             />
-            <div className="pointer-events-none absolute inset-0 bg-[#07110F]/72 backdrop-blur-[3px]" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#07110F]/88 via-[#123C32]/38 to-[#07110F]/55" />
+            <video
+                ref={videoRef}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 hidden h-full w-full object-cover object-center opacity-[0.34] lg:block"
+            >
+                <source src="/assets/bienvenue/livreur-bg.mp4" type="video/mp4" />
+            </video>
+            <div className="pointer-events-none absolute inset-0 bg-[#07110F]/76 backdrop-blur-[2px]" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#07110F]/90 via-[#123C32]/42 to-[#07110F]/62" />
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_48%,rgba(69,185,119,0.10),transparent_36%),linear-gradient(to_bottom,rgba(7,17,15,0.12),rgba(7,17,15,0.38))]" />
             <div className="pointer-events-none absolute inset-0 border border-white/[0.045] bg-white/[0.018] backdrop-blur-[1px]" />
             <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[393px] flex-col px-5 lg:max-w-none lg:px-10 xl:px-16">
