@@ -24,6 +24,7 @@ use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -522,7 +523,7 @@ Route::get('/commandes/{commande}', function (Commande $commande) {
         && $commande->pin_livraison_chiffre
     ) {
         try {
-            $pinLivraison = IlluminateSupportFacadesCrypt::decryptString($commande->pin_livraison_chiffre);
+            $pinLivraison = Crypt::decryptString($commande->pin_livraison_chiffre);
         } catch (\Throwable $exception) {
             $pinLivraison = null;
         }
