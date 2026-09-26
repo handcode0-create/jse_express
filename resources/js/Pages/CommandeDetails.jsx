@@ -11,6 +11,8 @@ import {
     CreditCard,
     KeyRound,
     MapPin,
+    Home,
+    X,
     Package,
     RefreshCcw,
     Store,
@@ -92,6 +94,18 @@ export default function CommandeDetails() {
             {},
             { preserveScroll: true },
         );
+    };
+
+    const annuler = () => {
+        if (!commande?.peut_annuler) return;
+
+        if (window.confirm("Voulez-vous vraiment annuler cette commande ?")) {
+            router.post(
+                "/commande/" + commande.id + "/annuler",
+                {},
+                { preserveScroll: true },
+            );
+        }
     };
 
     return (
@@ -446,6 +460,29 @@ export default function CommandeDetails() {
                         <RefreshCcw size={19} />
                         Commander à nouveau
                         <ChevronRight size={16} />
+                    </button>
+                )}
+
+                {commande.statut?.code === "ANNULEE" && (
+                    <button
+                        type="button"
+                        onClick={() => router.visit("/accueil")}
+                        className="mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-jse-accent px-5 font-sans text-sm font-semibold text-white shadow-lg shadow-jse-accent/20"
+                    >
+                        <Home size={19} />
+                        Nouvelle commande
+                        <ChevronRight size={16} />
+                    </button>
+                )}
+
+                {commande.peut_annuler && (
+                    <button
+                        type="button"
+                        onClick={annuler}
+                        className="mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-red-50 px-5 font-sans text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
+                    >
+                        <X size={19} />
+                        Annuler la commande
                     </button>
                 )}
                     </div>
