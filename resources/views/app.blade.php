@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/png" href="/assets/jse_logo.png">
-    <link rel="apple-touch-icon" href="/assets/jse_logo.png">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/favicon.ico">
     <link rel="manifest" href="/manifest.webmanifest">
 
     @viteReactRefresh
