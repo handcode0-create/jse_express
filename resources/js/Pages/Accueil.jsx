@@ -492,18 +492,6 @@ export default function Accueil() {
                                     </button>
                                 </div>
 
-                                <button type="button" onClick={() => setIndexBannière((indexBannière - 1 + bannières.length) % bannières.length)} className="absolute left-2.5 top-1/2 z-20 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-md" aria-label="Bannière précédente">
-                                    <ChevronRight size={15} className="rotate-180" />
-                                </button>
-                                <button type="button" onClick={() => setIndexBannière((indexBannière + 1) % bannières.length)} className="absolute right-2.5 top-1/2 z-20 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-md" aria-label="Bannière suivante">
-                                    <ChevronRight size={15} />
-                                </button>
-
-                                <div className="absolute bottom-4 left-5 z-20 flex gap-1.5 sm:left-8 lg:left-10">
-                                    {bannières.map((_, index) => (
-                                        <button key={index} type="button" onClick={() => setIndexBannière(index)} className={index === indexBannière ? "h-1.5 w-6 rounded-full bg-white" : "size-1.5 rounded-full bg-white/45"} aria-label={`Afficher la bannière ${index + 1}`} />
-                                    ))}
-                                </div>
                             </div>
                         </section>
 
