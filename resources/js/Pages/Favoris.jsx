@@ -89,6 +89,6 @@ export default function Favoris() {
             </div>
         </div>
 
-        <NavigationFlottante type="client" actif="accueil" />
+        <NavigationFlottante type="client" actif="favoris" />
     </main>;
 }
