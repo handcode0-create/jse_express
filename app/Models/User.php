@@ -12,7 +12,7 @@ class User extends Authenticatable
     use HasFactory;
 
     protected $fillable = [
-        'nom','prenom','telephone','email','photo_profil','password','role','statut',
+        'nom','prenom','telephone','email','photo_profil','couverture_profil','password','role','statut',
     ];
 
     public function restaurant(): HasOne { return $this->hasOne(Restaurant::class, 'user_id', 'id'); }
