@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Commande;
 use App\Models\HistoriqueCommande;
 use App\Models\StatutCommande;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CommandeController extends Controller
 {
-    public function annuler(Request $request, Commande $commande): RedirectResponse
+    public function annuler(Request $request, Commande $commande, NotificationService $notificationService): RedirectResponse
     {
         abort_unless((int) $commande->user_id === (int) $request->user()->id, 404);
 
@@ -35,6 +36,18 @@ class CommandeController extends Controller
                 'date_changement' => now(),
             ]);
         });
+
+        $commande->load('restaurant.user');
+
+        if ($commande->restaurant?->user) {
+            $notificationService->sms(
+                $commande->restaurant->user,
+                'La commande '.$commande->reference.' a été annulée par le client.',
+                $commande->id,
+                null,
+                'commande_annulee'
+            );
+        }
 
         return back()->with('success', 'La commande a été annulée.');
     }
