@@ -18,6 +18,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { basculerFavori, lireFavoris } from "../lib/favoris";
 
+const IMAGE_BANNIERE_SECOURS = "/assets/plat-hero.png";
+
 const bannières = [
     {
         image: "/assets/banner-plat-ivoirien.jpg",
@@ -469,7 +471,15 @@ export default function Accueil() {
                         {/* Bannière */}
                         <section ref={bannerRef} className="pt-7 sm:pt-8 lg:pt-9">
                             <div className="jse-dark-surface relative min-h-[210px] overflow-hidden rounded-[26px] bg-jse-principal shadow-lg shadow-jse-principal/10 sm:min-h-[240px] lg:min-h-[285px]">
-                                <img src={bannière.image} alt="" className="jse-banner-image absolute inset-0 h-full w-full object-cover will-change-transform" />
+                                <img
+                                    src={bannière.image}
+                                    alt=""
+                                    className="jse-banner-image absolute inset-0 h-full w-full object-cover will-change-transform"
+                                    onError={(event) => {
+                                        if (event.currentTarget.src.endsWith(IMAGE_BANNIERE_SECOURS)) return;
+                                        event.currentTarget.src = IMAGE_BANNIERE_SECOURS;
+                                    }}
+                                />
                                 <div className="absolute inset-0 bg-gradient-to-r from-jse-principal via-jse-principal/75 to-transparent" />
 
                                 <div className="jse-banner-copy relative z-10 flex min-h-[210px] max-w-[540px] flex-col justify-center px-5 py-6 sm:min-h-[240px] sm:px-8 lg:min-h-[285px] lg:px-10">
