@@ -92,11 +92,11 @@ export default function Profil() {
     };
 
     return <main className="min-h-screen bg-jse-fond pb-28 text-jse-texte">
-        <div className="mx-auto min-h-screen w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto min-h-screen w-full max-w-none px-4 sm:px-6 lg:px-8">
             <div className="lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-10">
                 <SidebarJSE active="profil" />
 
-                <div className="mx-auto w-full max-w-3xl lg:mx-0">
+                <div className="mx-auto w-full max-w-none lg:mx-0">
                     <CouvertureProfil user={utilisateur} />
 
                     <section className="pt-5 lg:pt-7">
