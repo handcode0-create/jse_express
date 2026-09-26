@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { router, usePage } from "@inertiajs/react";
+import { gsap } from "gsap";
 
 import {
     ArrowLeft,
@@ -15,6 +16,9 @@ import {
 
 export default function Authentification() {
     const { flash = {}, errors = {} } = usePage().props;
+    const pageRef = useRef(null);
+    const heroRef = useRef(null);
+    const formRef = useRef(null);
 
     const [mode, setMode] = useState("connexion");
 
@@ -39,6 +43,20 @@ export default function Authentification() {
         confirmation_mot_de_passe: "",
         consentement: false,
     });
+
+    useLayoutEffect(() => {
+        if (!pageRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+        const contexte = gsap.context(() => {
+            const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
+            timeline
+                .from(heroRef.current, { x: -28, opacity: 0, duration: 0.7 })
+                .from(formRef.current, { x: 28, opacity: 0, duration: 0.7 }, "-=0.55")
+                .from(formRef.current?.querySelectorAll("[data-auth-item]") || [], { y: 12, opacity: 0, duration: 0.38, stagger: 0.045, clearProps: "transform,opacity" }, "-=0.3");
+        }, pageRef);
+
+        return () => contexte.revert();
+    }, []);
 
     /*
     |--------------------------------------------------------------------------
@@ -163,14 +181,18 @@ export default function Authentification() {
     };
 
     return (
-        <main className="min-h-screen bg-jse-fond text-jse-texte font-sans">
-            <div className="mx-auto flex min-h-screen w-full max-w-7xl">
+        <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-[#07110F] font-sans text-jse-texte">
+            <img src="/assets/login_page_fond.png" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 size-full object-cover object-center" />
+            <div className="pointer-events-none absolute inset-0 bg-[#07110F]/45" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#123C32]/75 via-[#123C32]/30 to-[#07110F]/75" />
+
+            <div className="relative z-10 flex min-h-screen w-full">
 
                 {/* =====================================================
                     PARTIE VISUELLE DESKTOP
                 ====================================================== */}
 
-                <section className="relative hidden overflow-hidden bg-jse-principal lg:flex lg:w-1/2">
+                <section ref={heroRef} className="relative hidden min-h-screen overflow-hidden border-r border-white/10 bg-[#123C32]/55 backdrop-blur-[2px] lg:flex lg:w-1/2">
 
                     <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-jse-secondaire/20 blur-3xl" />
 
@@ -269,7 +291,7 @@ export default function Authentification() {
                     FORMULAIRE
                 ====================================================== */}
 
-                <section className="flex w-full items-center justify-center px-5 py-10 sm:px-8 lg:w-1/2 lg:px-12 xl:px-20">
+                <section ref={formRef} className="flex w-full items-center justify-center bg-[#07110F]/82 px-5 py-10 backdrop-blur-2xl sm:px-8 lg:min-h-screen lg:w-1/2 lg:px-12 xl:px-20">
 
                     <div className="w-full max-w-md">
 
@@ -299,7 +321,7 @@ export default function Authentification() {
                             EN-TÊTE
                         ================================================== */}
 
-                        <div className="mb-8">
+                        <div data-auth-item className="mb-8">
 
                             <p className="mb-2 text-sm font-semibold text-jse-secondaire">
                                 Bienvenue
@@ -322,7 +344,7 @@ export default function Authentification() {
                             ONGLETS
                         ================================================== */}
 
-                        <div className="mb-8 grid grid-cols-2 rounded-2xl bg-jse-principal/5 p-1">
+                        <div data-auth-item className="mb-8 grid grid-cols-2 rounded-2xl bg-jse-principal/5 p-1">
 
                             <button
                                 type="button"
@@ -375,6 +397,7 @@ export default function Authentification() {
                         ================================================== */}
 
                         <form
+                            data-auth-item
                             onSubmit={soumettre}
                             className="space-y-5"
                         >
