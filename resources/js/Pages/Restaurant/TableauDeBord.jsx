@@ -339,7 +339,7 @@ export default function TableauDeBord() {
 
                 <div className="min-w-0 flex-1">
                     <header className="border-b border-white/10 bg-[#0b0d0f] px-4 py-4 sm:px-6 lg:px-8">
-                        <div className="mx-auto flex max-w-[1250px] items-center justify-between gap-5">
+                        <div className="mx-auto flex max-w-none items-center justify-between gap-5">
                             <div className="flex min-w-0 items-center gap-3">
                                 <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-jse-principal text-white lg:hidden">
                                     <Store size={19} />
