@@ -121,6 +121,14 @@ function Application({ App, props }) {
                 clearProps: "transform,opacity",
             },
         );
+
+        if (window.matchMedia("(max-width: 1023px)").matches) {
+            const logos = applicationRef.current.querySelectorAll('img[alt="JSE Express"]');
+            gsap.fromTo(logos, { y: 18, opacity: 0.7 }, {
+                y: 0, opacity: 1, duration: 0.58, stagger: 0.04,
+                ease: "power3.out", clearProps: "transform,opacity",
+            });
+        }
     }, []);
 
     return (
