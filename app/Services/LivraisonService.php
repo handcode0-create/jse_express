@@ -159,8 +159,35 @@ class LivraisonService
 
     public function validerPin(Commande $commande, string $pin): bool
     {
-        return $commande->pin_livraison_hash
-            && Hash::check($pin, $commande->pin_livraison_hash);
+        $pin = trim($pin);
+
+        if (! preg_match('/^\d{6}$/', $pin)) {
+            return false;
+        }
+
+        if ($commande->pin_livraison_hash && Hash::check($pin, $commande->pin_livraison_hash)) {
+            return true;
+        }
+
+        // Répare une éventuelle incohérence entre le hash et le PIN chiffré
+        // créée par une ancienne version du flux de livraison.
+        if ($commande->pin_livraison_chiffre) {
+            try {
+                $pinChiffre = Crypt::decryptString($commande->pin_livraison_chiffre);
+
+                if (hash_equals($pinChiffre, $pin)) {
+                    $commande->update([
+                        'pin_livraison_hash' => Hash::make($pin),
+                    ]);
+
+                    return true;
+                }
+            } catch (\Throwable $exception) {
+                // Le PIN chiffré est invalide : la validation échoue normalement.
+            }
+        }
+
+        return false;
     }
 
     public function cloturerLivraison(
