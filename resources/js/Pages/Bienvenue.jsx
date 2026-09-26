@@ -103,12 +103,12 @@ export default function Bienvenue() {
                     onPointerEnter={pauseAutoplay}
                     onPointerLeave={reprendreAutoplay}
                 >
-                    <div data-welcome-copy className="relative z-10 pt-10 lg:max-w-[610px] lg:pt-0">
+                    <div data-welcome-copy className="relative z-10 pt-10 text-center lg:max-w-[610px] lg:pt-0 lg:text-left">
                         <p className="mb-3 font-sans text-sm font-semibold text-jse-secondaire lg:text-base">{slide.eyebrow}</p>
                         <h1 className="font-against text-[2rem] leading-[0.98] tracking-[-0.02em] text-jse-texte sm:text-[2.2rem] lg:text-[4.5rem] xl:text-[5.4rem]">
                             {slide.title}
                         </h1>
-                        <p className="mt-5 max-w-[390px] font-sans text-sm leading-6 text-jse-texte/60 lg:mt-7 lg:text-base lg:leading-7">{slide.description}</p>
+                        <p className="mx-auto mt-5 max-w-[390px] font-sans text-sm leading-6 text-jse-texte/60 lg:mx-0 lg:mt-7 lg:text-base lg:leading-7">{slide.description}</p>
 
                         <div data-welcome-action className="mt-7 hidden items-center gap-4 lg:flex">
                             <button type="button" onClick={() => router.visit("/authentification")} className="h-12 rounded-full bg-jse-principal px-7 font-sans text-sm font-semibold text-white shadow-lg shadow-jse-principal/15 transition hover:-translate-y-0.5 hover:bg-jse-principal/90">
