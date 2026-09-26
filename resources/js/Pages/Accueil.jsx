@@ -170,9 +170,37 @@ export default function Accueil() {
                 .from(".jse-home-header", { y: -18, opacity: 0, duration: 0.65 })
                 .from(".jse-home-greeting", { y: 24, opacity: 0, duration: 0.65 }, "-=0.38")
                 .from(searchRef.current, { y: 18, opacity: 0, scale: 0.985, duration: 0.55 }, "-=0.38")
-                .from(categoriesRef.current?.querySelectorAll(".jse-category-card") || [], { y: 22, opacity: 0, scale: 0.96, duration: 0.5, stagger: 0.07 }, "-=0.25")
-                .from(bannerRef.current, { y: 24, opacity: 0, duration: 0.6 }, "-=0.2")
-                .from(restaurantsRef.current?.querySelectorAll(".jse-restaurant-card") || [], { y: 20, opacity: 0, duration: 0.45, stagger: 0.06 }, "-=0.25");
+                .from(
+                    categoriesRef.current?.querySelectorAll(".jse-category-card") || [],
+                    {
+                        y: 22,
+                        scale: 0.96,
+                        duration: 0.5,
+                        stagger: 0.07,
+                        clearProps: "transform",
+                    },
+                    "-=0.25",
+                )
+                .from(
+                    bannerRef.current,
+                    {
+                        y: 24,
+                        opacity: 0,
+                        duration: 0.6,
+                        clearProps: "transform,opacity",
+                    },
+                    "-=0.2",
+                )
+                .from(
+                    restaurantsRef.current?.querySelectorAll(".jse-restaurant-card") || [],
+                    {
+                        y: 20,
+                        duration: 0.45,
+                        stagger: 0.06,
+                        clearProps: "transform",
+                    },
+                    "-=0.25",
+                );
         }, pageRef.current);
         return () => context.revert();
     }, []);
