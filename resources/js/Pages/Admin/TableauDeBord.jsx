@@ -17,7 +17,7 @@ export default function TableauDeBord({ statistiques = [] }) {
         <>
             <Head title="Administration — JSE Express" />
             <main className="min-h-screen bg-[#0B0D0E] px-5 py-8 text-white md:px-10">
-                <div className="mx-auto max-w-7xl">
+                <div className="mx-auto max-w-none">
                     <div className="flex items-start justify-between gap-4">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#45B977]">JSE Express</p>
