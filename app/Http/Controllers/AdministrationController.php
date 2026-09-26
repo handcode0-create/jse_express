@@ -23,12 +23,16 @@ class AdministrationController extends Controller
             'statistiques' => [
                 'commandes_actives' => Commande::query()->whereHas('statutCommande', fn ($q) => $q->whereNotIn('code', ['LIVREE', 'ANNULEE']))->count(),
                 'commandes_livrees' => Commande::query()->whereHas('statutCommande', fn ($q) => $q->where('code', 'LIVREE'))->count(),
-                'livraisons_actives' => Livraison::query()->whereIn('statut', ['en_attente', 'attribuee', 'en_cours'])->count(),
+                'livraisons_actives' => Livraison::query()
+                    ->whereIn('statut', ['en_attente', 'attribuee', 'en_cours'])
+                    ->whereHas('commande.statutCommande', fn ($q) => $q->whereNotIn('code', ['LIVREE', 'ANNULEE']))
+                    ->count(),
                 'livreurs_disponibles' => User::query()->where('role', 'livreur')->where('statut', 'actif')->whereHas('profilLivreur', fn ($q) => $q->where('disponibilite', 'disponible'))->count(),
             ],
             'livraisons' => Livraison::query()
                 ->with(['commande.zone:id,nom', 'commande.statutCommande:id,code,libelle', 'attributions' => fn ($q) => $q->where('statut', 'active')->with('livreur:id,nom,prenom')])
                 ->whereIn('statut', ['en_attente', 'attribuee', 'en_cours'])
+                ->whereHas('commande.statutCommande', fn ($q) => $q->whereNotIn('code', ['LIVREE', 'ANNULEE']))
                 ->latest('id')
                 ->limit(50)
                 ->get()
@@ -55,7 +59,7 @@ class AdministrationController extends Controller
                 ])->values(),
         ]);
     }
-    public function annulerCommande(Request $request, Commande $commande): RedirectResponse
+    public function annulerCommande(Request $request, Commande $commande, NotificationService $notificationService): RedirectResponse
     {
         $donnees = $request->validate(['motif' => ['nullable', 'string', 'max:500']]);
 
@@ -72,6 +76,28 @@ class AdministrationController extends Controller
                 'date_changement' => now(),
             ]);
         });
+
+        $commande->load(['user', 'restaurant.user']);
+
+        if ($commande->user) {
+            $notificationService->sms(
+                $commande->user,
+                'Votre commande '.$commande->reference.' a été annulée par l’administration.',
+                $commande->id,
+                null,
+                'commande_annulee'
+            );
+        }
+
+        if ($commande->restaurant?->user) {
+            $notificationService->sms(
+                $commande->restaurant->user,
+                'La commande '.$commande->reference.' a été annulée par l’administration.',
+                $commande->id,
+                null,
+                'commande_annulee'
+            );
+        }
 
         return back()->with('success', 'La commande a été annulée.');
     }
