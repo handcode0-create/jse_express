@@ -103,11 +103,11 @@ export default function Notifications() {
 
     return (
         <main className="min-h-screen bg-jse-fond pb-28 text-jse-texte">
-            <div className="mx-auto flex min-h-screen w-full max-w-[1440px] lg:px-8">
+            <div className="mx-auto flex min-h-screen w-full max-w-none lg:px-8">
                 <SidebarJSE active="profil" />
 
                 <div className="min-w-0 flex-1">
-                    <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
+                    <div className="mx-auto w-full max-w-none px-4 sm:px-6 lg:px-8">
                         <header className="pt-5 sm:pt-7 lg:pt-10">
                             <button
                                 type="button"
