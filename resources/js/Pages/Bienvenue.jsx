@@ -15,7 +15,6 @@ const AUTOPLAY_DELAY = 2200;
 export default function Bienvenue() {
     const pageRef = useRef(null);
     const visualRef = useRef(null);
-    const backgroundRef = useRef(null);
     const videoRef = useRef(null);
     const imageRef = useRef(null);
     const copyRef = useRef(null);
@@ -34,11 +33,11 @@ export default function Bienvenue() {
             onComplete: () => setIndex(nextIndex),
         })
             .to(image, { x: -direction * 44, opacity: 0, scale: 0.96, duration: 0.28 })
-            .to(backgroundRef.current, { xPercent: -direction * 1.5, scale: 1.025, duration: 0.42 }, "<")
+            .to(videoRef.current, { xPercent: -direction * 1.5, scale: 1.025, duration: 0.42 }, "<")
             .call(() => { image.src = next.image; })
             .set(image, { x: direction * 56, opacity: 0, scale: 0.92 })
             .to(image, { x: 0, opacity: 1, scale: 1, duration: 0.68, clearProps: "transform,opacity" })
-            .to(backgroundRef.current, { xPercent: 0, scale: 1, duration: 0.7, ease: "power3.out", clearProps: "transform" }, "<");
+            .to(videoRef.current, { xPercent: 0, scale: 1, duration: 0.7, ease: "power3.out", clearProps: "transform" }, "<");
     };
 
     const changerSlide = (direction) => {
@@ -109,13 +108,6 @@ export default function Bienvenue() {
 
     return (
         <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-[#07110F] text-jse-texte">
-            <img
-                ref={backgroundRef}
-                src="/assets/bienvenue/bg.png"
-                alt=""
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-[-2%] h-[104%] w-[104%] object-cover object-center opacity-100"
-            />
             <video
                 ref={videoRef}
                 autoPlay
@@ -128,9 +120,9 @@ export default function Bienvenue() {
             >
                 <source src="/assets/bienvenue/livreur-bg.mp4" type="video/mp4" />
             </video>
-            <div className="pointer-events-none absolute inset-0 bg-[#07110F]/76 backdrop-blur-[2px]" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#07110F]/90 via-[#123C32]/42 to-[#07110F]/62" />
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_48%,rgba(69,185,119,0.10),transparent_36%),linear-gradient(to_bottom,rgba(7,17,15,0.12),rgba(7,17,15,0.38))]" />
+            <div className="pointer-events-none absolute inset-0 bg-[#07110F]/58 backdrop-blur-[1px]" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#07110F]/72 via-[#123C32]/14 to-[#07110F]/46" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_48%,rgba(69,185,119,0.045),transparent_36%),linear-gradient(to_bottom,rgba(7,17,15,0.05),rgba(7,17,15,0.22))]" />
             <div className="pointer-events-none absolute inset-0 border border-white/[0.045] bg-white/[0.018] backdrop-blur-[1px]" />
             <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[393px] flex-col px-5 lg:max-w-none lg:px-10 xl:px-16">
                 <header data-welcome-header className="flex items-center justify-between pt-6 lg:pt-8">
