@@ -31,7 +31,7 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Splash');
+    return redirect()->route('bienvenue');
 })->name('accueil');
 
 Route::get('/design-system', function () {
