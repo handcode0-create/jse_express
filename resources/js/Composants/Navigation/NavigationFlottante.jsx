@@ -1,4 +1,6 @@
 import { router } from "@inertiajs/react";
+import { useLayoutEffect, useRef } from "react";
+import { gsap } from "gsap";
 import { Heart, Home, LayoutDashboard, MapPin, Receipt, ShoppingBag, UserRound, UtensilsCrossed, Bell } from "lucide-react";
 
 const ensembles = {
@@ -28,16 +30,30 @@ export default function NavigationFlottante({
     actif,
     onChange,
 }) {
+    const navigationRef = useRef(null);
     const items = ensembles[type] || ensembles.client;
+    const chemin = typeof window !== "undefined" ? window.location.pathname : "";
+    const actifDepuisUrl = items.find((item) => item.route && chemin === item.route)?.id;
+    const actifEffectif = actif && items.some((item) => item.id === actif) ? actif : (actifDepuisUrl || items[0]?.id);
 
+    useLayoutEffect(() => {
+        if (!navigationRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        const activeButton = navigationRef.current.querySelector("[aria-current=\"page\"]");
+        if (!activeButton) return;
+        const context = gsap.context(() => {
+            gsap.fromTo(activeButton, { y: 8, opacity: 0.78 }, { y: 0, opacity: 1, duration: 0.42, ease: "power3.out", clearProps: "transform,opacity" });
+        }, navigationRef);
+        return () => context.revert();
+    }, [actifEffectif, type]);
     return (
         <nav
+            ref={navigationRef}
             aria-label="Navigation principale"
             className="fixed inset-x-0 bottom-0 z-[70] px-3 pb-[max(12px,env(safe-area-inset-bottom))] lg:hidden"
         >
             <div className="mx-auto flex h-[68px] w-full max-w-[456px] items-center justify-around rounded-[34px] border border-white/10 bg-[#101719]/95 p-1.5 shadow-[0_20px_60px_rgba(0,0,0,.55)] backdrop-blur-2xl">
                 {items.map(({ id, label, icon: Icon, route }) => {
-                    const selected = actif === id;
+                    const selected = actifEffectif === id;
 
                     return (
                         <button
