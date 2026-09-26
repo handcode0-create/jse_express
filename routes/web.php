@@ -495,6 +495,7 @@ Route::get('/commandes', function (Request $request) {
                     'ordre' => (int) $statut->ordre,
                 ] : null,
                 'peut_recommander' => $statut?->code !== 'ANNULEE',
+                'peut_annuler' => in_array($statut?->code, ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION'], true),
             ];
         })->values(),
     ]);
@@ -596,6 +597,7 @@ Route::get('/commandes/{commande}', function (Commande $commande) {
                     : null,
             ] : null,
             'historique' => $historique,
+            'peut_annuler' => in_array($commande->statutCommande?->code, ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION'], true),
         ],
     ]);
 })->whereNumber('commande')->middleware(['auth', 'role:client'])->name('commandes.details');
