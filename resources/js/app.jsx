@@ -36,7 +36,20 @@ function Application({ App, props }) {
 
     useEffect(() => {
         if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("/sw.js").catch(() => {});
+            if (import.meta.env.PROD) {
+                navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
+            } else {
+                navigator.serviceWorker.getRegistrations().then((registrations) => {
+                    registrations.forEach((registration) => registration.unregister());
+                }).catch(() => {});
+
+                if ("caches" in window) {
+                    caches.keys().then((keys) => {
+                        keys.filter((key) => key.startsWith("jse-express-"))
+                            .forEach((key) => caches.delete(key));
+                    }).catch(() => {});
+                }
+            }
         }
 
         prefersReducedMotion.current = window.matchMedia(
