@@ -314,6 +314,8 @@ button:disabled {
 }
 .jse-category-card,
 .jse-restaurant-card {
+    opacity: 1;
+    visibility: visible;
     will-change: transform;
 }
 .jse-banner-image {
