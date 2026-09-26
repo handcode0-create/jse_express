@@ -334,7 +334,7 @@ export default function Accueil() {
 
     return (
         <main ref={pageRef} className="jse-client-home min-h-screen bg-jse-fond text-jse-texte">
-            <div className="mx-auto flex min-h-screen w-full max-w-[1440px]">
+            <div className="mx-auto flex min-h-screen w-full max-w-none">
                 {/* Sidebar desktop */}
                 <aside className="sticky top-0 hidden h-screen w-[238px] shrink-0 flex-col border-r border-jse-texte/5 bg-white/75 px-4 py-7 backdrop-blur-xl lg:flex">
                     <div className="px-4">
@@ -368,7 +368,7 @@ export default function Accueil() {
                 </aside>
 
                 <div className="min-w-0 flex-1 pb-24 lg:pb-8">
-                    <div className="mx-auto w-full max-w-[1180px] px-4 sm:px-7 lg:px-10">
+                    <div className="mx-auto w-full max-w-none px-4 sm:px-7 lg:px-10">
                         {/* En-tête */}
                         <header className="jse-home-header pt-5 sm:pt-7 lg:pt-8">
                             <div className="relative flex h-11 items-center justify-between gap-3 sm:h-12">
