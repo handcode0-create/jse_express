@@ -17,6 +17,7 @@ import {
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { basculerFavori, lireFavoris } from "../lib/favoris";
+import ThemeToggle from "../Composants/Interface/ThemeToggle";
 
 const IMAGE_BANNIERE_SECOURS = "/assets/plat-hero.png";
 
@@ -359,6 +360,10 @@ export default function Accueil() {
                                     <p className="truncate font-sans text-[10px] text-jse-texte/40">Espace client</p>
                                 </div>
                             </div>
+                        </div>
+                        <div className="mb-2 flex items-center justify-between rounded-2xl px-3 py-2">
+                            <span className="font-sans text-xs font-medium text-jse-texte/55">Thème</span>
+                            <ThemeToggle compact />
                         </div>
                         <button type="button" onClick={() => router.post("/deconnexion")} className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 font-sans text-xs font-medium text-jse-texte/45 hover:bg-red-50 hover:text-red-600">
                             <LogOut size={17} strokeWidth={1.8} />
