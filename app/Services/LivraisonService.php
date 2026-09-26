@@ -35,7 +35,7 @@ class LivraisonService
                 return $active;
             }
 
-            if (! $livraison->commande->pin_livraison_hash) {
+            if (! $livraison->commande->pin_livraison_hash || ! $livraison->commande->pin_livraison_chiffre) {
                 $this->genererPin($livraison->commande);
                 $livraison->commande->refresh();
             }
@@ -135,7 +135,7 @@ class LivraisonService
             ]);
 
             $commande = $livraison->commande()->firstOrFail();
-            if (! $commande->pin_livraison_hash) {
+            if (! $commande->pin_livraison_hash || ! $commande->pin_livraison_chiffre) {
                 $this->genererPin($commande);
             }
 
