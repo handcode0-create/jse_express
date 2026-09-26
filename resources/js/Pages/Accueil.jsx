@@ -14,7 +14,8 @@ import {
     UserRound,
     X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { gsap } from "gsap";
 import { basculerFavori, lireFavoris } from "../lib/favoris";
 
 const bannières = [
@@ -155,6 +156,26 @@ export default function Accueil() {
         (favorisRestaurantIds || []).map(Number),
     );
     const nombreArticles = Number(panier?.nombre_articles ?? 0);
+    const pageRef = useRef(null);
+    const searchRef = useRef(null);
+    const categoriesRef = useRef(null);
+    const bannerRef = useRef(null);
+    const restaurantsRef = useRef(null);
+
+    useLayoutEffect(() => {
+        if (!pageRef.current) return;
+        const context = gsap.context(() => {
+            const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
+            intro
+                .from(".jse-home-header", { y: -18, opacity: 0, duration: 0.65 })
+                .from(".jse-home-greeting", { y: 24, opacity: 0, duration: 0.65 }, "-=0.38")
+                .from(searchRef.current, { y: 18, opacity: 0, scale: 0.985, duration: 0.55 }, "-=0.38")
+                .from(categoriesRef.current?.querySelectorAll(".jse-category-card") || [], { y: 22, opacity: 0, scale: 0.96, duration: 0.5, stagger: 0.07 }, "-=0.25")
+                .from(bannerRef.current, { y: 24, opacity: 0, duration: 0.6 }, "-=0.2")
+                .from(restaurantsRef.current?.querySelectorAll(".jse-restaurant-card") || [], { y: 20, opacity: 0, duration: 0.45, stagger: 0.06 }, "-=0.25");
+        }, pageRef.current);
+        return () => context.revert();
+    }, []);
 
     useEffect(() => {
         const synchroniserFavorisLocaux = () => setFavoris(lireFavoris());
@@ -275,8 +296,14 @@ export default function Accueil() {
 
     const bannière = bannières[indexBannière];
 
+    useEffect(() => {
+        if (!bannerRef.current) return;
+        gsap.fromTo(bannerRef.current.querySelector(".jse-banner-image"), { opacity: 0, scale: 1.055 }, { opacity: 1, scale: 1, duration: 0.75, ease: "power2.out" });
+        gsap.fromTo(bannerRef.current.querySelectorAll(".jse-banner-copy > *"), { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.48, stagger: 0.06, ease: "power3.out" });
+    }, [indexBannière]);
+
     return (
-        <main className="min-h-screen bg-jse-fond text-jse-texte">
+        <main ref={pageRef} className="jse-client-home min-h-screen bg-jse-fond text-jse-texte">
             <div className="mx-auto flex min-h-screen w-full max-w-[1440px]">
                 {/* Sidebar desktop */}
                 <aside className="sticky top-0 hidden h-screen w-[238px] shrink-0 flex-col border-r border-jse-texte/5 bg-white/75 px-4 py-7 backdrop-blur-xl lg:flex">
@@ -313,7 +340,7 @@ export default function Accueil() {
                 <div className="min-w-0 flex-1 pb-24 lg:pb-8">
                     <div className="mx-auto w-full max-w-[1180px] px-4 sm:px-7 lg:px-10">
                         {/* En-tête */}
-                        <header className="pt-5 sm:pt-7 lg:pt-8">
+                        <header className="jse-home-header pt-5 sm:pt-7 lg:pt-8">
                             <div className="relative flex h-11 items-center justify-between gap-3 sm:h-12">
                                 <div className="flex items-center">
                                     <img src="/assets/jse_logo.png" alt="JSE Express" className="h-10 w-auto object-contain sm:h-11" />
@@ -341,14 +368,14 @@ export default function Accueil() {
                                 </div>
                             </div>
 
-                            <div className="mt-8 lg:mt-10">
+                            <div className="jse-home-greeting mt-8 lg:mt-10">
                                 <p className="font-against text-[2.7rem] leading-[0.9] text-jse-principal sm:text-[3.4rem] lg:text-[4rem]">Bonjour !</p>
                                 <p className="mt-2 font-sans text-[1.15rem] leading-tight text-jse-texte/70 sm:text-xl lg:text-2xl">
                                     Qu’est-ce qu’on vous sert aujourd’hui ?
                                 </p>
                             </div>
 
-                            <form onSubmit={rechercher} className="mt-6 lg:mt-7">
+                            <form ref={searchRef} onSubmit={rechercher} className="mt-6 lg:mt-7">
                                 <div className="flex h-[58px] items-center gap-3 rounded-[24px] bg-white px-5 shadow-sm ring-1 ring-jse-texte/5 focus-within:ring-jse-secondaire/30 lg:h-[62px]">
                                     <Search size={25} strokeWidth={1.8} className="shrink-0 text-jse-principal" />
                                     <input
@@ -377,7 +404,7 @@ export default function Accueil() {
                         </header>
 
                         {/* Raccourcis de l'accueil */}
-                        <section className="pt-7 sm:pt-8 lg:pt-9">
+                        <section ref={categoriesRef} className="pt-7 sm:pt-8 lg:pt-9">
                             <div className="mb-4 flex items-center justify-between">
                                 <h2 className="font-against text-[1.65rem] leading-none text-jse-principal sm:text-2xl">Catégories</h2>
                             </div>
@@ -392,7 +419,7 @@ export default function Accueil() {
                                             window.setTimeout(() => document.getElementById("restaurants-populaires")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
                                         }}
                                         className={[
-                                            "group min-w-0 rounded-[22px] bg-white p-2 text-center shadow-sm ring-1 ring-jse-texte/5 transition sm:p-3 lg:p-3.5",
+                                            "jse-category-card group min-w-0 rounded-[22px] bg-white p-2 text-center shadow-[0_10px_30px_rgba(18,60,50,0.06)] ring-1 ring-jse-texte/5 transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(18,60,50,0.10)] sm:p-3 lg:p-3.5",
                                             categorieSelectionnee === raccourci.nom ? "ring-2 ring-jse-secondaire" : "hover:-translate-y-0.5 hover:shadow-md",
                                         ].join(" ")}
                                     >
@@ -412,12 +439,12 @@ export default function Accueil() {
                         </section>
 
                         {/* Bannière */}
-                        <section className="pt-7 sm:pt-8 lg:pt-9">
-                            <div className="relative min-h-[210px] overflow-hidden rounded-[26px] bg-jse-principal shadow-lg shadow-jse-principal/10 sm:min-h-[240px] lg:min-h-[285px]">
-                                <img src={bannière.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                        <section ref={bannerRef} className="pt-7 sm:pt-8 lg:pt-9">
+                            <div className="jse-dark-surface relative min-h-[210px] overflow-hidden rounded-[26px] bg-jse-principal shadow-lg shadow-jse-principal/10 sm:min-h-[240px] lg:min-h-[285px]">
+                                <img src={bannière.image} alt="" className="jse-banner-image absolute inset-0 h-full w-full object-cover will-change-transform" />
                                 <div className="absolute inset-0 bg-gradient-to-r from-jse-principal via-jse-principal/75 to-transparent" />
 
-                                <div className="relative z-10 flex min-h-[210px] max-w-[540px] flex-col justify-center px-5 py-6 sm:min-h-[240px] sm:px-8 lg:min-h-[285px] lg:px-10">
+                                <div className="jse-banner-copy relative z-10 flex min-h-[210px] max-w-[540px] flex-col justify-center px-5 py-6 sm:min-h-[240px] sm:px-8 lg:min-h-[285px] lg:px-10">
                                     <span className="font-sans text-[9px] font-bold uppercase tracking-[0.18em] text-jse-secondaire sm:text-[10px]">{bannière.label}</span>
                                     <h2 className="mt-2 max-w-[420px] font-against text-[1.8rem] leading-[1.02] text-white sm:text-[2.25rem] lg:text-[2.7rem]">{bannière.titre}</h2>
                                     <p className="mt-2 max-w-[340px] font-sans text-[11px] leading-5 text-white/75 sm:text-xs">{bannière.description}</p>
@@ -443,7 +470,7 @@ export default function Accueil() {
                         </section>
 
                         {/* Restaurants */}
-                        <section className="pt-8 sm:pt-9 lg:pt-10">
+                        <section ref={restaurantsRef} className="pt-8 sm:pt-9 lg:pt-10">
                             <div className="mb-4 flex items-end justify-between gap-4">
                                 <div>
                                     <p className="font-sans text-[10px] font-medium uppercase tracking-[0.12em] text-jse-texte/35">À proximité</p>
@@ -461,7 +488,7 @@ export default function Accueil() {
                                             key={restaurant.id}
                                             onClick={() => Number.isInteger(Number(restaurant.id)) && router.visit(`/restaurants/${restaurant.id}`)}
                                             className={[
-                                                "w-[calc(100vw-72px)] max-w-[310px] shrink-0 snap-start snap-always overflow-hidden rounded-[22px] bg-white shadow-sm ring-1 ring-jse-texte/5 sm:w-[300px] lg:w-auto lg:max-w-none",
+                                                "jse-restaurant-card w-[calc(100vw-72px)] max-w-[310px] shrink-0 snap-start snap-always overflow-hidden rounded-[24px] bg-white shadow-[0_12px_35px_rgba(18,60,50,0.06)] ring-1 ring-jse-texte/5 transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_42px_rgba(18,60,50,0.11)] sm:w-[300px] lg:w-auto lg:max-w-none",
                                                 Number.isInteger(Number(restaurant.id)) ? "cursor-pointer transition-transform hover:-translate-y-0.5" : "cursor-default",
                                             ].join(" ")}
                                         >
@@ -475,7 +502,7 @@ export default function Accueil() {
                                                     }}
                                                     className="h-full w-full object-cover"
                                                 />
-                                                <button type="button" onClick={(event) => { event.stopPropagation(); basculerFavoriRestaurant(restaurant); }} className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-white/90 shadow-sm " aria-label={(Number.isInteger(Number(restaurant.id)) ? favorisServeur.includes(Number(restaurant.id)) : favoris.some((favori) => String(favori.id) === String(restaurant.id))) ? "Retirer des favoris" : "Ajouter aux favoris"}>
+                                                <button type="button" onClick={(event) => { event.stopPropagation(); gsap.fromTo(event.currentTarget, { scale: 0.82 }, { scale: 1, duration: 0.42, ease: "back.out(2)" }); basculerFavoriRestaurant(restaurant); }} className="jse-favorite-button absolute right-3 top-3 flex size-9 items-center justify-center rounded-full bg-white/95 shadow-md ring-1 ring-black/5 transition" aria-label={(Number.isInteger(Number(restaurant.id)) ? favorisServeur.includes(Number(restaurant.id)) : favoris.some((favori) => String(favori.id) === String(restaurant.id))) ? "Retirer des favoris" : "Ajouter aux favoris"}>
                                                     <Heart size={16} strokeWidth={1.8} className={favoris.some((favori) => String(favori.id) === String(restaurant.id)) ? "text-jse-accent" : "text-jse-principal"} fill={favoris.some((favori) => String(favori.id) === String(restaurant.id)) ? "currentColor" : "none"} />
                                                 </button>
                                             </div>
