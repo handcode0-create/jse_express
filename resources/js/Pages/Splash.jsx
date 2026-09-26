@@ -20,7 +20,7 @@ export default function Splash() {
             <div className="relative z-10 flex flex-col items-center px-6 text-center">
                 <div className="flex items-center justify-center rounded-[28px] border border-white/10 bg-white/[0.04] px-7 py-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
                     <img
-                        src="/jse_logo.png"
+                        src="/assets/jse_logo.png"
                         alt="JSE Express"
                         className="h-20 w-auto object-contain sm:h-24"
                         draggable="false"
