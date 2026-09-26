@@ -15,6 +15,7 @@ const AUTOPLAY_DELAY = 5200;
 export default function Bienvenue() {
     const pageRef = useRef(null);
     const visualRef = useRef(null);
+    const backgroundRef = useRef(null);
     const imageRef = useRef(null);
     const copyRef = useRef(null);
     const pointerStart = useRef(null);
@@ -32,9 +33,11 @@ export default function Bienvenue() {
             onComplete: () => setIndex(nextIndex),
         })
             .to(image, { x: -direction * 44, opacity: 0, scale: 0.96, duration: 0.28 })
+            .to(backgroundRef.current, { xPercent: -direction * 1.5, scale: 1.025, duration: 0.42 }, "<")
             .call(() => { image.src = next.image; })
             .set(image, { x: direction * 56, opacity: 0, scale: 0.92 })
-            .to(image, { x: 0, opacity: 1, scale: 1, duration: 0.68, clearProps: "transform,opacity" });
+            .to(image, { x: 0, opacity: 1, scale: 1, duration: 0.68, clearProps: "transform,opacity" })
+            .to(backgroundRef.current, { xPercent: 0, scale: 1, duration: 0.7, ease: "power3.out", clearProps: "transform" }, "<");
     };
 
     const changerSlide = (direction) => {
@@ -87,8 +90,19 @@ export default function Bienvenue() {
     };
 
     return (
-        <main ref={pageRef} className="min-h-screen overflow-hidden bg-jse-fond text-jse-texte">
-            <div className="mx-auto flex min-h-screen w-full max-w-[393px] flex-col px-5 lg:max-w-none lg:px-10 xl:px-16">
+        <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-[#07110F] text-jse-texte">
+            <img
+                ref={backgroundRef}
+                src="/assets/bienvenue/bg.png"
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-[-2%] h-[104%] w-[104%] object-cover object-center opacity-100"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-[#07110F]/72 backdrop-blur-[3px]" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#07110F]/88 via-[#123C32]/38 to-[#07110F]/55" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_48%,rgba(69,185,119,0.10),transparent_36%),linear-gradient(to_bottom,rgba(7,17,15,0.12),rgba(7,17,15,0.38))]" />
+            <div className="pointer-events-none absolute inset-0 border border-white/[0.045] bg-white/[0.018] backdrop-blur-[1px]" />
+            <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[393px] flex-col px-5 lg:max-w-none lg:px-10 xl:px-16">
                 <header data-welcome-header className="flex items-center justify-between pt-6 lg:pt-8">
                     <button type="button" onClick={() => router.visit("/")} className="flex items-center" aria-label="Accueil">
                         <img src="/assets/jse_logo.png" alt="JSE Express" className="h-9 w-auto object-contain lg:h-10" />
