@@ -33,7 +33,7 @@ export default function CommandeDetailsRestaurant() {
 
     return (
         <main className="min-h-screen bg-[#0b0d0f] pb-28 text-white">
-            <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
+            <div className="mx-auto w-full max-w-none px-4 sm:px-6">
                 <header className="flex items-center justify-between py-5">
                     <button type="button" onClick={() => router.visit("/restaurant/tableau-de-bord")} className="flex size-11 items-center justify-center rounded-full bg-[#101215] text-white shadow-sm ring-1 ring-white/10" aria-label="Retour">
                         <ArrowLeft size={20} />
