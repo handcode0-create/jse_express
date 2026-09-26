@@ -343,6 +343,9 @@ html[data-theme="dark"] .text-jse-principal {
 html[data-theme="dark"] [class*="text-jse-principal/"] {
     color: rgb(116 216 161 / .78) !important;
 }
+html[data-theme="dark"] [class~="bg-jse-accent"][class~="text-jse-principal"] {
+    color: #123C32 !important;
+}
 html[data-theme="dark"] .text-jse-secondaire {
     color: #63D08F !important;
 }
