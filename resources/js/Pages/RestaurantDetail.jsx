@@ -207,11 +207,11 @@ export default function RestaurantDetail() {
 
     return (
         <main className="min-h-screen bg-jse-fond text-jse-texte">
-            <div className="mx-auto flex min-h-screen w-full max-w-[1440px] lg:px-8">
+            <div className="mx-auto flex min-h-screen w-full max-w-none lg:px-8">
                 <SidebarJSE />
 
                 <div className="min-w-0 flex-1">
-                    <div className="relative mx-auto min-h-screen w-full max-w-[760px] overflow-hidden bg-jse-fond shadow-none lg:my-6 lg:rounded-[32px] lg:shadow-2xl">
+                    <div className="relative mx-auto min-h-screen w-full max-w-none overflow-hidden bg-jse-fond shadow-none lg:my-6 lg:rounded-[32px] lg:shadow-2xl">
                         <section className="relative h-[345px] overflow-hidden bg-jse-principal sm:h-[390px]">
                             <img
                                 src={imageRestaurant}
