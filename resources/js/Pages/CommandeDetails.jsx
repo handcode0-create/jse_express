@@ -95,10 +95,10 @@ export default function CommandeDetails() {
 
     return (
         <main className="min-h-screen bg-jse-fond pb-10 text-jse-texte">
-            <div className="mx-auto flex min-h-screen w-full max-w-[1440px]">
+            <div className="mx-auto flex min-h-screen w-full max-w-none">
                 <SidebarJSE active="commandes" />
                 <div className="min-w-0 flex-1">
-                    <div className="mx-auto w-full max-w-[760px] px-4 sm:px-6">
+                    <div className="mx-auto w-full max-w-none px-4 sm:px-6">
                 <header className="flex items-center justify-between pt-5 sm:pt-7">
                     <button
                         type="button"
