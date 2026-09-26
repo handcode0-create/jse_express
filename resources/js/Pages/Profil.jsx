@@ -9,6 +9,7 @@ import { BoutonChargement } from "../Composants/Interface/EtatsChargement";
 import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 import PhotoProfil from "../Composants/Profil/PhotoProfil";
 import ThemeToggle from "../Composants/Interface/ThemeToggle";
+import CouvertureProfil from "../Composants/Profil/CouvertureProfil";
 
 function NavigationItem({ label, icon: Icon, active = false, onClick }) {
     return <button type="button" onClick={onClick} className={["flex min-w-[66px] flex-col items-center justify-center gap-1 rounded-[20px] px-2.5 py-2 transition-all", active ? "bg-jse-secondaire text-white shadow-sm" : "text-jse-texte/80 hover:bg-jse-fond"].join(" ")}>
@@ -96,19 +97,7 @@ export default function Profil() {
                 <SidebarJSE active="profil" />
 
                 <div className="mx-auto w-full max-w-3xl lg:mx-0">
-                    <section className="-mx-4 overflow-hidden rounded-b-[34px] bg-jse-principal px-5 pb-8 pt-6 sm:-mx-6 sm:px-8 lg:mx-0 lg:rounded-[34px] lg:pt-8">
-                        <div className="flex items-center justify-between">
-                            <button type="button" onClick={() => router.visit("/accueil")} className="flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md lg:hidden"><Home size={18} /></button>
-                            <div className="ml-auto flex items-center gap-2">
-                                <ThemeToggle compact />
-                                <button type="button" aria-label="Modifier mon profil" onClick={() => setModal("informations")} className="flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md"><Settings size={18} /></button>
-                            </div>
-                        </div>
-                        <div className="mt-2 flex items-center gap-4">
-                            <PhotoProfil user={utilisateur} size="size-[78px]" className="border-white/20" dark />
-                            <div className="min-w-0 text-white"><h1 className="font-against text-[1.65rem] leading-none">{[utilisateur?.prenom, utilisateur?.nom].filter(Boolean).join(" ") || "Client JSE Express"}</h1><p className="mt-1 font-sans text-xs text-white/70">{utilisateur?.telephone || "Téléphone non renseigné"}</p></div>
-                        </div>
-                    </section>
+                    <CouvertureProfil user={utilisateur} />
 
                     <section className="pt-5 lg:pt-7">
                         <div className="overflow-hidden rounded-[28px] bg-white shadow-sm ring-1 ring-jse-texte/5">
