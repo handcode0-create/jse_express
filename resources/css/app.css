@@ -109,10 +109,15 @@ html[data-theme="light"] [class~="bg-[#070b0d]"] {
     background-color: #FFFFFF !important;
 }
 
-html[data-theme="light"] [class~="text-white"] { color: #191919 !important; }
-html[data-theme="light"] [class*="text-white/"] { color: rgb(25 25 25 / .55) !important; }
-html[data-theme="light"] [class*="border-white/"] { border-color: rgb(25 25 25 / .08) !important; }
-html[data-theme="light"] [class*="bg-white/"] { background-color: rgb(25 25 25 / .035) !important; }
+html[data-theme="light"] .jse-client-home .jse-dark-surface {
+    color: #FFF7E8 !important;
+}
+html[data-theme="light"] .jse-client-home .jse-dark-surface .text-white {
+    color: #FFF7E8 !important;
+}
+html[data-theme="light"] .jse-client-home .jse-dark-surface [class*="text-white/"] {
+    color: rgb(255 247 232 / .72) !important;
+}
 html[data-theme="light"] [class~="bg-[#101719]/95"] {
     background-color: rgb(255 255 255 / .94) !important;
     border-color: rgb(18 60 50 / .10) !important;
@@ -288,4 +293,39 @@ button:disabled {
     .animate-jse-pop,
     .animate-jse-pulse,
     .jse-route-glow { animation: none !important; }
+}
+
+
+/* JSE Express — accueil client / motion */
+.jse-client-home {
+    position: relative;
+    overflow-x: clip;
+    isolation: isolate;
+}
+.jse-client-home::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 12% 8%, rgb(69 185 119 / .09), transparent 28%),
+        radial-gradient(circle at 90% 28%, rgb(242 140 40 / .07), transparent 24%);
+}
+.jse-category-card,
+.jse-restaurant-card {
+    will-change: transform;
+}
+.jse-banner-image {
+    transform-origin: center;
+}
+.jse-home-greeting {
+    text-wrap: balance;
+}
+@media (prefers-reduced-motion: reduce) {
+    .jse-category-card,
+    .jse-restaurant-card,
+    .jse-banner-image {
+        will-change: auto;
+    }
 }
