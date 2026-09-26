@@ -126,8 +126,15 @@ export default function Bienvenue() {
             <div className="pointer-events-none absolute inset-0 border border-white/[0.045] bg-white/[0.018] backdrop-blur-[1px]" />
             <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[393px] flex-col px-5 lg:max-w-none lg:px-10 xl:px-16">
                 <header data-welcome-header className="flex items-center justify-between pt-6 lg:pt-8">
-                    <button type="button" onClick={() => router.visit("/")} className="flex items-center" aria-label="Accueil">
-                        <img src="/assets/jse_logo.png" alt="JSE Express" className="h-9 w-auto object-contain lg:h-10" />
+                    <button
+                        type="button"
+                        onClick={() => router.visit("/")}
+                        className="flex items-center"
+                        aria-label="Accueil"
+                    >
+                        <span className="font-against text-2xl tracking-[-0.04em] text-jse-texte lg:text-3xl">
+                            JSE Express
+                        </span>
                     </button>
                     <button type="button" onClick={() => router.visit("/authentification")} className="font-sans text-sm font-medium text-jse-texte/65 transition hover:text-jse-principal">
                         Passer
