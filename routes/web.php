@@ -59,6 +59,10 @@ Route::post('/profil/photo', [\App\Http\Controllers\PhotoProfilController::class
     ->middleware('auth')
     ->name('profil.photo.modifier');
 
+Route::post('/profil/couverture', [\App\Http\Controllers\CouvertureProfilController::class, 'modifier'])
+    ->middleware('auth')
+    ->name('profil.couverture.modifier');
+
 Route::prefix('livreur')
     ->middleware(['auth', 'role:livreur'])
     ->group(function () {
@@ -237,6 +241,7 @@ Route::get('/profil', function () {
             'telephone' => Auth::user()->telephone,
             'email' => Auth::user()->email,
             'photo_profil' => Auth::user()->photo_profil,
+            'couverture_profil' => Auth::user()->couverture_profil,
         ],
         'notificationsCount' => Notification::query()
             ->where('user_id', Auth::id())
