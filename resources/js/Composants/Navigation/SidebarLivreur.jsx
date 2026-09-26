@@ -50,7 +50,7 @@ export default function SidebarLivreur({ actif, livreur, onChange }) {
                                 className={[
                                     "flex w-full items-center gap-3 rounded-2xl px-3.5 py-3.5 text-left transition-all",
                                     selected
-                                        ? "bg-jse-accent text-jse-principal shadow-lg shadow-jse-accent/10"
+                                        ? "bg-jse-secondaire/10 text-jse-secondaire shadow-none"
                                         : "text-white/45 hover:bg-white/5 hover:text-white",
                                 ].join(" ")}
                             >
