@@ -959,6 +959,7 @@ export default function TableauDeBord() {
     };
 
     const ouvrirMission = (selected) => {
+        setPinError("");
         setMission(selected);
 
         let ecranInitial = selected.statut_livraison === "en_cours" ? "navigation" : "detail";
@@ -1011,6 +1012,7 @@ export default function TableauDeBord() {
     };
 
     const validatePin = (pin) => {
+        setPinError("");
         setLoading(true);
         router.post(
             "/livreur/livraisons/" + mission.attribution_id + "/valider-pin",
@@ -1018,6 +1020,9 @@ export default function TableauDeBord() {
             {
                 preserveScroll: true,
                 onSuccess: () => changerEcran("success"),
+                onError: (errors) => {
+                    setPinError(errors?.pin || errors?.message || "Le PIN de livraison est incorrect.");
+                },
                 onFinish: () => setLoading(false),
             },
         );
