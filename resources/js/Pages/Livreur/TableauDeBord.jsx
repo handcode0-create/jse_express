@@ -19,11 +19,13 @@ import {
     Store,
     UserRound,
     WalletCards,
+    AlertCircle,
+
 } from "lucide-react";
 import L from "leaflet";
 import { MapContainer, TileLayer, Marker, Popup, Circle, ZoomControl, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const formatMontant = (value) =>
     new Intl.NumberFormat("fr-FR").format(Number(value || 0)) + " FCFA";
@@ -519,9 +521,52 @@ function PickupScreen({ mission, onBack, onStart }) {
     );
 }
 
-function DeliveryScreen({ mission, onBack, onValidate, loading }) {
+function DeliveryScreen({ mission, onBack, onValidate, loading, error }) {
     const [pin, setPin] = useState("");
-    const { position, accuracy, error } = usePositionLivreur(true);
+    const inputsRef = useRef([]);
+    const { position, accuracy, error: gpsError } = usePositionLivreur(true);
+
+    useEffect(() => {
+        inputsRef.current[0]?.focus();
+    }, []);
+
+    const updatePin = (index, rawValue) => {
+        const value = rawValue.replace(/\\D/g, "");
+
+        if (!value) {
+            setPin((current) => current.slice(0, index) + current.slice(index + 1));
+            return;
+        }
+
+        const digits = value.slice(-6);
+        setPin((current) => {
+            const chars = current.padEnd(6, " ").split("");
+            digits.split("").forEach((digit, offset) => {
+                const target = index + offset;
+                if (target < 6) chars[target] = digit;
+            });
+            return chars.join("").replace(/\\s/g, "").slice(0, 6);
+        });
+
+        const nextIndex = Math.min(index + digits.length, 5);
+        inputsRef.current[nextIndex]?.focus();
+    };
+
+    const handleKeyDown = (index, event) => {
+        if (event.key === "Backspace" && !pin[index] && index > 0) {
+            inputsRef.current[index - 1]?.focus();
+        }
+    };
+
+    const handlePaste = (event) => {
+        event.preventDefault();
+        const pasted = event.clipboardData.getData("text").replace(/\\D/g, "").slice(0, 6);
+
+        if (!pasted) return;
+
+        setPin(pasted);
+        inputsRef.current[Math.min(pasted.length, 6) - 1]?.focus();
+    };
 
     const submit = () => {
         if (pin.length === 6) onValidate(pin);
@@ -531,44 +576,77 @@ function DeliveryScreen({ mission, onBack, onValidate, loading }) {
         <div className="fixed inset-0 z-50 bg-[#070b0d] text-white">
             <div className="mx-auto h-full w-full max-w-[480px] overflow-y-auto px-4 pb-8">
                 <header className="flex items-center gap-3 py-4">
-                    <button onClick={onBack} className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5"><ArrowLeft size={19} /></button>
+                    <button onClick={onBack} className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5">
+                        <ArrowLeft size={19} />
+                    </button>
                     <p className="text-sm font-bold">En livraison</p>
                 </header>
 
                 <section className="rounded-[20px] border border-white/8 bg-[#101719] p-4">
                     <p className="text-xs font-bold">{mission.client?.nom || "Client"}</p>
                     <p className="mt-1 text-[9px] text-white/45">{mission.adresse_livraison || "Adresse client"}</p>
-                    <div className="mt-3 flex items-center gap-2 text-[10px] text-white/45"><Clock3 size={13} /> Livraison en cours</div>
+                    <div className="mt-3 flex items-center gap-2 text-[10px] text-white/45">
+                        <Clock3 size={13} /> Livraison en cours
+                    </div>
                 </section>
 
                 <div className="relative mt-3 h-[310px]">
-                    <CarteLeaflet compact position={position} accuracy={accuracy} error={error} />
+                    <CarteLeaflet compact position={position} accuracy={accuracy} error={gpsError} />
                     <div className="pointer-events-none absolute left-4 top-4 z-[600] rounded-full border border-white/10 bg-[#0B1112]/90 px-3 py-2 text-[9px] font-semibold text-white shadow-xl backdrop-blur-xl">
                         {position ? "GPS actif · ± " + Math.round(accuracy || 0) + " m" : "Localisation…"}
                     </div>
                 </div>
 
                 <section className="mt-3 rounded-[20px] border border-jse-accent/20 bg-jse-accent/5 p-4">
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-jse-accent">Confirmation de livraison</p>
-                    <p className="mt-2 text-xs font-semibold">Demandez le code PIN au client</p>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-jse-accent">
+                        Confirmation de livraison
+                    </p>
+                    <p className="mt-2 text-xs font-semibold">
+                        Demandez le code PIN au client
+                    </p>
+                    <p className="mt-1 text-[9px] leading-4 text-white/40">
+                        Saisissez les 6 chiffres communiqués par le client pour clôturer la livraison.
+                    </p>
+
                     <div className="mt-4 grid grid-cols-6 gap-2">
                         {Array.from({ length: 6 }).map((_, index) => (
                             <input
                                 key={index}
-                                value={pin[index] || ""}
-                                onChange={(event) => {
-                                    const value = event.target.value.replace(/\D/g, "").slice(-1);
-                                    if (!value) return;
-                                    setPin((current) => (current.slice(0, index) + value + current.slice(index + 1)).slice(0, 6));
+                                ref={(element) => {
+                                    inputsRef.current[index] = element;
                                 }}
+                                value={pin[index] || ""}
+                                onChange={(event) => updatePin(index, event.target.value)}
+                                onKeyDown={(event) => handleKeyDown(index, event)}
+                                onPaste={handlePaste}
                                 inputMode="numeric"
-                                maxLength={1}
-                                className="h-12 rounded-xl border border-white/10 bg-[#0a0f11] text-center text-lg font-bold text-white outline-none focus:border-jse-accent"
+                                pattern="[0-9]*"
+                                maxLength={6}
+                                autoComplete={index === 0 ? "one-time-code" : "off"}
+                                aria-label={"Chiffre " + (index + 1) + " du PIN"}
+                                className={[
+                                    "h-12 rounded-xl border bg-[#0a0f11] text-center text-lg font-bold text-white outline-none transition",
+                                    error
+                                        ? "border-red-400/60 focus:border-red-400"
+                                        : "border-white/10 focus:border-jse-accent",
+                                ].join(" ")}
                             />
                         ))}
                     </div>
-                    <button disabled={loading || pin.length !== 6} onClick={submit} className="mt-4 w-full rounded-full bg-jse-accent py-4 text-xs font-bold text-jse-principal disabled:opacity-40">
-                        Terminer la livraison
+
+                    {error && (
+                        <div className="mt-3 flex items-start gap-2 rounded-xl border border-red-400/20 bg-red-400/5 px-3 py-2.5 text-[10px] leading-4 text-red-300">
+                            <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                            <span>{error}</span>
+                        </div>
+                    )}
+
+                    <button
+                        disabled={loading || pin.length !== 6}
+                        onClick={submit}
+                        className="mt-4 w-full rounded-full bg-jse-accent py-4 text-xs font-bold text-jse-principal disabled:opacity-40"
+                    >
+                        {loading ? "Validation du PIN…" : "Terminer la livraison"}
                     </button>
                 </section>
             </div>
@@ -853,7 +931,7 @@ export default function TableauDeBord() {
     const [onglet, setOnglet] = useState("accueil");
     const [mission, setMission] = useState(null);
     const [ecran, setEcran] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);\n    const [pinError, setPinError] = useState("");
     const { position: positionCarte, accuracy: accuracyCarte, error: errorCarte } = usePositionLivreur(onglet === "carte");
 
     const active = useMemo(() => livraisons.filter((item) => item.statut_livraison !== "livree"), [livraisons]);
@@ -953,7 +1031,7 @@ export default function TableauDeBord() {
     }
 
     if (ecran === "delivery" && mission) {
-        return <DeliveryScreen mission={mission} onBack={() => changerEcran("pickup")} onValidate={validatePin} loading={loading} />;
+        return <DeliveryScreen mission={mission} onBack={() => changerEcran("pickup")} onValidate={validatePin} loading={loading} error={pinError} />;
     }
 
     if (ecran === "success" && mission) {
