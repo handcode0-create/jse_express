@@ -531,7 +531,7 @@ function DeliveryScreen({ mission, onBack, onValidate, loading, error }) {
     }, []);
 
     const updatePin = (index, rawValue) => {
-        const value = rawValue.replace(/\\D/g, "");
+        const value = rawValue.replace(/\D/g, "");
 
         if (!value) {
             setPin((current) => current.slice(0, index) + current.slice(index + 1));
@@ -545,7 +545,7 @@ function DeliveryScreen({ mission, onBack, onValidate, loading, error }) {
                 const target = index + offset;
                 if (target < 6) chars[target] = digit;
             });
-            return chars.join("").replace(/\\s/g, "").slice(0, 6);
+            return chars.join("").replace(/\s/g, "").slice(0, 6);
         });
 
         const nextIndex = Math.min(index + digits.length, 5);
@@ -560,7 +560,7 @@ function DeliveryScreen({ mission, onBack, onValidate, loading, error }) {
 
     const handlePaste = (event) => {
         event.preventDefault();
-        const pasted = event.clipboardData.getData("text").replace(/\\D/g, "").slice(0, 6);
+        const pasted = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
 
         if (!pasted) return;
 
@@ -931,7 +931,8 @@ export default function TableauDeBord() {
     const [onglet, setOnglet] = useState("accueil");
     const [mission, setMission] = useState(null);
     const [ecran, setEcran] = useState(null);
-    const [loading, setLoading] = useState(false);\n    const [pinError, setPinError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [pinError, setPinError] = useState("");
     const { position: positionCarte, accuracy: accuracyCarte, error: errorCarte } = usePositionLivreur(onglet === "carte");
 
     const active = useMemo(() => livraisons.filter((item) => item.statut_livraison !== "livree"), [livraisons]);
