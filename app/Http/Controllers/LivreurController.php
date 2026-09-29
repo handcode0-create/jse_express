@@ -206,7 +206,12 @@ class LivreurController extends Controller
         return back()->with('success', 'La livraison a été prise en charge.');
     }
 
-    public function validerPin(Request $request, int $livraison, LivraisonService $livraisonService): RedirectResponse
+    public function validerPin(
+        Request $request,
+        int $livraison,
+        LivraisonService $livraisonService,
+        NotificationService $notificationService
+    ): RedirectResponse
     {
         $profil = $this->profil($request);
 
@@ -214,7 +219,7 @@ class LivreurController extends Controller
             ->whereKey($livraison)
             ->where('livreur_id', $request->user()->id)
             ->where('statut', 'active')
-            ->with(['livraison.commande.statutCommande'])
+            ->with(['livraison.commande.statutCommande', 'livraison.commande.user', 'livraison.commande.restaurant.user'])
             ->firstOrFail();
 
         $livraisonModel = $attribution->livraison;
@@ -236,6 +241,26 @@ class LivreurController extends Controller
         );
 
         $livraisonService->cloturerLivraison($livraisonModel, $request->user()->id);
+
+        if ($commande->user) {
+            $notificationService->sms(
+                $commande->user,
+                'Votre commande '.$commande->reference.' a été livrée avec succès.',
+                $commande->id,
+                $livraisonModel->id,
+                'livraison_terminee'
+            );
+        }
+
+        if ($commande->restaurant?->user) {
+            $notificationService->sms(
+                $commande->restaurant->user,
+                'La commande '.$commande->reference.' a été livrée au client.',
+                $commande->id,
+                $livraisonModel->id,
+                'livraison_terminee'
+            );
+        }
 
         return back()->with('success', 'Livraison validée et commande clôturée.');
     }
