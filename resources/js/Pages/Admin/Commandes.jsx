@@ -37,7 +37,7 @@ export default function Commandes({ utilisateur, commandes = [], recherche = "" 
                     key: "actions",
                     label: "Action",
                     render: row => ["EN_ATTENTE", "CONFIRMEE", "EN_PREPARATION"].includes(row.statut?.code) ? (
-                        <button type="button" onClick={() => annuler(row)} disabled={traitement === row.id} className="inline-flex min-h-10 items-center gap-2 rounded-full bg-jse-danger/10 px-4 text-xs font-semibold text-jse-danger disabled:opacity-50">
+                        <button type="button" onClick={() => annuler(row)} disabled={traitement === row.id} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-jse-danger/10 sm:w-auto sm:rounded-full px-4 text-xs font-semibold text-jse-danger disabled:opacity-50">
                             <Ban size={15} aria-hidden="true" />
                             {traitement === row.id ? "Traitement..." : "Annuler"}
                         </button>
