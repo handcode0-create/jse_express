@@ -114,6 +114,10 @@ Route::prefix('restaurant')
             ->whereNumber('produit')
             ->name('restaurant.produits.options');
 
+        Route::patch('/produits/{produit}', [RestaurantController::class, 'modifierProduit'])
+            ->whereNumber('produit')
+            ->name('restaurant.produits.modifier');
+
         Route::post('/categories', [RestaurantController::class, 'creerCategorie'])
             ->name('restaurant.categories.creer');
 
