@@ -1,7 +1,7 @@
 import { router } from "@inertiajs/react";
 import { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { Heart, Home, LayoutDashboard, MapPin, Receipt, ShoppingBag, UserRound, UtensilsCrossed, Bell } from "lucide-react";
+import { Heart, Home, LayoutDashboard, MapPin, Receipt, ShoppingBag, UserRound, UtensilsCrossed, Bell, Truck, Users } from "lucide-react";
 
 const ensembles = {
     client: [
