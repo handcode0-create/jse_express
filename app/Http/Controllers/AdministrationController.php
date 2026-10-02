@@ -208,7 +208,7 @@ class AdministrationController extends Controller
                     ->orWhereHas('user', fn ($u) => $u->where('nom', 'like', '%'.$recherche.'%')->orWhere('prenom', 'like', '%'.$recherche.'%')->orWhere('telephone', 'like', '%'.$recherche.'%'))
                     ->orWhereHas('restaurant', fn ($r) => $r->where('nom', 'like', '%'.$recherche.'%'));
             }))->latest('date_commande')->limit(100)->get()
-            ->map(fn (Commande $commande) => ['id'=>$commande->id,'reference'=>$commande->reference,'client'=>$commande->user?trim($commande->user->prenom.' '.$commande->user->nom):null,'telephone'=>$commande->user?->telephone,'restaurant'=>$commande->restaurant?->nom,'zone'=>$commande->zone?->nom,'statut'=>$commande->statutCommande?['code'=>$commande->statutCommande->code,'libelle'=>$commande->statutCommande->libelle]:null,'montant_total'=>(float)$commande->montant_total,'date_commande'=>$commande->date_commande?->format('d/m/Y H:i')])->values();
+            ->map(fn (Commande $commande) => ['id'=>$commande->id,'reference'=>$commande->reference,'client'=>$commande->user ? trim($commande->user->prenom.' '.$commande->user->nom) : null,'telephone'=>$commande->user?->telephone,'restaurant'=>$commande->restaurant?->nom,'zone'=>$commande->zone?->nom,'statut'=>$commande->statutCommande?['code'=>$commande->statutCommande->code,'libelle'=>$commande->statutCommande->libelle]:null,'montant_total'=>(float)$commande->montant_total,'date_commande'=>$commande->date_commande?->format('d/m/Y H:i')])->values();
         return Inertia::render('Admin/Commandes', ['utilisateur'=>$request->user(),'commandes'=>$commandes,'recherche'=>$recherche]);
     }
 
@@ -217,7 +217,7 @@ class AdministrationController extends Controller
         $recherche=trim((string)$request->query('recherche',''));
         $livraisons=Livraison::query()->with(['commande:id,reference','zone:id,nom','attributions'=>fn($q)=>$q->where('statut','active')->with('livreur:id,nom,prenom')->latest('id')])
             ->when($recherche!=='' ,fn($q)=>$q->where(function($query)use($recherche){$query->whereHas('commande',fn($c)=>$c->where('reference','like','%'.$recherche.'%'))->orWhereHas('zone',fn($z)=>$z->where('nom','like','%'.$recherche.'%'))->orWhereHas('attributions.livreur',fn($u)=>$u->where('nom','like','%'.$recherche.'%')->orWhere('prenom','like','%'.$recherche.'%'));}))
-            ->latest('id')->limit(100)->get()->map(fn(Livraison $l)=>['id'=>$l->id,'reference'=>$l->commande?->reference,'zone'=>$l->zone?->nom,'statut'=>$l->statut,'mode_attribution'=>$l->mode_attribution,'livreur'=>$l->attributions->first()?->livreur?trim($l->attributions->first()->livreur->prenom.' '.$l->attributions->first()->livreur->nom):null,'matricule'=>$l->attributions->first()?->livreur?->profilLivreur?->matricule,'date_attribution'=>$l->date_attribution?IlluminateSupportCarbon::parse($l->date_attribution)->format('d/m/Y H:i'):null])->values();
+            ->latest('id')->limit(100)->get()->map(fn(Livraison $l)=>['id'=>$l->id,'reference'=>$l->commande?->reference,'zone'=>$l->zone?->nom,'statut'=>$l->statut,'mode_attribution'=>$l->mode_attribution,'livreur'=>$l->attributions->first()?->livreur ? trim($l->attributions->first()->livreur->prenom.' '.$l->attributions->first()->livreur->nom) : null,'matricule'=>$l->attributions->first()?->livreur?->profilLivreur?->matricule,'date_attribution'=>$l->date_attribution?IlluminateSupportCarbon::parse($l->date_attribution)->format('d/m/Y H:i'):null])->values();
         return Inertia::render('Admin/Livraisons',['utilisateur'=>$request->user(),'livraisons'=>$livraisons,'recherche'=>$recherche]);
     }
 
@@ -235,7 +235,7 @@ class AdministrationController extends Controller
         $recherche=trim((string)$request->query('recherche',''));
         $restaurants=Restaurant::query()->with(['user:id,nom,prenom,telephone','zone:id,nom'])->withCount(['produits','commandes'])
             ->when($recherche!=='' ,fn($q)=>$q->where(function($query)use($recherche){$query->where('nom','like','%'.$recherche.'%')->orWhere('telephone','like','%'.$recherche.'%')->orWhereHas('user',fn($u)=>$u->where('nom','like','%'.$recherche.'%')->orWhere('prenom','like','%'.$recherche.'%'));}))
-            ->orderBy('nom')->limit(100)->get()->map(fn(Restaurant $r)=>['id'=>$r->id,'nom'=>$r->nom,'responsable'=>$r->user?trim($r->user->prenom.' '.$r->user->nom):null,'telephone'=>$r->telephone?:$r->user?->telephone,'zone'=>$r->zone?->nom,'statut'=>$r->statut,'produits_count'=>(int)$r->produits_count,'commandes_count'=>(int)$r->commandes_count])->values();
+            ->orderBy('nom')->limit(100)->get()->map(fn(Restaurant $r)=>['id'=>$r->id,'nom'=>$r->nom,'responsable'=>$r->user ? trim($r->user->prenom.' '.$r->user->nom) : null,'telephone'=>$r->telephone?:$r->user?->telephone,'zone'=>$r->zone?->nom,'statut'=>$r->statut,'produits_count'=>(int)$r->produits_count,'commandes_count'=>(int)$r->commandes_count])->values();
         return Inertia::render('Admin/Restaurants',['utilisateur'=>$request->user(),'restaurants'=>$restaurants,'recherche'=>$recherche]);
     }
 
@@ -264,7 +264,7 @@ class AdministrationController extends Controller
         $recherche=trim((string)$request->query('recherche',''));
         $notifications=Notification::query()->with(['user:id,nom,prenom','commande:id,reference'])
             ->when($recherche!=='' ,fn($q)=>$q->where(function($query)use($recherche){$query->where('type_evenement','like','%'.$recherche.'%')->orWhere('canal','like','%'.$recherche.'%')->orWhere('statut_envoi','like','%'.$recherche.'%')->orWhereHas('user',fn($u)=>$u->where('nom','like','%'.$recherche.'%')->orWhere('prenom','like','%'.$recherche.'%'))->orWhereHas('commande',fn($c)=>$c->where('reference','like','%'.$recherche.'%'));}))
-            ->latest('id')->limit(100)->get()->map(fn(Notification $n)=>['id'=>$n->id,'date_envoi'=>$n->date_envoi?IlluminateSupportCarbon::parse($n->date_envoi)->format('d/m/Y H:i'):null,'destinataire'=>$n->user?trim($n->user->prenom.' '.$n->user->nom):($n->telephone_destination?:'—'),'type_evenement'=>$n->type_evenement,'canal'=>$n->canal,'statut_envoi'=>$n->statut_envoi,'reference'=>$n->commande?->reference])->values();
+            ->latest('id')->limit(100)->get()->map(fn(Notification $n)=>['id'=>$n->id,'date_envoi'=>$n->date_envoi?IlluminateSupportCarbon::parse($n->date_envoi)->format('d/m/Y H:i'):null,'destinataire'=>$n->user ? trim($n->user->prenom.' '.$n->user->nom) : ($n->telephone_destination ?: '—'),'type_evenement'=>$n->type_evenement,'canal'=>$n->canal,'statut_envoi'=>$n->statut_envoi,'reference'=>$n->commande?->reference])->values();
         return Inertia::render('Admin/Notifications',['utilisateur'=>$request->user(),'notifications'=>$notifications,'recherche'=>$recherche]);
     }
 
