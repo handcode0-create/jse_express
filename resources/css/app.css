@@ -171,16 +171,10 @@ button:disabled {
     outline-offset: 3px;
 }
 
-@font-face {
-    font-family: "Against";
-    src: url("https://db.onlinewebfonts.com/t/893fdce7fe8ecb381f012ce2edd2dd6c.woff2") format("woff2");
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
+@import url("https://db.onlinewebfonts.com/c/893fdce7fe8ecb381f012ce2edd2dd6c?family=against-Regular");
 
 .font-against {
-    font-family: "Against", sans-serif;
+    font-family: "against-Regular", "Against", sans-serif;
 }
 
 /* Utilitaire JSE — conserve le scroll tactile sans afficher la barre. */
