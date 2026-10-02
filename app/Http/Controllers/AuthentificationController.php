@@ -204,7 +204,7 @@ class AuthentificationController extends Controller
         }
 
         if (str_starts_with($telephone, '0') && strlen($telephone) === 10) {
-            $telephone = '225' . substr($telephone, 1);
+            $telephone = '225' . $telephone;
         }
 
         return $telephone;
