@@ -15,9 +15,9 @@ export default function AdminDataPage({ utilisateur,title,description,search="",
     return <>
         <Head title={`${title} — JSE Express`} />
         <main className="min-h-screen overflow-x-hidden bg-jse-theme-bg pb-[calc(88px+env(safe-area-inset-bottom))] text-jse-theme-text lg:pb-0">
-            <div className="flex min-h-screen flex-col lg:flex-row">
+            <div className="flex min-h-screen flex-col lg:flex-row lg:pl-[238px]">
                 <AdminSidebar utilisateur={utilisateur} />
-                <section className="min-w-0 flex-1 lg:ml-[238px]">
+                <section className="min-w-0 flex-1">
                     <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
                         <header className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                             <div className="min-w-0">
