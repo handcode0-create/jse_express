@@ -125,7 +125,7 @@ export default function AdminSidebar({ utilisateur }) {
         <>
             {/* Navigation desktop */}
             <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:h-screen lg:w-[238px] lg:shrink-0 lg:overflow-y-auto border-r border-jse-theme-border bg-jse-theme-surface/90 backdrop-blur-xl">
-                <div className="flex min-h-full w-full flex-col px-4 py-7">
+                <div className="flex min-h-full w-full flex-col px-4 py-6 lg:py-7">
                     <div className="flex items-center justify-between gap-3">
                         <img
                             src="/assets/jse_logo.png?v=20261002"
@@ -135,7 +135,7 @@ export default function AdminSidebar({ utilisateur }) {
                     </div>
 
                     <nav
-                        className="mt-10 space-y-6"
+                        className="mt-7 space-y-5 lg:mt-10 lg:space-y-6"
                         aria-label="Navigation administration"
                     >
                         {sections.map((section) => (
@@ -337,7 +337,7 @@ export default function AdminSidebar({ utilisateur }) {
 
             {/* Navigation basse façon application */}
             <nav
-                className="fixed inset-x-0 bottom-0 z-50 border-t border-jse-theme-border bg-jse-theme-surface/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 shadow-[0_-10px_30px_rgba(18,60,50,0.08)] backdrop-blur-xl lg:hidden"
+                className="fixed inset-x-0 bottom-0 z-50 border-t border-jse-theme-border bg-jse-theme-surface/95 px-2 pb-[calc(env(safe-area-inset-bottom)+4px)] pt-2 shadow-[0_-10px_30px_rgba(18,60,50,0.08)] backdrop-blur-xl lg:hidden"
                 aria-label="Navigation mobile administration"
             >
                 <div className="mx-auto grid max-w-lg grid-cols-4 gap-1">
