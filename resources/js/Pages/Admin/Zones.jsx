@@ -16,6 +16,6 @@ export default function Zones({ utilisateur, zones = [], recherche = "" }) {
         { key: "livreurs_count", label: "Livreurs" },
         { key: "livreurs_disponibles", label: "Disponibles" },
         { key: "livraisons_actives", label: "Livraisons actives" },
-        { key: "actions", label: "Action", render: row => <button type="button" onClick={() => basculer(row)} disabled={traitement === row.id || (row.statut === "actif" && row.livraisons_actives > 0)} className="inline-flex min-h-10 items-center gap-2 rounded-full bg-jse-principal px-4 text-xs font-semibold text-white disabled:opacity-50"><Power size={15} />{traitement === row.id ? "..." : row.statut === "actif" ? "Désactiver" : "Activer"}</button> },
+        { key: "actions", label: "Action", render: row => <button type="button" onClick={() => basculer(row)} disabled={traitement === row.id || (row.statut === "actif" && row.livraisons_actives > 0)} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-jse-principal sm:w-auto sm:rounded-full px-4 text-xs font-semibold text-white disabled:opacity-50"><Power size={15} />{traitement === row.id ? "..." : row.statut === "actif" ? "Désactiver" : "Activer"}</button> },
     ]} emptyMessage="Aucune zone trouvée." />;
 }
