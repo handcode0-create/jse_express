@@ -1,24 +1,53 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace AppHttpControllers;
 
-use App\Models\Commande;
-use App\Models\HistoriqueCommande;
-use App\Models\StatutCommande;
-use App\Models\Livraison;
-use App\Services\LivraisonService;
-use App\Services\NotificationService;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\Models\User;
-use Inertia\Inertia;
-use Inertia\Response;
+use AppModelsCommande;
+use AppModelsHistoriqueCommande;
+use AppModelsLivraison;
+use AppModelsRestaurant;
+use AppModelsStatutCommande;
+use AppModelsUser;
+use AppServicesLivraisonService;
+use AppServicesNotificationService;
+use IlluminateHttpRedirectResponse;
+use IlluminateHttpRequest;
+use IlluminateSupportFacadesDB;
+use InertiaInertia;
+use InertiaResponse;
 
 class AdministrationController extends Controller
 {
     public function tableauDeBord(): Response
     {
+        $debutPeriode = now()->startOfDay()->subDays(6);
+        $finPeriode = now()->endOfDay();
+
+        $recuesParJour = Commande::query()
+            ->whereBetween('date_commande', [$debutPeriode, $finPeriode])
+            ->selectRaw('DATE(date_commande) as jour, COUNT(*) as total')
+            ->groupBy('jour')
+            ->pluck('total', 'jour');
+
+        $livreesParJour = Commande::query()
+            ->whereBetween('date_commande', [$debutPeriode, $finPeriode])
+            ->whereHas('statutCommande', fn ($q) => $q->where('code', 'LIVREE'))
+            ->selectRaw('DATE(date_commande) as jour, COUNT(*) as total')
+            ->groupBy('jour')
+            ->pluck('total', 'jour');
+
+        $serieActivite = collect(range(0, 6))->map(function (int $offset) use ($debutPeriode, $recuesParJour, $livreesParJour) {
+            $date = $debutPeriode->copy()->addDays($offset);
+            $jour = $date->toDateString();
+
+            return [
+                'date' => $jour,
+                'label' => $date->locale('fr')->isoFormat('dd'),
+                'recues' => (int) ($recuesParJour[$jour] ?? 0),
+                'livrees' => (int) ($livreesParJour[$jour] ?? 0),
+            ];
+        })->values();
+
         return Inertia::render('Admin/TableauDeBord', [
             'statistiques' => [
                 'commandes_actives' => Commande::query()->whereHas('statutCommande', fn ($q) => $q->whereNotIn('code', ['LIVREE', 'ANNULEE']))->count(),
@@ -27,10 +56,21 @@ class AdministrationController extends Controller
                     ->whereIn('statut', ['en_attente', 'attribuee', 'en_cours'])
                     ->whereHas('commande.statutCommande', fn ($q) => $q->whereNotIn('code', ['LIVREE', 'ANNULEE']))
                     ->count(),
-                'livreurs_disponibles' => User::query()->where('role', 'livreur')->where('statut', 'actif')->whereHas('profilLivreur', fn ($q) => $q->where('disponibilite', 'disponible'))->count(),
+                'livreurs_disponibles' => User::query()
+                    ->where('role', 'livreur')
+                    ->where('statut', 'actif')
+                    ->whereHas('profilLivreur', fn ($q) => $q->where('disponibilite', 'disponible'))
+                    ->count(),
+                'restaurants_actifs' => Restaurant::query()->where('statut', 'actif')->count(),
+                'clients_actifs' => User::query()->where('role', 'client')->where('statut', 'actif')->count(),
             ],
+            'serie_activite' => $serieActivite,
             'livraisons' => Livraison::query()
-                ->with(['commande.zone:id,nom', 'commande.statutCommande:id,code,libelle', 'attributions' => fn ($q) => $q->where('statut', 'active')->with('livreur:id,nom,prenom')])
+                ->with([
+                    'commande.zone:id,nom',
+                    'commande.statutCommande:id,code,libelle',
+                    'attributions' => fn ($q) => $q->where('statut', 'active')->with('livreur:id,nom,prenom'),
+                ])
                 ->whereIn('statut', ['en_attente', 'attribuee', 'en_cours'])
                 ->whereHas('commande.statutCommande', fn ($q) => $q->whereNotIn('code', ['LIVREE', 'ANNULEE']))
                 ->latest('id')
@@ -42,7 +82,9 @@ class AdministrationController extends Controller
                     'zone_id' => $livraison->zone_id,
                     'zone' => $livraison->commande?->zone?->nom,
                     'statut' => $livraison->statut,
-                    'livreur' => $livraison->attributions->first()?->livreur ? trim($livraison->attributions->first()->livreur->prenom . ' ' . $livraison->attributions->first()->livreur->nom) : null,
+                    'livreur' => $livraison->attributions->first()?->livreur
+                        ? trim($livraison->attributions->first()->livreur->prenom . ' ' . $livraison->attributions->first()->livreur->nom)
+                        : null,
                 ])->values(),
             'commandes' => Commande::query()
                 ->with([
@@ -84,6 +126,7 @@ class AdministrationController extends Controller
                 ])->values(),
         ]);
     }
+
     public function annulerCommande(Request $request, Commande $commande, NotificationService $notificationService): RedirectResponse
     {
         $donnees = $request->validate(['motif' => ['nullable', 'string', 'max:500']]);
@@ -134,16 +177,23 @@ class AdministrationController extends Controller
             'motif' => ['required', 'string', 'max:500'],
         ]);
 
-        $livreur = User::query()->whereKey($donnees['livreur_id'])->where('role', 'livreur')->where('statut', 'actif')->with('profilLivreur')->firstOrFail();
+        $livreur = User::query()
+            ->whereKey($donnees['livreur_id'])
+            ->where('role', 'livreur')
+            ->where('statut', 'actif')
+            ->with('profilLivreur')
+            ->firstOrFail();
+
         abort_unless($livreur->profilLivreur?->zone_id === $livraison->zone_id, 422, 'Le livreur doit appartenir à la zone de la livraison.');
 
         $livraisonService->reattribuer($livraison, $request->user()->id, $livreur->id, $donnees['motif']);
         $livraison->load('commande.user');
         $commande = $livraison->commande;
         $pin = \Illuminate\Support\Facades\Crypt::decryptString($commande->pin_livraison_chiffre);
+
         $notificationService->sms($livreur, 'Une livraison '.$commande->reference.' vous a été attribuée par l’administration.', $commande->id, $livraison->id, 'attribution');
         $notificationService->sms($commande->user, 'Votre code de livraison pour '.$commande->reference.' est '.$pin.'.', $commande->id, $livraison->id, 'pin_livraison');
+
         return back()->with('success', 'La livraison a été réattribuée.');
     }
-
 }
