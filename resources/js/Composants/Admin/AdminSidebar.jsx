@@ -53,6 +53,11 @@ export default function AdminSidebar({ utilisateur }) {
         {
             label: "Utilisateurs",
             items: [
+                {
+                    href: "/administration/utilisateurs",
+                    label: "Utilisateurs & rôles",
+                    icon: Users,
+                },
                 { href: "/administration/clients", label: "Clients", icon: Users },
                 {
                     href: "/administration/restaurants",
