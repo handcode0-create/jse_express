@@ -16,9 +16,8 @@ export default function AdminStatistics({ statistiques, serie = [] }) {
                     </div>
                     <p className="mt-2 text-xs text-jse-theme-muted">Commandes reçues et livrées sur les sept derniers jours.</p>
                 </div>
-                <span className="rounded-full border border-jse-theme-border px-3 py-1.5 text-[10px] font-medium text-jse-theme-muted">7 jours</span>
+                <span className="rounded-full border border-jse-theme-border px-3 py-1.5 text-xs font-medium text-jse-theme-muted">7 jours</span>
             </div>
-
             {serie.length === 0 ? (
                 <div className="mt-6 flex min-h-48 items-center justify-center rounded-jse-moyen border border-dashed border-jse-theme-border text-xs text-jse-theme-muted">
                     Aucune donnée disponible pour cette période.
@@ -28,27 +27,25 @@ export default function AdminStatistics({ statistiques, serie = [] }) {
                     {serie.map((point) => (
                         <div key={point.date} className="min-w-0 flex-1">
                             <div className="flex h-40 items-end justify-center gap-1.5">
-                                <div className="w-full max-w-3 rounded-t-jse-petit bg-jse-principal" style={{ height: Math.max((point.recues / maximum) * 100, point.recues ? 8 : 2) + "%" }} title={point.recues + " commande(s) reçue(s)"} />
-                                <div className="w-full max-w-3 rounded-t-jse-petit bg-jse-secondaire" style={{ height: Math.max((point.livrees / maximum) * 100, point.livrees ? 8 : 2) + "%" }} title={point.livrees + " commande(s) livrée(s)"} />
+                                <div className="w-full max-w-3 rounded-t-jse-petit bg-jse-principal" style={{ height: Math.max((point.recues / maximum) * 100, point.recues ? 8 : 2) + "%" }} />
+                                <div className="w-full max-w-3 rounded-t-jse-petit bg-jse-secondaire" style={{ height: Math.max((point.livrees / maximum) * 100, point.livrees ? 8 : 2) + "%" }} />
                             </div>
-                            <p className="mt-2 truncate text-center text-[9px] text-jse-theme-muted">{point.label}</p>
+                            <p className="mt-2 truncate text-center text-xs text-jse-theme-muted">{point.label}</p>
                         </div>
                     ))}
                 </div>
             )}
-
-            <div className="mt-5 flex flex-wrap items-center gap-4 text-[10px] text-jse-theme-muted">
+            <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-jse-theme-muted">
                 <span className="inline-flex items-center gap-2"><span className="size-2 rounded-full bg-jse-principal" /><ShoppingBag size={12} aria-hidden="true" />Reçues</span>
                 <span className="inline-flex items-center gap-2"><span className="size-2 rounded-full bg-jse-secondaire" /><CheckCircle2 size={12} aria-hidden="true" />Livrées</span>
             </div>
-
             <div className="mt-6 grid grid-cols-2 gap-3">
                 <div className="rounded-jse-moyen border border-jse-theme-border bg-jse-theme-surface-soft p-3">
-                    <p className="text-[10px] text-jse-theme-muted">Actives</p>
+                    <p className="text-xs text-jse-theme-muted">Actives</p>
                     <p className="mt-1 text-lg font-semibold text-jse-theme-text">{statistiques.commandes_actives ?? 0}</p>
                 </div>
                 <div className="rounded-jse-moyen border border-jse-theme-border bg-jse-theme-surface-soft p-3">
-                    <p className="text-[10px] text-jse-theme-muted">Livrées</p>
+                    <p className="text-xs text-jse-theme-muted">Livrées</p>
                     <p className="mt-1 text-lg font-semibold text-jse-theme-text">{statistiques.commandes_livrees ?? 0}</p>
                 </div>
             </div>
