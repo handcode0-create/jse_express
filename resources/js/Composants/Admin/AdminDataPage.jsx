@@ -27,7 +27,7 @@ export default function AdminDataPage({
     return (
         <>
             <Head title={`${title} — JSE Express`} />
-            <main className="min-h-screen bg-jse-theme-bg text-jse-theme-text">
+            <main className="min-h-screen bg-jse-theme-bg pb-24 text-jse-theme-text lg:pb-0">
                 <div className="flex min-h-screen flex-col lg:flex-row">
                     <AdminSidebar utilisateur={utilisateur} />
                     <section className="min-w-0 flex-1">
