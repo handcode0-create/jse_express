@@ -12,12 +12,12 @@ export default function AdminDeliveryTable({ livraisons, livreurs, selection, mo
         const candidats = livreurs.filter((livreur) => livreur.zone_id === livraison.zone_id);
         return (
             <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
-                <select aria-label={"Livreur pour " + (livraison.reference || livraison.id)} value={selection[livraison.id] || ""} onChange={(event) => onSelectionChange(livraison.id, event.target.value)} className="min-h-11 min-w-0 w-full flex-1 rounded-2xl sm:rounded-full border border-jse-theme-border bg-jse-theme-surface-soft px-4 text-xs text-jse-theme-text outline-none focus:border-jse-secondaire">
+                <select aria-label={"Livreur pour " + (livraison.reference || livraison.id)} value={selection[livraison.id] || ""} onChange={(event) => onSelectionChange(livraison.id, event.target.value)} className="jse-admin-input min-h-11 min-w-0 w-full flex-1 rounded-2xl sm:rounded-full border border-jse-theme-border bg-jse-theme-surface-soft px-4 text-xs text-jse-theme-text outline-none focus:border-jse-secondaire">
                     <option value="">Choisir un livreur</option>
                     {candidats.map((livreur) => <option key={livreur.id} value={livreur.id}>{livreur.nom} — {livreur.disponibilite || "indisponible"}</option>)}
                 </select>
-                <input aria-label={"Motif pour " + (livraison.reference || livraison.id)} value={motifs[livraison.id] || ""} onChange={(event) => onMotifChange(livraison.id, event.target.value)} placeholder="Motif de réattribution" className="min-h-11 min-w-0 flex-1 rounded-full border border-jse-theme-border bg-jse-theme-surface-soft px-4 text-xs text-jse-theme-text outline-none placeholder:text-jse-theme-muted focus:border-jse-secondaire" />
-                <button type="button" disabled={!selection[livraison.id] || !motifs[livraison.id]?.trim() || traitement === livraison.id} onClick={() => onReattribuer(livraison.id)} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-jse-secondaire px-4 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
+                <input aria-label={"Motif pour " + (livraison.reference || livraison.id)} value={motifs[livraison.id] || ""} onChange={(event) => onMotifChange(livraison.id, event.target.value)} placeholder="Motif de réattribution" className="jse-admin-input min-h-11 min-w-0 flex-1 rounded-full border border-jse-theme-border bg-jse-theme-surface-soft px-4 text-xs text-jse-theme-text outline-none placeholder:text-jse-theme-muted focus:border-jse-secondaire" />
+                <button type="button" disabled={!selection[livraison.id] || !motifs[livraison.id]?.trim() || traitement === livraison.id} onClick={() => onReattribuer(livraison.id)} className="jse-admin-primary inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-jse-secondaire px-4 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
                     <RefreshCw size={13} className={traitement === livraison.id ? "animate-spin" : ""} aria-hidden="true" />Réattribuer
                 </button>
             </div>
@@ -25,7 +25,7 @@ export default function AdminDeliveryTable({ livraisons, livreurs, selection, mo
     };
 
     return (
-        <article id="livraisons" className="rounded-jse-xl border border-jse-theme-border bg-jse-theme-surface p-5 shadow-sm sm:p-6">
+        <article id="livraisons" className="jse-admin-card rounded-jse-xl border border-jse-theme-border bg-jse-theme-surface p-5 shadow-sm sm:p-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <div className="flex items-center gap-2">
@@ -71,7 +71,7 @@ export default function AdminDeliveryTable({ livraisons, livreurs, selection, mo
                             const Icon = state.icon;
                             const candidats = livreurs.filter((livreur) => livreur.zone_id === livraison.zone_id);
                             return (
-                                <div key={livraison.id} className="rounded-jse-moyen border border-jse-theme-border bg-jse-theme-surface-soft p-4">
+                                <div key={livraison.id} className="jse-admin-card rounded-jse-moyen border border-jse-theme-border bg-jse-theme-surface-soft p-4">
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="min-w-0">
                                             <p className="truncate text-xs font-semibold text-jse-theme-text">{livraison.reference || "Livraison #" + livraison.id}</p>
@@ -79,7 +79,7 @@ export default function AdminDeliveryTable({ livraisons, livreurs, selection, mo
                                         </div>
                                         <span className={"inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium " + state.classe}><Icon size={13} aria-hidden="true" />{state.label}</span>
                                     </div>
-                                    <div className="mt-4 rounded-jse-moyen border border-jse-theme-border bg-jse-theme-surface p-3">
+                                    <div className="jse-admin-card mt-4 rounded-jse-moyen border border-jse-theme-border bg-jse-theme-surface p-3">
                                         <p className="text-xs uppercase tracking-[0.14em] text-jse-theme-muted">Livreur actuel</p>
                                         <p className="mt-1 text-xs font-medium text-jse-theme-text">{livraison.livreur || "Non attribué"}</p>
                                     </div>
