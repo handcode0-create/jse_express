@@ -163,6 +163,19 @@ Route::prefix('administration')
         Route::post('/livraisons/{livraison}/reattribuer', [AdministrationController::class, 'reattribuerLivraison'])
             ->whereNumber('livraison')
             ->name('admin.livraisons.reattribuer');
+
+        Route::post('/clients/{user}/statut', [AdministrationController::class, 'changerStatutClient'])
+            ->whereNumber('user')
+            ->name('admin.clients.statut');
+        Route::post('/restaurants/{restaurant}/statut', [AdministrationController::class, 'changerStatutRestaurant'])
+            ->whereNumber('restaurant')
+            ->name('admin.restaurants.statut');
+        Route::post('/livreurs/{user}/disponibilite', [AdministrationController::class, 'changerDisponibiliteLivreur'])
+            ->whereNumber('user')
+            ->name('admin.livreurs.disponibilite');
+        Route::post('/zones/{zone}/statut', [AdministrationController::class, 'changerStatutZone'])
+            ->whereNumber('zone')
+            ->name('admin.zones.statut');
     });
 
 Route::get('/panier', function () {
