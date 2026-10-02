@@ -40,7 +40,7 @@ export default function AdminDataPage({
             <main className="min-h-screen bg-jse-theme-bg pb-24 text-jse-theme-text lg:pb-0">
                 <div className="flex min-h-screen flex-col lg:flex-row">
                     <AdminSidebar utilisateur={utilisateur} />
-                    <section className="min-w-0 flex-1">
+                    <section className="min-w-0 flex-1 lg:ml-[238px]">
                         <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
                             <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                                 <div>
