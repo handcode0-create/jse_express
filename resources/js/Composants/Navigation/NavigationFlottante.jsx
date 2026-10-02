@@ -20,7 +20,7 @@ const ensembles = {
         { id: "dashboard", label: "Accueil", icon: LayoutDashboard, route: "/administration/tableau-de-bord" },
         { id: "commandes", label: "Commandes", icon: ShoppingBag, route: "/administration/commandes" },
         { id: "livraisons", label: "Livraisons", icon: Truck, route: "/administration/livraisons" },
-        { id: "plus", label: "Plus", icon: Bell },
+        { id: "utilisateurs", label: "Utilisateurs", icon: Users, route: "/administration/utilisateurs" },
     ],
     livreur: [
         { id: "accueil", label: "Accueil", icon: Home },
