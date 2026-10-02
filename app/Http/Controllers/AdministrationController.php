@@ -1,20 +1,20 @@
 <?php
 
-namespace AppHttpControllers;
+namespace App\\Http\\Controllers;
 
-use AppModelsCommande;
-use AppModelsHistoriqueCommande;
-use AppModelsLivraison;
-use AppModelsRestaurant;
-use AppModelsStatutCommande;
-use AppModelsUser;
-use AppServicesLivraisonService;
-use AppServicesNotificationService;
-use IlluminateHttpRedirectResponse;
-use IlluminateHttpRequest;
-use IlluminateSupportFacadesDB;
-use InertiaInertia;
-use InertiaResponse;
+use App\\Models\\Commande;
+use App\\Models\\HistoriqueCommande;
+use App\\Models\\Livraison;
+use App\\Models\\Restaurant;
+use App\\Models\\StatutCommande;
+use App\\Models\\User;
+use App\\Services\\LivraisonService;
+use App\\Services\\NotificationService;
+use Illuminate\\Http\\RedirectResponse;
+use Illuminate\\Http\\Request;
+use Illuminate\\Support\\Facades\\DB;
+use Inertia\\Inertia;
+use Inertia\\Response;
 
 class AdministrationController extends Controller
 {
