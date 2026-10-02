@@ -386,4 +386,294 @@ class AdministrationController extends Controller
         return back()->with('success', 'Le statut de la zone a été mis à jour.');
     }
 
+
+    public function utilisateurs(Request $request): Response
+    {
+        $recherche = trim((string) $request->query('recherche', ''));
+        $role = trim((string) $request->query('role', ''));
+        $statut = trim((string) $request->query('statut', ''));
+
+        $utilisateurs = User::query()
+            ->with([
+                'restaurant:id,user_id,zone_id,nom,telephone,email,adresse,statut',
+                'restaurant.zone:id,nom',
+                'profilLivreur:user_id,matricule,zone_id,disponibilite,telephone_secondaire',
+                'profilLivreur.zone:id,nom',
+            ])
+            ->when($recherche !== '', function ($query) use ($recherche) {
+                $query->where(function ($q) use ($recherche) {
+                    $q->where('nom', 'like', '%'.$recherche.'%')
+                        ->orWhere('prenom', 'like', '%'.$recherche.'%')
+                        ->orWhere('telephone', 'like', '%'.$recherche.'%')
+                        ->orWhere('email', 'like', '%'.$recherche.'%')
+                        ->orWhereHas('profilLivreur', fn ($p) => $p->where('matricule', 'like', '%'.$recherche.'%'))
+                        ->orWhereHas('restaurant', fn ($r) => $r->where('nom', 'like', '%'.$recherche.'%'));
+                });
+            })
+            ->when(in_array($role, ['client', 'restaurant', 'livreur', 'administrateur'], true), fn ($q) => $q->where('role', $role))
+            ->when(in_array($statut, ['actif', 'inactif'], true), fn ($q) => $q->where('statut', $statut))
+            ->latest('id')
+            ->paginate(20)
+            ->withQueryString();
+
+        $utilisateurs->setCollection(
+            $utilisateurs->getCollection()->map(fn (User $user) => $this->utilisateurAdmin($user))->values()
+        );
+
+        return Inertia::render('Admin/Utilisateurs', [
+            'utilisateurs' => $utilisateurs,
+            'filtres' => [
+                'recherche' => $recherche,
+                'role' => $role,
+                'statut' => $statut,
+            ],
+            'roles' => ['client', 'restaurant', 'livreur', 'administrateur'],
+            'statuts' => ['actif', 'inactif'],
+            'administrateursActifs' => User::query()->where('role', 'administrateur')->where('statut', 'actif')->count(),
+            'utilisateur' => $this->utilisateurAdmin($request->user()),
+        ]);
+    }
+
+    public function creerUtilisateur(Request $request): RedirectResponse
+    {
+        $donnees = $this->validerUtilisateurAdmin($request);
+
+        DB::transaction(function () use ($donnees) {
+            $user = User::create([
+                'nom' => $donnees['nom'],
+                'prenom' => $donnees['prenom'] ?? null,
+                'telephone' => $donnees['telephone'],
+                'email' => $donnees['email'] ?? null,
+                'password' => IlluminateSupportFacadesHash::make($donnees['mot_de_passe']),
+                'role' => $donnees['role'],
+                'statut' => $donnees['statut'],
+            ]);
+
+            $this->synchroniserProfilMetier($user, $donnees);
+        });
+
+        return back()->with('success', 'Utilisateur créé avec succès.');
+    }
+
+    public function modifierUtilisateur(Request $request, User $user): RedirectResponse
+    {
+        $donnees = $this->validerUtilisateurAdmin($request, $user);
+
+        DB::transaction(function () use ($donnees, $user) {
+            $ancienRole = $user->role;
+
+            if ($ancienRole === 'administrateur' && $user->statut === 'actif') {
+                $passeAdministrateurActif = ($donnees['role'] ?? $ancienRole) === 'administrateur'
+                    && ($donnees['statut'] ?? $user->statut) === 'actif';
+
+                if (! $passeAdministrateurActif && User::query()->where('role', 'administrateur')->where('statut', 'actif')->count() <= 1) {
+                    abort(422, 'Impossible de supprimer le dernier administrateur actif du système.');
+                }
+            }
+
+            $user->update([
+                'nom' => $donnees['nom'],
+                'prenom' => $donnees['prenom'] ?? null,
+                'telephone' => $donnees['telephone'],
+                'email' => $donnees['email'] ?? null,
+                'role' => $donnees['role'],
+                'statut' => $donnees['statut'],
+                ...(!empty($donnees['mot_de_passe']) ? ['password' => IlluminateSupportFacadesHash::make($donnees['mot_de_passe'])] : []),
+            ]);
+
+            $this->synchroniserProfilMetier($user->fresh(), $donnees);
+        });
+
+        return back()->with('success', 'Utilisateur mis à jour.');
+    }
+
+    public function changerRole(Request $request, User $user): RedirectResponse
+    {
+        $donnees = $request->validate([
+            'role' => ['required', 'string', 'in:client,restaurant,livreur,administrateur'],
+            'restaurant_nom' => ['nullable', 'string', 'max:150'],
+            'restaurant_description' => ['nullable', 'string', 'max:2000'],
+            'restaurant_telephone' => ['nullable', 'string', 'max:30'],
+            'restaurant_email' => ['nullable', 'email', 'max:150'],
+            'restaurant_adresse' => ['nullable', 'string', 'max:1000'],
+            'restaurant_zone_id' => ['nullable', 'integer', 'exists:zones,id'],
+            'livreur_matricule' => ['nullable', 'string', 'max:100'],
+            'livreur_zone_id' => ['nullable', 'integer', 'exists:zones,id'],
+            'livreur_disponibilite' => ['nullable', 'in:disponible,indisponible'],
+            'livreur_telephone_secondaire' => ['nullable', 'string', 'max:30'],
+        ]);
+
+        if ($user->role === 'administrateur' && $user->statut === 'actif' && $donnees['role'] !== 'administrateur'
+            && User::query()->where('role', 'administrateur')->where('statut', 'actif')->count() <= 1) {
+            abort(422, 'Impossible de supprimer le dernier administrateur actif du système.');
+        }
+
+        if ($donnees['role'] === 'restaurant' && ! $user->restaurant) {
+            validator($donnees, [
+                'restaurant_nom' => ['required', 'string', 'max:150'],
+                'restaurant_telephone' => ['required', 'string', 'max:30'],
+                'restaurant_adresse' => ['required', 'string', 'max:1000'],
+            ], [
+                'restaurant_nom.required' => 'Le nom du restaurant est obligatoire pour ce rôle.',
+                'restaurant_telephone.required' => 'Le téléphone du restaurant est obligatoire.',
+                'restaurant_adresse.required' => 'L’adresse du restaurant est obligatoire.',
+            ])->validate();
+        }
+
+        if ($donnees['role'] === 'livreur' && ! $user->profilLivreur) {
+            validator($donnees, [
+                'livreur_matricule' => ['required', 'string', 'max:100', 'unique:profils_livreurs,matricule'],
+                'livreur_disponibilite' => ['required', 'in:disponible,indisponible'],
+            ], [
+                'livreur_matricule.required' => 'Le matricule livreur est obligatoire pour ce rôle.',
+                'livreur_matricule.unique' => 'Ce matricule livreur est déjà utilisé.',
+                'livreur_disponibilite.required' => 'La disponibilité du livreur est obligatoire.',
+            ])->validate();
+        }
+
+        DB::transaction(function () use ($donnees, $user) {
+            $user->update(['role' => $donnees['role']]);
+            $this->synchroniserProfilMetier($user->fresh(), $donnees);
+        });
+
+        return back()->with('success', 'Rôle utilisateur mis à jour.');
+    }
+
+    public function changerStatutUtilisateur(Request $request, User $user): RedirectResponse
+    {
+        $donnees = $request->validate([
+            'statut' => ['required', 'in:actif,inactif'],
+        ]);
+
+        if ($user->role === 'administrateur' && $user->statut === 'actif' && $donnees['statut'] === 'inactif'
+            && User::query()->where('role', 'administrateur')->where('statut', 'actif')->count() <= 1) {
+            abort(422, 'Impossible de désactiver le dernier administrateur actif du système.');
+        }
+
+        $user->update(['statut' => $donnees['statut']]);
+
+        return back()->with('success', 'Statut utilisateur mis à jour.');
+    }
+
+    private function validerUtilisateurAdmin(Request $request, ?User $user = null): array
+    {
+        $telephone = preg_replace('/[^0-9]/', '', (string) $request->input('telephone')) ?? '';
+
+        $donnees = $request->validate([
+            'nom' => ['required', 'string', 'max:100'],
+            'prenom' => ['nullable', 'string', 'max:100'],
+            'telephone' => ['required', 'string', 'max:30', IlluminateValidationRule::unique('users', 'telephone')->ignore($user?->id)],
+            'email' => ['nullable', 'email', 'max:255', IlluminateValidationRule::unique('users', 'email')->ignore($user?->id)],
+            'role' => ['required', 'in:client,restaurant,livreur,administrateur'],
+            'statut' => ['required', 'in:actif,inactif'],
+            'mot_de_passe' => [$user ? 'nullable' : 'required', 'string', 'min:8'],
+            'restaurant_nom' => ['nullable', 'string', 'max:150'],
+            'restaurant_description' => ['nullable', 'string', 'max:2000'],
+            'restaurant_telephone' => ['nullable', 'string', 'max:30'],
+            'restaurant_email' => ['nullable', 'email', 'max:150'],
+            'restaurant_adresse' => ['nullable', 'string', 'max:1000'],
+            'restaurant_zone_id' => ['nullable', 'integer', 'exists:zones,id'],
+            'livreur_matricule' => ['nullable', 'string', 'max:100', $user ? IlluminateValidationRule::unique('profils_livreurs', 'matricule')->ignore($user->id, 'user_id') : 'unique:profils_livreurs,matricule'],
+            'livreur_zone_id' => ['nullable', 'integer', 'exists:zones,id'],
+            'livreur_disponibilite' => ['nullable', 'in:disponible,indisponible'],
+            'livreur_telephone_secondaire' => ['nullable', 'string', 'max:30'],
+        ]);
+
+        if ($donnees['role'] === 'restaurant' && ! $user?->restaurant) {
+            if (blank($donnees['restaurant_nom']) || blank($donnees['restaurant_telephone']) || blank($donnees['restaurant_adresse'])) {
+                abort(422, 'Les informations du restaurant sont obligatoires pour attribuer ce rôle.');
+            }
+        }
+
+        if ($donnees['role'] === 'livreur' && ! $user?->profilLivreur) {
+            if (blank($donnees['livreur_matricule']) || blank($donnees['livreur_disponibilite'])) {
+                abort(422, 'Le matricule et la disponibilité du livreur sont obligatoires pour attribuer ce rôle.');
+            }
+        }
+
+        return $donnees;
+    }
+
+    private function synchroniserProfilMetier(User $user, array $donnees): void
+    {
+        if ($user->role === 'restaurant') {
+            if ($user->restaurant) {
+                $user->restaurant->update(array_filter([
+                    'zone_id' => $donnees['restaurant_zone_id'] ?? null,
+                    'nom' => $donnees['restaurant_nom'] ?? null,
+                    'description' => $donnees['restaurant_description'] ?? null,
+                    'telephone' => $donnees['restaurant_telephone'] ?? null,
+                    'email' => $donnees['restaurant_email'] ?? null,
+                    'adresse' => $donnees['restaurant_adresse'] ?? null,
+                ], fn ($value) => $value !== null));
+            } else {
+                Restaurant::create([
+                    'user_id' => $user->id,
+                    'zone_id' => $donnees['restaurant_zone_id'] ?? null,
+                    'nom' => $donnees['restaurant_nom'],
+                    'description' => $donnees['restaurant_description'] ?? null,
+                    'telephone' => $donnees['restaurant_telephone'],
+                    'email' => $donnees['restaurant_email'] ?? null,
+                    'adresse' => $donnees['restaurant_adresse'],
+                    'horaires' => null,
+                    'statut' => 'actif',
+                ]);
+            }
+        }
+
+        if ($user->role === 'livreur') {
+            if ($user->profilLivreur) {
+                $user->profilLivreur->update(array_filter([
+                    'matricule' => $donnees['livreur_matricule'] ?? null,
+                    'zone_id' => $donnees['livreur_zone_id'] ?? null,
+                    'disponibilite' => $donnees['livreur_disponibilite'] ?? null,
+                    'telephone_secondaire' => $donnees['livreur_telephone_secondaire'] ?? null,
+                ], fn ($value) => $value !== null));
+            } else {
+                AppModelsProfilLivreur::create([
+                    'user_id' => $user->id,
+                    'matricule' => $donnees['livreur_matricule'],
+                    'zone_id' => $donnees['livreur_zone_id'] ?? null,
+                    'disponibilite' => $donnees['livreur_disponibilite'],
+                    'telephone_secondaire' => $donnees['livreur_telephone_secondaire'] ?? null,
+                ]);
+            }
+        }
+    }
+
+    private function utilisateurAdmin(?User $user): ?array
+    {
+        if (! $user) {
+            return null;
+        }
+
+        return [
+            'id' => $user->id,
+            'nom' => $user->nom,
+            'prenom' => $user->prenom,
+            'telephone' => $user->telephone,
+            'email' => $user->email,
+            'photo_profil' => $user->photo_profil,
+            'role' => $user->role,
+            'statut' => $user->statut,
+            'created_at' => $user->created_at?->format('d/m/Y H:i'),
+            'restaurant' => $user->restaurant ? [
+                'id' => $user->restaurant->id,
+                'nom' => $user->restaurant->nom,
+                'telephone' => $user->restaurant->telephone,
+                'email' => $user->restaurant->email,
+                'adresse' => $user->restaurant->adresse,
+                'zone' => $user->restaurant->zone?->nom,
+                'statut' => $user->restaurant->statut,
+            ] : null,
+            'profil_livreur' => $user->profilLivreur ? [
+                'matricule' => $user->profilLivreur->matricule,
+                'zone_id' => $user->profilLivreur->zone_id,
+                'zone' => $user->profilLivreur->zone?->nom,
+                'disponibilite' => $user->profilLivreur->disponibilite,
+                'telephone_secondaire' => $user->profilLivreur->telephone_secondaire,
+            ] : null,
+        ];
+    }
+
 }
