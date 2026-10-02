@@ -46,7 +46,11 @@ class SecurityHeaders
             'https://www.google.com/recaptcha/',
             'https://www.gstatic.com/recaptcha/',
         ];
-        $styleSources = ["'self'", "'unsafe-inline'"];
+        $styleSources = [
+            "'self'",
+            "'unsafe-inline'",
+            'https://fonts.googleapis.com',
+        ];
         $connectSources = ["'self'"];
 
         // Vite HMR is only exposed during local development.
@@ -76,7 +80,7 @@ class SecurityHeaders
             'script-src '.implode(' ', $scriptSources),
             'style-src '.implode(' ', $styleSources),
             "img-src 'self' data: blob: https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
-            "font-src 'self' data:",
+            "font-src 'self' data: https://fonts.gstatic.com https://db.onlinewebfonts.com",
             'connect-src '.implode(' ', $connectSources),
             "frame-src 'self' https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/",
             "manifest-src 'self'",
