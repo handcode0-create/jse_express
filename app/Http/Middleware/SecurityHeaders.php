@@ -29,6 +29,10 @@ class SecurityHeaders
         $response->headers->set('X-Permitted-Cross-Domain-Policies', 'none');
         $response->headers->set('X-Download-Options', 'noopen');
 
+        // Remove framework/runtime fingerprinting when those headers are present.
+        $response->headers->remove('Server');
+        $response->headers->remove('X-Powered-By');
+
         // Keep local HTTP development working while enforcing HSTS over HTTPS.
         if ($request->isSecure()) {
             $response->headers->set(
@@ -37,24 +41,44 @@ class SecurityHeaders
             );
         }
 
+        $scriptSources = [
+            "'self'",
+            'https://www.google.com/recaptcha/',
+            'https://www.gstatic.com/recaptcha/',
+        ];
+        $styleSources = ["'self'", "'unsafe-inline'"];
+        $connectSources = ["'self'"];
+
+        // Vite HMR is only exposed during local development.
+        if (app()->environment('local')) {
+            $scriptSources[] = 'http://localhost:5173';
+            $scriptSources[] = 'http://127.0.0.1:5173';
+            $styleSources[] = 'http://localhost:5173';
+            $styleSources[] = 'http://127.0.0.1:5173';
+            $connectSources[] = 'ws://localhost:5173';
+            $connectSources[] = 'ws://127.0.0.1:5173';
+            $connectSources[] = 'http://localhost:5173';
+            $connectSources[] = 'http://127.0.0.1:5173';
+        }
+
         $csp = implode('; ', [
             "default-src 'self'",
             "base-uri 'self'",
             "object-src 'none'",
             "frame-ancestors 'none'",
             "form-action 'self'",
-            "script-src 'self' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
-            "style-src 'self' 'unsafe-inline'",
+            'script-src '.implode(' ', $scriptSources),
+            'style-src '.implode(' ', $styleSources),
             "img-src 'self' data: blob: https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
             "font-src 'self' data:",
-            "connect-src 'self'",
+            'connect-src '.implode(' ', $connectSources),
             "frame-src 'self' https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/",
             "manifest-src 'self'",
             "worker-src 'self' blob:",
             "media-src 'self'",
         ]);
 
-        if ($request->isSecure()) {
+        if ($request->isSecure() && app()->environment('production')) {
             $csp .= "; upgrade-insecure-requests";
         }
 
