@@ -7,7 +7,6 @@ import {
     Truck,
     Users,
     UserRound,
-    ChevronRight,
 } from "lucide-react";
 import AdminSidebar from "../../Composants/Admin/AdminSidebar";
 import AdminStatCard from "../../Composants/Admin/AdminStatCard";
@@ -185,35 +184,6 @@ export default function TableauDeBord({
                                     </div>
                                 ))}
                             </section>
-
-                            <div className="mt-5 flex items-center justify-between rounded-2xl border border-jse-theme-border bg-jse-theme-surface px-3.5 py-3 shadow-sm sm:hidden">
-                                <div className="min-w-0">
-                                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-jse-theme-muted">
-                                        Accès rapide
-                                    </p>
-                                    <p className="mt-0.5 truncate text-xs text-jse-theme-text">
-                                        Ouvrir la gestion détaillée
-                                    </p>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        const event = new MouseEvent("click", {
-                                            bubbles: true,
-                                            cancelable: true,
-                                        });
-                                        document
-                                            .querySelector(
-                                                '[aria-label="Ouvrir le menu administration"]',
-                                            )
-                                            ?.dispatchEvent(event);
-                                    }}
-                                    className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-jse-principal text-white"
-                                    aria-label="Ouvrir la gestion détaillée"
-                                >
-                                    <ChevronRight size={17} aria-hidden="true" />
-                                </button>
-                            </div>
 
                             <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.85fr)]">
                                 <div className="order-2 xl:order-1">
