@@ -75,27 +75,26 @@ export default function Inscription() {
         const keys = Object.keys(toutes);
 
         if (etape === 1) {
-            const profilPrefixes = ["restaurant_", "livreur_"];
-            return keys
-                .filter((key) => key !== "role" && !profilPrefixes.some((prefix) => key.startsWith(prefix)))
-                .map((key) => toutes[key]);
-        }
-
-        if (etape === 2) {
             return keys
                 .filter((key) => key === "role")
                 .map((key) => toutes[key]);
         }
 
-        const prefixos =
-            data.role === "restaurant"
-                ? ["restaurant_"]
-                : data.role === "livreur"
-                  ? ["livreur_"]
-                  : [];
+        if (etape === 2) {
+            const prefixos =
+                data.role === "restaurant"
+                    ? ["restaurant_"]
+                    : data.role === "livreur"
+                      ? ["livreur_"]
+                      : [];
+            return keys
+                .filter((key) => prefixos.some((prefix) => key.startsWith(prefix)))
+                .map((key) => toutes[key]);
+        }
 
+        const profilPrefixes = ["restaurant_", "livreur_"];
         return keys
-            .filter((key) => prefixos.some((prefix) => key.startsWith(prefix)))
+            .filter((key) => key !== "role" && !profilPrefixes.some((prefix) => key.startsWith(prefix)))
             .map((key) => toutes[key]);
     }, [errors, etape, data.role]);
 
@@ -110,11 +109,11 @@ export default function Inscription() {
         );
 
         if (erreurProfil) {
-            setEtape(3);
-        } else if (errors.role) {
             setEtape(2);
-        } else {
+        } else if (errors.role) {
             setEtape(1);
+        } else {
+            setEtape(3);
         }
     }, [errors]);
 
@@ -132,49 +131,18 @@ export default function Inscription() {
         clearErrors();
 
         if (etape === 1) {
-            const champs = [
-                ["prenom", "Le prénom est obligatoire."],
-                ["nom", "Le nom est obligatoire."],
-                ["telephone", "Le téléphone est obligatoire."],
-                ["mot_de_passe", "Le mot de passe est obligatoire."],
-                ["confirmation_mot_de_passe", "La confirmation du mot de passe est obligatoire."],
-            ];
-
-            const manquants = champs.filter(([champ]) => !String(data[champ] || "").trim());
-
-            if (manquants.length > 0 || !data.consentement) {
-                manquants.forEach(([champ, message]) => setError(champ, message));
-                if (!data.consentement) {
-                    setError("consentement", "Vous devez accepter les conditions pour continuer.");
-                }
-                return;
-            }
-
-            if (data.mot_de_passe !== data.confirmation_mot_de_passe) {
-                setError("confirmation_mot_de_passe", "Les mots de passe ne correspondent pas.");
-                return;
-            }
-
-            if (data.mot_de_passe.length < 8) {
-                setError("mot_de_passe", "Le mot de passe doit contenir au moins 8 caractères.");
-                return;
-            }
-
-            setEtape(2);
-            return;
-        }
-
-        if (etape === 2) {
             if (!data.role) {
                 setError("role", "Veuillez sélectionner votre utilisation de JSE Express.");
                 return;
             }
 
-            setEtape(3);
+            // Un client n'a pas de profil métier supplémentaire dans le MCD.
+            // Il passe donc directement aux informations du compte.
+            setEtape(data.role === "client" ? 3 : 2);
             return;
         }
 
-        if (etape === 3) {
+        if (etape === 2) {
             if (data.role === "restaurant") {
                 const champs = [
                     ["restaurant_nom", "Le nom du restaurant est obligatoire."],
@@ -182,6 +150,7 @@ export default function Inscription() {
                     ["restaurant_adresse", "L'adresse du restaurant est obligatoire."],
                 ];
                 const manquants = champs.filter(([champ]) => !String(data[champ] || "").trim());
+
                 if (manquants.length > 0) {
                     manquants.forEach(([champ, message]) => setError(champ, message));
                     return;
@@ -194,11 +163,14 @@ export default function Inscription() {
                     ["livreur_disponibilite", "Veuillez indiquer votre disponibilité."],
                 ];
                 const manquants = champs.filter(([champ]) => !String(data[champ] || "").trim());
+
                 if (manquants.length > 0) {
                     manquants.forEach(([champ, message]) => setError(champ, message));
                     return;
                 }
             }
+
+            setEtape(3);
         }
     };
 
@@ -207,7 +179,7 @@ export default function Inscription() {
         post("/inscription", { preserveScroll: true });
     };
 
-    const labelsEtapes = ["Vos informations", "Votre utilisation", "Votre profil"];
+    const labelsEtapes = ["Votre utilisation", "Votre profil", "Vos identifiants"];
 
     return (
         <main className="relative min-h-screen overflow-x-hidden bg-[#07110F] font-sans text-white">
@@ -309,21 +281,21 @@ export default function Inscription() {
                                     </p>
                                     <h2 className="mt-2 max-w-2xl font-against text-[32px] leading-[1.02] text-[#FFF7E8] sm:text-[38px]">
                                         {etape === 1
-                                            ? "Commençons par vous."
+                                            ? "Comment utiliserez-vous JSE Express ?"
                                             : etape === 2
-                                              ? "Comment utiliserez-vous JSE Express ?"
-                                              : roleSelectionne?.value === "restaurant"
-                                                ? "Parlons de votre restaurant."
-                                                : roleSelectionne?.value === "livreur"
-                                                  ? "Complétons votre profil."
-                                                  : "Votre profil client."}
+                                              ? roleSelectionne?.value === "restaurant"
+                                                  ? "Parlons de votre restaurant."
+                                                  : roleSelectionne?.value === "livreur"
+                                                    ? "Complétons votre profil."
+                                                    : "Votre profil client."
+                                              : "Créons vos identifiants."}
                                     </h2>
                                     <p className="mt-3 max-w-xl text-xs leading-5 text-white/40 sm:text-sm">
                                         {etape === 1
-                                            ? "Renseignez vos informations personnelles avant de choisir votre parcours JSE Express."
+                                            ? "Votre réponse détermine le profil créé dans JSE Express."
                                             : etape === 2
-                                              ? "Votre choix détermine le rôle qui sera associé à votre compte."
-                                              : "Dernière étape : complétez les informations propres à votre profil."}
+                                              ? "Ces informations complètent le profil correspondant à votre activité."
+                                              : "Dernière étape : renseignez les informations nécessaires à votre compte."}
                                     </p>
                                 </div>
 
@@ -350,71 +322,6 @@ export default function Inscription() {
 
                             <form onSubmit={soumettre}>
                                 {etape === 1 && (
-                                    <div className="space-y-4">
-                                        <div className="grid gap-4 sm:grid-cols-2">
-                                            <Champ
-                                                label="Prénom"
-                                                value={data.prenom}
-                                                onChange={(v) => modifier("prenom", v)}
-                                                placeholder="Votre prénom"
-                                            />
-                                            <Champ
-                                                label="Nom"
-                                                value={data.nom}
-                                                onChange={(v) => modifier("nom", v)}
-                                                placeholder="Votre nom"
-                                            />
-                                        </div>
-
-                                        <div className="grid gap-4 sm:grid-cols-2">
-                                            <Champ
-                                                label="Téléphone"
-                                                value={data.telephone}
-                                                onChange={(v) => modifier("telephone", v)}
-                                                placeholder="Votre numéro"
-                                                type="tel"
-                                                icon={Phone}
-                                            />
-                                            <Champ
-                                                label="E-mail"
-                                                value={data.email}
-                                                onChange={(v) => modifier("email", v)}
-                                                placeholder="Facultatif"
-                                                type="email"
-                                                icon={Mail}
-                                            />
-                                        </div>
-
-                                        <PasswordChamp
-                                            label="Mot de passe"
-                                            value={data.mot_de_passe}
-                                            onChange={(v) => modifier("mot_de_passe", v)}
-                                            visible={afficherMotDePasse}
-                                            toggle={() => setAfficherMotDePasse(!afficherMotDePasse)}
-                                        />
-                                        <PasswordChamp
-                                            label="Confirmer le mot de passe"
-                                            value={data.confirmation_mot_de_passe}
-                                            onChange={(v) => modifier("confirmation_mot_de_passe", v)}
-                                            visible={afficherConfirmation}
-                                            toggle={() => setAfficherConfirmation(!afficherConfirmation)}
-                                        />
-
-                                        <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.025] p-4 text-xs leading-5 text-white/45">
-                                            <input
-                                                type="checkbox"
-                                                checked={data.consentement}
-                                                onChange={(event) => modifier("consentement", event.target.checked)}
-                                                className="mt-1 size-4 accent-jse-secondaire"
-                                            />
-                                            <span>
-                                                J’accepte la politique de confidentialité et consens au traitement de mes données personnelles par JSE Express.
-                                            </span>
-                                        </label>
-                                    </div>
-                                )}
-
-                                {etape === 2 && (
                                     <div className="grid gap-3 md:grid-cols-3">
                                         {roles.map((role) => {
                                             const active = data.role === role.value;
@@ -467,7 +374,7 @@ export default function Inscription() {
                                     </div>
                                 )}
 
-                                {etape === 3 && (
+                                {etape === 2 && (
                                     <div className="space-y-5">
                                         <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
                                             <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#07110F]">
@@ -574,6 +481,71 @@ export default function Inscription() {
                                                 <Champ label="Téléphone secondaire" value={data.livreur_telephone_secondaire} onChange={(v) => modifier("livreur_telephone_secondaire", v)} placeholder="Numéro secondaire (facultatif)" type="tel" icon={Phone} />
                                             </div>
                                         )}
+                                    </div>
+                                )}
+
+                                {etape === 3 && (
+                                    <div className="space-y-4">
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <Champ
+                                                label="Prénom"
+                                                value={data.prenom}
+                                                onChange={(v) => modifier("prenom", v)}
+                                                placeholder="Votre prénom"
+                                            />
+                                            <Champ
+                                                label="Nom"
+                                                value={data.nom}
+                                                onChange={(v) => modifier("nom", v)}
+                                                placeholder="Votre nom"
+                                            />
+                                        </div>
+
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <Champ
+                                                label="Téléphone"
+                                                value={data.telephone}
+                                                onChange={(v) => modifier("telephone", v)}
+                                                placeholder="Votre numéro"
+                                                type="tel"
+                                                icon={Phone}
+                                            />
+                                            <Champ
+                                                label="E-mail"
+                                                value={data.email}
+                                                onChange={(v) => modifier("email", v)}
+                                                placeholder="Facultatif"
+                                                type="email"
+                                                icon={Mail}
+                                            />
+                                        </div>
+
+                                        <PasswordChamp
+                                            label="Mot de passe"
+                                            value={data.mot_de_passe}
+                                            onChange={(v) => modifier("mot_de_passe", v)}
+                                            visible={afficherMotDePasse}
+                                            toggle={() => setAfficherMotDePasse(!afficherMotDePasse)}
+                                        />
+                                        <PasswordChamp
+                                            label="Confirmer le mot de passe"
+                                            value={data.confirmation_mot_de_passe}
+                                            onChange={(v) => modifier("confirmation_mot_de_passe", v)}
+                                            visible={afficherConfirmation}
+                                            toggle={() => setAfficherConfirmation(!afficherConfirmation)}
+                                        />
+
+                                        <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.025] p-4 text-xs leading-5 text-white/45">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.consentement}
+                                                onChange={(event) => modifier("consentement", event.target.checked)}
+                                                className="mt-1 size-4 accent-jse-secondaire"
+                                            />
+                                            <span>
+                                                J’accepte la politique de confidentialité et consens au traitement de mes données personnelles par JSE Express.
+                                            </span>
+                                        </label>
                                     </div>
                                 )}
 
