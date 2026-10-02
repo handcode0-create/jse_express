@@ -16,6 +16,12 @@ const ensembles = {
         { id: "menu", label: "Menu", icon: UtensilsCrossed },
         { id: "profil", label: "Profil", icon: UserRound },
     ],
+    admin: [
+        { id: "dashboard", label: "Accueil", icon: LayoutDashboard, route: "/administration/tableau-de-bord" },
+        { id: "commandes", label: "Commandes", icon: ShoppingBag, route: "/administration/commandes" },
+        { id: "livraisons", label: "Livraisons", icon: Truck, route: "/administration/livraisons" },
+        { id: "plus", label: "Plus", icon: Bell },
+    ],
     livreur: [
         { id: "accueil", label: "Accueil", icon: Home },
         { id: "missions", label: "Missions", icon: Receipt },
