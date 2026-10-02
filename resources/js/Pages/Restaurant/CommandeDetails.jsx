@@ -1,5 +1,6 @@
+import React from "react";
 import { router, usePage } from "@inertiajs/react";
-import { ArrowLeft, Bike, Check, ChevronRight, ClipboardList, CreditCard, MapPin, Package } from "lucide-react";
+import { ArrowLeft, Bike, Check, ChevronRight, ClipboardList, CreditCard, MapPin, Package, XCircle } from "lucide-react";
 
 const transitions = {
     EN_ATTENTE: { code: "CONFIRMEE", label: "Confirmer la commande" },
@@ -25,10 +26,38 @@ function Section({ title, icon: Icon, children }) {
 export default function CommandeDetailsRestaurant() {
     const { restaurant, commande, flash = {} } = usePage().props;
     const action = transitions[commande?.statut?.code];
+    const [chargement, setChargement] = React.useState(false);
+    const [erreur, setErreur] = React.useState(null);
 
     const changerStatut = () => {
-        if (!action) return;
-        router.patch(`/restaurant/commandes/${commande.id}/statut`, { statut: action.code }, { preserveScroll: true });
+        if (!action || chargement) return;
+        setErreur(null);
+        setChargement(true);
+        router.patch(`/restaurant/commandes/${commande.id}/statut`, { statut: action.code }, {
+            preserveScroll: true,
+            onError: (errors) => {
+                setErreur(Object.values(errors || {})[0] || "Impossible de mettre à jour la commande.");
+            },
+            onFinish: () => setChargement(false),
+        });
+    };
+
+    const annulerCommande = () => {
+        if (chargement) return;
+        const confirme = window.confirm("Annuler cette commande ? Cette action est réservée aux commandes encore traitables.");
+        if (!confirme) return;
+
+        setErreur(null);
+        setChargement(true);
+        router.post(`/restaurant/commandes/${commande.id}/annuler`, {
+            motif: "Commande annulée par le restaurant.",
+        }, {
+            preserveScroll: true,
+            onError: (errors) => {
+                setErreur(Object.values(errors || {})[0] || "Impossible d'annuler la commande.");
+            },
+            onFinish: () => setChargement(false),
+        });
     };
 
     return (
@@ -46,6 +75,7 @@ export default function CommandeDetailsRestaurant() {
                 </header>
 
                 {flash?.success && <div className="rounded-2xl bg-jse-secondaire/10 px-4 py-3 text-xs font-semibold text-white">{flash.success}</div>}
+                {erreur && <div className="mt-3 rounded-2xl bg-red-500/10 px-4 py-3 text-xs font-semibold text-red-200">{erreur}</div>}
 
                 <section className="mt-2 rounded-[28px] bg-jse-principal p-5 text-white shadow-sm sm:p-6">
                     <div className="flex items-start justify-between gap-4">
@@ -56,7 +86,16 @@ export default function CommandeDetailsRestaurant() {
                         </div>
                         <span className="rounded-full bg-white/10 px-3 py-2 text-[10px] font-semibold">{commande?.statut?.libelle || "Inconnu"}</span>
                     </div>
-                    {action && <button type="button" onClick={changerStatut} className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-jse-secondaire text-xs font-semibold text-white transition hover:brightness-105"><Check size={17} />{action.label}</button>}
+                    {action && (
+                        <button type="button" disabled={chargement} onClick={changerStatut} className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-jse-secondaire text-xs font-semibold text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50">
+                            <Check size={17} />{chargement ? "Mise à jour..." : action.label}
+                        </button>
+                    )}
+                    {["EN_ATTENTE", "CONFIRMEE", "EN_PREPARATION"].includes(commande?.statut?.code) && (
+                        <button type="button" disabled={chargement} onClick={annulerCommande} className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-white/5 text-xs font-semibold text-red-200 ring-1 ring-white/10 disabled:opacity-50">
+                            <XCircle size={16} /> Annuler la commande
+                        </button>
+                    )}
                 </section>
 
                 <Section title="Client" icon={ClipboardList}>
