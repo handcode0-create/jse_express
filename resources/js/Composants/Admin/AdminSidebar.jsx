@@ -194,7 +194,7 @@ export default function AdminSidebar({ utilisateur }) {
                             <button
                                 type="button"
                                 onClick={deconnexion}
-                                className="mt-3 flex min-h-10 w-full items-center gap-3 rounded-2xl px-3 py-2.5 font-sans text-xs font-medium text-jse-theme-muted transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20"
+                                className="mt-3 flex min-h-10 w-full items-center gap-3 whitespace-nowrap rounded-2xl px-3 py-2.5 font-sans text-xs font-medium text-jse-theme-muted transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20"
                             >
                                 <LogOut size={15} aria-hidden="true" />
                                 Se déconnecter
