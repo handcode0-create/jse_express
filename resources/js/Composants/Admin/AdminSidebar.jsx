@@ -119,36 +119,36 @@ export default function AdminSidebar({ utilisateur }) {
     return (
         <>
             {/* Navigation desktop */}
-            <aside className="hidden border-r border-jse-theme-border bg-jse-theme-surface lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-64 lg:shrink-0">
-                <div className="flex h-full w-full flex-col p-4 sm:p-5">
+            <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:h-screen lg:w-[238px] lg:shrink-0 lg:overflow-y-auto border-r border-jse-theme-border bg-jse-theme-surface/90 backdrop-blur-xl">
+                <div className="flex min-h-full w-full flex-col px-4 py-7">
                     <div className="flex items-center justify-between gap-3">
                         <img
                             src="/assets/jse_logo.png?v=20261002"
                             alt="JSE Express"
-                            className="h-10 w-auto object-contain"
+                            className="h-11 w-auto object-contain"
                         />
                     </div>
 
                     <nav
-                        className="mt-8 space-y-6"
+                        className="mt-10 space-y-6"
                         aria-label="Navigation administration"
                     >
                         {sections.map((section) => (
                             <div key={section.label}>
-                                <p className="px-3 text-xs font-semibold uppercase tracking-[0.16em] text-jse-theme-muted">
+                                <p className="px-4 font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-jse-theme-muted">
                                     {section.label}
                                 </p>
-                                <div className="mt-2 space-y-1">
+                                <div className="mt-3 space-y-1.5">
                                     {section.items.map(
                                         ({ href, label, icon: Icon }) => (
                                             <Link
                                                 key={href}
                                                 href={href}
                                                 className={[
-                                                    "flex min-h-11 items-center gap-3 rounded-full px-4 text-sm font-medium transition-colors",
+                                                    "group flex min-h-11 w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium transition-all",
                                                     estActif(href)
-                                                        ? "bg-jse-secondaire/10 text-jse-principal dark:text-jse-secondaire"
-                                                        : "text-jse-theme-muted hover:bg-jse-secondaire/10 hover:text-jse-principal dark:hover:text-jse-secondaire",
+                                                        ? "bg-jse-secondaire/10 text-jse-secondaire"
+                                                        : "text-jse-theme-muted hover:bg-jse-theme-bg hover:text-jse-principal dark:hover:text-jse-secondaire",
                                                 ].join(" ")}
                                             >
                                                 <Icon
@@ -167,12 +167,15 @@ export default function AdminSidebar({ utilisateur }) {
                         ))}
                     </nav>
 
-                    <div className="mt-auto">
-                        <div className="mb-4 flex justify-end">
-                            <ThemeToggle />
+                    <div className="mt-auto px-3">
+                        <div className="mb-3 flex items-center justify-between rounded-2xl px-3 py-2">
+                            <span className="font-sans text-xs font-medium text-jse-theme-muted">
+                                Thème
+                            </span>
+                            <ThemeToggle compact />
                         </div>
 
-                        <div className="rounded-jse-moyen border border-jse-theme-border bg-jse-theme-surface-soft p-3">
+                        <div className="rounded-2xl bg-jse-theme-bg p-3.5">
                             <div className="flex items-center gap-3">
                                 <PhotoProfil
                                     user={utilisateur}
@@ -180,10 +183,10 @@ export default function AdminSidebar({ utilisateur }) {
                                     dark
                                 />
                                 <div className="min-w-0">
-                                    <p className="truncate text-xs font-semibold text-jse-theme-text">
+                                    <p className="truncate font-sans text-xs font-semibold text-jse-theme-text">
                                         {profilNom}
                                     </p>
-                                    <p className="mt-0.5 truncate text-xs text-jse-theme-muted">
+                                    <p className="mt-0.5 truncate font-sans text-[10px] text-jse-theme-muted">
                                         Administrateur
                                     </p>
                                 </div>
@@ -191,7 +194,7 @@ export default function AdminSidebar({ utilisateur }) {
                             <button
                                 type="button"
                                 onClick={deconnexion}
-                                className="mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-full border border-jse-theme-border bg-jse-theme-surface text-xs font-semibold text-jse-theme-text transition hover:border-jse-secondaire hover:text-jse-secondaire"
+                                className="mt-3 flex min-h-10 w-full items-center gap-3 rounded-2xl px-3 py-2.5 font-sans text-xs font-medium text-jse-theme-muted transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20"
                             >
                                 <LogOut size={15} aria-hidden="true" />
                                 Se déconnecter
