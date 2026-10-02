@@ -116,7 +116,8 @@ export default function AdminSidebar({ utilisateur }) {
         url === href || url.startsWith(href + "/");
 
     return (
-        <aside className="jse-client-sidebar fixed inset-y-0 left-0 z-50 hidden h-screen w-[238px] shrink-0 flex-col overflow-y-auto border-r border-jse-texte/5 bg-white/75 px-4 py-7 backdrop-blur-xl dark:border-white/8 dark:bg-[#101719]/90 lg:flex">
+        <>
+            <aside className="jse-client-sidebar fixed inset-y-0 left-0 z-50 hidden h-screen w-[238px] shrink-0 flex-col overflow-y-auto border-r border-jse-texte/5 bg-white/75 px-4 py-7 backdrop-blur-xl dark:border-white/8 dark:bg-[#101719]/90 lg:flex">
             <div className="px-4">
                 <img
                     src="/assets/jse_logo.png?v=20261002"
