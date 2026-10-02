@@ -47,7 +47,7 @@ export default function Inscription() {
     const [afficherMotDePasse, setAfficherMotDePasse] = useState(false);
     const [afficherConfirmation, setAfficherConfirmation] = useState(false);
 
-    const { data, setData, post, processing } = useForm({
+    const { data, setData, post, processing, clearErrors, setError } = useForm({
         role: "",
         nom: "",
         prenom: "",
@@ -106,15 +106,60 @@ export default function Inscription() {
         setEtape(erreurProfil ? 2 : 3);
     }, [errors]);
 
-    const modifier = (champ, valeur) => setData(champ, valeur);
+    const modifier = (champ, valeur) => {
+        setData(champ, valeur);
+        if (errors?.[champ]) clearErrors(champ);
+    };
+
+    const selectionnerRole = (role) => {
+        clearErrors();
+        setData("role", role);
+        setEtape(1);
+    };
 
     const continuer = () => {
-        if (etape === 1 && data.role) {
+        clearErrors();
+
+        if (etape === 1) {
+            if (!data.role) {
+                setError("role", "Veuillez sélectionner votre utilisation de JSE Express.");
+                return;
+            }
+
             setEtape(2);
             return;
         }
 
         if (etape === 2) {
+            if (data.role === "restaurant") {
+                const champs = [
+                    ["restaurant_nom", "Le nom du restaurant est obligatoire."],
+                    ["restaurant_telephone", "Le téléphone du restaurant est obligatoire."],
+                    ["restaurant_adresse", "L'adresse du restaurant est obligatoire."],
+                ];
+
+                const manquants = champs.filter(([champ]) => !String(data[champ] || "").trim());
+
+                if (manquants.length > 0) {
+                    manquants.forEach(([champ, message]) => setError(champ, message));
+                    return;
+                }
+            }
+
+            if (data.role === "livreur") {
+                const champs = [
+                    ["livreur_matricule", "Le matricule livreur est obligatoire."],
+                    ["livreur_disponibilite", "Veuillez indiquer votre disponibilité."],
+                ];
+
+                const manquants = champs.filter(([champ]) => !String(data[champ] || "").trim());
+
+                if (manquants.length > 0) {
+                    manquants.forEach(([champ, message]) => setError(champ, message));
+                    return;
+                }
+            }
+
             setEtape(3);
         }
     };
@@ -275,7 +320,7 @@ export default function Inscription() {
                                                 <button
                                                     key={role.value}
                                                     type="button"
-                                                    onClick={() => modifier("role", role.value)}
+                                                    onClick={() => selectionnerRole(role.value)}
                                                     className={
                                                         "group relative overflow-hidden rounded-2xl border text-left transition-all duration-300 " +
                                                         (active
