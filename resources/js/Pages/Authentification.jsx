@@ -287,6 +287,20 @@ export default function Authentification() {
                     </div>
                 )}
 
+                {afficherErreurs && !flash?.success && (
+                    <div className="fixed right-5 top-5 z-[100] w-[calc(100%-2.5rem)] max-w-sm animate-in slide-in-from-right-5 fade-in duration-300">
+                        <div className="flex items-start gap-3 rounded-2xl border border-red-500/20 bg-[#17100F] p-4 shadow-xl shadow-black/20">
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-300">
+                                <X size={20} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-sm font-semibold text-white">Vérifiez les informations</p>
+                                <p className="mt-1 text-xs leading-5 text-white/60">{erreurs[0]}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* =====================================================
                     FORMULAIRE
                 ====================================================== */}
