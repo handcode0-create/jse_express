@@ -1,5 +1,4 @@
 import React from "react";
-import { TrendingUp } from "lucide-react";
 
 export default function AdminStatCard({ label, value, icon: Icon, tone = "principal" }) {
     const tones = {
