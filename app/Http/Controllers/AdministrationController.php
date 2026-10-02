@@ -217,9 +217,48 @@ class AdministrationController extends Controller
     public function livraisons(Request $request): Response
     {
         $recherche=trim((string)$request->query('recherche',''));
-        $livraisons=Livraison::query()->with(['commande:id,reference','zone:id,nom','attributions'=>fn($q)=>$q->where('statut','active')->with('livreur:id,nom,prenom')->latest('id')])
+        $livraisons=Livraison::query()->with(['commande:id,reference','zone:id,nom','attributions'=>fn($q)=>$q->where('statut','active')->with('livreur:id,nom,prenom','livreur.profilLivreur:user_id,matricule')->latest('id')])
             ->when($recherche!=='' ,fn($q)=>$q->where(function($query)use($recherche){$query->whereHas('commande',fn($c)=>$c->where('reference','like','%'.$recherche.'%'))->orWhereHas('zone',fn($z)=>$z->where('nom','like','%'.$recherche.'%'))->orWhereHas('attributions.livreur',fn($u)=>$u->where('nom','like','%'.$recherche.'%')->orWhere('prenom','like','%'.$recherche.'%'));}))
-            ->latest('id')->limit(100)->get()->map(fn(Livraison $l)=>['id'=>$l->id,'reference'=>$l->commande?->reference,'zone'=>$l->zone?->nom,'statut'=>$l->statut,'mode_attribution'=>$l->mode_attribution,'livreur'=>$l->attributions->first()?->livreur ? trim($l->attributions->first()->livreur->prenom.' '.$l->attributions->first()->livreur->nom) : null,'matricule'=>$l->attributions->first()?->livreur?->profilLivreur?->matricule,'date_attribution'=>$l->date_attribution?Carbon::parse($l->date_attribution)->format('d/m/Y H:i'):null])->values();
+            ->latest('id')->limit(100)->get();
+
+        $activeLivreurIds=AttributionLivraison::query()
+            ->where('statut','active')
+            ->pluck('livreur_id');
+
+        $candidats=User::query()
+            ->where('role','livreur')
+            ->where('statut','actif')
+            ->whereHas('profilLivreur',fn($q)=>$q->where('disponibilite','disponible'))
+            ->whereNotIn('id',$activeLivreurIds)
+            ->with('profilLivreur:user_id,zone_id,matricule')
+            ->orderBy('prenom')
+            ->orderBy('nom')
+            ->get();
+
+        $livraisons=$livraisons->map(function(Livraison $l)use($candidats){
+            $active=$l->attributions->first();
+            $candidatsZone=$l->statut==='en_cours'||$l->statut==='attribuee'||$l->statut==='en_attente'
+                ? $candidats->filter(fn(User $u)=>(int)$u->profilLivreur?->zone_id===(int)$l->zone_id)->map(fn(User $u)=>[
+                    'id'=>$u->id,
+                    'nom'=>trim($u->prenom.' '.$u->nom),
+                    'matricule'=>$u->profilLivreur?->matricule,
+                ])->values()
+                : collect();
+
+            return [
+                'id'=>$l->id,
+                'reference'=>$l->commande?->reference,
+                'zone'=>$l->zone?->nom,
+                'zone_id'=>$l->zone_id,
+                'statut'=>$l->statut,
+                'mode_attribution'=>$l->mode_attribution,
+                'livreur'=>$active?->livreur ? trim($active->livreur->prenom.' '.$active->livreur->nom) : null,
+                'matricule'=>$active?->livreur?->profilLivreur?->matricule,
+                'date_attribution'=>$l->date_attribution?Carbon::parse($l->date_attribution)->format('d/m/Y H:i'):null,
+                'candidats'=>$candidatsZone,
+            ];
+        })->values();
+
         return Inertia::render('Admin/Livraisons',['utilisateur'=>$request->user(),'livraisons'=>$livraisons,'recherche'=>$recherche]);
     }
 

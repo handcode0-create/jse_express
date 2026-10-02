@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, usePage } from "@inertiajs/react";
+import { Link, router, usePage } from "@inertiajs/react";
 import {
     LayoutDashboard,
     ShoppingBag,
@@ -11,6 +11,7 @@ import {
     Bell,
     MoreHorizontal,
     X,
+    LogOut,
 } from "lucide-react";
 import PhotoProfil from "../Profil/PhotoProfil";
 import ThemeToggle from "../Interface/ThemeToggle";
@@ -104,7 +105,16 @@ export default function AdminSidebar({ utilisateur }) {
     const estActif = (href) =>
         href !== "#" && (url === href || url.startsWith(href + "/"));
 
+    const pageCourante =
+        sections
+            .flatMap((section) => section.items)
+            .find((item) => estActif(item.href))?.label || "Administration";
+
     const fermerMenu = () => setMenuOuvert(false);
+
+    const deconnexion = () => {
+        router.post("/deconnexion");
+    };
 
     return (
         <>
@@ -178,6 +188,14 @@ export default function AdminSidebar({ utilisateur }) {
                                     </p>
                                 </div>
                             </div>
+                            <button
+                                type="button"
+                                onClick={deconnexion}
+                                className="mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-full border border-jse-theme-border bg-jse-theme-surface text-xs font-semibold text-jse-theme-text transition hover:border-jse-secondaire hover:text-jse-secondaire"
+                            >
+                                <LogOut size={15} aria-hidden="true" />
+                                Se déconnecter
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -189,13 +207,16 @@ export default function AdminSidebar({ utilisateur }) {
                     <Link
                         href="/administration/tableau-de-bord"
                         aria-label="Retour au tableau de bord"
-                        className="flex items-center"
+                        className="flex min-w-0 items-center gap-3"
                     >
                         <img
                             src="/assets/jse_logo.png?v=20261002"
                             alt="JSE Express"
-                            className="h-9 w-auto object-contain"
+                            className="h-9 w-auto shrink-0 object-contain"
                         />
+                        <span className="min-w-0 truncate text-sm font-semibold text-jse-theme-text">
+                            {pageCourante}
+                        </span>
                     </Link>
 
                     <div className="flex items-center gap-2">
@@ -277,7 +298,7 @@ export default function AdminSidebar({ utilisateur }) {
                                 ))}
                         </nav>
 
-                        <div className="mt-5 rounded-2xl border border-jse-theme-border bg-jse-theme-surface-soft p-3.5">
+                        <div className="mt-5 rounded-jse-moyen border border-jse-theme-border bg-jse-theme-surface-soft p-3">
                             <div className="flex items-center gap-3">
                                 <PhotoProfil
                                     user={utilisateur}
@@ -293,6 +314,14 @@ export default function AdminSidebar({ utilisateur }) {
                                     </p>
                                 </div>
                             </div>
+                            <button
+                                type="button"
+                                onClick={deconnexion}
+                                className="mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-full border border-jse-theme-border bg-jse-theme-surface text-xs font-semibold text-jse-theme-text transition hover:border-jse-secondaire hover:text-jse-secondaire"
+                            >
+                                <LogOut size={15} aria-hidden="true" />
+                                Se déconnecter
+                            </button>
                         </div>
                     </div>
                 </div>
