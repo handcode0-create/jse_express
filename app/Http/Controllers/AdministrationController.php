@@ -73,7 +73,7 @@ class AdministrationController extends Controller
                 ->with([
                     'commande.zone:id,nom',
                     'commande.statutCommande:id,code,libelle',
-                    'attributions' => fn ($q) => $q->where('statut', 'active')->with('livreur:id,nom,prenom'),
+                    'attributions' => fn ($q) => $q->where('statut', 'active')->with('livreur:id,nom,prenom', 'livreur.profilLivreur:user_id,matricule'),
                 ])
                 ->whereIn('statut', ['en_attente', 'attribuee', 'en_cours'])
                 ->whereHas('commande.statutCommande', fn ($q) => $q->whereNotIn('code', ['LIVREE', 'ANNULEE']))
