@@ -119,7 +119,7 @@ export default function AdminSidebar({ utilisateur }) {
 
     return (
         <>
-            <aside className="jse-client-sidebar fixed inset-y-0 left-0 z-50 hidden h-screen w-[238px] shrink-0 flex-col overflow-y-auto border-r border-jse-texte/5 bg-white/75 px-4 py-7 backdrop-blur-xl dark:border-white/8 dark:bg-[#101719]/90 lg:flex">
+            <aside className="jse-admin-sidebar fixed inset-y-0 left-0 z-50 hidden h-screen w-[238px] shrink-0 flex-col overflow-y-auto border-r border-jse-texte/5 bg-white/75 px-4 py-7 backdrop-blur-xl dark:border-white/8 dark:bg-[#101719]/90 lg:flex">
                 <div className="px-4">
                     <img
                         src="/assets/jse_logo.png"
@@ -129,7 +129,7 @@ export default function AdminSidebar({ utilisateur }) {
                 </div>
 
                 <div className="mt-10">
-                    <p className="px-4 font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-jse-texte/30 dark:text-white/30">
+                    <p className="jse-admin-label px-4 font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-jse-texte/30 dark:text-white/30">
                         Administration
                     </p>
 
@@ -158,7 +158,7 @@ export default function AdminSidebar({ utilisateur }) {
                 </div>
 
                 <div className="mt-auto px-3 pt-6">
-                    <div className="mb-3 rounded-2xl bg-jse-fond p-3.5 dark:bg-white/[0.035]">
+                    <div className="jse-admin-profile mb-3 rounded-2xl bg-jse-fond p-3.5 dark:bg-white/[0.035]">
                         <div className="flex items-center gap-3">
                             <PhotoProfil
                                 user={utilisateurActuel}
