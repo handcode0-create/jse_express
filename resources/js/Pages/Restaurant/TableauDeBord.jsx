@@ -961,7 +961,7 @@ export default function TableauDeBord() {
                                 <button disabled={chargement} className="h-11 w-full rounded-xl bg-jse-accent text-[10px] font-semibold disabled:opacity-50">{chargement ? "Enregistrement..." : "Enregistrer les modifications"}</button>
                             </form>
                         ) : modal === "categorie" ? (
-                            <form onSubmit={creerCategorie className="mt-6 space-y-4">
+                            <form onSubmit={creerCategorie} className="mt-6 space-y-4">
                                 <ChampDark value={categorie.nom} onChange={(e) => setCategorie({ ...categorie, nom: e.target.value })} placeholder="Nom de la catégorie" required />
                                 <textarea value={categorie.description} onChange={(e) => setCategorie({ ...categorie, description: e.target.value })} placeholder="Description (facultatif)" className="min-h-24 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-jse-accent" />
                                 <button disabled={chargement} className="h-11 w-full rounded-xl bg-jse-accent text-[10px] font-semibold disabled:opacity-50">Créer la catégorie</button>
