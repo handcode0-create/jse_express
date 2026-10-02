@@ -2,36 +2,33 @@ import { router, useForm, usePage } from "@inertiajs/react";
 import { useEffect, useMemo, useState } from "react";
 import {
     ArrowLeft,
-    Bike,
-    Building2,
     Check,
     ChevronLeft,
     ChevronRight,
     Eye,
     EyeOff,
     MapPin,
-    ShoppingBag,
-    UserRound,
+    ShieldCheck,
 } from "lucide-react";
 
 const roles = [
     {
         value: "client",
-        title: "Je veux commander",
-        description: "Je souhaite découvrir les restaurants et me faire livrer.",
-        icon: ShoppingBag,
+        title: "Commander mes plats",
+        description: "Découvrir les restaurants et me faire livrer.",
+        image: "/assets/inscription/shopping_bag.png",
     },
     {
         value: "restaurant",
-        title: "Je gère un restaurant",
-        description: "Je souhaite proposer mes plats et recevoir des commandes.",
-        icon: Building2,
+        title: "Gérer mon restaurant",
+        description: "Gérer mes plats, menus et commandes.",
+        image: "/assets/inscription/resto.png",
     },
     {
         value: "livreur",
-        title: "Je veux livrer",
-        description: "Je souhaite effectuer les livraisons JSE Express.",
-        icon: Bike,
+        title: "Livreur indépendant",
+        description: "Effectuer les livraisons JSE Express.",
+        image: "/assets/inscription/livreur.png",
     },
 ];
 
@@ -66,24 +63,20 @@ export default function Inscription() {
     });
 
     const erreurs = useMemo(() => Object.values(errors || {}), [errors]);
+    const roleSelectionne = roles.find((role) => role.value === data.role);
 
     useEffect(() => {
-        if (Object.keys(errors || {}).length > 0) {
-            const champsProfil = [
-                "restaurant_",
-                "livreur_",
-            ];
-            const aErreurProfil = Object.keys(errors).some((key) =>
-                champsProfil.some((prefix) => key.startsWith(prefix)),
-            );
-            if (aErreurProfil) setEtape(2);
-            else setEtape(3);
-        }
+        if (!Object.keys(errors || {}).length) return;
+
+        const profilPrefixes = ["restaurant_", "livreur_"];
+        const erreurProfil = Object.keys(errors).some((key) =>
+            profilPrefixes.some((prefix) => key.startsWith(prefix)),
+        );
+
+        setEtape(erreurProfil ? 2 : 3);
     }, [errors]);
 
     const modifier = (champ, valeur) => setData(champ, valeur);
-
-    const roleSelectionne = roles.find((role) => role.value === data.role);
 
     const continuer = () => {
         if (etape === 1 && data.role) setEtape(2);
@@ -92,102 +85,144 @@ export default function Inscription() {
 
     const soumettre = (event) => {
         event.preventDefault();
-        post("/inscription", {
-            preserveScroll: true,
-        });
+        post("/inscription", { preserveScroll: true });
     };
 
+    const labelsEtapes = ["Votre utilisation", "Votre profil", "Vos identifiants"];
+
     return (
-        <main className="relative min-h-screen overflow-hidden bg-[#07110F] font-sans text-white">\n            <img src="/assets/login_page_fond.png" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 size-full object-cover object-center" />\n            <div className="pointer-events-none absolute inset-0 bg-[#07110F]/78" />\n            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#123C32]/75 via-[#07110F]/70 to-[#07110F]/90" />\n            <div className="pointer-events-none absolute -left-32 top-20 size-96 rounded-full bg-jse-secondaire/15 blur-3xl" />\n            <div className="pointer-events-none absolute -bottom-40 right-0 size-[32rem] rounded-full bg-jse-accent/10 blur-3xl" />
-            <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-5 sm:px-8 lg:px-10">
-                <header className="flex items-center justify-between">
+        <main className="relative min-h-screen overflow-x-hidden bg-[#07110F] font-sans text-white">
+            <img
+                src="/assets/login_page_fond.png"
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none fixed inset-0 size-full object-cover object-center opacity-30"
+            />
+            <div className="pointer-events-none fixed inset-0 bg-[#07110F]/80" />
+            <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_45%,rgba(69,185,119,.22),transparent_30%),radial-gradient(circle_at_80%_60%,rgba(242,140,40,.08),transparent_28%)]" />
+
+            <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1240px] flex-col px-4 py-4 sm:px-6 lg:px-8">
+                <header className="flex h-14 shrink-0 items-center justify-between">
                     <button
                         type="button"
                         onClick={() => router.visit("/authentification")}
-                        className="group flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-white/65 backdrop-blur-xl transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                        className="group flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-4 py-2.5 text-xs font-semibold text-white/60 backdrop-blur-xl transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
                     >
-                        <ArrowLeft size={18} />
+                        <ArrowLeft size={15} className="transition-transform group-hover:-translate-x-0.5" />
                         Retour
                     </button>
 
                     <img
                         src="/assets/jse_logo.png"
                         alt="JSE Express"
-                        className="h-11 w-auto object-contain"
+                        className="h-10 w-auto object-contain"
                     />
                 </header>
 
-                <section className="flex flex-1 items-center justify-center py-10 lg:py-14">
-                    <div className="w-full max-w-5xl">
-                        <aside className="relative hidden min-h-[620px] overflow-hidden rounded-[2rem] border border-white/10 bg-[#123C32]/55 p-9 text-white shadow-2xl shadow-black/30 backdrop-blur-2xl lg:flex lg:flex-col lg:justify-between">
-                            <div>
-                                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-jse-secondaire">
-                                    JSE Express
+                <section className="flex flex-1 items-center justify-center py-5 sm:py-8">
+                    <div className="grid w-full max-w-[1080px] overflow-hidden rounded-[28px] border border-white/10 bg-[#0A1211]/90 shadow-[0_30px_100px_rgba(0,0,0,.45)] backdrop-blur-2xl lg:grid-cols-[.78fr_1.22fr]">
+                        <aside className="relative hidden min-h-[650px] overflow-hidden border-r border-white/10 bg-[#123C32]/90 p-8 lg:flex lg:flex-col lg:justify-between">
+                            <div className="pointer-events-none absolute -right-28 -top-28 size-72 rounded-full bg-jse-secondaire/20 blur-3xl" />
+                            <div className="pointer-events-none absolute -bottom-32 -left-24 size-80 rounded-full bg-jse-accent/10 blur-3xl" />
+
+                            <div className="relative">
+                                <p className="text-[11px] font-bold uppercase tracking-[.24em] text-jse-secondaire">
+                                    JSE EXPRESS
                                 </p>
-                                <h1 className="mt-5 font-against text-4xl leading-tight xl:text-5xl">
-                                    Créons votre
+                                <h1 className="mt-5 max-w-xs font-against text-[48px] leading-[.92] text-[#FFF7E8] xl:text-[56px]">
+                                    Créons
+                                    <br />
+                                    votre
                                     <br />
                                     espace.
                                 </h1>
-                                <p className="mt-5 max-w-sm text-sm leading-7 text-white/65">
-                                    Quelques questions suffisent pour créer le
-                                    profil correspondant à votre utilisation de
-                                    JSE Express.
+                                <p className="mt-7 max-w-xs text-sm leading-6 text-white/55">
+                                    Quelques questions suffisent pour créer le profil
+                                    correspondant à votre utilisation de JSE Express.
                                 </p>
                             </div>
 
-                            <div className="space-y-4">
-                                {[1, 2, 3].map((numero) => (
-                                    <div key={numero} className="flex items-center gap-3">
-                                        <span
-                                            className={
-                                                "flex size-9 items-center justify-center rounded-full text-xs font-bold " +
-                                                (etape >= numero
-                                                    ? "bg-jse-secondaire text-jse-principal"
-                                                    : "bg-white/10 text-white/40")
-                                            }
-                                        >
-                                            {etape > numero ? <Check size={16} /> : numero}
-                                        </span>
-                                        <span className="text-sm text-white/60">
-                                            {numero === 1
-                                                ? "Votre utilisation"
-                                                : numero === 2
-                                                  ? "Votre profil"
-                                                  : "Vos identifiants"}
-                                        </span>
-                                    </div>
-                                ))}
+                            <div className="relative">
+                                <div className="mb-7 h-px w-full bg-white/10" />
+                                <div className="space-y-4">
+                                    {labelsEtapes.map((label, index) => {
+                                        const numero = index + 1;
+                                        const active = etape === numero;
+                                        const complete = etape > numero;
+
+                                        return (
+                                            <div key={label} className="flex items-center gap-3">
+                                                <span
+                                                    className={
+                                                        "flex size-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold transition " +
+                                                        (active
+                                                            ? "bg-jse-secondaire text-jse-principal shadow-lg shadow-jse-secondaire/25"
+                                                            : complete
+                                                              ? "bg-jse-secondaire/20 text-jse-secondaire"
+                                                              : "bg-white/[0.08] text-white/35")
+                                                    }
+                                                >
+                                                    {complete ? <Check size={14} /> : numero}
+                                                </span>
+                                                <span
+                                                    className={
+                                                        "text-xs transition " +
+                                                        (active ? "font-semibold text-white" : "text-white/45")
+                                                    }
+                                                >
+                                                    {label}
+                                                </span>
+                                                {active && (
+                                                    <span className="ml-auto h-px w-12 bg-gradient-to-r from-jse-secondaire to-transparent" />
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </aside>
 
-                        <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#0B1513]/80 p-6 shadow-2xl shadow-black/30 backdrop-blur-2xl sm:p-9">
-                            <div className="mb-8">
-                                <p className="text-sm font-semibold text-jse-secondaire">
-                                    Étape {etape} sur 3
-                                </p>
-                                <h2 className="mt-2 font-against text-3xl leading-tight sm:text-4xl">
-                                    {etape === 1
-                                        ? "Comment allez-vous utiliser JSE ?"
-                                        : etape === 2
-                                          ? roleSelectionne?.value === "restaurant"
-                                              ? "Parlez-nous de votre restaurant"
-                                              : roleSelectionne?.value === "livreur"
-                                                ? "Complétons votre profil livreur"
-                                                : "Votre profil client"
-                                          : "Créons vos identifiants"}
-                                </h2>
-                                <p className="mt-3 text-sm leading-6 text-white/45">
-                                    {etape === 1
-                                        ? "Votre réponse détermine le profil créé dans JSE Express."
-                                        : etape === 2
-                                          ? "Ces informations sont enregistrées dans le profil correspondant à votre rôle."
-                                          : "Ces informations permettront de sécuriser votre compte."}
-                                </p>
+                        <div className="min-w-0 p-5 sm:p-8 lg:p-9">
+                            <div className="mb-7 flex items-start justify-between gap-4">
+                                <div>
+                                    <p className="text-[11px] font-bold uppercase tracking-[.18em] text-jse-secondaire">
+                                        Étape {etape} sur 3
+                                    </p>
+                                    <h2 className="mt-2 max-w-2xl font-against text-[32px] leading-[1.02] text-[#FFF7E8] sm:text-[38px]">
+                                        {etape === 1
+                                            ? "Comment utiliserez-vous JSE Express ?"
+                                            : etape === 2
+                                              ? roleSelectionne?.value === "restaurant"
+                                                  ? "Parlons de votre restaurant."
+                                                  : roleSelectionne?.value === "livreur"
+                                                    ? "Complétons votre profil."
+                                                    : "Votre profil client."
+                                              : "Créons vos identifiants."}
+                                    </h2>
+                                    <p className="mt-3 max-w-xl text-xs leading-5 text-white/40 sm:text-sm">
+                                        {etape === 1
+                                            ? "Votre réponse détermine le profil créé dans JSE Express."
+                                            : etape === 2
+                                              ? "Ces informations complètent le profil correspondant à votre activité."
+                                              : "Dernière étape : renseignez les informations nécessaires à votre compte."}
+                                    </p>
+                                </div>
+
+                                <div className="flex shrink-0 items-center gap-1.5 lg:hidden">
+                                    {[1, 2, 3].map((numero) => (
+                                        <span
+                                            key={numero}
+                                            className={
+                                                "size-2 rounded-full transition " +
+                                                (etape >= numero ? "bg-jse-secondaire" : "bg-white/15")
+                                            }
+                                        />
+                                    ))}
+                                </div>
                             </div>
 
                             {erreurs.length > 0 && (
-                                <div className="mb-6 rounded-2xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-600">
+                                <div className="mb-5 rounded-xl border border-red-400/20 bg-red-400/5 p-3 text-xs leading-5 text-red-300">
                                     {erreurs.map((erreur, index) => (
                                         <p key={index}>{erreur}</p>
                                     ))}
@@ -196,9 +231,8 @@ export default function Inscription() {
 
                             <form onSubmit={soumettre}>
                                 {etape === 1 && (
-                                    <div className="grid gap-3 sm:grid-cols-3">
+                                    <div className="grid gap-3 md:grid-cols-3">
                                         {roles.map((role) => {
-                                            const Icon = role.icon;
                                             const active = data.role === role.value;
 
                                             return (
@@ -207,22 +241,42 @@ export default function Inscription() {
                                                     type="button"
                                                     onClick={() => modifier("role", role.value)}
                                                     className={
-                                                        "group relative min-h-[190px] rounded-2xl border p-5 text-left transition duration-200 " +
+                                                        "group relative overflow-hidden rounded-2xl border text-left transition-all duration-300 " +
                                                         (active
-                                                            ? "border-jse-secondaire/70 bg-jse-secondaire/[0.09] shadow-lg shadow-jse-secondaire/5"
-                                                            : "border-white/10 bg-white/[0.025] hover:border-white/20 hover:bg-white/[0.05]")
+                                                            ? "border-jse-secondaire/80 bg-jse-secondaire/[0.10] shadow-[0_0_28px_rgba(69,185,119,.16)]"
+                                                            : "border-white/10 bg-white/[0.025] hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.05]")
                                                     }
                                                 >
-                                                    <span className={"flex size-12 shrink-0 items-center justify-center rounded-2xl " + (active ? "bg-jse-secondaire text-jse-principal" : "bg-jse-principal/5 text-jse-principal")}>
-                                                        <Icon size={21} />
-                                                    </span>
-                                                    <span className="min-w-0 flex-1">
-                                                        <span className="block text-sm font-bold">{role.title}</span>
-                                                        <span className="mt-2 block text-xs leading-5 text-white/40">{role.description}</span>
-                                                    </span>
-                                                    <span className={"absolute right-4 top-4 flex size-5 items-center justify-center rounded-full border " + (active ? "border-jse-secondaire bg-jse-secondaire text-jse-principal" : "border-jse-texte/15")}>
-                                                        {active && <Check size={14} />}
-                                                    </span>
+                                                    <div className="relative flex h-[145px] items-end justify-center overflow-hidden bg-gradient-to-b from-white/[0.03] to-transparent px-3 pt-3">
+                                                        <img
+                                                            src={role.image}
+                                                            alt=""
+                                                            className={
+                                                                "h-full w-full object-contain transition duration-500 " +
+                                                                (active ? "scale-105" : "group-hover:scale-105")
+                                                            }
+                                                        />
+                                                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#0A1211] to-transparent" />
+                                                    </div>
+
+                                                    <div className="relative px-4 pb-4 pt-2">
+                                                        <span
+                                                            className={
+                                                                "absolute right-4 top-2 flex size-5 items-center justify-center rounded-full border transition " +
+                                                                (active
+                                                                    ? "border-jse-secondaire bg-jse-secondaire text-jse-principal"
+                                                                    : "border-white/15 bg-black/10")
+                                                            }
+                                                        >
+                                                            {active && <Check size={12} />}
+                                                        </span>
+                                                        <p className="pr-7 text-sm font-bold text-white">
+                                                            {role.title}
+                                                        </p>
+                                                        <p className="mt-1.5 text-[11px] leading-4 text-white/40">
+                                                            {role.description}
+                                                        </p>
+                                                    </div>
                                                 </button>
                                             );
                                         })}
@@ -230,30 +284,39 @@ export default function Inscription() {
                                 )}
 
                                 {etape === 2 && (
-                                    <div className="space-y-5">
+                                    <div className="space-y-4">
                                         {data.role === "client" && (
-                                            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm leading-6 text-white/45">
-                                                Votre profil client sera créé à partir de vos informations personnelles. Les adresses de livraison pourront être ajoutées ensuite depuis votre espace.
+                                            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                                                <div className="flex gap-3">
+                                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-jse-secondaire/10 text-jse-secondaire">
+                                                        <ShieldCheck size={17} />
+                                                    </div>
+                                                    <p className="text-xs leading-5 text-white/45">
+                                                        Votre profil client sera créé à partir de vos informations personnelles. Les adresses de livraison pourront être ajoutées depuis votre espace.
+                                                    </p>
+                                                </div>
                                             </div>
                                         )}
 
                                         {data.role === "restaurant" && (
-                                            <>
-                                                <Champ label="Nom du restaurant" value={data.restaurant_nom} onChange={(v) => modifier("restaurant_nom", v)} placeholder="Ex. Restaurant..." />
-                                                <Champ label="Téléphone du restaurant" value={data.restaurant_telephone} onChange={(v) => modifier("restaurant_telephone", v)} placeholder="Votre numéro professionnel" type="tel" />
+                                            <div className="grid gap-4 sm:grid-cols-2">
+                                                <Champ label="Nom du restaurant" value={data.restaurant_nom} onChange={(v) => modifier("restaurant_nom", v)} placeholder="Nom du restaurant" />
+                                                <Champ label="Téléphone du restaurant" value={data.restaurant_telephone} onChange={(v) => modifier("restaurant_telephone", v)} placeholder="Numéro professionnel" type="tel" />
                                                 <Champ label="Adresse du restaurant" value={data.restaurant_adresse} onChange={(v) => modifier("restaurant_adresse", v)} placeholder="Adresse du restaurant" />
-                                                <Champ label="Description" value={data.restaurant_description} onChange={(v) => modifier("restaurant_description", v)} placeholder="Présentez brièvement votre restaurant" textarea />
                                                 <Select label="Zone du restaurant" value={data.restaurant_zone_id} onChange={(v) => modifier("restaurant_zone_id", v)} zones={zones} />
-                                            </>
+                                                <div className="sm:col-span-2">
+                                                    <Champ label="Description" value={data.restaurant_description} onChange={(v) => modifier("restaurant_description", v)} placeholder="Présentez brièvement votre restaurant" textarea />
+                                                </div>
+                                            </div>
                                         )}
 
                                         {data.role === "livreur" && (
-                                            <>
+                                            <div className="grid gap-4 sm:grid-cols-2">
                                                 <Champ label="Matricule livreur" value={data.livreur_matricule} onChange={(v) => modifier("livreur_matricule", v)} placeholder="Votre matricule" />
                                                 <Select label="Zone d'activité" value={data.livreur_zone_id} onChange={(v) => modifier("livreur_zone_id", v)} zones={zones} />
                                                 <div>
                                                     <label className="mb-2 block text-xs font-semibold text-white/70">Disponibilité</label>
-                                                    <div className="grid grid-cols-2 gap-3">
+                                                    <div className="grid grid-cols-2 gap-2">
                                                         {[
                                                             ["disponible", "Disponible"],
                                                             ["indisponible", "Indisponible"],
@@ -262,7 +325,12 @@ export default function Inscription() {
                                                                 key={value}
                                                                 type="button"
                                                                 onClick={() => modifier("livreur_disponibilite", value)}
-                                                                className={"rounded-2xl border px-4 py-3 text-sm font-semibold transition " + (data.livreur_disponibilite === value ? "border-jse-secondaire/60 bg-jse-secondaire/10 text-jse-secondaire" : "border-white/10 bg-white/[0.025] text-white/45 hover:bg-white/[0.05]")}
+                                                                className={
+                                                                    "h-12 rounded-xl border text-xs font-semibold transition " +
+                                                                    (data.livreur_disponibilite === value
+                                                                        ? "border-jse-secondaire/60 bg-jse-secondaire/10 text-jse-secondaire"
+                                                                        : "border-white/10 bg-white/[0.025] text-white/45 hover:bg-white/[0.05]")
+                                                                }
                                                             >
                                                                 {label}
                                                             </button>
@@ -270,36 +338,45 @@ export default function Inscription() {
                                                     </div>
                                                 </div>
                                                 <Champ label="Téléphone secondaire" value={data.livreur_telephone_secondaire} onChange={(v) => modifier("livreur_telephone_secondaire", v)} placeholder="Facultatif" type="tel" />
-                                            </>
+                                            </div>
                                         )}
                                     </div>
                                 )}
 
                                 {etape === 3 && (
-                                    <div className="space-y-5">
-                                        <div className="grid gap-5 sm:grid-cols-2">
+                                    <div className="space-y-4">
+                                        <div className="grid gap-4 sm:grid-cols-2">
                                             <Champ label="Prénom" value={data.prenom} onChange={(v) => modifier("prenom", v)} placeholder="Votre prénom" />
                                             <Champ label="Nom" value={data.nom} onChange={(v) => modifier("nom", v)} placeholder="Votre nom" />
                                         </div>
-                                        <Champ label="Téléphone" value={data.telephone} onChange={(v) => modifier("telephone", v)} placeholder="Votre numéro" type="tel" />
-                                        <Champ label="E-mail" value={data.email} onChange={(v) => modifier("email", v)} placeholder="Facultatif" type="email" />
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <Champ label="Téléphone" value={data.telephone} onChange={(v) => modifier("telephone", v)} placeholder="Votre numéro" type="tel" />
+                                            <Champ label="E-mail" value={data.email} onChange={(v) => modifier("email", v)} placeholder="Facultatif" type="email" />
+                                        </div>
                                         <PasswordChamp label="Mot de passe" value={data.mot_de_passe} onChange={(v) => modifier("mot_de_passe", v)} visible={afficherMotDePasse} toggle={() => setAfficherMotDePasse(!afficherMotDePasse)} />
                                         <PasswordChamp label="Confirmer le mot de passe" value={data.confirmation_mot_de_passe} onChange={(v) => modifier("confirmation_mot_de_passe", v)} visible={afficherConfirmation} toggle={() => setAfficherConfirmation(!afficherConfirmation)} />
-                                        <label className="flex items-start gap-3 rounded-2xl bg-jse-principal/5 p-4 text-xs leading-5 text-jse-texte/55">
-                                            <input type="checkbox" checked={data.consentement} onChange={(e) => modifier("consentement", e.target.checked)} className="mt-1 size-4 accent-jse-secondaire" />
-                                            <span>J’accepte la politique de confidentialité et consens au traitement de mes données personnelles par JSE Express.</span>
+                                        <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.025] p-4 text-xs leading-5 text-white/45">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.consentement}
+                                                onChange={(event) => modifier("consentement", event.target.checked)}
+                                                className="mt-1 size-4 accent-jse-secondaire"
+                                            />
+                                            <span>
+                                                J’accepte la politique de confidentialité et consens au traitement de mes données personnelles par JSE Express.
+                                            </span>
                                         </label>
                                     </div>
                                 )}
 
-                                <div className="mt-8 flex items-center justify-between gap-3">
+                                <div className="mt-7 flex items-center justify-between gap-3 border-t border-white/10 pt-5">
                                     <button
                                         type="button"
                                         onClick={() => setEtape((value) => Math.max(1, value - 1))}
                                         disabled={etape === 1}
-                                        className="flex h-11 items-center gap-2 rounded-full border border-white/10 bg-white/[0.025] px-5 text-sm font-semibold text-white/55 transition hover:bg-white/[0.06] hover:text-white disabled:pointer-events-none disabled:opacity-25"
+                                        className="flex h-10 items-center gap-2 rounded-full border border-white/10 bg-white/[0.025] px-4 text-xs font-semibold text-white/45 transition hover:bg-white/[0.06] hover:text-white disabled:pointer-events-none disabled:opacity-20"
                                     >
-                                        <ChevronLeft size={18} />
+                                        <ChevronLeft size={16} />
                                         Retour
                                     </button>
 
@@ -308,19 +385,19 @@ export default function Inscription() {
                                             type="button"
                                             onClick={continuer}
                                             disabled={etape === 1 && !data.role}
-                                            className="flex h-11 items-center gap-2 rounded-full bg-jse-secondaire px-6 text-sm font-bold text-jse-principal transition hover:brightness-105 disabled:pointer-events-none disabled:opacity-35"
+                                            className="flex h-10 items-center gap-2 rounded-full bg-jse-secondaire px-5 text-xs font-bold text-jse-principal shadow-lg shadow-jse-secondaire/15 transition hover:brightness-105 disabled:pointer-events-none disabled:opacity-30"
                                         >
                                             Continuer
-                                            <ChevronRight size={18} />
+                                            <ChevronRight size={16} />
                                         </button>
                                     ) : (
                                         <button
                                             type="submit"
                                             disabled={processing}
-                                            className="flex h-11 items-center gap-2 rounded-full bg-jse-secondaire px-6 text-sm font-bold text-jse-principal transition hover:brightness-105 disabled:opacity-50"
+                                            className="flex h-10 items-center gap-2 rounded-full bg-jse-secondaire px-5 text-xs font-bold text-jse-principal shadow-lg shadow-jse-secondaire/15 transition hover:brightness-105 disabled:opacity-50"
                                         >
                                             {processing ? "Création..." : "Créer mon compte"}
-                                            <Check size={18} />
+                                            <Check size={16} />
                                         </button>
                                     )}
                                 </div>
@@ -336,11 +413,23 @@ export default function Inscription() {
 function Champ({ label, value, onChange, placeholder, type = "text", textarea = false }) {
     return (
         <div>
-            <label className="mb-2 block text-sm font-semibold">{label}</label>
+            <label className="mb-2 block text-xs font-semibold text-white/70">{label}</label>
             {textarea ? (
-                <textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} rows={4} className={inputClass + " h-auto py-3 resize-none"} />
+                <textarea
+                    value={value}
+                    onChange={(event) => onChange(event.target.value)}
+                    placeholder={placeholder}
+                    rows={3}
+                    className={inputClass + " h-auto resize-none py-3"}
+                />
             ) : (
-                <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className={inputClass} />
+                <input
+                    type={type}
+                    value={value}
+                    onChange={(event) => onChange(event.target.value)}
+                    placeholder={placeholder}
+                    className={inputClass}
+                />
             )}
         </div>
     );
@@ -349,12 +438,23 @@ function Champ({ label, value, onChange, placeholder, type = "text", textarea = 
 function Select({ label, value, onChange, zones }) {
     return (
         <div>
-            <label className="mb-2 block text-sm font-semibold">{label}</label>
+            <label className="mb-2 block text-xs font-semibold text-white/70">{label}</label>
             <div className="relative">
-                <MapPin size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
-                <select value={value} onChange={(e) => onChange(e.target.value)} className={inputClass + " appearance-none pl-11"}>
+                <MapPin
+                    size={17}
+                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/30"
+                />
+                <select
+                    value={value}
+                    onChange={(event) => onChange(event.target.value)}
+                    className={inputClass + " appearance-none pl-11"}
+                >
                     <option value="">Sélectionner une zone</option>
-                    {zones.map((zone) => <option key={zone.id} value={zone.id}>{zone.nom}</option>)}
+                    {zones.map((zone) => (
+                        <option key={zone.id} value={zone.id}>
+                            {zone.nom}
+                        </option>
+                    ))}
                 </select>
             </div>
         </div>
@@ -364,11 +464,21 @@ function Select({ label, value, onChange, zones }) {
 function PasswordChamp({ label, value, onChange, visible, toggle }) {
     return (
         <div>
-            <label className="mb-2 block text-sm font-semibold">{label}</label>
+            <label className="mb-2 block text-xs font-semibold text-white/70">{label}</label>
             <div className="relative">
-                <input type={visible ? "text" : "password"} value={value} onChange={(e) => onChange(e.target.value)} placeholder="8 caractères minimum" className={inputClass + " pr-12"} />
-                <button type="button" onClick={toggle} className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-white/35 transition hover:bg-white/5 hover:text-white">
-                    {visible ? <EyeOff size={18} /> : <Eye size={18} />}
+                <input
+                    type={visible ? "text" : "password"}
+                    value={value}
+                    onChange={(event) => onChange(event.target.value)}
+                    placeholder="8 caractères minimum"
+                    className={inputClass + " pr-12"}
+                />
+                <button
+                    type="button"
+                    onClick={toggle}
+                    className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-white/35 transition hover:bg-white/5 hover:text-white"
+                >
+                    {visible ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
             </div>
         </div>
