@@ -1,5 +1,5 @@
 import React from "react";
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import { Search, ChevronRight, Inbox } from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
 
@@ -16,6 +16,8 @@ export default function AdminDataPage({
     actionLabel = null,
     actionHref = null,
 }) {
+    const { flash = {} } = usePage().props;
+
     const submit = (event) => {
         event.preventDefault();
         const value = new FormData(event.currentTarget).get("recherche") || "";
@@ -42,6 +44,14 @@ export default function AdminDataPage({
                                     </Link>
                                 )}
                             </header>
+
+                            {(flash.success || flash.error) && (
+                                <div className="mt-5 rounded-jse-moyen border border-jse-theme-border bg-jse-theme-surface p-4 text-sm shadow-jse-carte" role="status">
+                                    <p className={flash.error ? "text-jse-danger" : "text-jse-secondaire"}>
+                                        {flash.error || flash.success}
+                                    </p>
+                                </div>
+                            )}
 
                             <div className="mt-6 rounded-jse-xl border border-jse-theme-border bg-jse-theme-surface p-4 shadow-jse-carte">
                                 <div className="flex flex-col gap-3 lg:flex-row">
