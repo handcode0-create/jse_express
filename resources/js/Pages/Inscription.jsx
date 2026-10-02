@@ -75,21 +75,27 @@ export default function Inscription() {
         const keys = Object.keys(toutes);
 
         if (etape === 1) {
+            const profilPrefixes = ["restaurant_", "livreur_"];
+            return keys
+                .filter((key) => key !== "role" && !profilPrefixes.some((prefix) => key.startsWith(prefix)))
+                .map((key) => toutes[key]);
+        }
+
+        if (etape === 2) {
             return keys
                 .filter((key) => key === "role")
                 .map((key) => toutes[key]);
         }
 
-        if (etape === 2) {
-            const prefixos = data.role === "restaurant" ? ["restaurant_"] : data.role === "livreur" ? ["livreur_"] : [];
-            return keys
-                .filter((key) => prefixos.some((prefix) => key.startsWith(prefix)))
-                .map((key) => toutes[key]);
-        }
+        const prefixos =
+            data.role === "restaurant"
+                ? ["restaurant_"]
+                : data.role === "livreur"
+                  ? ["livreur_"]
+                  : [];
 
-        const profilKeys = ["restaurant_", "livreur_"];
         return keys
-            .filter((key) => key !== "role" && !profilKeys.some((prefix) => key.startsWith(prefix)))
+            .filter((key) => prefixos.some((prefix) => key.startsWith(prefix)))
             .map((key) => toutes[key]);
     }, [errors, etape, data.role]);
 
@@ -103,7 +109,13 @@ export default function Inscription() {
             profilPrefixes.some((prefix) => key.startsWith(prefix)),
         );
 
-        setEtape(erreurProfil ? 2 : 3);
+        if (erreurProfil) {
+            setEtape(3);
+        } else if (errors.role) {
+            setEtape(2);
+        } else {
+            setEtape(1);
+        }
     }, [errors]);
 
     const modifier = (champ, valeur) => {
@@ -112,17 +124,39 @@ export default function Inscription() {
     };
 
     const selectionnerRole = (role) => {
-        clearErrors();
+        clearErrors("role");
         setData("role", role);
-        setEtape(1);
     };
 
     const continuer = () => {
         clearErrors();
 
         if (etape === 1) {
-            if (!data.role) {
-                setError("role", "Veuillez sélectionner votre utilisation de JSE Express.");
+            const champs = [
+                ["prenom", "Le prénom est obligatoire."],
+                ["nom", "Le nom est obligatoire."],
+                ["telephone", "Le téléphone est obligatoire."],
+                ["mot_de_passe", "Le mot de passe est obligatoire."],
+                ["confirmation_mot_de_passe", "La confirmation du mot de passe est obligatoire."],
+            ];
+
+            const manquants = champs.filter(([champ]) => !String(data[champ] || "").trim());
+
+            if (manquants.length > 0 || !data.consentement) {
+                manquants.forEach(([champ, message]) => setError(champ, message));
+                if (!data.consentement) {
+                    setError("consentement", "Vous devez accepter les conditions pour continuer.");
+                }
+                return;
+            }
+
+            if (data.mot_de_passe !== data.confirmation_mot_de_passe) {
+                setError("confirmation_mot_de_passe", "Les mots de passe ne correspondent pas.");
+                return;
+            }
+
+            if (data.mot_de_passe.length < 8) {
+                setError("mot_de_passe", "Le mot de passe doit contenir au moins 8 caractères.");
                 return;
             }
 
@@ -131,15 +165,23 @@ export default function Inscription() {
         }
 
         if (etape === 2) {
+            if (!data.role) {
+                setError("role", "Veuillez sélectionner votre utilisation de JSE Express.");
+                return;
+            }
+
+            setEtape(3);
+            return;
+        }
+
+        if (etape === 3) {
             if (data.role === "restaurant") {
                 const champs = [
                     ["restaurant_nom", "Le nom du restaurant est obligatoire."],
                     ["restaurant_telephone", "Le téléphone du restaurant est obligatoire."],
                     ["restaurant_adresse", "L'adresse du restaurant est obligatoire."],
                 ];
-
                 const manquants = champs.filter(([champ]) => !String(data[champ] || "").trim());
-
                 if (manquants.length > 0) {
                     manquants.forEach(([champ, message]) => setError(champ, message));
                     return;
@@ -151,16 +193,12 @@ export default function Inscription() {
                     ["livreur_matricule", "Le matricule livreur est obligatoire."],
                     ["livreur_disponibilite", "Veuillez indiquer votre disponibilité."],
                 ];
-
                 const manquants = champs.filter(([champ]) => !String(data[champ] || "").trim());
-
                 if (manquants.length > 0) {
                     manquants.forEach(([champ, message]) => setError(champ, message));
                     return;
                 }
             }
-
-            setEtape(3);
         }
     };
 
@@ -169,7 +207,7 @@ export default function Inscription() {
         post("/inscription", { preserveScroll: true });
     };
 
-    const labelsEtapes = ["Votre utilisation", "Votre profil", "Vos identifiants"];
+    const labelsEtapes = ["Vos informations", "Votre utilisation", "Votre profil"];
 
     return (
         <main className="relative min-h-screen overflow-x-hidden bg-[#07110F] font-sans text-white">
@@ -271,21 +309,21 @@ export default function Inscription() {
                                     </p>
                                     <h2 className="mt-2 max-w-2xl font-against text-[32px] leading-[1.02] text-[#FFF7E8] sm:text-[38px]">
                                         {etape === 1
-                                            ? "Comment utiliserez-vous JSE Express ?"
+                                            ? "Commençons par vous."
                                             : etape === 2
-                                              ? roleSelectionne?.value === "restaurant"
-                                                  ? "Parlons de votre restaurant."
-                                                  : roleSelectionne?.value === "livreur"
-                                                    ? "Complétons votre profil."
-                                                    : "Votre profil client."
-                                              : "Créons vos identifiants."}
+                                              ? "Comment utiliserez-vous JSE Express ?"
+                                              : roleSelectionne?.value === "restaurant"
+                                                ? "Parlons de votre restaurant."
+                                                : roleSelectionne?.value === "livreur"
+                                                  ? "Complétons votre profil."
+                                                  : "Votre profil client."}
                                     </h2>
                                     <p className="mt-3 max-w-xl text-xs leading-5 text-white/40 sm:text-sm">
                                         {etape === 1
-                                            ? "Votre réponse détermine le profil créé dans JSE Express."
+                                            ? "Renseignez vos informations personnelles avant de choisir votre parcours JSE Express."
                                             : etape === 2
-                                              ? "Ces informations complètent le profil correspondant à votre activité."
-                                              : "Dernière étape : renseignez les informations nécessaires à votre compte."}
+                                              ? "Votre choix détermine le rôle qui sera associé à votre compte."
+                                              : "Dernière étape : complétez les informations propres à votre profil."}
                                     </p>
                                 </div>
 
@@ -312,6 +350,71 @@ export default function Inscription() {
 
                             <form onSubmit={soumettre}>
                                 {etape === 1 && (
+                                    <div className="space-y-4">
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <Champ
+                                                label="Prénom"
+                                                value={data.prenom}
+                                                onChange={(v) => modifier("prenom", v)}
+                                                placeholder="Votre prénom"
+                                            />
+                                            <Champ
+                                                label="Nom"
+                                                value={data.nom}
+                                                onChange={(v) => modifier("nom", v)}
+                                                placeholder="Votre nom"
+                                            />
+                                        </div>
+
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <Champ
+                                                label="Téléphone"
+                                                value={data.telephone}
+                                                onChange={(v) => modifier("telephone", v)}
+                                                placeholder="Votre numéro"
+                                                type="tel"
+                                                icon={Phone}
+                                            />
+                                            <Champ
+                                                label="E-mail"
+                                                value={data.email}
+                                                onChange={(v) => modifier("email", v)}
+                                                placeholder="Facultatif"
+                                                type="email"
+                                                icon={Mail}
+                                            />
+                                        </div>
+
+                                        <PasswordChamp
+                                            label="Mot de passe"
+                                            value={data.mot_de_passe}
+                                            onChange={(v) => modifier("mot_de_passe", v)}
+                                            visible={afficherMotDePasse}
+                                            toggle={() => setAfficherMotDePasse(!afficherMotDePasse)}
+                                        />
+                                        <PasswordChamp
+                                            label="Confirmer le mot de passe"
+                                            value={data.confirmation_mot_de_passe}
+                                            onChange={(v) => modifier("confirmation_mot_de_passe", v)}
+                                            visible={afficherConfirmation}
+                                            toggle={() => setAfficherConfirmation(!afficherConfirmation)}
+                                        />
+
+                                        <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.025] p-4 text-xs leading-5 text-white/45">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.consentement}
+                                                onChange={(event) => modifier("consentement", event.target.checked)}
+                                                className="mt-1 size-4 accent-jse-secondaire"
+                                            />
+                                            <span>
+                                                J’accepte la politique de confidentialité et consens au traitement de mes données personnelles par JSE Express.
+                                            </span>
+                                        </label>
+                                    </div>
+                                )}
+
+                                {etape === 2 && (
                                     <div className="grid gap-3 md:grid-cols-3">
                                         {roles.map((role) => {
                                             const active = data.role === role.value;
@@ -364,7 +467,7 @@ export default function Inscription() {
                                     </div>
                                 )}
 
-                                {etape === 2 && (
+                                {etape === 3 && (
                                     <div className="space-y-5">
                                         <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
                                             <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#07110F]">
@@ -409,61 +512,19 @@ export default function Inscription() {
                                         {data.role === "restaurant" && (
                                             <div className="space-y-4">
                                                 <div className="grid gap-4 sm:grid-cols-2">
-                                                    <Champ
-                                                        label="Nom du restaurant"
-                                                        value={data.restaurant_nom}
-                                                        onChange={(v) => modifier("restaurant_nom", v)}
-                                                        placeholder="Ex. Chez nous"
-                                                        icon={Building2}
-                                                    />
-                                                    <Champ
-                                                        label="Téléphone"
-                                                        value={data.restaurant_telephone}
-                                                        onChange={(v) => modifier("restaurant_telephone", v)}
-                                                        placeholder="Numéro du restaurant"
-                                                        type="tel"
-                                                        icon={Phone}
-                                                    />
+                                                    <Champ label="Nom du restaurant" value={data.restaurant_nom} onChange={(v) => modifier("restaurant_nom", v)} placeholder="Ex. Chez nous" icon={Building2} />
+                                                    <Champ label="Téléphone" value={data.restaurant_telephone} onChange={(v) => modifier("restaurant_telephone", v)} placeholder="Numéro du restaurant" type="tel" icon={Phone} />
                                                 </div>
-
                                                 <div className="grid gap-4 sm:grid-cols-2">
-                                                    <Champ
-                                                        label="E-mail du restaurant"
-                                                        value={data.restaurant_email}
-                                                        onChange={(v) => modifier("restaurant_email", v)}
-                                                        placeholder="contact@restaurant.ci"
-                                                        type="email"
-                                                        icon={Mail}
-                                                    />
-                                                    <Select
-                                                        label="Zone du restaurant"
-                                                        value={data.restaurant_zone_id}
-                                                        onChange={(v) => modifier("restaurant_zone_id", v)}
-                                                        zones={zones}
-                                                    />
+                                                    <Champ label="E-mail du restaurant" value={data.restaurant_email} onChange={(v) => modifier("restaurant_email", v)} placeholder="contact@restaurant.ci" type="email" icon={Mail} />
+                                                    <Select label="Zone du restaurant" value={data.restaurant_zone_id} onChange={(v) => modifier("restaurant_zone_id", v)} zones={zones} />
                                                 </div>
-
-                                                <Champ
-                                                    label="Adresse"
-                                                    value={data.restaurant_adresse}
-                                                    onChange={(v) => modifier("restaurant_adresse", v)}
-                                                    placeholder="Adresse ou repère du restaurant"
-                                                    icon={MapPin}
-                                                />
-
-                                                <Champ
-                                                    label="Présentation"
-                                                    value={data.restaurant_description}
-                                                    onChange={(v) => modifier("restaurant_description", v)}
-                                                    placeholder="Présentez brièvement votre restaurant et sa cuisine."
-                                                    textarea
-                                                />
-
+                                                <Champ label="Adresse" value={data.restaurant_adresse} onChange={(v) => modifier("restaurant_adresse", v)} placeholder="Adresse ou repère du restaurant" icon={MapPin} />
+                                                <Champ label="Présentation" value={data.restaurant_description} onChange={(v) => modifier("restaurant_description", v)} placeholder="Présentez brièvement votre restaurant et sa cuisine." textarea />
                                                 <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.025] p-4">
                                                     <Clock3 size={16} className="mt-0.5 shrink-0 text-jse-secondaire" />
                                                     <p className="text-[11px] leading-5 text-white/40">
-                                                        Les horaires et les informations détaillées de votre établissement
-                                                        pourront être complétés depuis votre espace restaurant.
+                                                        Les horaires et les informations détaillées de votre établissement pourront être complétés depuis votre espace restaurant.
                                                     </p>
                                                 </div>
                                             </div>
@@ -472,32 +533,17 @@ export default function Inscription() {
                                         {data.role === "livreur" && (
                                             <div className="space-y-4">
                                                 <div className="grid gap-4 sm:grid-cols-2">
-                                                    <Champ
-                                                        label="Matricule livreur"
-                                                        value={data.livreur_matricule}
-                                                        onChange={(v) => modifier("livreur_matricule", v)}
-                                                        placeholder="Votre matricule"
-                                                        icon={BadgeCheck}
-                                                    />
-                                                    <Select
-                                                        label="Zone d'activité"
-                                                        value={data.livreur_zone_id}
-                                                        onChange={(v) => modifier("livreur_zone_id", v)}
-                                                        zones={zones}
-                                                    />
+                                                    <Champ label="Matricule livreur" value={data.livreur_matricule} onChange={(v) => modifier("livreur_matricule", v)} placeholder="Votre matricule" icon={BadgeCheck} />
+                                                    <Select label="Zone d'activité" value={data.livreur_zone_id} onChange={(v) => modifier("livreur_zone_id", v)} zones={zones} />
                                                 </div>
-
                                                 <div>
-                                                    <label className="mb-2 block text-xs font-semibold text-white/70">
-                                                        Disponibilité
-                                                    </label>
+                                                    <label className="mb-2 block text-xs font-semibold text-white/70">Disponibilité</label>
                                                     <div className="grid gap-2 sm:grid-cols-2">
                                                         {[
                                                             ["disponible", "Disponible", "Je peux recevoir des livraisons."],
                                                             ["indisponible", "Indisponible", "Je ne suis pas disponible maintenant."],
                                                         ].map(([value, label, description]) => {
                                                             const active = data.livreur_disponibilite === value;
-
                                                             return (
                                                                 <button
                                                                     key={value}
@@ -510,32 +556,14 @@ export default function Inscription() {
                                                                             : "border-white/10 bg-white/[0.025] hover:border-white/20 hover:bg-white/[0.05]")
                                                                     }
                                                                 >
-                                                                    <span
-                                                                        className={
-                                                                            "flex size-9 shrink-0 items-center justify-center rounded-lg " +
-                                                                            (active
-                                                                                ? "bg-jse-secondaire text-jse-principal"
-                                                                                : "bg-white/[0.06] text-white/35")
-                                                                        }
-                                                                    >
+                                                                    <span className={"flex size-9 shrink-0 items-center justify-center rounded-lg " + (active ? "bg-jse-secondaire text-jse-principal" : "bg-white/[0.06] text-white/35")}>
                                                                         <Bike size={16} />
                                                                     </span>
                                                                     <span>
-                                                                        <span className={"block text-xs font-bold " + (active ? "text-white" : "text-white/65")}>
-                                                                            {label}
-                                                                        </span>
-                                                                        <span className="mt-0.5 block text-[10px] leading-4 text-white/35">
-                                                                            {description}
-                                                                        </span>
+                                                                        <span className={"block text-xs font-bold " + (active ? "text-white" : "text-white/65")}>{label}</span>
+                                                                        <span className="mt-0.5 block text-[10px] leading-4 text-white/35">{description}</span>
                                                                     </span>
-                                                                    <span
-                                                                        className={
-                                                                            "ml-auto flex size-4 shrink-0 items-center justify-center rounded-full border " +
-                                                                            (active
-                                                                                ? "border-jse-secondaire bg-jse-secondaire"
-                                                                                : "border-white/15")
-                                                                        }
-                                                                    >
+                                                                    <span className={"ml-auto flex size-4 shrink-0 items-center justify-center rounded-full border " + (active ? "border-jse-secondaire bg-jse-secondaire" : "border-white/15")}>
                                                                         {active && <Check size={10} className="text-jse-principal" />}
                                                                     </span>
                                                                 </button>
@@ -543,43 +571,9 @@ export default function Inscription() {
                                                         })}
                                                     </div>
                                                 </div>
-
-                                                <Champ
-                                                    label="Téléphone secondaire"
-                                                    value={data.livreur_telephone_secondaire}
-                                                    onChange={(v) => modifier("livreur_telephone_secondaire", v)}
-                                                    placeholder="Numéro secondaire (facultatif)"
-                                                    type="tel"
-                                                    icon={Phone}
-                                                />
+                                                <Champ label="Téléphone secondaire" value={data.livreur_telephone_secondaire} onChange={(v) => modifier("livreur_telephone_secondaire", v)} placeholder="Numéro secondaire (facultatif)" type="tel" icon={Phone} />
                                             </div>
                                         )}
-                                    </div>
-                                )}
-
-                                {etape === 3 && (
-                                    <div className="space-y-4">
-                                        <div className="grid gap-4 sm:grid-cols-2">
-                                            <Champ label="Prénom" value={data.prenom} onChange={(v) => modifier("prenom", v)} placeholder="Votre prénom" />
-                                            <Champ label="Nom" value={data.nom} onChange={(v) => modifier("nom", v)} placeholder="Votre nom" />
-                                        </div>
-                                        <div className="grid gap-4 sm:grid-cols-2">
-                                            <Champ label="Téléphone" value={data.telephone} onChange={(v) => modifier("telephone", v)} placeholder="Votre numéro" type="tel" />
-                                            <Champ label="E-mail" value={data.email} onChange={(v) => modifier("email", v)} placeholder="Facultatif" type="email" />
-                                        </div>
-                                        <PasswordChamp label="Mot de passe" value={data.mot_de_passe} onChange={(v) => modifier("mot_de_passe", v)} visible={afficherMotDePasse} toggle={() => setAfficherMotDePasse(!afficherMotDePasse)} />
-                                        <PasswordChamp label="Confirmer le mot de passe" value={data.confirmation_mot_de_passe} onChange={(v) => modifier("confirmation_mot_de_passe", v)} visible={afficherConfirmation} toggle={() => setAfficherConfirmation(!afficherConfirmation)} />
-                                        <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.025] p-4 text-xs leading-5 text-white/45">
-                                            <input
-                                                type="checkbox"
-                                                checked={data.consentement}
-                                                onChange={(event) => modifier("consentement", event.target.checked)}
-                                                className="mt-1 size-4 accent-jse-secondaire"
-                                            />
-                                            <span>
-                                                J’accepte la politique de confidentialité et consens au traitement de mes données personnelles par JSE Express.
-                                            </span>
-                                        </label>
                                     </div>
                                 )}
 
@@ -598,7 +592,6 @@ export default function Inscription() {
                                         <button
                                             type="button"
                                             onClick={continuer}
-                                            disabled={etape === 1 && !data.role}
                                             className="flex h-10 items-center gap-2 rounded-full bg-jse-secondaire px-5 text-xs font-bold text-jse-principal shadow-lg shadow-jse-secondaire/15 transition hover:brightness-105 disabled:pointer-events-none disabled:opacity-30"
                                         >
                                             Continuer
