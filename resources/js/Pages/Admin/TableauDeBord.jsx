@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Head, Link, router, usePage } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 import {
     CheckCircle2,
     ShoppingBag,
