@@ -31,12 +31,13 @@
 }
 
 :root {
-    --jse-theme-bg: #FFF7E8;
-    --jse-theme-surface: #FFFFFF;
-    --jse-theme-surface-soft: #F7F1E5;
-    --jse-theme-text: #191919;
-    --jse-theme-muted: rgb(25 25 25 / .55);
-    --jse-theme-border: rgb(25 25 25 / .08);
+    /* LIGHT — hiérarchie de surfaces premium JSE */
+    --jse-theme-bg: #F7F4EC;
+    --jse-theme-surface: #FFFDF8;
+    --jse-theme-surface-soft: #F1F5F1;
+    --jse-theme-text: #17312A;
+    --jse-theme-muted: rgb(25 49 42 / .64);
+    --jse-theme-border: rgb(18 60 50 / .11);
 
     font-family: "Poppins", sans-serif;
     color: var(--jse-theme-text);
@@ -422,4 +423,129 @@ html[data-theme="light"] .jse-dark-surface [class*="border-white/"] {
 }
 html[data-theme="light"] .jse-dark-surface [class*="bg-white/"] {
     background-color: rgb(255 255 255 / .07) !important;
+}
+
+
+/* JSE Express — couche visuelle Admin LIGHT
+   Centralisée ici afin de ne pas multiplier les couleurs hardcodées.
+   Le mode DARK conserve ses valeurs existantes. */
+html[data-theme="light"] .jse-admin-page {
+    background:
+        radial-gradient(circle at 8% 4%, rgb(69 185 119 / .055), transparent 25%),
+        radial-gradient(circle at 92% 12%, rgb(242 140 40 / .045), transparent 22%),
+        var(--jse-theme-bg);
+}
+
+html[data-theme="light"] .jse-admin-card {
+    border-color: rgb(18 60 50 / .10) !important;
+    background: var(--jse-theme-surface) !important;
+    box-shadow: 0 10px 28px rgb(18 60 50 / .045), 0 2px 7px rgb(18 60 50 / .025) !important;
+}
+
+html[data-theme="light"] .jse-admin-card:hover {
+    border-color: rgb(69 185 119 / .20) !important;
+}
+
+html[data-theme="light"] .jse-admin-sidebar {
+    background: rgb(250 248 241 / .88) !important;
+    border-color: rgb(18 60 50 / .09) !important;
+    box-shadow: 10px 0 34px rgb(18 60 50 / .035);
+}
+
+html[data-theme="light"] .jse-admin-sidebar .jse-admin-nav-item:not([aria-current="page"]):hover {
+    background: rgb(69 185 119 / .07) !important;
+    color: #123C32 !important;
+}
+
+html[data-theme="light"] .jse-admin-sidebar .jse-admin-nav-item[aria-current="page"] {
+    background: rgb(69 185 119 / .13) !important;
+    color: #17643F !important;
+    box-shadow: inset 3px 0 0 #45B977;
+}
+
+html[data-theme="light"] .jse-admin-sidebar .jse-admin-profile {
+    background: rgb(241 245 241 / .92) !important;
+    border: 1px solid rgb(18 60 50 / .075);
+}
+
+html[data-theme="light"] .jse-admin-sidebar .jse-admin-label {
+    color: rgb(23 49 42 / .52) !important;
+}
+
+html[data-theme="light"] .jse-admin-kpi-icon {
+    box-shadow: inset 0 0 0 1px rgb(18 60 50 / .045);
+}
+
+html[data-theme="light"] .jse-admin-input {
+    background: #F4F7F3 !important;
+    border-color: rgb(18 60 50 / .12) !important;
+}
+
+html[data-theme="light"] .jse-admin-input:focus {
+    border-color: rgb(69 185 119 / .70) !important;
+    box-shadow: 0 0 0 4px rgb(69 185 119 / .10);
+}
+
+html[data-theme="light"] .jse-admin-primary {
+    box-shadow: 0 7px 18px rgb(18 60 50 / .10);
+}
+
+html[data-theme="light"] .jse-admin-empty {
+    background: rgb(241 245 241 / .48);
+}
+
+html[data-theme="light"] .jse-admin-table thead {
+    background: #F1F5F1;
+}
+
+html[data-theme="light"] .jse-admin-floating-bar {
+    border-color: rgb(18 60 50 / .10) !important;
+    background: rgb(255 253 248 / .92) !important;
+    box-shadow: 0 16px 45px rgb(18 60 50 / .16) !important;
+}
+
+html[data-theme="light"] .jse-admin-floating-item {
+    color: rgb(23 49 42 / .48) !important;
+}
+
+html[data-theme="light"] .jse-admin-floating-item:hover {
+    color: #123C32 !important;
+    background: rgb(69 185 119 / .06) !important;
+}
+
+html[data-theme="light"] .jse-admin-floating-item[aria-current="page"] {
+    color: #123C32 !important;
+}
+
+html[data-theme="light"] .jse-admin-floating-menu {
+    border-color: rgb(18 60 50 / .10) !important;
+    background: rgb(255 253 248 / .96) !important;
+    box-shadow: 0 20px 55px rgb(18 60 50 / .16) !important;
+}
+
+html[data-theme="light"] .jse-admin-floating-menu .jse-admin-floating-secondary {
+    background: #F1F5F1 !important;
+    color: rgb(23 49 42 / .72) !important;
+}
+
+html[data-theme="light"] .jse-admin-floating-menu .jse-admin-floating-secondary:hover {
+    background: rgb(69 185 119 / .10) !important;
+    color: #123C32 !important;
+}
+
+html[data-theme="light"] .jse-admin-floating-menu .jse-admin-floating-title {
+    color: rgb(23 49 42 / .50) !important;
+}
+
+html[data-theme="light"] .jse-admin-floating-close {
+    color: rgb(23 49 42 / .48) !important;
+}
+
+html[data-theme="light"] .jse-admin-floating-logout {
+    background: rgb(217 74 74 / .08) !important;
+    color: #A33A3A !important;
+}
+
+html[data-theme="light"] .jse-admin-sidebar .text-red-600 {
+    color: #A33A3A !important;
 }
