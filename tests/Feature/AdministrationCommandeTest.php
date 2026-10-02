@@ -45,7 +45,7 @@ class AdministrationCommandeTest extends TestCase
             'statut_id' => $annulee->id,
         ]);
 
-        $this->assertDatabaseHas('historiques_commandes', [
+        $this->assertDatabaseHas('historique_commandes', [
             'commande_id' => $commande->id,
             'statut_id' => $annulee->id,
             'user_id' => $admin->id,
