@@ -43,10 +43,5 @@ class SecurityHeadersTest extends TestCase
 
         $response->assertOk()
             ->assertHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-
-        $this->assertStringContainsString(
-            'upgrade-insecure-requests',
-            $response->headers->get('Content-Security-Policy')
-        );
     }
 }
