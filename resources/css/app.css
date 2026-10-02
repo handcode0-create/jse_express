@@ -549,3 +549,26 @@ html[data-theme="light"] .jse-admin-floating-logout {
 html[data-theme="light"] .jse-admin-sidebar .text-red-600 {
     color: #A33A3A !important;
 }
+
+
+html[data-theme="light"] .jse-admin-chart {
+    border-radius: 18px;
+    background-image: linear-gradient(to top, rgb(18 60 50 / .06) 1px, transparent 1px);
+    background-size: 100% 25%;
+}
+
+html[data-theme="light"] .jse-admin-page input,
+html[data-theme="light"] .jse-admin-page select,
+html[data-theme="light"] .jse-admin-page textarea {
+    color: var(--jse-theme-text);
+}
+
+html[data-theme="light"] .jse-admin-page input:focus,
+html[data-theme="light"] .jse-admin-page select:focus,
+html[data-theme="light"] .jse-admin-page textarea:focus {
+    box-shadow: 0 0 0 4px rgb(69 185 119 / .08);
+}
+
+html[data-theme="light"] .jse-admin-page .bg-jse-theme-bg {
+    background-color: #F1F5F1;
+}
