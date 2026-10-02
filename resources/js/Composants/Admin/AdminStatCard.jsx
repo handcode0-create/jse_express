@@ -32,7 +32,7 @@ export default function AdminStatCard({ label, value, icon: Icon, tone = "princi
         return (
             <Link
                 href={href}
-                className="block rounded-jse-xl border border-jse-theme-border bg-jse-theme-surface p-4 shadow-sm transition hover:border-jse-secondaire/30 hover:shadow-jse-carte focus-visible:outline-none sm:p-5"
+                className="jse-admin-card block rounded-jse-xl border border-jse-theme-border bg-jse-theme-surface p-4 shadow-sm transition hover:border-jse-secondaire/30 hover:shadow-jse-carte focus-visible:outline-none sm:p-5"
                 aria-label={label}
             >
                 {contenu}
@@ -41,7 +41,7 @@ export default function AdminStatCard({ label, value, icon: Icon, tone = "princi
     }
 
     return (
-        <article className="rounded-jse-xl border border-jse-theme-border bg-jse-theme-surface p-4 shadow-sm sm:p-5">
+        <article className="jse-admin-card rounded-jse-xl border border-jse-theme-border bg-jse-theme-surface p-4 shadow-sm sm:p-5">
             {contenu}
         </article>
     );
