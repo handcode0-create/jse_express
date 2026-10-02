@@ -7,7 +7,13 @@ import {
     ChevronRight,
     Eye,
     EyeOff,
+    BadgeCheck,
+    Bike,
+    Building2,
+    Clock3,
+    Mail,
     MapPin,
+    Phone,
     ShieldCheck,
 } from "lucide-react";
 
@@ -284,60 +290,193 @@ export default function Inscription() {
                                 )}
 
                                 {etape === 2 && (
-                                    <div className="space-y-4">
+                                    <div className="space-y-5">
+                                        <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+                                            <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#07110F]">
+                                                <img
+                                                    src={roleSelectionne?.image}
+                                                    alt=""
+                                                    className="size-full object-contain p-1"
+                                                />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-[10px] font-bold uppercase tracking-[.16em] text-jse-secondaire">
+                                                    Profil sélectionné
+                                                </p>
+                                                <p className="mt-1 text-sm font-bold text-white">
+                                                    {roleSelectionne?.title}
+                                                </p>
+                                                <p className="mt-1 text-xs text-white/40">
+                                                    {roleSelectionne?.description}
+                                                </p>
+                                            </div>
+                                        </div>
+
                                         {data.role === "client" && (
-                                            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-                                                <div className="flex gap-3">
-                                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-jse-secondaire/10 text-jse-secondaire">
-                                                        <ShieldCheck size={17} />
+                                            <div className="rounded-2xl border border-jse-secondaire/20 bg-jse-secondaire/[0.055] p-5">
+                                                <div className="flex items-start gap-4">
+                                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-jse-secondaire/10 text-jse-secondaire">
+                                                        <ShieldCheck size={18} />
                                                     </div>
-                                                    <p className="text-xs leading-5 text-white/45">
-                                                        Votre profil client sera créé à partir de vos informations personnelles. Les adresses de livraison pourront être ajoutées depuis votre espace.
-                                                    </p>
+                                                    <div>
+                                                        <p className="text-sm font-semibold text-white">
+                                                            Votre profil client est prêt.
+                                                        </p>
+                                                        <p className="mt-1.5 text-xs leading-5 text-white/45">
+                                                            Aucune information supplémentaire n'est nécessaire à cette étape.
+                                                            Vos adresses de livraison pourront être ajoutées depuis votre espace personnel.
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
 
                                         {data.role === "restaurant" && (
-                                            <div className="grid gap-4 sm:grid-cols-2">
-                                                <Champ label="Nom du restaurant" value={data.restaurant_nom} onChange={(v) => modifier("restaurant_nom", v)} placeholder="Nom du restaurant" />
-                                                <Champ label="Téléphone du restaurant" value={data.restaurant_telephone} onChange={(v) => modifier("restaurant_telephone", v)} placeholder="Numéro professionnel" type="tel" />
-                                                <Champ label="Adresse du restaurant" value={data.restaurant_adresse} onChange={(v) => modifier("restaurant_adresse", v)} placeholder="Adresse du restaurant" />
-                                                <Select label="Zone du restaurant" value={data.restaurant_zone_id} onChange={(v) => modifier("restaurant_zone_id", v)} zones={zones} />
-                                                <div className="sm:col-span-2">
-                                                    <Champ label="Description" value={data.restaurant_description} onChange={(v) => modifier("restaurant_description", v)} placeholder="Présentez brièvement votre restaurant" textarea />
+                                            <div className="space-y-4">
+                                                <div className="grid gap-4 sm:grid-cols-2">
+                                                    <Champ
+                                                        label="Nom du restaurant"
+                                                        value={data.restaurant_nom}
+                                                        onChange={(v) => modifier("restaurant_nom", v)}
+                                                        placeholder="Ex. Chez nous"
+                                                        icon={Building2}
+                                                    />
+                                                    <Champ
+                                                        label="Téléphone"
+                                                        value={data.restaurant_telephone}
+                                                        onChange={(v) => modifier("restaurant_telephone", v)}
+                                                        placeholder="Numéro du restaurant"
+                                                        type="tel"
+                                                        icon={Phone}
+                                                    />
+                                                </div>
+
+                                                <div className="grid gap-4 sm:grid-cols-2">
+                                                    <Champ
+                                                        label="E-mail du restaurant"
+                                                        value={data.restaurant_email}
+                                                        onChange={(v) => modifier("restaurant_email", v)}
+                                                        placeholder="contact@restaurant.ci"
+                                                        type="email"
+                                                        icon={Mail}
+                                                    />
+                                                    <Select
+                                                        label="Zone du restaurant"
+                                                        value={data.restaurant_zone_id}
+                                                        onChange={(v) => modifier("restaurant_zone_id", v)}
+                                                        zones={zones}
+                                                    />
+                                                </div>
+
+                                                <Champ
+                                                    label="Adresse"
+                                                    value={data.restaurant_adresse}
+                                                    onChange={(v) => modifier("restaurant_adresse", v)}
+                                                    placeholder="Adresse ou repère du restaurant"
+                                                    icon={MapPin}
+                                                />
+
+                                                <Champ
+                                                    label="Présentation"
+                                                    value={data.restaurant_description}
+                                                    onChange={(v) => modifier("restaurant_description", v)}
+                                                    placeholder="Présentez brièvement votre restaurant et sa cuisine."
+                                                    textarea
+                                                />
+
+                                                <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.025] p-4">
+                                                    <Clock3 size={16} className="mt-0.5 shrink-0 text-jse-secondaire" />
+                                                    <p className="text-[11px] leading-5 text-white/40">
+                                                        Les horaires et les informations détaillées de votre établissement
+                                                        pourront être complétés depuis votre espace restaurant.
+                                                    </p>
                                                 </div>
                                             </div>
                                         )}
 
                                         {data.role === "livreur" && (
-                                            <div className="grid gap-4 sm:grid-cols-2">
-                                                <Champ label="Matricule livreur" value={data.livreur_matricule} onChange={(v) => modifier("livreur_matricule", v)} placeholder="Votre matricule" />
-                                                <Select label="Zone d'activité" value={data.livreur_zone_id} onChange={(v) => modifier("livreur_zone_id", v)} zones={zones} />
+                                            <div className="space-y-4">
+                                                <div className="grid gap-4 sm:grid-cols-2">
+                                                    <Champ
+                                                        label="Matricule livreur"
+                                                        value={data.livreur_matricule}
+                                                        onChange={(v) => modifier("livreur_matricule", v)}
+                                                        placeholder="Votre matricule"
+                                                        icon={BadgeCheck}
+                                                    />
+                                                    <Select
+                                                        label="Zone d'activité"
+                                                        value={data.livreur_zone_id}
+                                                        onChange={(v) => modifier("livreur_zone_id", v)}
+                                                        zones={zones}
+                                                    />
+                                                </div>
+
                                                 <div>
-                                                    <label className="mb-2 block text-xs font-semibold text-white/70">Disponibilité</label>
-                                                    <div className="grid grid-cols-2 gap-2">
+                                                    <label className="mb-2 block text-xs font-semibold text-white/70">
+                                                        Disponibilité
+                                                    </label>
+                                                    <div className="grid gap-2 sm:grid-cols-2">
                                                         {[
-                                                            ["disponible", "Disponible"],
-                                                            ["indisponible", "Indisponible"],
-                                                        ].map(([value, label]) => (
-                                                            <button
-                                                                key={value}
-                                                                type="button"
-                                                                onClick={() => modifier("livreur_disponibilite", value)}
-                                                                className={
-                                                                    "h-12 rounded-xl border text-xs font-semibold transition " +
-                                                                    (data.livreur_disponibilite === value
-                                                                        ? "border-jse-secondaire/60 bg-jse-secondaire/10 text-jse-secondaire"
-                                                                        : "border-white/10 bg-white/[0.025] text-white/45 hover:bg-white/[0.05]")
-                                                                }
-                                                            >
-                                                                {label}
-                                                            </button>
-                                                        ))}
+                                                            ["disponible", "Disponible", "Je peux recevoir des livraisons."],
+                                                            ["indisponible", "Indisponible", "Je ne suis pas disponible maintenant."],
+                                                        ].map(([value, label, description]) => {
+                                                            const active = data.livreur_disponibilite === value;
+
+                                                            return (
+                                                                <button
+                                                                    key={value}
+                                                                    type="button"
+                                                                    onClick={() => modifier("livreur_disponibilite", value)}
+                                                                    className={
+                                                                        "flex min-h-[72px] items-center gap-3 rounded-xl border px-4 text-left transition " +
+                                                                        (active
+                                                                            ? "border-jse-secondaire/60 bg-jse-secondaire/10"
+                                                                            : "border-white/10 bg-white/[0.025] hover:border-white/20 hover:bg-white/[0.05]")
+                                                                    }
+                                                                >
+                                                                    <span
+                                                                        className={
+                                                                            "flex size-9 shrink-0 items-center justify-center rounded-lg " +
+                                                                            (active
+                                                                                ? "bg-jse-secondaire text-jse-principal"
+                                                                                : "bg-white/[0.06] text-white/35")
+                                                                        }
+                                                                    >
+                                                                        <Bike size={16} />
+                                                                    </span>
+                                                                    <span>
+                                                                        <span className={"block text-xs font-bold " + (active ? "text-white" : "text-white/65")}>
+                                                                            {label}
+                                                                        </span>
+                                                                        <span className="mt-0.5 block text-[10px] leading-4 text-white/35">
+                                                                            {description}
+                                                                        </span>
+                                                                    </span>
+                                                                    <span
+                                                                        className={
+                                                                            "ml-auto flex size-4 shrink-0 items-center justify-center rounded-full border " +
+                                                                            (active
+                                                                                ? "border-jse-secondaire bg-jse-secondaire"
+                                                                                : "border-white/15")
+                                                                        }
+                                                                    >
+                                                                        {active && <Check size={10} className="text-jse-principal" />}
+                                                                    </span>
+                                                                </button>
+                                                            );
+                                                        })}
                                                     </div>
                                                 </div>
-                                                <Champ label="Téléphone secondaire" value={data.livreur_telephone_secondaire} onChange={(v) => modifier("livreur_telephone_secondaire", v)} placeholder="Facultatif" type="tel" />
+
+                                                <Champ
+                                                    label="Téléphone secondaire"
+                                                    value={data.livreur_telephone_secondaire}
+                                                    onChange={(v) => modifier("livreur_telephone_secondaire", v)}
+                                                    placeholder="Numéro secondaire (facultatif)"
+                                                    type="tel"
+                                                    icon={Phone}
+                                                />
                                             </div>
                                         )}
                                     </div>
@@ -410,27 +549,35 @@ export default function Inscription() {
     );
 }
 
-function Champ({ label, value, onChange, placeholder, type = "text", textarea = false }) {
+function Champ({ label, value, onChange, placeholder, type = "text", textarea = false, icon: Icon }) {
     return (
         <div>
             <label className="mb-2 block text-xs font-semibold text-white/70">{label}</label>
-            {textarea ? (
+            <div className="relative">
+                {textarea ? (
                 <textarea
                     value={value}
                     onChange={(event) => onChange(event.target.value)}
                     placeholder={placeholder}
                     rows={3}
-                    className={inputClass + " h-auto resize-none py-3"}
+                    className={inputClass + " h-auto resize-none py-3 " + (Icon ? "pl-11" : "")}
                 />
             ) : (
+                {Icon && (
+                    <Icon
+                        size={16}
+                        className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/25"
+                    />
+                )}
                 <input
                     type={type}
                     value={value}
                     onChange={(event) => onChange(event.target.value)}
                     placeholder={placeholder}
-                    className={inputClass}
+                    className={inputClass + (Icon ? " pl-11" : "")}
                 />
             )}
+            </div>
         </div>
     );
 }
