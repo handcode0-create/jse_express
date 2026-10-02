@@ -48,6 +48,8 @@ Route::get('/bienvenue', function () {
 
 Route::get('/authentification', [AuthentificationController::class, 'show'])->name('authentification');
 
+Route::get('/inscription', [AuthentificationController::class, 'showInscription'])->name('inscription');
+
 Route::post('/inscription', [AuthentificationController::class, 'inscription'])->name('inscription');
 
 Route::post('/connexion', [AuthentificationController::class, 'connexion'])->name('connexion');
