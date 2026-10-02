@@ -1,4 +1,4 @@
-const CACHE_NAME = "jse-express-v3";
+const CACHE_NAME = "jse-express-v4";
 const PRECACHE_URLS = ["/", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
