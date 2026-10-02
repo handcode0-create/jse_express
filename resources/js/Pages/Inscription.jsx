@@ -42,12 +42,12 @@ const inputClass =
     "h-12 w-full rounded-xl border border-white/10 bg-white/[0.045] px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-jse-secondaire/70 focus:bg-white/[0.065] focus:ring-4 focus:ring-jse-secondaire/10";
 
 export default function Inscription() {
-    const { zones = [], errors = {} } = usePage().props;
+    const { zones = [] } = usePage().props;
     const [etape, setEtape] = useState(1);
     const [afficherMotDePasse, setAfficherMotDePasse] = useState(false);
     const [afficherConfirmation, setAfficherConfirmation] = useState(false);
 
-    const { data, setData, post, processing, clearErrors, setError } = useForm({
+    const { data, setData, post, processing, errors, clearErrors, setError } = useForm({
         role: "",
         nom: "",
         prenom: "",
@@ -67,8 +67,6 @@ export default function Inscription() {
         livreur_disponibilite: "indisponible",
         livreur_telephone_secondaire: "",
     });
-
-    const erreurs = useMemo(() => Object.values(errors || {}), [errors]);
 
     const erreursEtape = useMemo(() => {
         const toutes = errors || {};
