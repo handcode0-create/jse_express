@@ -126,7 +126,7 @@ export default function TableauDeBord({
         <>
             <Head title="Administration — JSE Express" />
 
-            <main className="min-h-screen overflow-x-hidden bg-jse-theme-bg pb-[calc(96px+env(safe-area-inset-bottom))] text-jse-theme-text lg:pb-0">
+            <main className="jse-admin-page min-h-screen overflow-x-hidden bg-jse-theme-bg pb-[calc(96px+env(safe-area-inset-bottom))] text-jse-theme-text lg:pb-0">
                 <div className="flex min-h-screen flex-col lg:flex-row lg:pl-[238px]">
                     <AdminSidebar utilisateur={utilisateur} />
 
