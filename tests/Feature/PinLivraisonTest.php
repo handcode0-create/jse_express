@@ -329,4 +329,64 @@ class PinLivraisonTest extends TestCase
         $this->assertSame('en_cours', $scenario['livraison']->fresh()->statut);
         $this->assertSame('PRETE', $scenario['commande']->fresh()->statutCommande->code);
     }
+    public function test_le_flux_complet_restaurant_livreur_pin_cloture_la_commande(): void
+    {
+        $scenario = $this->creerLivraisonScenario('en_attente', 'EN_ATTENTE');
+
+        $scenario['attribution']->delete();
+
+        foreach (['CONFIRMEE', 'EN_PREPARATION', 'PRETE'] as $statut) {
+            $this->actingAs($scenario['restaurantUser'])
+                ->from('/restaurant/commandes/' . $scenario['commande']->id)
+                ->patch('/restaurant/commandes/' . $scenario['commande']->id . '/statut', [
+                    'statut' => $statut,
+                ])
+                ->assertRedirect('/restaurant/commandes/' . $scenario['commande']->id);
+        }
+
+        $commande = $scenario['commande']->fresh();
+        $livraison = $scenario['livraison']->fresh();
+        $attribution = AttributionLivraison::query()
+            ->where('livraison_id', $livraison->id)
+            ->where('statut', 'active')
+            ->firstOrFail();
+
+        $this->assertSame('PRETE', $commande->statutCommande->code);
+        $this->assertSame('attribuee', $livraison->statut);
+        $this->assertSame($scenario['livreur']->id, $attribution->livreur_id);
+        $this->assertNotNull($commande->pin_livraison_hash);
+        $this->assertNotNull($commande->pin_livraison_chiffre);
+
+        $pin = Crypt::decryptString($commande->pin_livraison_chiffre);
+
+        $this->actingAs($scenario['livreur'])
+            ->from('/livreur/tableau-de-bord')
+            ->patch('/livreur/livraisons/' . $attribution->id . '/prise-en-charge')
+            ->assertRedirect('/livreur/tableau-de-bord');
+
+        $this->assertSame('EN_LIVRAISON', $commande->fresh()->statutCommande->code);
+        $this->assertSame('en_cours', $livraison->fresh()->statut);
+
+        $this->actingAs($scenario['livreur'])
+            ->from('/livreur/tableau-de-bord')
+            ->post('/livreur/livraisons/' . $attribution->id . '/valider-pin', [
+                'pin' => $pin,
+            ])
+            ->assertRedirect('/livreur/tableau-de-bord')
+            ->assertSessionHas('success', 'Livraison validée et commande clôturée.');
+
+        $commandeFinale = $commande->fresh();
+
+        $this->assertSame('LIVREE', $commandeFinale->statutCommande->code);
+        $this->assertSame('livree', $livraison->fresh()->statut);
+        $this->assertSame('terminee', $attribution->fresh()->statut);
+        $this->assertNotNull($commandeFinale->pin_valide_at);
+        $this->assertDatabaseHas('historique_commandes', [
+            'commande_id' => $commandeFinale->id,
+            'statut_id' => DB::table('statuts_commandes')->where('code', 'LIVREE')->value('id'),
+            'user_id' => $scenario['livreur']->id,
+            'commentaire' => 'Livraison validée par PIN.',
+        ]);
+    }
+
 }
