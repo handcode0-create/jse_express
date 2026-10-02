@@ -1,106 +1,79 @@
-import { ArrowLeft } from "lucide-react";
 import { router } from "@inertiajs/react";
+import { ArrowLeft, CheckCircle2, ShieldCheck } from "lucide-react";
+
+const sections = [
+    {
+        title: "Données collectées",
+        text: "JSE Express collecte les informations que vous renseignez lors de la création et de l'utilisation de votre compte : nom, prénom, numéro de téléphone, adresse e-mail lorsqu'elle est fournie, informations propres au restaurant ou au profil livreur, ainsi que les informations nécessaires aux commandes et à la livraison.",
+    },
+    {
+        title: "Utilisation des données",
+        text: "Ces informations servent à créer et sécuriser votre compte, identifier votre profil (client, restaurant ou livreur), traiter les commandes, organiser la livraison, assurer le suivi des opérations et vous transmettre les notifications liées à votre activité sur JSE Express.",
+    },
+    {
+        title: "Adresses et commandes",
+        text: "Les adresses de livraison, informations de commande et éléments nécessaires au traitement d'une livraison sont associés à votre compte afin de permettre l'exécution du service.",
+    },
+    {
+        title: "Paiement et services externes",
+        text: "Lorsque les fonctionnalités de paiement mobile ou d'envoi de SMS sont activées, les données strictement nécessaires à leur fonctionnement peuvent être transmises au prestataire concerné. Les intégrations externes sont activées et configurées séparément par JSE Express.",
+    },
+    {
+        title: "Sécurité",
+        text: "Les mots de passe sont enregistrés sous forme hachée. L'accès aux espaces Client, Restaurant, Livreur et Administrateur est contrôlé selon le rôle du compte. Des mécanismes de protection contre les soumissions automatisées peuvent également être utilisés lors de l'inscription.",
+    },
+    {
+        title: "Vos droits",
+        text: "Vous pouvez demander l'accès, la rectification ou la mise à jour des informations associées à votre compte. Pour toute demande concernant vos données, utilisez les moyens de contact officiels de JSE Express.",
+    },
+];
 
 export default function PolitiqueConfidentialite() {
     return (
-        <main className="min-h-screen bg-jse-fond text-jse-texte">
-            <div className="mx-auto w-full max-w-4xl px-5 py-8 sm:px-8 lg:px-10">
-                {/* En-tête */}
-                <div className="mb-10">
+        <main className="min-h-screen bg-[#07110F] px-4 py-6 font-sans text-white sm:px-6 lg:px-10">
+            <div className="mx-auto max-w-5xl">
+                <header className="flex items-center justify-between gap-4">
                     <button
                         type="button"
                         onClick={() => router.visit("/authentification")}
-                        className="mb-8 flex items-center gap-2 text-sm font-medium text-jse-texte/55 transition hover:text-jse-principal"
+                        className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm text-white/70 transition hover:bg-white/[0.09] hover:text-white"
                     >
-                        <ArrowLeft size={18} />
-                        Retour à l'authentification
+                        <ArrowLeft size={16} />
+                        Retour
                     </button>
+                    <img src="/assets/jse_logo.png" alt="JSE Express" className="h-10 w-auto object-contain" />
+                </header>
 
-                    <div className="mb-6">
-                        <img
-                            src="/assets/jse_logo.png"
-                            alt="JSE Express"
-                            className="h-16 w-auto object-contain"
-                        />
+                <section className="mt-10 overflow-hidden rounded-[30px] border border-white/10 bg-[#0B1513]/95 shadow-[0_30px_100px_rgba(0,0,0,.4)]">
+                    <div className="border-b border-white/10 bg-gradient-to-br from-[#123C32] to-[#0B1513] p-7 sm:p-10">
+                        <div className="flex size-12 items-center justify-center rounded-2xl bg-jse-secondaire/15 text-jse-secondaire">
+                            <ShieldCheck size={24} />
+                        </div>
+                        <p className="mt-6 text-[11px] font-bold uppercase tracking-[.24em] text-jse-secondaire">JSE EXPRESS</p>
+                        <h1 className="mt-3 font-against text-4xl leading-tight text-[#FFF7E8] sm:text-5xl">Politique de confidentialité</h1>
+                        <p className="mt-5 max-w-3xl text-sm leading-7 text-white/60">
+                            Cette page présente les données utilisées par JSE Express dans le cadre du service de commande et de livraison.
+                        </p>
                     </div>
 
-                    <p className="mb-2 text-sm font-semibold text-jse-secondaire">
-                        JSE Express
-                    </p>
-
-                    <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                        Politique de confidentialité
-                    </h1>
-
-                    <p className="mt-3 text-sm leading-6 text-jse-texte/55">
-                        Informations relatives à la confidentialité et au
-                        traitement des données personnelles sur JSE Express.
-                    </p>
-                </div>
-
-                {/* Contenu temporaire */}
-                <div className="rounded-3xl border border-jse-texte/10 bg-white p-6 shadow-sm sm:p-8">
-                    <div className="space-y-8">
-                        <section>
-                            <h2 className="mb-3 text-lg font-bold">
-                                1. Introduction
-                            </h2>
-
-                            <p className="text-sm leading-7 text-jse-texte/65">
-                                Cette page est destinée à présenter la politique
-                                de confidentialité applicable à JSE Express.
-                            </p>
-                        </section>
-
-                        <section>
-                            <h2 className="mb-3 text-lg font-bold">
-                                2. Données personnelles
-                            </h2>
-
-                            <p className="text-sm leading-7 text-jse-texte/65">
-                                Le contenu définitif relatif aux données
-                                collectées, à leur utilisation, à leur
-                                conservation et aux droits des utilisateurs sera
-                                ajouté dans cette section.
-                            </p>
-                        </section>
-
-                        <section>
-                            <h2 className="mb-3 text-lg font-bold">
-                                3. Consentement
-                            </h2>
-
-                            <p className="text-sm leading-7 text-jse-texte/65">
-                                Le consentement de l'utilisateur est demandé
-                                lors de l'utilisation des formulaires
-                                d'authentification de JSE Express.
-                            </p>
-                        </section>
-
-                        <section>
-                            <h2 className="mb-3 text-lg font-bold">
-                                4. Contact
-                            </h2>
-
-                            <p className="text-sm leading-7 text-jse-texte/65">
-                                Les informations de contact relatives aux
-                                demandes concernant la confidentialité seront
-                                ajoutées avec la version définitive de cette
-                                politique.
-                            </p>
-                        </section>
+                    <div className="grid gap-4 p-5 sm:p-8 lg:grid-cols-2">
+                        {sections.map((section) => (
+                            <article key={section.title} className="rounded-2xl border border-white/10 bg-white/[0.035] p-5">
+                                <div className="flex items-start gap-3">
+                                    <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-jse-secondaire" />
+                                    <div>
+                                        <h2 className="font-semibold text-[#FFF7E8]">{section.title}</h2>
+                                        <p className="mt-2 text-sm leading-6 text-white/55">{section.text}</p>
+                                    </div>
+                                </div>
+                            </article>
+                        ))}
                     </div>
-                </div>
 
-                <div className="mt-8">
-                    <button
-                        type="button"
-                        onClick={() => router.visit("/authentification")}
-                        className="rounded-2xl bg-jse-principal px-6 py-3 text-sm font-semibold text-white transition hover:bg-jse-principal/90"
-                    >
-                        Retour à l'authentification
-                    </button>
-                </div>
+                    <div className="border-t border-white/10 px-5 py-6 text-xs leading-6 text-white/40 sm:px-8">
+                        Les modalités précises relatives aux prestataires externes seront précisées lorsque les intégrations concernées seront activées.
+                    </div>
+                </section>
             </div>
         </main>
     );
