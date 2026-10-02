@@ -23,11 +23,10 @@ class AdministrationCommandeTest extends TestCase
             'ordre' => 1,
         ]);
 
-        $annulee = StatutCommande::factory()->create([
-            'code' => 'ANNULEE',
-            'libelle' => 'Annulée',
-            'ordre' => 99,
-        ]);
+        $annulee = StatutCommande::query()->firstOrCreate(
+            ['code' => 'ANNULEE'],
+            ['libelle' => 'Annulée', 'ordre' => 99]
+        );
 
         $commande = Commande::factory()->create([
             'statut_id' => $enAttente->id,
