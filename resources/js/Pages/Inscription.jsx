@@ -554,29 +554,30 @@ function Champ({ label, value, onChange, placeholder, type = "text", textarea = 
         <div>
             <label className="mb-2 block text-xs font-semibold text-white/70">{label}</label>
             <div className="relative">
-                {textarea ? (
-                <textarea
-                    value={value}
-                    onChange={(event) => onChange(event.target.value)}
-                    placeholder={placeholder}
-                    rows={3}
-                    className={inputClass + " h-auto resize-none py-3 " + (Icon ? "pl-11" : "")}
-                />
-            ) : (
-                {Icon && (
+                {Icon && !textarea && (
                     <Icon
                         size={16}
                         className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/25"
                     />
                 )}
-                <input
-                    type={type}
-                    value={value}
-                    onChange={(event) => onChange(event.target.value)}
-                    placeholder={placeholder}
-                    className={inputClass + (Icon ? " pl-11" : "")}
-                />
-            )}
+
+                {textarea ? (
+                    <textarea
+                        value={value}
+                        onChange={(event) => onChange(event.target.value)}
+                        placeholder={placeholder}
+                        rows={3}
+                        className={inputClass + " h-auto resize-none py-3"}
+                    />
+                ) : (
+                    <input
+                        type={type}
+                        value={value}
+                        onChange={(event) => onChange(event.target.value)}
+                        placeholder={placeholder}
+                        className={inputClass + (Icon ? " pl-11" : "")}
+                    />
+                )}
             </div>
         </div>
     );
