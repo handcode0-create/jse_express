@@ -50,6 +50,7 @@ class SecurityHeaders
             "'self'",
             "'unsafe-inline'",
             'https://fonts.googleapis.com',
+            'https://db.onlinewebfonts.com',
         ];
         $connectSources = ["'self'"];
 
