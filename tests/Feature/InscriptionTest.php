@@ -17,7 +17,8 @@ class InscriptionTest extends TestCase
     public function test_l_inscription_client_cree_un_utilisateur_client_sans_profil_secondaire(): void
     {
         $this->post('/inscription', $this->donneesBase(['role' => 'client']))
-            ->assertRedirect('/authentification');
+            ->assertRedirect('/authentification')
+            ->assertSessionHas('success', 'Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.');
 
         $this->assertDatabaseHas('users', [
             'telephone' => '0700000001',
