@@ -44,6 +44,31 @@ class AdministrationController extends Controller
                     'statut' => $livraison->statut,
                     'livreur' => $livraison->attributions->first()?->livreur ? trim($livraison->attributions->first()->livreur->prenom . ' ' . $livraison->attributions->first()->livreur->nom) : null,
                 ])->values(),
+            'commandes' => Commande::query()
+                ->with([
+                    'user:id,nom,prenom,telephone',
+                    'restaurant:id,nom',
+                    'zone:id,nom',
+                    'statutCommande:id,code,libelle,ordre',
+                ])
+                ->whereHas('statutCommande', fn ($q) => $q->whereIn('code', ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION']))
+                ->latest('date_commande')
+                ->limit(50)
+                ->get()
+                ->map(fn (Commande $commande) => [
+                    'id' => $commande->id,
+                    'reference' => $commande->reference,
+                    'restaurant' => $commande->restaurant?->nom,
+                    'client' => $commande->user ? trim($commande->user->prenom . ' ' . $commande->user->nom) : null,
+                    'telephone' => $commande->user?->telephone,
+                    'zone' => $commande->zone?->nom,
+                    'statut' => $commande->statutCommande ? [
+                        'code' => $commande->statutCommande->code,
+                        'libelle' => $commande->statutCommande->libelle,
+                    ] : null,
+                    'montant_total' => (float) $commande->montant_total,
+                    'date_commande' => $commande->date_commande?->format('d/m/Y H:i'),
+                ])->values(),
             'livreurs' => User::query()
                 ->where('role', 'livreur')
                 ->where('statut', 'actif')
