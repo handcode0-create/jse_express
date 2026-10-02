@@ -126,7 +126,7 @@ export default function TableauDeBord({
         <>
             <Head title="Administration — JSE Express" />
 
-            <main className="min-h-screen overflow-x-hidden bg-jse-theme-bg pb-24 text-jse-theme-text lg:pb-0">
+            <main className="min-h-screen overflow-x-hidden bg-jse-theme-bg pb-[calc(96px+env(safe-area-inset-bottom))] text-jse-theme-text lg:pb-0">
                 <div className="flex min-h-screen flex-col lg:flex-row">
                     <AdminSidebar utilisateur={utilisateur} />
 
@@ -140,7 +140,7 @@ export default function TableauDeBord({
                                     <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-jse-secondaire sm:text-xs">
                                         JSE Express
                                     </p>
-                                    <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-jse-theme-text sm:mt-2 sm:text-4xl">
+                                    <h1 className="mt-1.5 break-words text-2xl font-semibold leading-tight tracking-tight text-jse-theme-text sm:mt-2 sm:text-4xl">
                                         Bonjour {utilisateur?.prenom || "Administrateur"}
                                     </h1>
                                     <p className="mt-1.5 max-w-2xl text-xs leading-5 text-jse-theme-muted sm:mt-2 sm:text-sm">
