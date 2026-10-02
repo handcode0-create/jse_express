@@ -69,6 +69,30 @@ export default function Inscription() {
     });
 
     const erreurs = useMemo(() => Object.values(errors || {}), [errors]);
+
+    const erreursEtape = useMemo(() => {
+        const toutes = errors || {};
+        const keys = Object.keys(toutes);
+
+        if (etape === 1) {
+            return keys
+                .filter((key) => key === "role")
+                .map((key) => toutes[key]);
+        }
+
+        if (etape === 2) {
+            const prefixos = data.role === "restaurant" ? ["restaurant_"] : data.role === "livreur" ? ["livreur_"] : [];
+            return keys
+                .filter((key) => prefixos.some((prefix) => key.startsWith(prefix)))
+                .map((key) => toutes[key]);
+        }
+
+        const profilKeys = ["restaurant_", "livreur_"];
+        return keys
+            .filter((key) => key !== "role" && !profilKeys.some((prefix) => key.startsWith(prefix)))
+            .map((key) => toutes[key]);
+    }, [errors, etape, data.role]);
+
     const roleSelectionne = roles.find((role) => role.value === data.role);
 
     useEffect(() => {
@@ -85,8 +109,14 @@ export default function Inscription() {
     const modifier = (champ, valeur) => setData(champ, valeur);
 
     const continuer = () => {
-        if (etape === 1 && data.role) setEtape(2);
-        else if (etape === 2) setEtape(3);
+        if (etape === 1 && data.role) {
+            setEtape(2);
+            return;
+        }
+
+        if (etape === 2) {
+            setEtape(3);
+        }
     };
 
     const soumettre = (event) => {
@@ -227,9 +257,9 @@ export default function Inscription() {
                                 </div>
                             </div>
 
-                            {erreurs.length > 0 && (
+                            {erreursEtape.length > 0 && (
                                 <div className="mb-5 rounded-xl border border-red-400/20 bg-red-400/5 p-3 text-xs leading-5 text-red-300">
-                                    {erreurs.map((erreur, index) => (
+                                    {erreursEtape.map((erreur, index) => (
                                         <p key={index}>{erreur}</p>
                                     ))}
                                 </div>
