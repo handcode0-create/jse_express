@@ -9,6 +9,7 @@ use App\Models\Livraison;
 use App\Models\Notification;
 use App\Models\ProfilLivreur;
 use App\Models\Restaurant;
+use App\Models\StatutCommande;
 use App\Models\User;
 use App\Models\Zone;
 use App\Services\LivraisonService;
@@ -33,11 +34,10 @@ class PinLivraisonTest extends TestCase
             ['LIVREE', 'Livrée', 6],
             ['ANNULEE', 'Annulée', 7],
         ] as [$code, $libelle, $ordre]) {
-            DB::table('statuts_commandes')->insert([
-                'code' => $code,
-                'libelle' => $libelle,
-                'ordre' => $ordre,
-            ]);
+            StatutCommande::query()->updateOrCreate(
+                ['code' => $code],
+                ['libelle' => $libelle, 'ordre' => $ordre],
+            );
         }
     }
 
