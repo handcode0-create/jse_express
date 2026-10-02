@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import PhotoProfil from "../Profil/PhotoProfil";
 import ThemeToggle from "../Interface/ThemeToggle";
+import NavigationFlottante from "../Navigation/NavigationFlottante";
 
 const sections = [
     {
@@ -180,5 +181,6 @@ export default function AdminSidebar({ utilisateur }) {
                 </button>
             </div>
         </aside>
+        <NavigationFlottante type="admin" />
     );
 }
