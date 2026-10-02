@@ -110,6 +110,7 @@ class LivraisonService
                 ->where('zone_id', $livraison->zone_id)
                 ->where('disponibilite', 'disponible')
                 ->whereHas('user', fn ($query) => $query->where('role', 'livreur')->where('statut', 'actif'))
+                ->lockForUpdate()
                 ->firstOrFail();
 
             $dejaActif = AttributionLivraison::query()
