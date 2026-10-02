@@ -5,9 +5,10 @@ import { AlertTriangle, CheckCircle2, Clock3, PackageCheck, RefreshCw, Truck } f
 import PhotoProfil from '../../Composants/Profil/PhotoProfil';
 import ThemeToggle from '../../Composants/Interface/ThemeToggle';
 
-export default function TableauDeBord({ statistiques = {}, livraisons = [], livreurs = [] }) {
+export default function TableauDeBord({ statistiques = {}, livraisons = [], livreurs = [], commandes = [] }) {
     const [selection, setSelection] = useState({});
     const [motifs, setMotifs] = useState({});
+    const [motifsAnnulation, setMotifsAnnulation] = useState({});
     const [traitement, setTraitement] = useState(null);
     const { auth } = usePage().props;
     const utilisateur = auth?.user;
@@ -62,6 +63,69 @@ export default function TableauDeBord({ statistiques = {}, livraisons = [], livr
                             </section>
                         ))}
                     </div>
+
+                    <section className="mt-8 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+                        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                            <div>
+                                <h2 className="text-lg font-semibold">Commandes à surveiller</h2>
+                                <p className="mt-1 text-xs text-white/45">Commandes encore traitées par les restaurants et pouvant être annulées par l’administration.</p>
+                            </div>
+                            <span className="text-xs text-white/40">{commandes.length} commande(s)</span>
+                        </div>
+
+                        {commandes.length === 0 ? (
+                            <div className="mt-5 rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-white/45">
+                                Aucune commande en attente de traitement.
+                            </div>
+                        ) : (
+                            <div className="mt-5 space-y-3">
+                                {commandes.map((commande) => {
+                                    const motif = (motifsAnnulation[commande.id] || '').trim();
+                                    const identifiantTraitement = 'annulation-' + commande.id;
+                                    return (
+                                        <div key={commande.id} className="rounded-2xl border border-white/10 bg-black/10 p-4">
+                                            <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr_auto] lg:items-center">
+                                                <div>
+                                                    <p className="text-sm font-semibold">{commande.reference || ('Commande #' + commande.id)}</p>
+                                                    <p className="mt-1 text-xs text-white/45">{commande.restaurant || 'Restaurant'} · {commande.client || 'Client'} · {commande.zone || 'Zone non définie'}</p>
+                                                </div>
+                                                <div>
+                                                    <span className="inline-flex rounded-full bg-[#F28C28]/10 px-3 py-1.5 text-xs font-medium text-[#F28C28]">
+                                                        {commande.statut?.libelle || commande.statut?.code || 'En traitement'}
+                                                    </span>
+                                                    <p className="mt-2 text-xs text-white/35">{commande.date_commande || '—'} · {new Intl.NumberFormat('fr-FR').format(Number(commande.montant_total || 0))} FCFA</p>
+                                                </div>
+                                                <div className="flex flex-col gap-2 lg:min-w-[280px]">
+                                                    <input
+                                                        value={motifsAnnulation[commande.id] || ''}
+                                                        onChange={(event) => setMotifsAnnulation((etat) => ({ ...etat, [commande.id]: event.target.value }))}
+                                                        placeholder="Motif d'annulation"
+                                                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/25 outline-none focus:border-[#F28C28]"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        disabled={!motif || traitement === identifiantTraitement}
+                                                        onClick={() => {
+                                                            if (!window.confirm('Annuler la commande ' + commande.reference + ' ?')) return;
+                                                            setTraitement(identifiantTraitement);
+                                                            router.post('/administration/commandes/' + commande.id + '/annuler', { motif }, {
+                                                                preserveScroll: true,
+                                                                onFinish: () => setTraitement(null),
+                                                            });
+                                                        }}
+                                                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-2.5 text-sm font-semibold text-red-300 disabled:cursor-not-allowed disabled:opacity-40"
+                                                    >
+                                                        <AlertTriangle size={15} />
+                                                        {traitement === identifiantTraitement ? 'Annulation…' : 'Annuler la commande'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </section>
 
                     <section className="mt-8 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
                         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
