@@ -55,6 +55,7 @@ class SecurityHeaders
             $scriptSources[] = 'http://127.0.0.1:5173';
             $scriptSources[] = 'http://[::1]:5173';
             $scriptSources[] = "'unsafe-inline'";
+            $scriptSources[] = "'unsafe-eval'";
             $styleSources[] = 'http://localhost:5173';
             $styleSources[] = 'http://127.0.0.1:5173';
             $styleSources[] = 'http://[::1]:5173';
