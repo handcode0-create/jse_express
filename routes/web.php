@@ -141,6 +141,21 @@ Route::prefix('administration')
         Route::get('/tableau-de-bord', [AdministrationController::class, 'tableauDeBord'])
             ->name('admin.tableau-de-bord');
 
+        Route::get('/commandes', [AdministrationController::class, 'commandes'])
+            ->name('admin.commandes');
+        Route::get('/livraisons', [AdministrationController::class, 'livraisons'])
+            ->name('admin.livraisons');
+        Route::get('/clients', [AdministrationController::class, 'clients'])
+            ->name('admin.clients');
+        Route::get('/restaurants', [AdministrationController::class, 'restaurants'])
+            ->name('admin.restaurants');
+        Route::get('/livreurs', [AdministrationController::class, 'livreurs'])
+            ->name('admin.livreurs');
+        Route::get('/zones', [AdministrationController::class, 'zones'])
+            ->name('admin.zones');
+        Route::get('/notifications', [AdministrationController::class, 'notifications'])
+            ->name('admin.notifications');
+
         Route::post('/commandes/{commande}/annuler', [AdministrationController::class, 'annulerCommande'])
             ->whereNumber('commande')
             ->name('admin.commandes.annuler');
