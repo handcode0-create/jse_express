@@ -51,7 +51,7 @@ export default function AdminDataPage({ utilisateur,title,description,search="",
                                         const estAction=column.key==="actions"; const estPrincipal=columnIndex===0;
                                         return <div key={column.key} className={["min-w-0",columnIndex>0?"mt-3":"",estAction?"border-t border-jse-theme-border pt-3":""].join(" ")}>
                                             {!estPrincipal && <p className="text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-jse-theme-muted">{column.label}</p>}
-                                            <div className={["mt-1 min-w-0 break-words text-sm text-jse-theme-text",estPrincipal?"text-base font-semibold":"","estAction?"w-full":""].join(" ")}>{column.render ? column.render(row) : row[column.key]}</div>
+                                            <div className={["mt-1 min-w-0 break-words text-sm text-jse-theme-text",estPrincipal?"text-base font-semibold":"",estAction?"w-full":""].join(" ")}>{column.render ? column.render(row) : row[column.key]}</div>
                                         </div>;
                                     })}
                                 </article>)}
