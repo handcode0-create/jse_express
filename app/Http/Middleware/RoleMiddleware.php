@@ -12,7 +12,7 @@ class RoleMiddleware
     {
         $utilisateur = $request->user();
 
-        abort_unless($utilisateur && in_array($utilisateur->role, $roles, true), 403);
+        abort_unless($utilisateur && $utilisateur->statut === 'actif' && in_array($utilisateur->role, $roles, true), 403);
 
         return $next($request);
     }
