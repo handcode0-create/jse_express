@@ -156,6 +156,20 @@ Route::prefix('administration')
         Route::get('/notifications', [AdministrationController::class, 'notifications'])
             ->name('admin.notifications');
 
+        Route::get('/utilisateurs', [AdministrationController::class, 'utilisateurs'])
+            ->name('admin.utilisateurs');
+        Route::post('/utilisateurs', [AdministrationController::class, 'creerUtilisateur'])
+            ->name('admin.utilisateurs.creer');
+        Route::patch('/utilisateurs/{user}', [AdministrationController::class, 'modifierUtilisateur'])
+            ->whereNumber('user')
+            ->name('admin.utilisateurs.modifier');
+        Route::patch('/utilisateurs/{user}/role', [AdministrationController::class, 'changerRole'])
+            ->whereNumber('user')
+            ->name('admin.utilisateurs.role');
+        Route::patch('/utilisateurs/{user}/statut', [AdministrationController::class, 'changerStatutUtilisateur'])
+            ->whereNumber('user')
+            ->name('admin.utilisateurs.statut');
+
         Route::post('/commandes/{commande}/annuler', [AdministrationController::class, 'annulerCommande'])
             ->whereNumber('commande')
             ->name('admin.commandes.annuler');
