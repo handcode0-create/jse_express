@@ -165,6 +165,27 @@ export default function TableauDeBord() {
         setModal("options");
     };
 
+    const ouvrirEditionProduit = (item) => {
+        setProduitSelectionne(item);
+        setProduit({
+            nom: item.nom || "",
+            description: item.description || "",
+            prix: item.prix ?? "",
+            categorie_id: item.categorie?.id || "",
+            image: item.image || "",
+        });
+        setModal("modifier-produit");
+    };
+
+    const sauvegarderProduit = (event) => {
+        event.preventDefault();
+        if (!produitSelectionne) return;
+
+        executer("patch", `/restaurant/produits/${produitSelectionne.id}`, produit);
+        setProduit({ nom: "", description: "", prix: "", categorie_id: "", image: "" });
+        setProduitSelectionne(null);
+    };
+
     const ajouterGroupeOption = (configuration = null) => {
         setOptionsProduit((groupes) => [
             ...groupes,
@@ -644,9 +665,14 @@ export default function TableauDeBord() {
                                                         <span className={`rounded-full px-2.5 py-1 text-[8px] font-semibold backdrop-blur-md ${item.disponible ? "bg-jse-secondaire text-jse-texte" : "bg-black/60 text-white/60"}`}>
                                                             {item.disponible ? "Disponible" : "Indisponible"}
                                                         </span>
-                                                        <button type="button" onClick={(event) => { event.stopPropagation(); executer("patch", `/restaurant/produits/${item.id}/disponibilite`); }} className={`flex size-9 items-center justify-center rounded-full border border-white/10 backdrop-blur-md ${item.disponible ? "bg-black/35 text-white" : "bg-black/60 text-white/45"}`} aria-label="Changer la disponibilité">
-                                                            <Power size={15} />
-                                                        </button>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <button type="button" onClick={(event) => { event.stopPropagation(); ouvrirEditionProduit(item); }} className="flex size-9 items-center justify-center rounded-full border border-white/10 bg-black/35 text-white backdrop-blur-md" aria-label="Modifier le produit">
+                                                                <Settings size={15} />
+                                                            </button>
+                                                            <button type="button" onClick={(event) => { event.stopPropagation(); executer("patch", `/restaurant/produits/${item.id}/disponibilite`); }} className={`flex size-9 items-center justify-center rounded-full border border-white/10 backdrop-blur-md ${item.disponible ? "bg-black/35 text-white" : "bg-black/60 text-white/45"}`} aria-label="Changer la disponibilité">
+                                                                <Power size={15} />
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div className="p-4">
@@ -674,7 +700,7 @@ export default function TableauDeBord() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/30">JSE Express</p>
-                                <h2 className="mt-1 font-against text-2xl">{modal === "options" ? "Options du produit" : modal === "produit" ? "Ajouter un produit" : "Ajouter une catégorie"}</h2>
+                                <h2 className="mt-1 font-against text-2xl">{modal === "options" ? "Options du produit" : modal === "modifier-produit" ? "Modifier le produit" : modal === "produit" ? "Ajouter un produit" : "Ajouter une catégorie"}</h2>
                             </div>
                             <button type="button" onClick={() => setModal(null)} className="flex size-9 items-center justify-center rounded-full bg-white/7"><X size={16} /></button>
                         </div>
@@ -920,8 +946,22 @@ export default function TableauDeBord() {
                                     {chargement ? "Enregistrement..." : "Enregistrer les options"}
                                 </button>
                             </form>
+                        ) : modal === "modifier-produit" ? (
+                            <form onSubmit={sauvegarderProduit} className="mt-6 space-y-4">
+                                <ChampDark value={produit.nom} onChange={(e) => setProduit({ ...produit, nom: e.target.value })} placeholder="Nom du produit" required />
+                                <div className="grid grid-cols-2 gap-3">
+                                    <ChampDark type="number" min="0" step="50" value={produit.prix} onChange={(e) => setProduit({ ...produit, prix: e.target.value })} placeholder="Prix (FCFA)" required />
+                                    <select value={produit.categorie_id} onChange={(e) => setProduit({ ...produit, categorie_id: e.target.value })} className="h-11 w-full rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-white outline-none focus:border-jse-accent">
+                                        <option className="bg-[#101215]" value="">Sans catégorie</option>
+                                        {categories.map((item) => <option className="bg-[#101215]" key={item.id} value={item.id}>{item.nom}</option>)}
+                                    </select>
+                                </div>
+                                <textarea value={produit.description} onChange={(e) => setProduit({ ...produit, description: e.target.value })} placeholder="Description (facultatif)" className="min-h-24 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-jse-accent" />
+                                <ChampDark value={produit.image} onChange={(e) => setProduit({ ...produit, image: e.target.value })} placeholder="URL de l'image (facultatif)" />
+                                <button disabled={chargement} className="h-11 w-full rounded-xl bg-jse-accent text-[10px] font-semibold disabled:opacity-50">{chargement ? "Enregistrement..." : "Enregistrer les modifications"}</button>
+                            </form>
                         ) : modal === "categorie" ? (
-                            <form onSubmit={creerCategorie} className="mt-6 space-y-4">
+                            <form onSubmit={creerCategorie className="mt-6 space-y-4">
                                 <ChampDark value={categorie.nom} onChange={(e) => setCategorie({ ...categorie, nom: e.target.value })} placeholder="Nom de la catégorie" required />
                                 <textarea value={categorie.description} onChange={(e) => setCategorie({ ...categorie, description: e.target.value })} placeholder="Description (facultatif)" className="min-h-24 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-jse-accent" />
                                 <button disabled={chargement} className="h-11 w-full rounded-xl bg-jse-accent text-[10px] font-semibold disabled:opacity-50">Créer la catégorie</button>
