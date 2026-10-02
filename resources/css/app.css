@@ -74,7 +74,10 @@ body {
     color: var(--jse-theme-text);
 }
 
+.bg-jse-theme-bg { background: var(--jse-theme-bg); }
 .bg-jse-theme-surface { background: var(--jse-theme-surface); }
+.bg-jse-theme-surface-soft { background: var(--jse-theme-surface-soft); }
+.text-jse-theme-muted { color: var(--jse-theme-muted); }
 .text-jse-theme-text { color: var(--jse-theme-text); }
 .border-jse-theme-border { border-color: var(--jse-theme-border); }
 /* Surfaces qui restent volontairement sombres dans le mode clair. */
