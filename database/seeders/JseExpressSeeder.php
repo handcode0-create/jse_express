@@ -26,6 +26,8 @@ class JseExpressSeeder extends Seeder
 {
     public function run(): void
     {
+        // Les zones de référence sont identifiées par leur nom métier.
+        // Cette écriture est idempotente et évite toute recréation à chaque seeding.
         $zoneCentre = Zone::query()->updateOrCreate(
             ['nom' => 'Centre'],
             [

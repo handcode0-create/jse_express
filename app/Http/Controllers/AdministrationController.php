@@ -294,9 +294,34 @@ class AdministrationController extends Controller
     public function zones(Request $request): Response
     {
         $recherche=trim((string)$request->query('recherche',''));
-        $zones=Zone::query()->with('zoneParent:id,nom')->withCount(['restaurants','livraisons'])->when($recherche!=='',fn($q)=>$q->where('nom','like','%'.$recherche.'%'))->orderBy('nom')->limit(100)->get();
-        $livreurs=User::query()->where('role','livreur')->where('statut','actif')->with('profilLivreur')->get()->groupBy(fn(User $u)=>$u->profilLivreur?->zone_id);
-        $zones=$zones->map(fn(Zone $z)=>['id'=>$z->id,'nom'=>$z->nom,'parent'=>$z->zoneParent?->nom,'statut'=>$z->statut,'restaurants_count'=>(int)$z->restaurants_count,'livreurs_count'=>(int)($livreurs->get($z->id)?->count()??0),'livreurs_disponibles'=>(int)($livreurs->get($z->id)?->filter(fn(User $u)=>$u->profilLivreur?->disponibilite==='disponible')->count()??0),'livraisons_actives'=>(int)$z->livraisons_count])->values();
+        $zones=Zone::query()
+            ->with('zoneParent:id,nom')
+            ->withCount([
+                'restaurants',
+                'livraisons as livraisons_actives' => fn($q) => $q->whereIn('statut', ['en_attente', 'attribuee', 'en_cours']),
+            ])
+            ->when($recherche!=='',fn($q)=>$q->where('nom','like','%'.$recherche.'%'))
+            ->orderBy('nom')
+            ->limit(100)
+            ->get();
+
+        $livreurs=User::query()
+            ->where('role','livreur')
+            ->where('statut','actif')
+            ->with('profilLivreur')
+            ->get()
+            ->groupBy(fn(User $u)=>$u->profilLivreur?->zone_id);
+
+        $zones=$zones->map(fn(Zone $z)=>[
+            'id'=>$z->id,
+            'nom'=>$z->nom,
+            'parent'=>$z->zoneParent?->nom,
+            'statut'=>$z->statut,
+            'restaurants_count'=>(int)$z->restaurants_count,
+            'livreurs_count'=>(int)($livreurs->get($z->id)?->count()??0),
+            'livreurs_disponibles'=>(int)($livreurs->get($z->id)?->filter(fn(User $u)=>$u->profilLivreur?->disponibilite==='disponible')->count()??0),
+            'livraisons_actives'=>(int)$z->livraisons_actives,
+        ])->values();
         return Inertia::render('Admin/Zones',['utilisateur'=>$request->user(),'zones'=>$zones,'recherche'=>$recherche]);
     }
 
