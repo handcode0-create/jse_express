@@ -270,4 +270,56 @@ class AdministrationController extends Controller
         return Inertia::render('Admin/Notifications',['utilisateur'=>$request->user(),'notifications'=>$notifications,'recherche'=>$recherche]);
     }
 
+
+    public function changerStatutClient(Request $request, User $user): RedirectResponse
+    {
+        abort_unless($user->role === 'client', 404);
+
+        $nouveauStatut = $user->statut === 'actif' ? 'inactif' : 'actif';
+        $user->update(['statut' => $nouveauStatut]);
+
+        return back()->with('success', 'Le statut du client a été mis à jour.');
+    }
+
+    public function changerStatutRestaurant(Restaurant $restaurant): RedirectResponse
+    {
+        $nouveauStatut = $restaurant->statut === 'actif' ? 'inactif' : 'actif';
+        $restaurant->update(['statut' => $nouveauStatut]);
+
+        return back()->with('success', 'Le statut du restaurant a été mis à jour.');
+    }
+
+    public function changerDisponibiliteLivreur(User $user): RedirectResponse
+    {
+        abort_unless($user->role === 'livreur', 404);
+
+        $profil = $user->profilLivreur;
+        abort_unless($profil, 404);
+
+        $nouvelleDisponibilite = $profil->disponibilite === 'disponible'
+            ? 'indisponible'
+            : 'disponible';
+
+        $profil->update(['disponibilite' => $nouvelleDisponibilite]);
+
+        return back()->with('success', 'La disponibilité du livreur a été mise à jour.');
+    }
+
+    public function changerStatutZone(Zone $zone): RedirectResponse
+    {
+        if ($zone->statut === 'actif') {
+            $aDesLivraisonsActives = $zone->livraisons()
+                ->whereIn('statut', ['en_attente', 'attribuee', 'en_cours'])
+                ->exists();
+
+            abort_if($aDesLivraisonsActives, 422, 'Cette zone possède encore des livraisons actives.');
+        }
+
+        $zone->update([
+            'statut' => $zone->statut === 'actif' ? 'inactif' : 'actif',
+        ]);
+
+        return back()->with('success', 'Le statut de la zone a été mis à jour.');
+    }
+
 }
