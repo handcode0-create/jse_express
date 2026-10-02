@@ -37,9 +37,7 @@ class SecurityHeadersTest extends TestCase
 
     public function test_hsts_est_active_sur_une_requete_https(): void
     {
-        $response = $this->withServerVariables([
-            'HTTPS' => 'on',
-        ])->get('/authentification');
+        $response = $this->get('https://localhost/authentification');
 
         $response->assertOk()
             ->assertHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
