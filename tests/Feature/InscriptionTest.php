@@ -21,14 +21,14 @@ class InscriptionTest extends TestCase
             ->assertSessionHas('success', 'Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.');
 
         $this->assertDatabaseHas('users', [
-            'telephone' => '225070000001',
+            'telephone' => '2250700000001',
             'role' => 'client',
             'statut' => 'actif',
         ]);
 
         $this->assertDatabaseCount('restaurants', 0);
         $this->assertDatabaseCount('profils_livreurs', 0);
-        $this->assertTrue(Hash::check('motdepasse123', User::where('telephone', '225070000001')->first()->password));
+        $this->assertTrue(Hash::check('motdepasse123', User::where('telephone', '2250700000001')->first()->password));
     }
 
     public function test_l_inscription_restaurant_cree_l_utilisateur_et_son_profil_restaurant(): void
