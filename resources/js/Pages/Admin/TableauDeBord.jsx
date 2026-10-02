@@ -130,7 +130,7 @@ export default function TableauDeBord({
                 <div className="flex min-h-screen flex-col lg:flex-row">
                     <AdminSidebar utilisateur={utilisateur} />
 
-                    <section className="min-w-0 flex-1">
+                    <section className="min-w-0 flex-1 lg:ml-[238px]">
                         <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
                             <header
                                 id="vue-ensemble"
