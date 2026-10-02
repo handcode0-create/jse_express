@@ -36,7 +36,7 @@ const roles = [
 ];
 
 const inputClass =
-    "h-13 w-full rounded-2xl border border-jse-texte/10 bg-white px-4 text-sm outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10";
+    "h-12 w-full rounded-xl border border-white/10 bg-white/[0.045] px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-jse-secondaire/70 focus:bg-white/[0.065] focus:ring-4 focus:ring-jse-secondaire/10";
 
 export default function Inscription() {
     const { zones = [], errors = {} } = usePage().props;
@@ -98,13 +98,13 @@ export default function Inscription() {
     };
 
     return (
-        <main className="min-h-screen bg-[#FFF7E8] font-sans text-jse-texte">
-            <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-5 sm:px-8 lg:px-10">
+        <main className="relative min-h-screen overflow-hidden bg-[#07110F] font-sans text-white">\n            <img src="/assets/login_page_fond.png" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 size-full object-cover object-center" />\n            <div className="pointer-events-none absolute inset-0 bg-[#07110F]/78" />\n            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#123C32]/75 via-[#07110F]/70 to-[#07110F]/90" />\n            <div className="pointer-events-none absolute -left-32 top-20 size-96 rounded-full bg-jse-secondaire/15 blur-3xl" />\n            <div className="pointer-events-none absolute -bottom-40 right-0 size-[32rem] rounded-full bg-jse-accent/10 blur-3xl" />
+            <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-5 sm:px-8 lg:px-10">
                 <header className="flex items-center justify-between">
                     <button
                         type="button"
                         onClick={() => router.visit("/authentification")}
-                        className="flex items-center gap-2 text-sm font-medium text-jse-texte/55 transition hover:text-jse-principal"
+                        className="group flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-white/65 backdrop-blur-xl transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
                     >
                         <ArrowLeft size={18} />
                         Retour
@@ -113,13 +113,13 @@ export default function Inscription() {
                     <img
                         src="/assets/jse_logo.png"
                         alt="JSE Express"
-                        className="h-10 w-auto object-contain"
+                        className="h-11 w-auto object-contain"
                     />
                 </header>
 
                 <section className="flex flex-1 items-center justify-center py-10 lg:py-14">
-                    <div className="grid w-full max-w-5xl gap-8 lg:grid-cols-[0.72fr_1.28fr]">
-                        <aside className="hidden rounded-[2rem] bg-jse-principal p-8 text-white lg:flex lg:flex-col lg:justify-between">
+                    <div className="w-full max-w-5xl">
+                        <aside className="relative hidden min-h-[620px] overflow-hidden rounded-[2rem] border border-white/10 bg-[#123C32]/55 p-9 text-white shadow-2xl shadow-black/30 backdrop-blur-2xl lg:flex lg:flex-col lg:justify-between">
                             <div>
                                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-jse-secondaire">
                                     JSE Express
@@ -161,7 +161,7 @@ export default function Inscription() {
                             </div>
                         </aside>
 
-                        <div className="rounded-[2rem] border border-jse-texte/8 bg-white p-6 shadow-xl shadow-jse-principal/5 sm:p-9">
+                        <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#0B1513]/80 p-6 shadow-2xl shadow-black/30 backdrop-blur-2xl sm:p-9">
                             <div className="mb-8">
                                 <p className="text-sm font-semibold text-jse-secondaire">
                                     Étape {etape} sur 3
@@ -177,7 +177,7 @@ export default function Inscription() {
                                                 : "Votre profil client"
                                           : "Créons vos identifiants"}
                                 </h2>
-                                <p className="mt-3 text-sm leading-6 text-jse-texte/50">
+                                <p className="mt-3 text-sm leading-6 text-white/45">
                                     {etape === 1
                                         ? "Votre réponse détermine le profil créé dans JSE Express."
                                         : etape === 2
@@ -196,7 +196,7 @@ export default function Inscription() {
 
                             <form onSubmit={soumettre}>
                                 {etape === 1 && (
-                                    <div className="grid gap-3">
+                                    <div className="grid gap-3 sm:grid-cols-3">
                                         {roles.map((role) => {
                                             const Icon = role.icon;
                                             const active = data.role === role.value;
@@ -207,20 +207,20 @@ export default function Inscription() {
                                                     type="button"
                                                     onClick={() => modifier("role", role.value)}
                                                     className={
-                                                        "flex items-center gap-4 rounded-2xl border p-4 text-left transition " +
+                                                        "group relative min-h-[190px] rounded-2xl border p-5 text-left transition duration-200 " +
                                                         (active
-                                                            ? "border-jse-secondaire bg-jse-secondaire/8 ring-4 ring-jse-secondaire/10"
-                                                            : "border-jse-texte/10 hover:border-jse-secondaire/40 hover:bg-jse-principal/[0.025]")
+                                                            ? "border-jse-secondaire/70 bg-jse-secondaire/[0.09] shadow-lg shadow-jse-secondaire/5"
+                                                            : "border-white/10 bg-white/[0.025] hover:border-white/20 hover:bg-white/[0.05]")
                                                     }
                                                 >
-                                                    <span className={"flex size-12 shrink-0 items-center justify-center rounded-xl " + (active ? "bg-jse-secondaire text-jse-principal" : "bg-jse-principal/5 text-jse-principal")}>
+                                                    <span className={"flex size-12 shrink-0 items-center justify-center rounded-2xl " + (active ? "bg-jse-secondaire text-jse-principal" : "bg-jse-principal/5 text-jse-principal")}>
                                                         <Icon size={21} />
                                                     </span>
                                                     <span className="min-w-0 flex-1">
                                                         <span className="block text-sm font-bold">{role.title}</span>
-                                                        <span className="mt-1 block text-xs leading-5 text-jse-texte/50">{role.description}</span>
+                                                        <span className="mt-2 block text-xs leading-5 text-white/40">{role.description}</span>
                                                     </span>
-                                                    <span className={"flex size-6 items-center justify-center rounded-full border " + (active ? "border-jse-secondaire bg-jse-secondaire text-jse-principal" : "border-jse-texte/15")}>
+                                                    <span className={"absolute right-4 top-4 flex size-5 items-center justify-center rounded-full border " + (active ? "border-jse-secondaire bg-jse-secondaire text-jse-principal" : "border-jse-texte/15")}>
                                                         {active && <Check size={14} />}
                                                     </span>
                                                 </button>
@@ -232,7 +232,7 @@ export default function Inscription() {
                                 {etape === 2 && (
                                     <div className="space-y-5">
                                         {data.role === "client" && (
-                                            <div className="rounded-2xl bg-jse-principal/5 p-5 text-sm leading-6 text-jse-texte/60">
+                                            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm leading-6 text-white/45">
                                                 Votre profil client sera créé à partir de vos informations personnelles. Les adresses de livraison pourront être ajoutées ensuite depuis votre espace.
                                             </div>
                                         )}
@@ -252,7 +252,7 @@ export default function Inscription() {
                                                 <Champ label="Matricule livreur" value={data.livreur_matricule} onChange={(v) => modifier("livreur_matricule", v)} placeholder="Votre matricule" />
                                                 <Select label="Zone d'activité" value={data.livreur_zone_id} onChange={(v) => modifier("livreur_zone_id", v)} zones={zones} />
                                                 <div>
-                                                    <label className="mb-2 block text-sm font-semibold">Disponibilité</label>
+                                                    <label className="mb-2 block text-xs font-semibold text-white/70">Disponibilité</label>
                                                     <div className="grid grid-cols-2 gap-3">
                                                         {[
                                                             ["disponible", "Disponible"],
@@ -262,7 +262,7 @@ export default function Inscription() {
                                                                 key={value}
                                                                 type="button"
                                                                 onClick={() => modifier("livreur_disponibilite", value)}
-                                                                className={"rounded-2xl border px-4 py-3 text-sm font-semibold transition " + (data.livreur_disponibilite === value ? "border-jse-secondaire bg-jse-secondaire/10 text-jse-principal" : "border-jse-texte/10")}
+                                                                className={"rounded-2xl border px-4 py-3 text-sm font-semibold transition " + (data.livreur_disponibilite === value ? "border-jse-secondaire/60 bg-jse-secondaire/10 text-jse-secondaire" : "border-white/10 bg-white/[0.025] text-white/45 hover:bg-white/[0.05]")}
                                                             >
                                                                 {label}
                                                             </button>
@@ -286,7 +286,7 @@ export default function Inscription() {
                                         <PasswordChamp label="Mot de passe" value={data.mot_de_passe} onChange={(v) => modifier("mot_de_passe", v)} visible={afficherMotDePasse} toggle={() => setAfficherMotDePasse(!afficherMotDePasse)} />
                                         <PasswordChamp label="Confirmer le mot de passe" value={data.confirmation_mot_de_passe} onChange={(v) => modifier("confirmation_mot_de_passe", v)} visible={afficherConfirmation} toggle={() => setAfficherConfirmation(!afficherConfirmation)} />
                                         <label className="flex items-start gap-3 rounded-2xl bg-jse-principal/5 p-4 text-xs leading-5 text-jse-texte/55">
-                                            <input type="checkbox" checked={data.consentement} onChange={(e) => modifier("consentement", e.target.checked)} className="mt-1 size-4 accent-jse-principal" />
+                                            <input type="checkbox" checked={data.consentement} onChange={(e) => modifier("consentement", e.target.checked)} className="mt-1 size-4 accent-jse-secondaire" />
                                             <span>J’accepte la politique de confidentialité et consens au traitement de mes données personnelles par JSE Express.</span>
                                         </label>
                                     </div>
@@ -297,7 +297,7 @@ export default function Inscription() {
                                         type="button"
                                         onClick={() => setEtape((value) => Math.max(1, value - 1))}
                                         disabled={etape === 1}
-                                        className="flex h-12 items-center gap-2 rounded-full border border-jse-texte/10 px-5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-30"
+                                        className="flex h-11 items-center gap-2 rounded-full border border-white/10 bg-white/[0.025] px-5 text-sm font-semibold text-white/55 transition hover:bg-white/[0.06] hover:text-white disabled:pointer-events-none disabled:opacity-25"
                                     >
                                         <ChevronLeft size={18} />
                                         Retour
@@ -308,7 +308,7 @@ export default function Inscription() {
                                             type="button"
                                             onClick={continuer}
                                             disabled={etape === 1 && !data.role}
-                                            className="flex h-12 items-center gap-2 rounded-full bg-jse-principal px-6 text-sm font-semibold text-white transition hover:bg-jse-principal/90 disabled:cursor-not-allowed disabled:opacity-40"
+                                            className="flex h-11 items-center gap-2 rounded-full bg-jse-secondaire px-6 text-sm font-bold text-jse-principal transition hover:brightness-105 disabled:pointer-events-none disabled:opacity-35"
                                         >
                                             Continuer
                                             <ChevronRight size={18} />
@@ -317,7 +317,7 @@ export default function Inscription() {
                                         <button
                                             type="submit"
                                             disabled={processing}
-                                            className="flex h-12 items-center gap-2 rounded-full bg-jse-principal px-7 text-sm font-semibold text-white transition hover:bg-jse-principal/90 disabled:opacity-50"
+                                            className="flex h-11 items-center gap-2 rounded-full bg-jse-secondaire px-6 text-sm font-bold text-jse-principal transition hover:brightness-105 disabled:opacity-50"
                                         >
                                             {processing ? "Création..." : "Créer mon compte"}
                                             <Check size={18} />
@@ -351,7 +351,7 @@ function Select({ label, value, onChange, zones }) {
         <div>
             <label className="mb-2 block text-sm font-semibold">{label}</label>
             <div className="relative">
-                <MapPin size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-jse-texte/35" />
+                <MapPin size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
                 <select value={value} onChange={(e) => onChange(e.target.value)} className={inputClass + " appearance-none pl-11"}>
                     <option value="">Sélectionner une zone</option>
                     {zones.map((zone) => <option key={zone.id} value={zone.id}>{zone.nom}</option>)}
@@ -367,7 +367,7 @@ function PasswordChamp({ label, value, onChange, visible, toggle }) {
             <label className="mb-2 block text-sm font-semibold">{label}</label>
             <div className="relative">
                 <input type={visible ? "text" : "password"} value={value} onChange={(e) => onChange(e.target.value)} placeholder="8 caractères minimum" className={inputClass + " pr-12"} />
-                <button type="button" onClick={toggle} className="absolute right-4 top-1/2 -translate-y-1/2 text-jse-texte/35">
+                <button type="button" onClick={toggle} className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-white/35 transition hover:bg-white/5 hover:text-white">
                     {visible ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
             </div>
