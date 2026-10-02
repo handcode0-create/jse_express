@@ -15,7 +15,7 @@ export default function AdminSidebar({ utilisateur }) {
         <aside className="border-b border-jse-theme-border bg-jse-theme-surface lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r">
             <div className="flex h-full flex-col p-4 sm:p-5">
                 <div className="flex items-center justify-between gap-3">
-                    <img src="/assets/jse_logo.png" alt="JSE Express" className="h-10 w-auto object-contain" />
+                    <img src="/assets/jse_logo.png?v=20261002" alt="JSE Express" className="h-10 w-auto object-contain" />
                     <div className="lg:hidden"><ThemeToggle compact /></div>
                 </div>
                 <nav className="mt-8" aria-label="Navigation administration">
