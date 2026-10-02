@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -42,6 +43,10 @@ class AuthentificationController extends Controller
                 ->where('statut', 'actif')
                 ->orderBy('nom')
                 ->get(['id', 'nom']),
+            'captcha' => [
+                'enabled' => filled(config('services.recaptcha.site_key')) && filled(config('services.recaptcha.secret_key')),
+                'site_key' => config('services.recaptcha.site_key'),
+            ],
         ]);
     }
 
@@ -50,6 +55,35 @@ class AuthentificationController extends Controller
         if (Auth::check()) {
             return $this->redirectionApresConnexion();
         }
+
+        $captchaActif = filled(config('services.recaptcha.site_key')) && filled(config('services.recaptcha.secret_key'));
+
+        if ($captchaActif) {
+            $token = (string) $request->input('recaptcha_token');
+
+            if ($token === '') {
+                throw ValidationException::withMessages([
+                    'recaptcha_token' => 'Veuillez confirmer que vous n’êtes pas un robot.',
+                ]);
+            }
+
+            $verification = Http::asForm()
+                ->timeout(8)
+                ->post('https://www.google.com/recaptcha/api/siteverify', [
+                    'secret' => config('services.recaptcha.secret_key'),
+                    'response' => $token,
+                    'remoteip' => $request->ip(),
+                ]);
+
+            if (! $verification->successful() || ! $verification->json('success')) {
+                throw ValidationException::withMessages([
+                    'recaptcha_token' => 'La vérification CAPTCHA a échoué. Veuillez réessayer.',
+                ]);
+            }
+        }
+
+        $telephoneBrut = (string) $request->input('telephone');
+        $request->merge(['telephone' => $this->normaliserTelephone($telephoneBrut)]);
 
         $donnees = $request->validate([
             'role' => ['required', 'in:client,restaurant,livreur'],
@@ -60,6 +94,7 @@ class AuthentificationController extends Controller
             'mot_de_passe' => ['required', 'string', 'min:8'],
             'confirmation_mot_de_passe' => ['required', 'same:mot_de_passe'],
             'consentement' => ['accepted'],
+            'recaptcha_token' => [$captchaActif ? 'required' : 'nullable', 'string'],
 
             'restaurant_nom' => ['required_if:role,restaurant', 'string', 'max:150'],
             'restaurant_description' => ['nullable', 'string', 'max:2000'],
@@ -140,11 +175,13 @@ class AuthentificationController extends Controller
             'consentement.accepted' => 'Vous devez accepter la politique de confidentialité.',
         ]);
 
+        $telephone = $this->normaliserTelephone((string) $donnees['telephone']);
+
         $utilisateur = User::query()
-            ->where('telephone', $donnees['telephone'])
             ->where('statut', 'actif')
             ->whereIn('role', ['client', 'restaurant', 'livreur', 'administrateur'])
-            ->first();
+            ->get()
+            ->first(fn (User $user) => $this->normaliserTelephone((string) $user->telephone) === $telephone);
 
         if (! $utilisateur || ! Hash::check($donnees['mot_de_passe'], $utilisateur->password)) {
             throw ValidationException::withMessages([
@@ -156,6 +193,21 @@ class AuthentificationController extends Controller
         $request->session()->regenerate();
 
         return redirect()->to($this->routeApresConnexion($utilisateur));
+    }
+
+    private function normaliserTelephone(string $telephone): string
+    {
+        $telephone = preg_replace('/[^0-9]/', '', $telephone) ?? '';
+
+        if (str_starts_with($telephone, '00225')) {
+            $telephone = substr($telephone, 2);
+        }
+
+        if (str_starts_with($telephone, '0') && strlen($telephone) === 10) {
+            $telephone = '225' . substr($telephone, 1);
+        }
+
+        return $telephone;
     }
 
     private function routeApresConnexion(User $utilisateur): string
