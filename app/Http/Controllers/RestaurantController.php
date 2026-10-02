@@ -474,6 +474,43 @@ class RestaurantController extends Controller
         return back()->with('success', 'Produit ajouté au menu.');
     }
 
+    public function modifierProduit(Request $request, Produit $produit): RedirectResponse
+    {
+        $restaurant = $this->restaurant($request);
+
+        abort_unless((int) $produit->restaurant_id === (int) $restaurant->id, 404);
+
+        $donnees = $request->validate([
+            'categorie_id' => ['nullable', 'integer'],
+            'nom' => ['required', 'string', 'max:150'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'prix' => ['required', 'numeric', 'min:0'],
+            'image' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        if (! empty($donnees['categorie_id'])) {
+            abort_unless(
+                Categorie::query()
+                    ->whereKey($donnees['categorie_id'])
+                    ->where('restaurant_id', $restaurant->id)
+                    ->where('statut', 'actif')
+                    ->exists(),
+                422,
+                'Cette catégorie n’appartient pas à votre restaurant.'
+            );
+        }
+
+        $produit->update([
+            'categorie_id' => $donnees['categorie_id'] ?? null,
+            'nom' => $donnees['nom'],
+            'description' => $donnees['description'] ?? null,
+            'prix' => $donnees['prix'],
+            'image' => $donnees['image'] ?? null,
+        ]);
+
+        return back()->with('success', 'Produit mis à jour.');
+    }
+
     public function modifierOptionsProduit(Request $request, Produit $produit): RedirectResponse
     {
         $restaurant = $this->restaurant($request);
