@@ -360,7 +360,7 @@ export default function Authentification() {
 
                             <button
                                 type="button"
-                                onClick={() => changerMode("inscription")}
+                                onClick={() => router.visit("/inscription")}
                                 className={`rounded-xl px-4 py-3 text-sm font-semibold transition ${
                                     mode === "inscription"
                                         ? "bg-white text-jse-principal shadow-sm"
@@ -769,11 +769,9 @@ export default function Authentification() {
                             <button
                                 type="button"
                                 onClick={() =>
-                                    changerMode(
-                                        mode === "connexion"
-                                            ? "inscription"
-                                            : "connexion",
-                                    )
+                                    mode === "connexion"
+                                        ? router.visit("/inscription")
+                                        : changerMode("connexion")
                                 }
                                 className="font-semibold text-jse-principal hover:underline"
                             >
