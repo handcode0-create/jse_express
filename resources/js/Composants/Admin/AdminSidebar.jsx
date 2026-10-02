@@ -183,5 +183,6 @@ export default function AdminSidebar({ utilisateur }) {
             </div>
         </aside>
         <NavigationFlottante type="admin" />
+        </>
     );
 }
