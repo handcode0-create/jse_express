@@ -354,7 +354,7 @@ Route::patch('/profil', function (Request $request) {
 
     Auth::user()->update($donnees);
 
-    return back()->with('success', 'Vos informations ont été mises à jour.');
+    return back()->with('success', 'Modifications enregistrées.');
 })->middleware(['auth', 'role:client'])->name('profil.modifier');
 
 Route::post('/profil/adresses', function (Request $request) {
@@ -412,7 +412,7 @@ Route::patch('/profil/adresses/{adresseLivraison}/defaut', function (Request $re
         $adresseLivraison->update(['par_defaut' => true]);
     });
 
-    return back()->with('success', 'Adresse par défaut mise à jour.');
+    return back()->with('success', 'Modifications enregistrées.');
 })->whereNumber('adresseLivraison')->middleware(['auth', 'role:client'])->name('profil.adresse.defaut');
 
 Route::delete('/profil/adresses/{adresseLivraison}', function (Request $request, AdresseLivraison $adresseLivraison) {
@@ -468,7 +468,7 @@ Route::patch('/profil/moyens-paiement/{moyenPaiement}/defaut', function (Request
         $moyenPaiement->update(['par_defaut' => true]);
     });
 
-    return back()->with('success', 'Moyen de paiement par défaut mis à jour.');
+    return back()->with('success', 'Modifications enregistrées.');
 })->whereNumber('moyenPaiement')->middleware(['auth', 'role:client'])->name('profil.paiement.defaut');
 
 Route::delete('/profil/moyens-paiement/{moyenPaiement}', function (Request $request, MoyenPaiement $moyenPaiement) {
