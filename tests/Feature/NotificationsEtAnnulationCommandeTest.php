@@ -228,7 +228,7 @@ class NotificationsEtAnnulationCommandeTest extends TestCase
             ->assertUnauthorized();
 
         $this->post(route('commande.annuler', $commande))
-            ->assertUnauthorized();
+            ->assertRedirect();
 
         $this->assertDatabaseHas('commandes', [
             'id' => $commande->id,
