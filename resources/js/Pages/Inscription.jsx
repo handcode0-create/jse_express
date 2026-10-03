@@ -214,14 +214,14 @@ export default function Inscription() {
     const labelsEtapes = ["Votre utilisation", "Votre profil", "Vos identifiants"];
 
     return (
-        <main className="relative min-h-screen overflow-x-hidden bg-[#07110F] font-sans text-white">
+        <main className="relative min-h-screen overflow-x-hidden bg-jse-principal font-sans text-white">
             <img
                 src="/assets/login_page_fond.png"
                 alt=""
                 aria-hidden="true"
                 className="pointer-events-none fixed inset-0 size-full object-cover object-center opacity-30"
             />
-            <div className="pointer-events-none fixed inset-0 bg-[#07110F]/80" />
+            <div className="pointer-events-none fixed inset-0 bg-jse-principal/80" />
             <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_45%,rgba(69,185,119,.22),transparent_30%),radial-gradient(circle_at_80%_60%,rgba(242,140,40,.08),transparent_28%)]" />
 
             <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1240px] flex-col px-4 py-4 sm:px-6 lg:px-8">
@@ -409,7 +409,7 @@ export default function Inscription() {
                                 {etape === 2 && (
                                     <div className="space-y-5">
                                         <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-                                            <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#07110F]">
+                                            <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-jse-principal">
                                                 <img
                                                     src={roleSelectionne?.image}
                                                     alt=""
