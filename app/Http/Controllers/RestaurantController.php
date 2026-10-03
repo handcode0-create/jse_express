@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\LivraisonService;
+use App\Services\CommandeService;
 use App\Services\NotificationService;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -364,28 +365,19 @@ class RestaurantController extends Controller
         return back()->with('success', 'Le statut de la commande a été mis à jour.');
     }
 
-    public function annulerCommande(Request $request, Commande $commande, NotificationService $notificationService): RedirectResponse
+    public function annulerCommande(Request $request, Commande $commande, NotificationService $notificationService, CommandeService $commandeService): RedirectResponse
     {
         $restaurant = $this->restaurant($request);
         abort_unless((int) $commande->restaurant_id === (int) $restaurant->id, 404);
 
         $donnees = $request->validate(['motif' => ['nullable', 'string', 'max:500']]);
 
-        DB::transaction(function () use ($request, $commande, $donnees) {
-            $commande = Commande::query()->whereKey($commande->id)->lockForUpdate()->with('statutCommande')->firstOrFail();
-            abort_unless(in_array($commande->statutCommande?->code, ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION'], true), 422, 'Cette commande ne peut plus être annulée.');
-
-            $statut = \App\Models\StatutCommande::query()->where('code', 'ANNULEE')->firstOrFail();
-            $commande->update(['statut_id' => $statut->id]);
-
-            HistoriqueCommande::create([
-                'commande_id' => $commande->id,
-                'statut_id' => $statut->id,
-                'user_id' => $request->user()->id,
-                'commentaire' => $donnees['motif'] ?? 'Commande annulée par le restaurant.',
-                'date_changement' => now(),
-            ]);
-        });
+        $commandeService->annuler(
+            $commande,
+            $request->user(),
+            ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION'],
+            $donnees['motif'] ?? 'Commande annulée par le restaurant.'
+        );
 
         $commande->load('user');
 

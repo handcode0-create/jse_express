@@ -12,6 +12,7 @@ use App\Models\Restaurant;
 use App\Models\StatutCommande;
 use App\Models\User;
 use App\Services\LivraisonService;
+use App\Services\CommandeService;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -131,7 +132,7 @@ class AdministrationController extends Controller
         ]);
     }
 
-    public function annulerCommande(Request $request, Commande $commande, NotificationService $notificationService): RedirectResponse
+    public function annulerCommande(Request $request, Commande $commande, NotificationService $notificationService, CommandeService $commandeService): RedirectResponse
     {
         $donnees = $request->validate(['motif' => ['nullable', 'string', 'max:500']]);
 
