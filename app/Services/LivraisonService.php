@@ -8,7 +8,6 @@ use App\Models\HistoriqueCommande;
 use App\Models\Livraison;
 use App\Models\ProfilLivreur;
 use App\Models\StatutCommande;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -166,29 +165,7 @@ class LivraisonService
             return false;
         }
 
-        if ($commande->pin_livraison_hash && Hash::check($pin, $commande->pin_livraison_hash)) {
-            return true;
-        }
-
-        // Répare une éventuelle incohérence entre le hash et le PIN chiffré
-        // créée par une ancienne version du flux de livraison.
-        if ($commande->pin_livraison_chiffre) {
-            try {
-                $pinChiffre = Crypt::decryptString($commande->pin_livraison_chiffre);
-
-                if (hash_equals($pinChiffre, $pin)) {
-                    $commande->update([
-                        'pin_livraison_hash' => Hash::make($pin),
-                    ]);
-
-                    return true;
-                }
-            } catch (\Throwable $exception) {
-                // Le PIN chiffré est invalide : la validation échoue normalement.
-            }
-        }
-
-        return false;
+        return (bool) ($commande->pin_livraison_hash && Hash::check($pin, $commande->pin_livraison_hash));
     }
 
     public function cloturerLivraison(
