@@ -11,8 +11,8 @@ export default function Splash() {
 
     return (
         <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-jse-principal text-white">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(69,185,119,0.16),transparent_34%),linear-gradient(145deg,var(--color-jse-principal)_0%,#0d2d25_55%,#07110F_100%)]" />
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(69,185,119,0.10),transparent_34%),linear-gradient(to_bottom,rgba(7,17,15,0.08),rgba(7,17,15,0.30))]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,color-mix(in srgb, var(--color-jse-secondaire) 16%, transparent),transparent_34%),linear-gradient(145deg,var(--color-jse-principal)_0%,var(--color-jse-principal)_55%,var(--color-jse-principal)_100%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,color-mix(in srgb, var(--color-jse-secondaire) 10%, transparent),transparent_34%),linear-gradient(to_bottom,color-mix(in srgb, var(--color-jse-principal) 8%, transparent),color-mix(in srgb, var(--color-jse-principal) 30%, transparent))]" />
 
             <div className="relative z-10 flex flex-col items-center px-6 text-center">
                 <div className="flex items-center justify-center rounded-[28px] border border-white/10 bg-white/[0.04] px-7 py-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
