@@ -233,9 +233,10 @@ class LivreurController extends Controller
         abort_unless($commande->statutCommande?->code === 'EN_LIVRAISON', 422, 'La commande n’est pas en livraison.');
 
         $pinKey = 'livraison:pin:'.$request->user()->id.':'.$livraisonModel->id;
-        if (RateLimiter::increment($pinKey) > 5) {
+        if (RateLimiter::tooManyAttempts($pinKey, 5)) {
             abort(429, 'Trop de tentatives de validation du PIN. Veuillez réessayer dans une minute.');
         }
+        RateLimiter::hit($pinKey, 60);
 
         $donnees = $request->validate([
             'pin' => ['required', 'digits:6'],
