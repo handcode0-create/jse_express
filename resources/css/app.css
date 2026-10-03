@@ -17,8 +17,6 @@
 
     /* Typographie */
     --font-sans: "Poppins", sans-serif;
-    --text-jse-landing-title: clamp(3rem, 6vw, 6rem);
-    --text-jse-landing-title--line-height: 0.98;
 
     /* Rayons — noms conservés pour compatibilité */
     --radius-jse-petit: 8px;
