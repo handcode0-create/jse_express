@@ -117,6 +117,15 @@ class ClientNotificationAndCancellationTest extends TestCase
             'statut' => 'active',
         ]);
 
+        Paiement::create([
+            'commande_id' => $commande->id,
+            'moyen' => 'Mobile Money',
+            'reference_transaction' => 'TX-TEST-123',
+            'montant' => 5500,
+            'statut' => 'reussi',
+            'date_paiement' => now(),
+        ]);
+
         $commande->update([
             'pin_livraison_hash' => Hash::make('123456'),
             'pin_livraison_chiffre' => Crypt::encryptString('123456'),
@@ -133,6 +142,13 @@ class ClientNotificationAndCancellationTest extends TestCase
             'statut_id' => StatutCommande::query()->where('code', 'ANNULEE')->value('id'),
             'pin_livraison_hash' => null,
             'pin_livraison_chiffre' => null,
+        ]);
+
+        $this->assertDatabaseHas('paiements', [
+            'commande_id' => $commande->id,
+            'reference_transaction' => 'TX-TEST-123',
+            'montant' => 5500,
+            'statut' => 'reussi',
         ]);
 
         $this->assertDatabaseHas('livraisons', [
