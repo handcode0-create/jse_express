@@ -1208,6 +1208,7 @@ Route::get('/accueil', function (Request $request) {
     return Inertia::render('Accueil', [
         'notificationsCount' => Notification::query()
             ->where('user_id', Auth::id())
+            ->whereNull('hidden_by_recipient_at')
             ->count(),
         'categories' => $categories,
         'restaurants' => $restaurants,
