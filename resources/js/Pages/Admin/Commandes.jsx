@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { router } from "@inertiajs/react";
+import { router, useState } from "@inertiajs/react";
 import { Ban } from "lucide-react";
 import AdminDataPage from "../../Composants/Admin/AdminDataPage";
 
-export default function Commandes({ utilisateur, commandes = [], recherche = "" }) {
+export default function Commandes({ utilisateur, commandes = { data: [] }, recherche = "" }) {
     const [traitement, setTraitement] = useState(null);
+    const rows = Array.isArray(commandes) ? commandes : (commandes.data || []);
 
     const annuler = (commande) => {
         const motif = window.prompt("Motif d'annulation de la commande " + (commande.reference || "") + " :");
@@ -24,7 +25,8 @@ export default function Commandes({ utilisateur, commandes = [], recherche = "" 
             description="Supervision de toutes les commandes et de leur progression."
             search={recherche}
             searchPlaceholder="Référence, client ou restaurant"
-            rows={commandes}
+            rows={rows}
+            pagination={Array.isArray(commandes) ? null : commandes}
             columns={[
                 { key: "reference", label: "Commande", render: row => <span className="font-semibold">{row.reference || "—"}</span> },
                 { key: "client", label: "Client", render: row => <div><p className="font-semibold">{row.client || "—"}</p><p className="text-xs text-jse-theme-muted">{row.telephone || "—"}</p></div> },

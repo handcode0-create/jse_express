@@ -3,7 +3,7 @@ import { Head, Link, router, usePage } from "@inertiajs/react";
 import { Search, ChevronRight, Inbox } from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
 
-export default function AdminDataPage({ utilisateur,title,description,search="",searchPlaceholder="Rechercher",columns=[],rows=[],emptyMessage="Aucun élément trouvé.",filters=null,actionLabel=null,actionHref=null }) {
+export default function AdminDataPage({ utilisateur,title,description,search="",searchPlaceholder="Rechercher",columns=[],rows=[],emptyMessage="Aucun élément trouvé.",filters=null,actionLabel=null,actionHref=null,pagination=null }) {
     const { flash = {} } = usePage().props;
     const [rechercheEnCours, setRechercheEnCours] = useState(false);
     const submit = (event) => {
