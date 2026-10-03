@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Notification;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
 
 class NotificationController extends Controller
 {
     public function supprimer(Notification $notification): JsonResponse
     {
-        $this->authorize('supprimer', $notification);
+        Gate::authorize('supprimer', $notification);
 
         if (! $notification->masquee_par_destinataire_at) {
             $notification->update([
