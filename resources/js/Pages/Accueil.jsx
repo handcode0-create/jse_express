@@ -380,7 +380,7 @@ export default function Accueil() {
     };
 
     const commencerGlissementRestaurants = (event) => {
-        if (!listeRestaurantsRef.current) return;
+        if (!listeRestaurantsRef.current || event.pointerType === "mouse") return;
 
         glissementRestaurantsRef.current = {
             actif: true,
