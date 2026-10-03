@@ -308,3 +308,4 @@ function NavigationItem({ item, compact = false }) {
             <NavigationFlottante type="client" actif="accueil" />
         </main>
     );
+}
