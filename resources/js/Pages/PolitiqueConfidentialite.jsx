@@ -23,6 +23,10 @@ const sections = [
         text: "Les mots de passe sont enregistrés sous forme hachée. L'accès aux espaces Client, Restaurant, Livreur et Administrateur est contrôlé selon le rôle du compte. Des mécanismes de protection contre les soumissions automatisées peuvent également être utilisés lors de l'inscription.",
     },
     {
+        title: "Position",
+        text: "Votre position n'est utilisée qu'une seule fois, au moment de la commande, pour calculer la distance de livraison. Elle n'est pas suivie en continu.",
+    },
+    {
         title: "Vos droits",
         text: "Vous pouvez demander l'accès, la rectification ou la mise à jour des informations associées à votre compte. Pour toute demande concernant vos données, utilisez les moyens de contact officiels de JSE Express.",
     },
