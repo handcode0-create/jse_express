@@ -211,8 +211,8 @@ Route::get('/panier', function () {
         'panier' => [
             'nombre_articles' => (int) $lignes->sum('quantite'),
             'sous_total' => $sousTotal,
-            'frais_livraison' => 500,
-            'montant_total' => $sousTotal + ($lignes->isNotEmpty() ? 500 : 0),
+            'frais_livraison' => config('jse.frais_livraison'),
+            'montant_total' => $sousTotal + ($lignes->isNotEmpty() ? config('jse.frais_livraison') : 0),
             'restaurant_unique' => $restaurants->count() === 1 ? $restaurants->first() : null,
             'plusieurs_restaurants' => $restaurants->count() > 1,
             'lignes' => $lignes->map(fn (LignePanier $ligne) => [
@@ -787,8 +787,8 @@ Route::get('/commande/validation', function () {
         'panier' => [
             'nombre_articles' => (int) $lignes->sum('quantite'),
             'sous_total' => (float) $lignes->sum(fn (LignePanier $ligne) => $ligne->quantite * $ligne->prix_unitaire),
-            'frais_livraison' => 500,
-            'montant_total' => (float) $lignes->sum(fn (LignePanier $ligne) => $ligne->quantite * $ligne->prix_unitaire) + 500,
+            'frais_livraison' => config('jse.frais_livraison'),
+            'montant_total' => (float) $lignes->sum(fn (LignePanier $ligne) => $ligne->quantite * $ligne->prix_unitaire) + config('jse.frais_livraison'),
             'lignes' => $lignes->map(fn (LignePanier $ligne) => [
                 'id' => $ligne->id,
                 'nom' => $ligne->produit?->nom,
@@ -839,7 +839,7 @@ Route::post('/commande', function (Request $request, PanierService $panierServic
             $ligne->update(['prix_unitaire' => $prixUnitaire]);
             $sousTotal += $ligne->quantite * $prixUnitaire;
         }
-        $fraisLivraison = 500;
+        $fraisLivraison = config('jse.frais_livraison');
         $reference = 'JSE-TMP-' . Str::uuid()->toString();
 
         $statutId = DB::table('statuts_commandes')->where('code', 'EN_ATTENTE')->value('id');
