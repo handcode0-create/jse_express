@@ -26,11 +26,22 @@ const imagesRestaurants = [
     "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=90",
 ];
 
+const imagesRestaurantsLocales = [
+    "/assets/banner-restaurants.jpg",
+    "/assets/banner-plat-ivoirien.jpg",
+    "/assets/banner-decouverte.jpg",
+];
+
 const imagesPlats = [
     "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85",
     "https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=900&q=85",
     "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=85",
 ];
+
+const obtenirSecoursImageRestaurant = (restaurantId) =>
+    imagesRestaurantsLocales[
+        (Number(restaurantId) || 0) % imagesRestaurantsLocales.length
+    ];
 
 const prix = (value) =>
     new Intl.NumberFormat("fr-FR", {
