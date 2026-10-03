@@ -147,7 +147,7 @@ export default function Notifications() {
 
             const donnees = await reponse.json().catch(() => null);
 
-            if (!reponse.ok || !donnees?.success) {
+            if (!reponse.ok || !donnees?.succes) {
                 throw new Error(
                     donnees?.message || "La notification n’a pas pu être supprimée.",
                 );
