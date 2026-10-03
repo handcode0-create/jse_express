@@ -415,11 +415,7 @@ export default function RestaurantDetail() {
                                                 >
                                                     <img
                                                         src={
-                                                            produit.image ||
-                                                            imagesPlats[
-                                                                index %
-                                                                    imagesPlats.length
-                                                            ]
+                                                            produit.image || imageProduitFallback(produit.id || index)
                                                         }
                                                         alt={produit.nom}
                                                         className="h-[106px] w-[116px] shrink-0 rounded-[17px] object-cover"
