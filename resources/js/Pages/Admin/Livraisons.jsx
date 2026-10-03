@@ -30,7 +30,7 @@ export default function Livraisons({ utilisateur, livraisons = [], recherche = "
             description="Suivi opérationnel, attribution automatique et réattribution manuelle."
             search={recherche}
             searchPlaceholder="Commande, zone ou livreur"
-            rows={livraisons}
+            rows={livraisons.data || []} pagination={livraisons}
             columns={[
                 { key: "reference", label: "Commande", render: row => <span className="font-semibold">{row.reference || "—"}</span> },
                 { key: "zone", label: "Zone" },
