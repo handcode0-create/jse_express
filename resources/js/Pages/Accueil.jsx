@@ -19,89 +19,30 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { basculerFavori, lireFavoris } from "../lib/favoris";
 import ThemeToggle from "../Composants/Interface/ThemeToggle";
+import { imagesBannieres, imagesCategories, imageRestaurantFallback } from "../lib/imagesUnsplash";
 
-const IMAGE_BANNIERE_SECOURS = "/assets/plat-hero.png";
+const IMAGE_BANNIERE_SECOURS = imagesBannieres[0];
 
 const bannières = [
-    {
-        image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1600&q=85",
-        label: "JSE EXPRESS",
-        titre: "Des saveurs près de chez vous",
-        description: "Commandez vos plats préférés à Adzopé",
-    },
-    {
-        image: "https://images.unsplash.com/photo-1526367790999-0150786686a2?auto=format&fit=crop&w=1600&q=85",
-        label: "LIVRAISON",
-        titre: "Vos plats préférés, livrés à Adzopé",
-        description: "Commandez simplement auprès de vos restaurants locaux.",
-    },
-    {
-        image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=85",
-        label: "RESTAURANTS LOCAUX",
-        titre: "Découvrez les restaurants d'Adzopé",
-        description: "Explorez les établissements disponibles près de chez vous.",
-    },
-    {
-        image: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=1600&q=85",
-        label: "SIMPLE ET PRATIQUE",
-        titre: "Commandez sans vous déplacer",
-        description: "Quelques étapes suffisent pour préparer votre commande.",
-    },
-    {
-        image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=85",
-        label: "À DÉCOUVRIR",
-        titre: "Variez les plaisirs",
-        description: "Trouvez différentes propositions au même endroit.",
-    },
+    { image: imagesBannieres[0], label: "JSE EXPRESS", titre: "Des saveurs près de chez vous", description: "Commandez vos plats préférés à Adzopé" },
+    { image: imagesBannieres[1], label: "LIVRAISON", titre: "Vos plats préférés, livrés à Adzopé", description: "Commandez simplement auprès de vos restaurants locaux." },
+    { image: imagesBannieres[2], label: "RESTAURANTS LOCAUX", titre: "Découvrez les restaurants d'Adzopé", description: "Explorez les établissements disponibles près de chez vous." },
+    { image: imagesBannieres[3], label: "SIMPLE ET PRATIQUE", titre: "Commandez sans vous déplacer", description: "Quelques étapes suffisent pour préparer votre commande." },
+    { image: imagesBannieres[4], label: "À DÉCOUVRIR", titre: "Variez les plaisirs", description: "Trouvez différentes propositions au même endroit." },
 ];
 
 const raccourcisAccueil = [
-    {
-        nom: "Restaurants",
-        image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=85",
-    },
-    {
-        nom: "Fast food",
-        image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=85",
-    },
-    {
-        nom: "Boissons",
-        image: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=85",
-    },
-    {
-        nom: "Promotions",
-        image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=800&q=85",
-    },
+    { nom: "Restaurants", image: imagesCategories[0] },
+    { nom: "Fast food", image: imagesCategories[1] },
+    { nom: "Boissons", image: imagesCategories[2] },
+    { nom: "Promotions", image: imagesCategories[3] },
 ];
 
-const imagesRestaurants = [
-    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=85",
-    "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1200&q=85",
-    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=85",
-    "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1200&q=85",
-    "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=85",
-    "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1200&q=85",
-];
+const obtenirImageRestaurant = (restaurant, index = 0) =>
+    restaurant?.image || imageRestaurantFallback(restaurant?.id ?? index);
 
-const imagesRestaurantsLocales = [
-    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=1600&q=85",
-    "https://images.unsplash.com/photo-1526367790999-0150786686a2?auto=format&fit=crop&w=1600&q=85",
-    "/assets/plat-hero.png",
-];
-
-const obtenirImageRestaurant = (restaurant, index = 0) => {
-    if (restaurant?.image) return restaurant.image;
-    return imagesRestaurants[index % imagesRestaurants.length];
-};
-
-const obtenirSecoursImageRestaurant = (restaurant, index = 0) => {
-    return imagesRestaurantsLocales[
-        (Number(restaurant?.id) || index) % imagesRestaurantsLocales.length
-    ];
-};
+const obtenirSecoursImageRestaurant = (restaurant, index = 0) =>
+    imageRestaurantFallback(restaurant?.id ?? index);
 
 
 function calculerDistanceKm(latitudeA, longitudeA, latitudeB, longitudeB) {
