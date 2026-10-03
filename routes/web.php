@@ -345,8 +345,8 @@ Route::patch('/profil', function (Request $request) {
         'telephone' => ['required', 'string', 'max:30', Rule::unique('users', 'telephone')->ignore(Auth::id())],
         'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore(Auth::id())],
     ], [
-        'nom.required' => 'Le nom est obligatoire.',
-        'telephone.required' => 'Le numéro de téléphone est obligatoire.',
+        'nom.required' => 'Ce champ est obligatoire.',
+        'telephone.required' => 'Ce champ est obligatoire.',
         'telephone.unique' => 'Ce numéro est déjà utilisé.',
         'email.email' => 'Veuillez saisir une adresse e-mail valide.',
         'email.unique' => 'Cette adresse e-mail est déjà utilisée.',
@@ -367,6 +367,9 @@ Route::post('/profil/adresses', function (Request $request) {
         'telephone' => ['nullable', 'string', 'max:30'],
         'zone_id' => ['nullable', 'integer', 'exists:zones,id'],
         'par_defaut' => ['boolean'],
+    ], [
+        'libelle.required' => 'Ce champ est obligatoire.',
+        'adresse.required' => 'Ce champ est obligatoire.',
     ]);
 
     DB::transaction(function () use ($donnees) {
