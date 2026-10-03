@@ -5,7 +5,7 @@ import AdminDataPage from "../../Composants/Admin/AdminDataPage";
 
 export default function Commandes({ utilisateur, commandes = { data: [] }, recherche = "" }) {
     const [traitement, setTraitement] = useState(null);
-    const rows = Array.isArray(commandes) ? commandes : (commandes.data || []);
+    const rows = commandes.data || [];
 
     const annuler = (commande) => {
         const motif = window.prompt("Motif d'annulation de la commande " + (commande.reference || "") + " :");
@@ -26,7 +26,7 @@ export default function Commandes({ utilisateur, commandes = { data: [] }, reche
             search={recherche}
             searchPlaceholder="Référence, client ou restaurant"
             rows={rows}
-            pagination={Array.isArray(commandes) ? null : commandes}
+            pagination={commandes}
             columns={[
                 { key: "reference", label: "Commande", render: row => <span className="font-semibold">{row.reference || "—"}</span> },
                 { key: "client", label: "Client", render: row => <div><p className="font-semibold">{row.client || "—"}</p><p className="text-xs text-jse-theme-muted">{row.telephone || "—"}</p></div> },
