@@ -60,9 +60,10 @@ class AuthentificationController extends Controller
         $captchaActif = filled(config('services.recaptcha.site_key')) && filled(config('services.recaptcha.secret_key'));
 
         $inscriptionKey = 'auth:inscription:'.($request->ip() ?: 'unknown');
-        if (RateLimiter::increment($inscriptionKey) > 5) {
+        if (RateLimiter::tooManyAttempts($inscriptionKey, 5)) {
             abort(429, 'Trop de tentatives d’inscription. Veuillez réessayer dans une minute.');
         }
+        RateLimiter::hit($inscriptionKey, 60);
 
         if ($captchaActif) {
             $token = (string) $request->input('recaptcha_token');
@@ -171,6 +172,13 @@ class AuthentificationController extends Controller
             return $this->redirectionApresConnexion();
         }
 
+        $telephone = $this->normaliserTelephone((string) $request->input('telephone'));
+        $connexionKey = 'auth:connexion:'.$telephone;
+        if (RateLimiter::tooManyAttempts($connexionKey, 5)) {
+            abort(429, 'Trop de tentatives de connexion. Veuillez réessayer dans une minute.');
+        }
+        RateLimiter::hit($connexionKey, 60);
+
         $donnees = $request->validate([
             'telephone' => ['required', 'string', 'max:30'],
             'mot_de_passe' => ['required', 'string'],
@@ -180,12 +188,6 @@ class AuthentificationController extends Controller
             'mot_de_passe.required' => 'Le mot de passe est obligatoire.',
             'consentement.accepted' => 'Vous devez accepter la politique de confidentialité.',
         ]);
-
-        $telephone = $this->normaliserTelephone((string) $donnees['telephone']);
-        $connexionKey = 'auth:connexion:'.$telephone;
-        if (RateLimiter::increment($connexionKey) > 5) {
-            abort(429, 'Trop de tentatives de connexion. Veuillez réessayer dans une minute.');
-        }
 
         $utilisateur = User::query()
             ->where('statut', 'actif')
