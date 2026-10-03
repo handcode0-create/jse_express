@@ -30,10 +30,15 @@ class TarificationLivraisonServiceTest extends TestCase
 
     public function test_distance_beyond_last_range_is_rejected(): void
     {
+        TarifLivraison::query()->delete();
         TarifLivraison::create(['distance_min_km'=>0,'distance_max_km'=>6,'frais'=>1000,'statut'=>'actif']);
-        $this->expectException(HttpException::class);
-        $this->expectExceptionCode(422);
-        app(TarificationLivraisonService::class)->fraisPourDistance(6.00);
+
+        try {
+            app(TarificationLivraisonService::class)->fraisPourDistance(6.00);
+            $this->fail('HttpException 422 attendue.');
+        } catch (HttpException $e) {
+            $this->assertSame(422, $e->getStatusCode());
+        }
     }
     public function test_village_range_covers_7_5_and_29_99_km_but_not_30(): void
     {
@@ -50,9 +55,12 @@ class TarificationLivraisonServiceTest extends TestCase
         $this->assertSame(2000.0, $service->fraisPourDistance(7.5));
         $this->assertSame(2000.0, $service->fraisPourDistance(29.99));
 
-        $this->expectException(HttpException::class);
-        $this->expectExceptionCode(422);
-        $service->fraisPourDistance(30.0);
+        try {
+            $service->fraisPourDistance(30.0);
+            $this->fail('HttpException 422 attendue.');
+        } catch (HttpException $e) {
+            $this->assertSame(422, $e->getStatusCode());
+        }
     }
 
 }

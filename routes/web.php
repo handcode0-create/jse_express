@@ -88,6 +88,7 @@ Route::prefix('livreur')
 
         Route::post('/livraisons/{livraison}/valider-pin', [LivreurController::class, 'validerPin'])
             ->whereNumber('livraison')
+            ->middleware('throttle:livreur-pin')
             ->name('livreur.livraisons.valider-pin');
     });
 
@@ -195,6 +196,19 @@ Route::prefix('administration')
         Route::post('/zones/{zone}/statut', [AdministrationController::class, 'changerStatutZone'])
             ->whereNumber('zone')
             ->name('admin.zones.statut');
+        Route::get('/tarification', [AdministrationController::class, 'tarification'])
+            ->name('admin.tarification');
+        Route::post('/tarification', [AdministrationController::class, 'creerTarif'])
+            ->name('admin.tarification.creer');
+        Route::post('/tarification/simuler', [AdministrationController::class, 'simulerTarif'])
+            ->middleware('throttle:30,1')
+            ->name('admin.tarification.simuler');
+        Route::patch('/tarification/{tarif}', [AdministrationController::class, 'modifierTarif'])
+            ->whereNumber('tarif')
+            ->name('admin.tarification.modifier');
+        Route::post('/tarification/{tarif}/statut', [AdministrationController::class, 'changerStatutTarif'])
+            ->whereNumber('tarif')
+            ->name('admin.tarification.statut');
     });
 
 Route::get('/panier', function () {
