@@ -185,7 +185,9 @@ export default function Accueil() {
     const categoriesRef = useRef(null);
     const bannerRef = useRef(null);
     const restaurantsRef = useRef(null);
-    const glissementRestaurantsRef = useRef({ actif: false, debutX: 0, scrollInitial: 0 });
+    const listeRestaurantsRef = useRef(null);
+    const glissementRestaurantsRef = useRef({ actif: false, debutX: 0, scrollInitial: 0, aBouge: false });
+    const clicApresGlissementRef = useRef(false);
     const [glissementRestaurants, setGlissementRestaurants] = useState(false);
 
     useLayoutEffect(() => {
@@ -368,15 +370,15 @@ export default function Accueil() {
         if (restaurantsDisponibles.length < 2) return;
 
         const intervalle = window.setInterval(() => {
-            if (!restaurantsRef.current) return;
+            if (!listeRestaurantsRef.current) return;
 
             const estFin =
-                restaurantsRef.current.scrollLeft +
-                    restaurantsRef.current.clientWidth >=
-                restaurantsRef.current.scrollWidth - 12;
+                listeRestaurantsRef.current.scrollLeft +
+                    listeRestaurantsRef.current.clientWidth >=
+                listeRestaurantsRef.current.scrollWidth - 12;
 
             if (estFin) {
-                restaurantsRef.current.scrollTo({
+                listeRestaurantsRef.current.scrollTo({
                     left: 0,
                     behavior: "smooth",
                 });
@@ -426,46 +428,61 @@ export default function Accueil() {
     };
 
     const defilerRestaurants = (direction) => {
-        if (!restaurantsRef.current) return;
+        if (!listeRestaurantsRef.current) return;
 
-        const distance = Math.max(restaurantsRef.current.clientWidth * 0.78, 280);
+        const distance = Math.max(listeRestaurantsRef.current.clientWidth * 0.78, 280);
 
-        restaurantsRef.current.scrollBy({
+        listeRestaurantsRef.current.scrollBy({
             left: direction * distance,
             behavior: "smooth",
         });
     };
 
     const commencerGlissementRestaurants = (event) => {
-        if (!restaurantsRef.current) return;
+        if (!listeRestaurantsRef.current) return;
 
         glissementRestaurantsRef.current = {
             actif: true,
             debutX: event.clientX,
-            scrollInitial: restaurantsRef.current.scrollLeft,
+            scrollInitial: listeRestaurantsRef.current.scrollLeft,
+            aBouge: false,
         };
+        clicApresGlissementRef.current = false;
 
         setGlissementRestaurants(true);
-        restaurantsRef.current.setPointerCapture?.(event.pointerId);
+        listeRestaurantsRef.current.setPointerCapture?.(event.pointerId);
     };
 
     const deplacerGlissementRestaurants = (event) => {
         const glissement = glissementRestaurantsRef.current;
 
-        if (!glissement.actif || !restaurantsRef.current) return;
+        if (!glissement.actif || !listeRestaurantsRef.current) return;
 
-        restaurantsRef.current.scrollLeft =
-            glissement.scrollInitial - (event.clientX - glissement.debutX);
+        const differenceX = event.clientX - glissement.debutX;
+        if (Math.abs(differenceX) > 8) {
+            glissement.aBouge = true;
+            clicApresGlissementRef.current = true;
+        }
+
+        listeRestaurantsRef.current.scrollLeft =
+            glissement.scrollInitial - differenceX;
     };
 
     const terminerGlissementRestaurants = (event) => {
+        const aBouge = glissementRestaurantsRef.current.aBouge;
         glissementRestaurantsRef.current.actif = false;
         setGlissementRestaurants(false);
 
+        if (aBouge) {
+            window.setTimeout(() => {
+                clicApresGlissementRef.current = false;
+            }, 0);
+        }
+
         if (
-            restaurantsRef.current?.hasPointerCapture?.(event.pointerId)
+            listeRestaurantsRef.current?.hasPointerCapture?.(event.pointerId)
         ) {
-            restaurantsRef.current.releasePointerCapture(event.pointerId);
+            listeRestaurantsRef.current.releasePointerCapture(event.pointerId);
         }
     };
 
@@ -724,6 +741,7 @@ export default function Accueil() {
                                         "lg:grid lg:grid-cols-3 lg:overflow-visible lg:snap-none lg:pb-2",
                                         glissementRestaurants ? "cursor-grabbing" : "cursor-grab",
                                     ].join(" ")}
+                                    ref={listeRestaurantsRef}
                                     onPointerDown={commencerGlissementRestaurants}
                                     onPointerMove={deplacerGlissementRestaurants}
                                     onPointerUp={terminerGlissementRestaurants}
@@ -732,7 +750,12 @@ export default function Accueil() {
                                     {restaurantsFiltres.map((restaurant, index) => (
                                         <article
                                             key={restaurant.id}
-                                            onClick={() => Number.isInteger(Number(restaurant.id)) && router.visit(`/restaurants/${restaurant.id}`)}
+                                            onClick={() => {
+                                                if (clicApresGlissementRef.current) return;
+                                                if (Number.isInteger(Number(restaurant.id))) {
+                                                    router.visit(`/restaurants/${restaurant.id}`);
+                                                }
+                                            }}
                                             className={[
                                                 "jse-restaurant-card w-[calc(100vw-72px)] max-w-[310px] shrink-0 snap-start snap-always overflow-hidden rounded-[24px] bg-white shadow-[0_12px_35px_rgba(18,60,50,0.06)] ring-1 ring-jse-texte/5 transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_42px_rgba(18,60,50,0.11)] sm:w-[300px] lg:w-auto lg:max-w-none",
                                                 Number.isInteger(Number(restaurant.id)) ? "cursor-pointer transition-transform hover:-translate-y-0.5" : "cursor-default",
