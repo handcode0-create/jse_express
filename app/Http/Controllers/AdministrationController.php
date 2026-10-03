@@ -490,7 +490,7 @@ class AdministrationController extends Controller
             'roles' => ['client', 'restaurant', 'livreur', 'administrateur'],
             'statuts' => ['actif', 'inactif'],
             'administrateursActifs' => User::query()->where('role', 'administrateur')->where('statut', 'actif')->count(),
-            'zones' => Zone::query()->orderBy('nom')->get(['id', 'nom']),
+            'zones' => Zone::query()->orderBy('nom')->where('statut', 'actif')->orderBy('nom')->get(['id', 'nom']),
             'utilisateur' => $this->utilisateurAdmin($request->user()),
         ]);
     }
