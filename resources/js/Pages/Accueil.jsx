@@ -552,7 +552,7 @@ export default function Accueil() {
                             <span className="font-sans text-xs font-medium text-jse-texte/55">Thème</span>
                             <ThemeToggle compact />
                         </div>
-                        <button type="button" onClick={() => router.post("/deconnexion")} className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 font-sans text-xs font-medium text-jse-texte/45 hover:bg-red-50 hover:text-red-600">
+                        <button type="button" onClick={() => router.post("/deconnexion")} className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 font-sans text-xs font-medium text-jse-texte/45 hover:bg-jse-danger/5 hover:text-jse-danger">
                             <LogOut size={17} strokeWidth={1.8} />
                             Déconnexion
                         </button>
