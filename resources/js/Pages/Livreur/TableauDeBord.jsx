@@ -103,7 +103,7 @@ function Availability({ livreur, onToggle, loading }) {
 
 function Stats({ statistiques, zone }) {
     return (
-        <section className="rounded-[20px] bg-[#101719] px-3 py-4">
+        <section className="rounded-[20px] bg-jse-theme-surface px-3 py-4">
             <div className="grid grid-cols-3 divide-x divide-white/10 text-center">
                 <div>
                     <p className="text-xl font-bold text-jse-accent">{statistiques.missions_du_jour || 0}</p>
@@ -127,7 +127,7 @@ function MissionCard({ mission, onOpen }) {
         <button
             type="button"
             onClick={() => onOpen(mission)}
-            className="w-full rounded-[21px] border border-white/8 bg-[#101719] p-3 text-left transition hover:border-jse-accent/40"
+            className="w-full rounded-[21px] border border-white/8 bg-jse-theme-surface p-3 text-left transition hover:border-jse-accent/40"
         >
             <div className="flex gap-3">
                 <div className="flex size-[58px] shrink-0 items-center justify-center overflow-hidden rounded-[16px] bg-jse-principal">
@@ -190,7 +190,7 @@ function MissionDetail({ mission, onBack, onTake, loading, onNavigate }) {
                     <div className="size-10" />
                 </div>
 
-                <section className="animate-jse-rise rounded-[24px] border border-white/8 bg-[#101719] p-4 shadow-2xl shadow-black/20">
+                <section className="animate-jse-rise rounded-[24px] border border-white/8 bg-jse-theme-surface p-4 shadow-2xl shadow-black/20">
                     <div className="flex gap-3">
                         <div className="size-[64px] shrink-0 overflow-hidden rounded-[16px] bg-jse-principal">
                             {mission.articles?.[0]?.image ? (
@@ -213,7 +213,7 @@ function MissionDetail({ mission, onBack, onTake, loading, onNavigate }) {
                     </div>
                 </section>
 
-                <section className="mt-3 rounded-[20px] border border-white/8 bg-[#101719] p-4">
+                <section className="mt-3 rounded-[20px] border border-white/8 bg-jse-theme-surface p-4">
                     <div className="flex items-stretch gap-3">
                         <div className="flex w-5 flex-col items-center">
                             <span className="mt-1 size-2.5 rounded-full bg-jse-accent" />
@@ -234,7 +234,7 @@ function MissionDetail({ mission, onBack, onTake, loading, onNavigate }) {
                     </div>
                 </section>
 
-                <section className="mt-3 rounded-[20px] border border-white/8 bg-[#101719] p-4">
+                <section className="mt-3 rounded-[20px] border border-white/8 bg-jse-theme-surface p-4">
                     <div className="flex items-center justify-between">
                         <span className="text-xs text-white/45">Commande</span>
                         <span className="text-xs font-bold text-jse-accent">{formatMontant(mission.montant_total)}</span>
@@ -495,7 +495,7 @@ function PickupScreen({ mission, onBack, onStart }) {
                     <button onClick={onBack} className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5"><ArrowLeft size={19} /></button>
                     <p className="text-sm font-bold">Retrait de la commande</p>
                 </header>
-                <section className="rounded-[20px] border border-white/8 bg-[#101719] p-3">
+                <section className="rounded-[20px] border border-white/8 bg-jse-theme-surface p-3">
                     <p className="text-sm font-bold">{mission.restaurant?.nom || "Restaurant"}</p>
                     <p className="mt-1 text-[9px] text-white/45">{mission.restaurant?.adresse || "Adresse"}</p>
                     <div className="mt-4 space-y-2">
@@ -582,7 +582,7 @@ function DeliveryScreen({ mission, onBack, onValidate, loading, error }) {
                     <p className="text-sm font-bold">En livraison</p>
                 </header>
 
-                <section className="rounded-[20px] border border-white/8 bg-[#101719] p-4">
+                <section className="rounded-[20px] border border-white/8 bg-jse-theme-surface p-4">
                     <p className="text-xs font-bold">{mission.client?.nom || "Client"}</p>
                     <p className="mt-1 text-[9px] text-white/45">{mission.adresse_livraison || "Adresse client"}</p>
                     <div className="mt-3 flex items-center gap-2 text-[10px] text-white/45">
@@ -627,7 +627,7 @@ function DeliveryScreen({ mission, onBack, onValidate, loading, error }) {
                                 className={[
                                     "h-12 rounded-xl border bg-[#0a0f11] text-center text-lg font-bold text-white outline-none transition",
                                     error
-                                        ? "border-red-400/60 focus:border-red-400"
+                                        ? "border-jse-danger/60 focus:border-red-400"
                                         : "border-white/10 focus:border-jse-accent",
                                 ].join(" ")}
                             />
@@ -635,7 +635,7 @@ function DeliveryScreen({ mission, onBack, onValidate, loading, error }) {
                     </div>
 
                     {error && (
-                        <div className="mt-3 flex items-start gap-2 rounded-xl border border-red-400/20 bg-red-400/5 px-3 py-2.5 text-[10px] leading-4 text-red-300">
+                        <div className="mt-3 flex items-start gap-2 rounded-xl border border-jse-danger/20 bg-jse-danger/5 px-3 py-2.5 text-[10px] leading-4 text-jse-danger">
                             <AlertCircle size={14} className="mt-0.5 shrink-0" />
                             <span>{error}</span>
                         </div>
@@ -664,7 +664,7 @@ function SuccessScreen({ mission, onBack }) {
                 </div>
                 <p className="mt-7 animate-jse-rise font-against text-3xl">Livraison réussie !</p>
                 <p className="mt-2 text-xs text-white/45">Commande #{mission.reference}</p>
-                <div className="mt-8 w-full rounded-[22px] border border-white/8 bg-[#101719] p-5">
+                <div className="mt-8 w-full rounded-[22px] border border-white/8 bg-jse-theme-surface p-5">
                     <p className="text-[9px] uppercase tracking-[0.14em] text-white/35">Commande clôturée</p>
                     <p className="mt-2 text-sm font-bold">{mission.restaurant?.nom || "Restaurant"} → {mission.client?.nom || "Client"}</p>
                 </div>
@@ -684,7 +684,7 @@ function Notifications({ notifications = [] }) {
                 {notifications.length ? notifications.map((notification) => (
                     <article
                         key={notification.id}
-                        className="rounded-[20px] border border-white/8 bg-[#101719] p-4"
+                        className="rounded-[20px] border border-white/8 bg-jse-theme-surface p-4"
                     >
                         <div className="flex items-start gap-3">
                             <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-jse-accent/12 text-jse-accent">
@@ -704,7 +704,7 @@ function Notifications({ notifications = [] }) {
                         </div>
                     </article>
                 )) : (
-                    <div className="rounded-[22px] border border-white/8 bg-[#101719] p-8 text-center">
+                    <div className="rounded-[22px] border border-white/8 bg-jse-theme-surface p-8 text-center">
                         <Bell className="mx-auto text-white/20" size={28} />
                         <p className="mt-3 text-sm font-semibold">Aucune notification</p>
                         <p className="mt-1 text-[10px] text-white/40">
@@ -724,7 +724,7 @@ function Historique({ historique = [] }) {
             <h2 className="mt-1 font-against text-3xl">Historique</h2>
             <div className="mt-5 space-y-2">
                 {historique.length ? historique.map((item) => (
-                    <article key={item.id} className="rounded-[20px] border border-white/8 bg-[#101719] p-4">
+                    <article key={item.id} className="rounded-[20px] border border-white/8 bg-jse-theme-surface p-4">
                         <div className="flex items-center gap-3">
                             <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-jse-secondaire/12 text-jse-secondaire">
                                 <Check size={17} />
@@ -739,7 +739,7 @@ function Historique({ historique = [] }) {
                         </div>
                     </article>
                 )) : (
-                    <div className="rounded-[22px] border border-white/8 bg-[#101719] p-8 text-center text-[10px] text-white/40">
+                    <div className="rounded-[22px] border border-white/8 bg-jse-theme-surface p-8 text-center text-[10px] text-white/40">
                         Aucun historique disponible.
                     </div>
                 )}
@@ -782,7 +782,7 @@ function Profile({ livreur, zones = [], historique = [], statistiques = {}, load
                 <ThemeToggle />
             </div>
 
-            <div className="mt-5 overflow-hidden rounded-[26px] border border-white/10 bg-[#101719] shadow-[0_24px_70px_rgba(0,0,0,.28)]">
+            <div className="mt-5 overflow-hidden rounded-[26px] border border-white/10 bg-jse-theme-surface shadow-[0_24px_70px_rgba(0,0,0,.28)]">
                 <div className="jse-profile-hero relative min-h-[190px] overflow-hidden px-5 pb-7 pt-6">
                     <img
                         src="/assets/profil_header.png"
@@ -910,7 +910,7 @@ function Profile({ livreur, zones = [], historique = [], statistiques = {}, load
                 </div>
             </div>
 
-            <button type="button" onClick={onLogout} className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-red-500/30 bg-red-500/5 py-3.5 text-xs font-semibold text-red-400 transition hover:bg-red-500/10 active:scale-[.98]">
+            <button type="button" onClick={onLogout} className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-jse-danger/30 bg-jse-danger/5 py-3.5 text-xs font-semibold text-jse-danger transition hover:bg-jse-danger/10 active:scale-[.98]">
                 <Power size={15} /> Se déconnecter
             </button>
         </section>
@@ -1077,7 +1077,7 @@ export default function TableauDeBord() {
                                 {active.length ? active.map((item) => (
                                     <MissionCard key={item.attribution_id} mission={item} onOpen={ouvrirMission} />
                                 )) : (
-                                    <div className="rounded-[22px] border border-white/8 bg-[#101719] p-8 text-center">
+                                    <div className="rounded-[22px] border border-white/8 bg-jse-theme-surface p-8 text-center">
                                         <Bike className="mx-auto text-white/20" size={28} />
                                         <p className="mt-3 text-sm font-semibold">Aucune mission disponible</p>
                                         <p className="mt-1 text-[10px] text-white/40">Les missions qui vous sont attribuées apparaîtront ici.</p>
