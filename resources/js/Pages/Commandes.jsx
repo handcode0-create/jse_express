@@ -414,9 +414,7 @@ export default function Commandes() {
                                         Aucune commande
                                     </h2>
                                     <p className="mx-auto mt-2 max-w-sm font-sans text-sm leading-5 text-jse-texte/50">
-                                        {filtreActif === "toutes"
-                                            ? "Vos commandes apparaîtront ici dès votre première commande."
-                                            : "Aucune commande ne correspond à ce filtre."}
+                                        Aucune commande pour le moment. Elles apparaîtront ici dès votre première validation.
                                     </p>
                                     <button
                                         type="button"
