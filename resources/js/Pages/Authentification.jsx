@@ -181,10 +181,10 @@ export default function Authentification() {
     };
 
     return (
-        <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-[#07110F] font-sans text-jse-texte">
+        <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-jse-principal font-sans text-jse-texte">
             <img src="/assets/login_page_fond.png" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 size-full object-cover object-center" />
-            <div className="pointer-events-none absolute inset-0 bg-[#07110F]/45" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--color-jse-principal)]/75 via-[var(--color-jse-principal)]/30 to-[#07110F]/75" />
+            <div className="pointer-events-none absolute inset-0 bg-jse-principal/45" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--color-jse-principal)]/75 via-[var(--color-jse-principal)]/30 to-[var(--color-jse-principal)]/75" />
 
             <div className="relative z-10 flex min-h-screen w-full">
 
@@ -305,7 +305,7 @@ export default function Authentification() {
                     FORMULAIRE
                 ====================================================== */}
 
-                <section ref={formRef} className="flex w-full items-center justify-center bg-[#07110F]/82 px-5 py-10 backdrop-blur-2xl sm:px-8 lg:min-h-screen lg:w-1/2 lg:px-12 xl:px-20">
+                <section ref={formRef} className="flex w-full items-center justify-center bg-jse-principal/82 px-5 py-10 backdrop-blur-2xl sm:px-8 lg:min-h-screen lg:w-1/2 lg:px-12 xl:px-20">
 
                     <div className="w-full max-w-md">
 
