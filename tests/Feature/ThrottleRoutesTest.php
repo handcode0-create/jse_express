@@ -70,6 +70,7 @@ class ThrottleRoutesTest extends TestCase
             'adresse' => 'Adresse test',
             'statut' => 'actif',
         ]);
+        StatutCommande::updateOrCreate(['code' => 'EN_LIVRAISON'], ['libelle' => 'En livraison', 'ordre' => 5]);
         $statut = StatutCommande::where('code', 'EN_LIVRAISON')->firstOrFail();
         $commande = Commande::create([
             'reference' => 'CMD-THROTTLE-001',
