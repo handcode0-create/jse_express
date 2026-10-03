@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { router, useState } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 import { Ban } from "lucide-react";
 import AdminDataPage from "../../Composants/Admin/AdminDataPage";
 
@@ -34,11 +34,13 @@ export default function Commandes({ utilisateur, commandes = { data: [] }, reche
                 { key: "zone", label: "Zone" },
                 { key: "statut", label: "Statut", render: row => <span className="inline-flex rounded-full bg-jse-secondaire/10 px-3 py-1 text-xs font-semibold text-jse-secondaire">{row.statut?.libelle || row.statut?.code || "—"}</span> },
                 { key: "montant_total", label: "Montant", render: row => `${Number(row.montant_total || 0).toLocaleString("fr-FR")} FCFA` },
+                { key: "distance_km", label: "Distance", render: row => row.distance_km == null ? "—" : `${row.distance_km} km` },
+                { key: "frais_livraison", label: "Livraison", render: row => `${Number(row.frais_livraison || 0).toLocaleString("fr-FR")} FCFA` },
                 { key: "date_commande", label: "Date" },
                 {
                     key: "actions",
                     label: "Action",
-                    render: row => ["EN_ATTENTE", "CONFIRMEE", "EN_PREPARATION"].includes(row.statut?.code) ? (
+                    render: row => ["EN_ATTENTE", "CONFIRMEE"].includes(row.statut?.code) ? (
                         <button type="button" onClick={() => annuler(row)} disabled={traitement === row.id} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-jse-danger/10 sm:w-auto sm:rounded-full px-4 text-xs font-semibold text-jse-danger disabled:opacity-50">
                             <Ban size={15} aria-hidden="true" />
                             {traitement === row.id ? "Traitement..." : "Annuler"}
