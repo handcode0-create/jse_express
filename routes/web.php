@@ -22,6 +22,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AdministrationController;
 use App\Services\PanierService;
 use App\Services\NotificationService;
+use App\Services\DistanceService;
+use App\Services\TarificationLivraisonService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -801,16 +803,34 @@ Route::get('/commande/validation', function () {
     ]);
 })->middleware(['auth', 'role:client'])->name('commande.validation');
 
-Route::post('/commande', function (Request $request, PanierService $panierService, NotificationService $notificationService) {
+Route::post('/commande/estimation-livraison', function (Request $request, DistanceService $distanceService, TarificationLivraisonService $tarificationService) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    $donnees = $request->validate([
+        'latitude' => ['required', 'numeric', 'between:-90,90'],
+        'longitude' => ['required', 'numeric', 'between:-180,180'],
+    ]);
+    $panier = Panier::query()->where('user_id', Auth::id())->where('statut', 'actif')->with('lignesPanier.produit.restaurant')->latest('id')->first();
+    $restaurant = $panier?->lignesPanier?->first()?->produit?->restaurant;
+    abort_unless($restaurant, 422);
+    if ($restaurant->latitude === null || $restaurant->longitude === null) {
+        return response()->json(['distance_km' => null, 'frais' => (float) config('jse.frais_livraison', 500)]);
+    }
+    $distance = $distanceService->calculer((float) $restaurant->latitude, (float) $restaurant->longitude, (float) $donnees['latitude'], (float) $donnees['longitude']);
+    return response()->json(['distance_km' => $distance, 'frais' => $tarificationService->fraisPourDistance($distance)]);
+})->middleware(['auth', 'role:client', 'throttle:5,1'])->name('commande.estimation-livraison');
+
+Route::post('/commande', function (Request $request, PanierService $panierService, NotificationService $notificationService, DistanceService $distanceService, TarificationLivraisonService $tarificationService) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
 
     $donnees = $request->validate([
         'zone_id' => ['required', 'integer', 'exists:zones,id'],
+        'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+        'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         'adresse_livraison' => ['required', 'string', 'max:500'],
         'telephone_livraison' => ['required', 'string', 'max:30'],
     ]);
 
-    $commande = DB::transaction(function () use ($donnees, $panierService, $notificationService) {
+    $commande = DB::transaction(function () use ($donnees, $panierService, $notificationService, $distanceService, $tarificationService) {
         $panier = Panier::query()
             ->where('user_id', Auth::id())
             ->where('statut', 'actif')
@@ -839,7 +859,17 @@ Route::post('/commande', function (Request $request, PanierService $panierServic
             $ligne->update(['prix_unitaire' => $prixUnitaire]);
             $sousTotal += $ligne->quantite * $prixUnitaire;
         }
-        $fraisLivraison = config('jse.frais_livraison');
+        $latitude = isset($donnees['latitude']) ? (float) $donnees['latitude'] : null;
+        $longitude = isset($donnees['longitude']) ? (float) $donnees['longitude'] : null;
+        $distanceKm = null;
+        $fraisLivraison = (float) config('jse.frais_livraison', 500);
+        if ($latitude !== null && $longitude !== null && $restaurant->latitude !== null && $restaurant->longitude !== null) {
+            $distanceKm = $distanceService->calculer((float) $restaurant->latitude, (float) $restaurant->longitude, $latitude, $longitude);
+            $fraisLivraison = $tarificationService->fraisPourDistance($distanceKm);
+        }
+        if ($latitude !== null && $longitude !== null) {
+            AdresseLivraison::query()->where('user_id', Auth::id())->where('adresse', $donnees['adresse_livraison'])->latest('id')->first()?->update(['latitude' => $latitude, 'longitude' => $longitude]);
+        }
         $reference = 'JSE-TMP-' . Str::uuid()->toString();
 
         $statutId = DB::table('statuts_commandes')->where('code', 'EN_ATTENTE')->value('id');
@@ -853,6 +883,9 @@ Route::post('/commande', function (Request $request, PanierService $panierServic
             'statut_id' => $statutId,
             'adresse_livraison' => $donnees['adresse_livraison'],
             'telephone_livraison' => $donnees['telephone_livraison'],
+            'latitude_livraison' => $latitude,
+            'longitude_livraison' => $longitude,
+            'distance_km' => $distanceKm,
             'sous_total' => $sousTotal,
             'frais_livraison' => $fraisLivraison,
             'montant_total' => $sousTotal + $fraisLivraison,
