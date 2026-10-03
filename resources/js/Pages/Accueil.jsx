@@ -24,31 +24,31 @@ const IMAGE_BANNIERE_SECOURS = "/assets/plat-hero.png";
 
 const bannières = [
     {
-        image: "/assets/banner-plat-ivoirien.jpg",
+        image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1600&q=85",
         label: "JSE EXPRESS",
         titre: "Des saveurs près de chez vous",
         description: "Commandez vos plats préférés à Adzopé",
     },
     {
-        image: "/assets/banner-livraison.jpg",
+        image: "https://images.unsplash.com/photo-1526367790999-0150786686a2?auto=format&fit=crop&w=1600&q=85",
         label: "LIVRAISON",
         titre: "Vos plats préférés, livrés à Adzopé",
         description: "Commandez simplement auprès de vos restaurants locaux.",
     },
     {
-        image: "/assets/banner-restaurants.jpg",
+        image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=85",
         label: "RESTAURANTS LOCAUX",
         titre: "Découvrez les restaurants d'Adzopé",
         description: "Explorez les établissements disponibles près de chez vous.",
     },
     {
-        image: "/assets/banner-commande-simple.jpg",
+        image: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=1600&q=85",
         label: "SIMPLE ET PRATIQUE",
         titre: "Commandez sans vous déplacer",
         description: "Quelques étapes suffisent pour préparer votre commande.",
     },
     {
-        image: "/assets/banner-decouverte.jpg",
+        image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=85",
         label: "À DÉCOUVRIR",
         titre: "Variez les plaisirs",
         description: "Trouvez différentes propositions au même endroit.",
@@ -58,19 +58,19 @@ const bannières = [
 const raccourcisAccueil = [
     {
         nom: "Restaurants",
-        image: "/assets/hero_icon/resto.jpeg",
+        image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=85",
     },
     {
         nom: "Fast food",
-        image: "/assets/hero_icon/fast_food.jpeg",
+        image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=85",
     },
     {
         nom: "Boissons",
-        image: "/assets/hero_icon/glacier.jpeg",
+        image: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=85",
     },
     {
         nom: "Promotions",
-        image: "/assets/hero_icon/promo.jpeg",
+        image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=800&q=85",
     },
 ];
 
@@ -84,11 +84,11 @@ const imagesRestaurants = [
 ];
 
 const imagesRestaurantsLocales = [
-    "/assets/banner-restaurants.jpg",
-    "/assets/banner-plat-ivoirien.jpg",
-    "/assets/banner-decouverte.jpg",
-    "/assets/banner-commande-simple.jpg",
-    "/assets/banner-livraison.jpg",
+    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=85",
+    "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1600&q=85",
+    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=85",
+    "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=1600&q=85",
+    "https://images.unsplash.com/photo-1526367790999-0150786686a2?auto=format&fit=crop&w=1600&q=85",
     "/assets/plat-hero.png",
 ];
 
