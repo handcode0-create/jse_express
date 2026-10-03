@@ -10,6 +10,7 @@ use App\Models\Notification;
 use App\Models\Paiement;
 use App\Models\Produit;
 use App\Models\Restaurant;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -351,9 +352,11 @@ class RestaurantController extends Controller
                         $commande->id,
                         $livraison->id,
                         'attribution'
-                    );                    $notificationService->sms(
-                         $commande->user,
-                         'Votre code de livraison est disponible dans l'application.',
+                    );
+
+                    $notificationService->sms(
+                        $commande->user,
+                        'Votre code de livraison est disponible dans l\'application.',
                         $commande->id,
                         $livraison->id,
                         'pin_livraison'
