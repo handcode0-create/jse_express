@@ -102,15 +102,15 @@ function presentationNotification(notification) {
 }
 
 export default function Notifications() {
-    const { notifications: notificationsInitial = [] } = usePage().props;
-    const [notifications, setNotifications] = useState(notificationsInitial);
+    const { notifications: notificationsInitiales = [] } = usePage().props;
+    const [notifications, setNotifications] = useState(notificationsInitiales);
     const [notificationASupprimer, setNotificationASupprimer] = useState(null);
     const [suppressionEnCours, setSuppressionEnCours] = useState(false);
     const [toast, setToast] = useState(null);
 
     useEffect(() => {
-        setNotifications(notificationsInitial);
-    }, [notificationsInitial]);
+        setNotifications(notificationsInitiales);
+    }, [notificationsInitiales]);
 
     useEffect(() => {
         if (!toast) return undefined;
@@ -133,7 +133,7 @@ export default function Notifications() {
         setSuppressionEnCours(true);
 
         try {
-            const response = await fetch(
+            const reponse = await fetch(
                 "/notifications/" + notificationASupprimer.id,
                 {
                     method: "DELETE",
@@ -145,11 +145,11 @@ export default function Notifications() {
                 },
             );
 
-            const payload = await response.json().catch(() => null);
+            const donnees = await reponse.json().catch(() => null);
 
-            if (!response.ok || !payload?.success) {
+            if (!reponse.ok || !donnees?.success) {
                 throw new Error(
-                    payload?.message || "La notification n’a pas pu être supprimée.",
+                    donnees?.message || "La notification n’a pas pu être supprimée.",
                 );
             }
 
@@ -164,11 +164,11 @@ export default function Notifications() {
                 type: "success",
                 message: "Notification supprimée.",
             });
-        } catch (error) {
+        } catch (erreur) {
             setToast({
-                type: "error",
+                type: "erreur",
                 message:
-                    error?.message ||
+                    erreur?.message ||
                     "Une erreur est survenue pendant la suppression.",
             });
         } finally {
