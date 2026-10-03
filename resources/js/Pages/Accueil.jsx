@@ -3,6 +3,7 @@ import NavigationFlottante from "../Composants/Navigation/NavigationFlottante";
 import {
     Bell,
     ChevronDown,
+    ChevronLeft,
     ChevronRight,
     Heart,
     Home,
@@ -74,38 +75,14 @@ const raccourcisAccueil = [
 ];
 
 const imagesRestaurants = [
-    "/assets/banner-restaurants.jpg",
-    "/assets/banner-plat-ivoirien.jpg",
-    "/assets/bienvenue/poulet_braise.png",
-    "/assets/bienvenue/attieke_poisson.png",
-    "/assets/bienvenue/burger.png",
-    "/assets/bienvenue/dessert.png",
-    "/assets/bienvenue/boisson_fraiche.png",
+    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1200&q=85",
 ];
 
-
-const restaurantsLocaux = [
-    { id: "local-oasis-du-chef", nom: "L’oasis du chef", note: 5, avis: 6, type: "Restaurant", adresse: "443V+48P", services: "Vente à emporter" },
-    { id: "local-le-queens", nom: "Maquis-Resto Le Queens Adzopé", note: 4.6, avis: 5, type: "Restaurant", adresse: "34VM+X35", services: "Restaurant", description: "Cadre propre, cuisine superbe et personnel accueillant 👌🏾" },
-    { id: "local-cdg", nom: "Maquis La Cour Des Grands (CDG) Adzopé", note: 3.8, avis: 74, type: "Restaurant", adresse: "34XQ+HG2", services: "Maquis · Restaurant", description: "Pour l’ambiance c’est l’endroit idéal à Adzopé" },
-    { id: "local-tantie-marthe", nom: "Maquis Chez Tantie Marthe", note: 3.5, avis: 135, type: "Restaurant", adresse: "442X+JP2", services: "Repas sur place · Vente à emporter" },
-    { id: "local-escale", nom: "L’escale", note: 3.6, avis: 109, type: "Plats africains", adresse: "34RM+GX2", services: "Restaurant", description: "Accueil chaleureux, plats délicieux, service impeccable, ambiance magique." },
-    { id: "local-escalier", nom: "Maquis restaurant L’ESCALIER", note: 3.8, avis: 5, type: "Restaurant", adresse: "34XW+QC9", services: "Repas sur place · Vente à emporter" },
-    { id: "local-adebo", nom: "Marquis resto ADÊBÔ", note: 5, avis: 2, type: "Restaurant", adresse: "442H+26", services: "Repas sur place · Vente à emporter" },
-    { id: "local-palmeraie", nom: "Plein-air la palmeraie d’adzopé", note: 4, avis: 20, type: "Plats africains", adresse: "34QR+72V", services: "Fermé · Ouvre à 00:00 sam.", description: "Très bon espace avec de très bons plats africains." },
-    { id: "local-colombe", nom: "Restaurant la COLOMBE", note: 3.3, avis: 8, type: "Restaurant", adresse: "444P+HR6", services: "Repas sur place · Vente à emporter" },
-    { id: "local-grand-ouest", nom: "Maquis Le Grand Ouest", note: 5, avis: 1, type: "Restaurant", adresse: "En dessous de L’escale", services: "Repas sur place · Vente à emporter" },
-    { id: "local-san-pedro", nom: "Espace SAN PEDRO", note: 4, avis: 2, type: "Restaurant", adresse: "449W+885 King Palace Hotel", services: "Repas sur place · Vente à emporter" },
-    { id: "local-kra-kra", nom: "Kra-Kra", note: 4.8, avis: 5, type: "Restaurant", adresse: "449H+WJV", services: "Vente à emporter" },
-    { id: "local-obarachiel", nom: "Restaurant O’Barachiel", note: null, avis: 0, type: "Restaurant", adresse: "447W+4CH", services: "Repas sur place" },
-    { id: "local-la-texane", nom: "LA TEXANE", note: 5, avis: 1, type: "Restaurant", adresse: "443Q+22R", services: "Repas sur place" },
-    { id: "local-escalier-a1", nom: "RESTAURANT L’ESCALIER", note: 3.7, avis: 3, type: "Restaurant", adresse: "34PM+XWH, A1", services: "Repas sur place · Vente à emporter" },
-    { id: "local-vitesse-superieure", nom: "Espace Vitesse Supérieure Plus", note: 4.3, avis: 3, type: "Buffet", adresse: "443R+65H", services: "Repas sur place · Vente à emporter" },
-    { id: "local-le-leader", nom: "MAQUIS LE LEADER", note: 3.7, avis: 15, type: "Restaurant", adresse: "Adzopé", services: "Repas sur place · Vente à emporter" },
-    { id: "local-riziere", nom: "La Rizière Restaurant", note: null, avis: 0, type: "Restaurant", adresse: "Adzopé", services: "Repas sur place · Vente à emporter · Livraison" },
-    { id: "local-le-bonus", nom: "Maquis-restaurant Le Bonus", note: 4, avis: 4, type: "Soupe populaire", adresse: "443W+7W9", services: "Restaurant" },
-    { id: "local-chez-fidele", nom: "Chez Fidèle", note: 4.7, avis: 3, type: "Poulet", adresse: "442W+56P", services: "Repas sur place · Vente à emporter · Livraison" },
-];
 
 const navigation = [
     { label: "Accueil", icon: Home, active: true },
@@ -168,6 +145,8 @@ export default function Accueil() {
     const categoriesRef = useRef(null);
     const bannerRef = useRef(null);
     const restaurantsRef = useRef(null);
+    const glissementRestaurantsRef = useRef({ actif: false, debutX: 0, scrollInitial: 0 });
+    const [glissementRestaurants, setGlissementRestaurants] = useState(false);
 
     useLayoutEffect(() => {
         if (!pageRef.current) return;
@@ -254,10 +233,7 @@ export default function Accueil() {
         return ["Toutes les zones", ...new Set(valeurs)];
     }, [restaurants]);
 
-    const restaurantsDisponibles = useMemo(
-        () => [...restaurantsLocaux, ...restaurants],
-        [restaurants],
-    );
+    const restaurantsDisponibles = useMemo(() => restaurants, [restaurants]);
 
     const restaurantsFiltres = useMemo(() => {
         const terme = String(recherche || "").trim().toLowerCase();
@@ -300,8 +276,77 @@ export default function Accueil() {
     }, []);
 
     useEffect(() => {
+        if (restaurantsDisponibles.length < 2) return;
+
+        const intervalle = window.setInterval(() => {
+            if (!restaurantsRef.current) return;
+
+            const estFin =
+                restaurantsRef.current.scrollLeft +
+                    restaurantsRef.current.clientWidth >=
+                restaurantsRef.current.scrollWidth - 12;
+
+            if (estFin) {
+                restaurantsRef.current.scrollTo({
+                    left: 0,
+                    behavior: "smooth",
+                });
+                return;
+            }
+
+            defilerRestaurants(1);
+        }, 3000);
+
+        return () => window.clearInterval(intervalle);
+    }, [restaurantsDisponibles.length]);
+
+    useEffect(() => {
         setRechercheLocale(recherche);
     }, [recherche]);
+
+    const defilerRestaurants = (direction) => {
+        if (!restaurantsRef.current) return;
+
+        const distance = Math.max(restaurantsRef.current.clientWidth * 0.78, 280);
+
+        restaurantsRef.current.scrollBy({
+            left: direction * distance,
+            behavior: "smooth",
+        });
+    };
+
+    const commencerGlissementRestaurants = (event) => {
+        if (!restaurantsRef.current) return;
+
+        glissementRestaurantsRef.current = {
+            actif: true,
+            debutX: event.clientX,
+            scrollInitial: restaurantsRef.current.scrollLeft,
+        };
+
+        setGlissementRestaurants(true);
+        restaurantsRef.current.setPointerCapture?.(event.pointerId);
+    };
+
+    const deplacerGlissementRestaurants = (event) => {
+        const glissement = glissementRestaurantsRef.current;
+
+        if (!glissement.actif || !restaurantsRef.current) return;
+
+        restaurantsRef.current.scrollLeft =
+            glissement.scrollInitial - (event.clientX - glissement.debutX);
+    };
+
+    const terminerGlissementRestaurants = (event) => {
+        glissementRestaurantsRef.current.actif = false;
+        setGlissementRestaurants(false);
+
+        if (
+            restaurantsRef.current?.hasPointerCapture?.(event.pointerId)
+        ) {
+            restaurantsRef.current.releasePointerCapture(event.pointerId);
+        }
+    };
 
     const rechercher = (event) => {
         event.preventDefault();
@@ -511,13 +556,41 @@ export default function Accueil() {
                                     <p className="font-sans text-[10px] font-medium uppercase tracking-[0.12em] text-jse-texte/35">À proximité</p>
                                     <h2 className="mt-1 font-against text-[1.65rem] leading-none text-jse-principal sm:text-2xl">Restaurants populaires</h2>
                                 </div>
-                                <button type="button" disabled className="flex items-center gap-1 pb-0.5 font-sans text-xs font-semibold text-jse-secondaire">
-                                    Voir tout <ChevronRight size={14} />
-                                </button>
+                                <div className="flex items-center gap-1.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => defilerRestaurants(-1)}
+                                        className="flex size-9 items-center justify-center rounded-full bg-white/80 text-jse-principal shadow-sm ring-1 ring-jse-texte/5 transition hover:bg-white active:scale-95"
+                                        aria-label="Restaurants précédents"
+                                    >
+                                        <ChevronLeft size={16} strokeWidth={2} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => defilerRestaurants(1)}
+                                        className="flex size-9 items-center justify-center rounded-full bg-white/80 text-jse-principal shadow-sm ring-1 ring-jse-texte/5 transition hover:bg-white active:scale-95"
+                                        aria-label="Restaurants suivants"
+                                    >
+                                        <ChevronRight size={16} strokeWidth={2} />
+                                    </button>
+                                    <button type="button" disabled className="hidden items-center gap-1 pb-0.5 font-sans text-xs font-semibold text-jse-secondaire sm:flex">
+                                        Voir tout <ChevronRight size={14} />
+                                    </button>
+                                </div>
                             </div>
 
                             {restaurantsFiltres.length > 0 ? (
-                                <div className="scrollbar-none -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 sm:-mx-0 sm:px-0 sm:gap-4 lg:grid lg:grid-cols-3 lg:overflow-visible lg:snap-none lg:pb-2">
+                                <div
+                                    className={[
+                                        "scrollbar-none -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 select-none sm:-mx-0 sm:px-0 sm:gap-4",
+                                        "lg:grid lg:grid-cols-3 lg:overflow-visible lg:snap-none lg:pb-2",
+                                        glissementRestaurants ? "cursor-grabbing" : "cursor-grab",
+                                    ].join(" ")}
+                                    onPointerDown={commencerGlissementRestaurants}
+                                    onPointerMove={deplacerGlissementRestaurants}
+                                    onPointerUp={terminerGlissementRestaurants}
+                                    onPointerCancel={terminerGlissementRestaurants}
+                                >
                                     {restaurantsFiltres.map((restaurant, index) => (
                                         <article
                                             key={restaurant.id}
