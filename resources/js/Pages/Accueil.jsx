@@ -83,6 +83,26 @@ const imagesRestaurants = [
     "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1200&q=85",
 ];
 
+const imagesRestaurantsLocales = [
+    "/assets/banner-restaurants.jpg",
+    "/assets/banner-plat-ivoirien.jpg",
+    "/assets/banner-decouverte.jpg",
+    "/assets/banner-commande-simple.jpg",
+    "/assets/banner-livraison.jpg",
+    "/assets/plat-hero.png",
+];
+
+const obtenirImageRestaurant = (restaurant, index = 0) => {
+    if (restaurant?.image) return restaurant.image;
+    return imagesRestaurants[index % imagesRestaurants.length];
+};
+
+const obtenirSecoursImageRestaurant = (restaurant, index = 0) => {
+    return imagesRestaurantsLocales[
+        (Number(restaurant?.id) || index) % imagesRestaurantsLocales.length
+    ];
+};
+
 
 function calculerDistanceKm(latitudeA, longitudeA, latitudeB, longitudeB) {
     const degresEnRadians = (valeur) => (valeur * Math.PI) / 180;
@@ -221,6 +241,18 @@ export default function Accueil() {
             window.removeEventListener("storage", synchroniserFavorisLocaux);
         };
     }, []);
+
+    const estRestaurantFavori = (restaurant) => {
+        const id = Number(restaurant?.id);
+
+        if (Number.isInteger(id)) {
+            return favorisServeur.includes(id);
+        }
+
+        return favoris.some(
+            (favori) => String(favori.id) === String(restaurant?.id),
+        );
+    };
 
     const basculerFavoriRestaurant = (restaurant) => {
         if (Number.isInteger(Number(restaurant.id))) {
@@ -708,16 +740,21 @@ export default function Accueil() {
                                         >
                                             <div className="relative aspect-[1.45/1] overflow-hidden bg-jse-principal">
                                                 <img
-                                                    src={restaurant.image || imagesRestaurants[index % imagesRestaurants.length]}
+                                                    src={obtenirImageRestaurant(restaurant, index)}
                                                     alt={restaurant.nom}
                                                     onError={(event) => {
                                                         event.currentTarget.onerror = null;
-                                                        event.currentTarget.src = imagesRestaurants[index % imagesRestaurants.length];
+                                                        event.currentTarget.src = obtenirSecoursImageRestaurant(restaurant, index);
                                                     }}
                                                     className="h-full w-full object-cover"
                                                 />
-                                                <button type="button" onClick={(event) => { event.stopPropagation(); gsap.fromTo(event.currentTarget, { scale: 0.82 }, { scale: 1, duration: 0.42, ease: "back.out(2)" }); basculerFavoriRestaurant(restaurant); }} className="jse-favorite-button absolute right-3 top-3 flex size-9 items-center justify-center rounded-full bg-white/95 shadow-md ring-1 ring-black/5 transition" aria-label={(Number.isInteger(Number(restaurant.id)) ? favorisServeur.includes(Number(restaurant.id)) : favoris.some((favori) => String(favori.id) === String(restaurant.id))) ? "Retirer des favoris" : "Ajouter aux favoris"}>
-                                                    <Heart size={16} strokeWidth={1.8} className={favoris.some((favori) => String(favori.id) === String(restaurant.id)) ? "text-jse-accent" : "text-jse-principal"} fill={favoris.some((favori) => String(favori.id) === String(restaurant.id)) ? "currentColor" : "none"} />
+                                                <button type="button" onClick={(event) => { event.stopPropagation(); gsap.fromTo(event.currentTarget, { scale: 0.82 }, { scale: 1, duration: 0.42, ease: "back.out(2)" }); basculerFavoriRestaurant(restaurant); }} className="jse-favorite-button absolute right-3 top-3 flex size-9 items-center justify-center rounded-full bg-white/95 shadow-md ring-1 ring-black/5 transition" aria-label={estRestaurantFavori(restaurant) ? "Retirer des favoris" : "Ajouter aux favoris"}>
+                                                    <Heart
+                                                        size={16}
+                                                        strokeWidth={1.8}
+                                                        className={estRestaurantFavori(restaurant) ? "text-jse-accent" : "text-jse-principal"}
+                                                        fill={estRestaurantFavori(restaurant) ? "currentColor" : "none"}
+                                                    />
                                                 </button>
                                             </div>
 
