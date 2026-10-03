@@ -1,7 +1,7 @@
 import { Download, Share, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const CLE_REJET = "jse-install-dismissed";
+const CLE_REJET = "jse-install-dismissed-v2";
 const DUREE_REJET = 7 * 24 * 60 * 60 * 1000;
 
 function estIOS() {
@@ -53,14 +53,10 @@ export default function InstallationApplication() {
 
         const iosSafari = estIOS() && estSafari();
 
-        if (iosSafari) {
-            const timer = window.setTimeout(() => {
-                setIos(true);
-                setVisible(true);
-            }, 1200);
-
-            return () => window.clearTimeout(timer);
-        }
+        const afficherToast = window.setTimeout(() => {
+            setIos(iosSafari);
+            setVisible(true);
+        }, 1200);
 
         const recevoirPrompt = (event) => {
             event.preventDefault();
@@ -81,6 +77,7 @@ export default function InstallationApplication() {
         window.addEventListener("resize", verifierModeStandalone);
 
         return () => {
+            window.clearTimeout(afficherToast);
             window.removeEventListener(
                 "beforeinstallprompt",
                 recevoirPrompt,
@@ -96,7 +93,11 @@ export default function InstallationApplication() {
     };
 
     const installer = async () => {
-        if (!promptInstallation) return;
+        if (!promptInstallation) {
+            enregistrerRejet();
+            setVisible(false);
+            return;
+        }
 
         promptInstallation.prompt();
         const resultat = await promptInstallation.userChoice;
@@ -113,7 +114,7 @@ export default function InstallationApplication() {
 
     return (
         <aside
-            className="fixed inset-x-4 bottom-5 z-[120] mx-auto max-w-xl overflow-hidden rounded-[26px] border border-jse-secondaire/25 bg-jse-principal shadow-[0_20px_60px_rgba(18,60,50,0.28)] backdrop-blur-xl"
+            className="fixed inset-x-4 bottom-5 z-[120] mx-auto max-w-xl overflow-hidden rounded-[26px] border border-jse-secondaire/25 bg-jse-principal shadow-2xl shadow-jse-principal/20 backdrop-blur-xl"
             role="dialog"
             aria-label="Installer JSE Express"
         >
@@ -155,13 +156,20 @@ export default function InstallationApplication() {
                             </strong>
                         </div>
                     ) : (
-                        <button
-                            type="button"
-                            onClick={installer}
-                            className="mt-4 inline-flex items-center justify-center rounded-xl bg-jse-accent px-4 py-2.5 text-sm font-semibold text-jse-texte transition-transform hover:brightness-105 active:scale-[0.98]"
-                        >
-                            Installer l’application
-                        </button>
+                        <div className="mt-4 flex flex-wrap items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={installer}
+                                className="inline-flex items-center justify-center rounded-xl bg-jse-accent px-4 py-2.5 text-sm font-semibold text-jse-texte transition-transform hover:brightness-105 active:scale-[0.98]"
+                            >
+                                Installer l’application
+                            </button>
+                            {!promptInstallation && (
+                                <span className="font-sans text-[10px] leading-4 text-jse-fond/55">
+                                    Si le bouton système n’apparaît pas, utilisez le menu du navigateur puis « Installer l’application ».
+                                </span>
+                            )}
+                        </div>
                     )}
                 </div>
 
