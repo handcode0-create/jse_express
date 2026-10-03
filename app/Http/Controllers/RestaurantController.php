@@ -350,15 +350,9 @@ class RestaurantController extends Controller
                         $commande->id,
                         $livraison->id,
                         'attribution'
-                    );
-
-                    $pin = \Illuminate\Support\Facades\Crypt::decryptString(
-                        $commande->fresh()->pin_livraison_chiffre
-                    );
-
-                    $notificationService->sms(
-                        $commande->user,
-                        'Votre code de livraison pour '.$commande->reference.' est '.$pin.'. Communiquez-le au livreur à la remise.',
+                    );                    $notificationService->sms(
+                         $commande->user,
+                         'Votre code de livraison est disponible dans l'application.',
                         $commande->id,
                         $livraison->id,
                         'pin_livraison'

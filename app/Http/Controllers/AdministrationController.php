@@ -192,11 +192,8 @@ class AdministrationController extends Controller
 
         $livraisonService->reattribuer($livraison, $request->user()->id, $livreur->id, $donnees['motif']);
         $livraison->load('commande.user');
-        $commande = $livraison->commande;
-        $pin = \Illuminate\Support\Facades\Crypt::decryptString($commande->pin_livraison_chiffre);
-
-        $notificationService->sms($livreur, 'Une livraison '.$commande->reference.' vous a été attribuée par l’administration.', $commande->id, $livraison->id, 'attribution');
-        $notificationService->sms($commande->user, 'Votre code de livraison pour '.$commande->reference.' est '.$pin.'.', $commande->id, $livraison->id, 'pin_livraison');
+        $commande = $livraison->commande;        $notificationService->sms($livreur, 'Une livraison '.$commande->reference.' vous a été attribuée par l’administration.', $commande->id, $livraison->id, 'attribution');
+        $notificationService->sms($commande->user, 'Votre code de livraison est disponible dans l'application.', $commande->id, $livraison->id, 'pin_livraison');
 
         return back()->with('success', 'La livraison a été réattribuée.');
     }
