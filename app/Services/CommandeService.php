@@ -9,15 +9,14 @@ use App\Models\Livraison;
 use App\Models\ProfilLivreur;
 use App\Models\StatutCommande;
 use App\Models\User;
-use App\Policies\CommandePolicy;
 use Illuminate\Support\Facades\DB;
 
 class CommandeService
 {
+    private const STATUTS_ANNULABLES = ['EN_ATTENTE', 'CONFIRMEE'];
     public function annuler(
         Commande $commande,
         User $acteur,
-        ?array $statutsAnnulables = null,
         ?string $commentaire = null
     ): void {
         DB::transaction(function () use ($commande, $acteur, $statutsAnnulables, $commentaire) {
@@ -31,19 +30,11 @@ class CommandeService
                 return;
             }
 
-            if ($statutsAnnulables === null) {
-                abort_unless(
-                    app(CommandePolicy::class)->peutEtreAnnulee($commande),
-                    422,
-                    'Cette commande ne peut plus être annulée.'
-                );
-            } else {
-                abort_unless(
-                    in_array($commande->statutCommande?->code, $statutsAnnulables, true),
-                    422,
-                    'Cette commande ne peut plus être annulée.'
-                );
-            }
+            abort_unless(
+                in_array($commande->statutCommande?->code, self::STATUTS_ANNULABLES, true),
+                422,
+                'Cette commande ne peut plus être annulée.'
+            );
 
             $statut = StatutCommande::query()
                 ->where('code', 'ANNULEE')

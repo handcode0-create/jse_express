@@ -98,7 +98,7 @@ class AdministrationController extends Controller
                     'zone:id,nom',
                     'statutCommande:id,code,libelle,ordre',
                 ])
-                ->whereHas('statutCommande', fn ($q) => $q->whereIn('code', ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION']))
+                ->whereHas('statutCommande', fn ($q) => $q->whereIn('code', ['EN_ATTENTE', 'CONFIRMEE']))
                 ->latest('date_commande')
                 ->limit(50)
                 ->get()
@@ -139,7 +139,6 @@ class AdministrationController extends Controller
         $commandeService->annuler(
             $commande,
             $request->user(),
-            ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION'],
             $donnees['motif'] ?? 'Commande annulée par l’administrateur.'
         );
 

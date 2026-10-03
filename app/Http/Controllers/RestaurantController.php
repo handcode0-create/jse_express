@@ -111,7 +111,7 @@ class RestaurantController extends Controller
             'statistiques' => [
                 'commandes_en_attente' => Commande::query()
                     ->where('restaurant_id', $restaurant->id)
-                    ->whereHas('statutCommande', fn ($query) => $query->whereIn('code', ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION']))
+                    ->whereHas('statutCommande', fn ($query) => $query->whereIn('code', ['EN_ATTENTE', 'CONFIRMEE']))
                     ->count(),
                 'commandes_du_jour' => Commande::query()
                     ->where('restaurant_id', $restaurant->id)
@@ -375,7 +375,6 @@ class RestaurantController extends Controller
         $commandeService->annuler(
             $commande,
             $request->user(),
-            ['EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION'],
             $donnees['motif'] ?? 'Commande annulée par le restaurant.'
         );
 
