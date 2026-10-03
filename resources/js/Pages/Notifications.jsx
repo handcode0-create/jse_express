@@ -336,6 +336,99 @@ export default function Notifications() {
                 </div>
             </div>
 
+            {notificationASupprimer && (
+                <div
+                    className="fixed inset-0 z-50 flex items-end justify-center bg-jse-principal/20 p-4 backdrop-blur-sm sm:items-center"
+                    role="presentation"
+                    onMouseDown={(event) => {
+                        if (event.target === event.currentTarget && !suppressionEnCours) {
+                            setNotificationASupprimer(null);
+                        }
+                    }}
+                >
+                    <section
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="suppression-notification-title"
+                        className="w-full max-w-md rounded-[28px] bg-white p-5 shadow-2xl ring-1 ring-jse-texte/10"
+                    >
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.14em] text-jse-danger">
+                                    Confirmation
+                                </p>
+                                <h2
+                                    id="suppression-notification-title"
+                                    className="mt-1 font-against text-2xl leading-none text-jse-principal"
+                                >
+                                    Supprimer la notification ?
+                                </h2>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => setNotificationASupprimer(null)}
+                                disabled={suppressionEnCours}
+                                aria-label="Fermer"
+                                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-jse-fond text-jse-principal disabled:opacity-50"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <p className="mt-4 font-sans text-sm leading-5 text-jse-texte/60">
+                            Cette notification sera masquée de votre compte.
+                            L’historique d’envoi JSE Express reste conservé.
+                        </p>
+
+                        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                            <button
+                                type="button"
+                                onClick={() => setNotificationASupprimer(null)}
+                                disabled={suppressionEnCours}
+                                className="rounded-full bg-jse-fond px-5 py-3 font-sans text-xs font-semibold text-jse-principal"
+                            >
+                                Conserver
+                            </button>
+                            <button
+                                type="button"
+                                onClick={confirmerSuppression}
+                                disabled={suppressionEnCours}
+                                className="rounded-full bg-jse-danger px-5 py-3 font-sans text-xs font-semibold text-white disabled:opacity-50"
+                            >
+                                {suppressionEnCours ? "Suppression…" : "Supprimer"}
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            )}
+
+            {toast && (
+                <div
+                    role="status"
+                    className={[
+                        "fixed inset-x-4 bottom-24 z-[60] mx-auto max-w-md rounded-full px-4 py-3 shadow-xl",
+                        toast.type === "success"
+                            ? "bg-jse-secondaire text-white"
+                            : "bg-jse-danger text-white",
+                    ].join(" ")}
+                >
+                    <div className="flex items-center justify-between gap-3">
+                        <span className="font-sans text-xs font-semibold">
+                            {toast.message}
+                        </span>
+                        <button
+                            type="button"
+                            onClick={() => setToast(null)}
+                            aria-label="Fermer"
+                            className="flex size-7 items-center justify-center rounded-full bg-white/10"
+                        >
+                            <X size={14} />
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <nav className="fixed inset-x-0 bottom-0 z-40 px-4 pb-4 lg:hidden">
                 <div className="mx-auto flex h-[66px] w-full max-w-md items-center justify-around rounded-[24px] border border-white/80 bg-white/95 px-1 shadow-xl shadow-jse-principal/10 backdrop-blur-xl">
                     <NavigationItem
