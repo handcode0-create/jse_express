@@ -90,7 +90,7 @@ export default function Bienvenue() {
     };
 
     return (
-        <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-[#07110F] text-jse-texte">
+        <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-jse-principal text-jse-texte">
             <img
                 ref={backgroundRef}
                 src="/assets/bg.png"
@@ -98,9 +98,9 @@ export default function Bienvenue() {
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-[-2%] h-[104%] w-[104%] object-cover object-center opacity-100"
             />
-            <div className="pointer-events-none absolute inset-0 bg-[#07110F]/72 backdrop-blur-[3px]" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#07110F]/88 via-[var(--color-jse-principal)]/38 to-[#07110F]/55" />
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_48%,rgba(69,185,119,0.10),transparent_36%),linear-gradient(to_bottom,rgba(7,17,15,0.12),rgba(7,17,15,0.38))]" />
+            <div className="pointer-events-none absolute inset-0 bg-jse-principal/72 backdrop-blur-[3px]" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--color-jse-principal)]/88 via-[var(--color-jse-principal)]/38 to-[var(--color-jse-principal)]/55" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_48%,color-mix(in srgb, var(--color-jse-secondaire) 10%, transparent),transparent_36%),linear-gradient(to_bottom,rgba(7,17,15,0.12),color-mix(in srgb, var(--color-jse-principal) 38%, transparent))]" />
             <div className="pointer-events-none absolute inset-0 border border-white/[0.045] bg-white/[0.018] backdrop-blur-[1px]" />
             <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[393px] flex-col px-5 lg:max-w-none lg:px-10 xl:px-16">
                 <header data-welcome-header className="flex items-center justify-between pt-6 lg:pt-8">
@@ -148,7 +148,7 @@ export default function Bienvenue() {
                             src={slide.image}
                             alt=""
                             draggable="false"
-                            className="relative z-10 w-full max-w-[330px] object-contain drop-shadow-[0_24px_35px_rgba(18,60,50,0.18)] sm:max-w-[350px] lg:max-w-[650px] xl:max-w-[760px]"
+                            className="relative z-10 w-full max-w-[330px] object-contain drop-shadow-[0_24px_35px_color-mix(in srgb, var(--color-jse-principal) 18%, transparent)] sm:max-w-[350px] lg:max-w-[650px] xl:max-w-[760px]"
                         />
                     </div>
 
