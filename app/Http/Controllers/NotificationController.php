@@ -18,7 +18,7 @@ class NotificationController extends Controller
         }
 
         return response()->json([
-            'success' => true,
+            'succes' => true,
             'data' => [
                 'id' => $notification->id,
                 'masquee_par_destinataire_at' => $notification->masquee_par_destinataire_at?->toIso8601String(),
