@@ -8,12 +8,15 @@ use App\Models\HistoriqueCommande;
 use App\Models\Livraison;
 use App\Models\Notification;
 use App\Models\Zone;
+use App\Models\TarifLivraison;
 use App\Models\Restaurant;
 use App\Models\StatutCommande;
 use App\Models\User;
 use App\Services\LivraisonService;
 use App\Services\CommandeService;
 use App\Services\NotificationService;
+use App\Services\DistanceService;
+use App\Services\TarificationLivraisonService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -204,7 +207,7 @@ class AdministrationController extends Controller
             ->withQueryString();
 
         $commandes->setCollection(
-            $commandes->getCollection()->map(fn (Commande $commande) => ['id'=>$commande->id,'reference'=>$commande->reference,'client'=>$commande->user ? trim($commande->user->prenom.' '.$commande->user->nom) : null,'telephone'=>$commande->user?->telephone,'restaurant'=>$commande->restaurant?->nom,'zone'=>$commande->zone?->nom,'statut'=>$commande->statutCommande?['code'=>$commande->statutCommande->code,'libelle'=>$commande->statutCommande->libelle]:null,'montant_total'=>(float)$commande->montant_total,'date_commande'=>$commande->date_commande?->format('d/m/Y H:i')])->values();
+            $commandes->getCollection()->map(fn (Commande $commande) => ['id'=>$commande->id,'reference'=>$commande->reference,'client'=>$commande->user ? trim($commande->user->prenom.' '.$commande->user->nom) : null,'telephone'=>$commande->user?->telephone,'restaurant'=>$commande->restaurant?->nom,'zone'=>$commande->zone?->nom,'statut'=>$commande->statutCommande?['code'=>$commande->statutCommande->code,'libelle'=>$commande->statutCommande->libelle]:null,'montant_total'=>(float)$commande->montant_total,'frais_livraison'=>(float)$commande->frais_livraison,'distance_km'=>$commande->distance_km !== null ? (float)$commande->distance_km : null,'date_commande'=>$commande->date_commande?->format('d/m/Y H:i')])->values();
         return Inertia::render('Admin/Commandes', ['utilisateur'=>$request->user(),'commandes'=>$commandes,'recherche'=>$recherche]);
     }
 
@@ -270,7 +273,7 @@ class AdministrationController extends Controller
         $recherche=trim((string)$request->query('recherche',''));
         $restaurants=Restaurant::query()->with(['user:id,nom,prenom,telephone','zone:id,nom'])->withCount(['produits','commandes'])
             ->when($recherche!=='' ,fn($q)=>$q->where(function($query)use($recherche){$query->where('nom','like','%'.$recherche.'%')->orWhere('telephone','like','%'.$recherche.'%')->orWhereHas('user',fn($u)=>$u->where('nom','like','%'.$recherche.'%')->orWhere('prenom','like','%'.$recherche.'%'));}))
-            ->orderBy('nom')->limit(100)->get()->map(fn(Restaurant $r)=>['id'=>$r->id,'nom'=>$r->nom,'responsable'=>$r->user ? trim($r->user->prenom.' '.$r->user->nom) : null,'telephone'=>$r->telephone?:$r->user?->telephone,'zone'=>$r->zone?->nom,'statut'=>$r->statut,'produits_count'=>(int)$r->produits_count,'commandes_count'=>(int)$r->commandes_count])->values();
+            ->orderBy('nom')->limit(100)->get()->map(fn(Restaurant $r)=>['id'=>$r->id,'nom'=>$r->nom,'responsable'=>$r->user ? trim($r->user->prenom.' '.$r->user->nom) : null,'telephone'=>$r->telephone?:$r->user?->telephone,'zone'=>$r->zone?->nom,'statut'=>$r->statut,'produits_count'=>(int)$r->produits_count,'commandes_count'=>(int)$r->commandes_count,'latitude'=>$r->latitude,'longitude'=>$r->longitude])->values();
         return Inertia::render('Admin/Restaurants',['utilisateur'=>$request->user(),'restaurants'=>$restaurants,'recherche'=>$recherche]);
     }
 
@@ -317,6 +320,77 @@ class AdministrationController extends Controller
             'livraisons_actives'=>(int)$z->livraisons_actives,
         ])->values();
         return Inertia::render('Admin/Zones',['utilisateur'=>$request->user(),'zones'=>$zones,'recherche'=>$recherche]);
+    }
+
+    public function tarification(Request $request): Response
+    {
+        return Inertia::render('Admin/Tarification', [
+            'utilisateur' => $request->user(),
+            'tarifs' => TarifLivraison::query()->orderBy('distance_min_km')->get(),
+            'restaurants' => Restaurant::query()->where('statut', 'actif')->orderBy('nom')->get(['id', 'nom', 'latitude', 'longitude']),
+        ]);
+    }
+
+    public function creerTarif(Request $request): RedirectResponse
+    {
+        $donnees = $request->validate([
+            'distance_min_km' => ['required', 'numeric', 'min:0'],
+            'distance_max_km' => ['required', 'numeric', 'gt:distance_min_km'],
+            'frais' => ['required', 'numeric', 'min:0'],
+        ]);
+        abort_if(app(TarificationLivraisonService::class)->tranchesChevauchent((float) $donnees['distance_min_km'], (float) $donnees['distance_max_km']), 422, 'Cette tranche chevauche une tranche active.');
+        TarifLivraison::create(array_merge($donnees, ['statut' => 'actif']));
+        return back()->with('success', 'Tranche ajoutée.');
+    }
+
+    public function modifierTarif(Request $request, TarifLivraison $tarif): RedirectResponse
+    {
+        $donnees = $request->validate([
+            'distance_min_km' => ['required', 'numeric', 'min:0'],
+            'distance_max_km' => ['required', 'numeric', 'gt:distance_min_km'],
+            'frais' => ['required', 'numeric', 'min:0'],
+        ]);
+        abort_if($tarif->statut === 'actif' && app(TarificationLivraisonService::class)->tranchesChevauchent((float) $donnees['distance_min_km'], (float) $donnees['distance_max_km'], $tarif->id), 422, 'Cette tranche chevauche une tranche active.');
+        $tarif->update($donnees);
+        return back()->with('success', 'Tranche mise à jour.');
+    }
+
+    public function changerStatutTarif(TarifLivraison $tarif): RedirectResponse
+    {
+        if ($tarif->statut !== 'actif') {
+            abort_if(app(TarificationLivraisonService::class)->tranchesChevauchent((float) $tarif->distance_min_km, (float) $tarif->distance_max_km, $tarif->id), 422, 'Cette tranche chevauche une tranche active.');
+        }
+        $tarif->update(['statut' => $tarif->statut === 'actif' ? 'inactif' : 'actif']);
+        return back()->with('success', 'Statut de la tranche mis à jour.');
+    }
+
+    public function simulerTarif(Request $request, DistanceService $distanceService, TarificationLivraisonService $tarificationService)
+    {
+        $donnees = $request->validate([
+            'restaurant_id' => ['nullable', 'integer', 'exists:restaurants,id'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'distance_km' => ['nullable', 'numeric', 'min:0'],
+        ]);
+        if ($request->filled('distance_km')) {
+            $distance = (float) $donnees['distance_km'];
+        } else {
+            $restaurant = Restaurant::findOrFail($donnees['restaurant_id']);
+            abort_unless($restaurant->latitude !== null && $restaurant->longitude !== null, 422, 'Le restaurant n’a pas de coordonnées.');
+            abort_unless(isset($donnees['latitude'], $donnees['longitude']), 422, 'Les coordonnées client sont requises.');
+            $distance = $distanceService->calculer((float) $restaurant->latitude, (float) $restaurant->longitude, (float) $donnees['latitude'], (float) $donnees['longitude']);
+        }
+        return response()->json(['distance_km' => $distance, 'frais' => $tarificationService->fraisPourDistance($distance)]);
+    }
+
+    public function modifierCoordonneesRestaurant(Request $request, Restaurant $restaurant): RedirectResponse
+    {
+        $donnees = $request->validate([
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+        ]);
+        $restaurant->update($donnees);
+        return back()->with('success', 'Coordonnées du restaurant mises à jour.');
     }
 
     public function notifications(Request $request): Response
