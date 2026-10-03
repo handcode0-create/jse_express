@@ -184,7 +184,8 @@ Route::prefix('administration')
         Route::post('/clients/{user}/statut', [AdministrationController::class, 'changerStatutClient'])
             ->whereNumber('user')
             ->name('admin.clients.statut');
-        Route::post('/restaurants/{restaurant}/statut', [AdministrationController::class, 'changerStatutRestaurant'])
+        Route::patch('/restaurants/{restaurant}/coordonnees', [AdministrationController::class, 'modifierCoordonneesRestaurant'])->name('admin.restaurants.coordonnees');
+         Route::post('/restaurants/{restaurant}/statut', [AdministrationController::class, 'changerStatutRestaurant'])
             ->whereNumber('restaurant')
             ->name('admin.restaurants.statut');
         Route::post('/livreurs/{user}/disponibilite', [AdministrationController::class, 'changerDisponibiliteLivreur'])
