@@ -28,7 +28,7 @@ export const imagesRestaurants = [
     unsplash("1550966871-3ed3cdb5ed0c"),
     unsplash("1556742049-0cfed4f6a45d"),
     unsplash("1521017432531-fbd92d768814"),
-    unsplash("1515003197210-e0cd71810b5f"),
+    unsplash("1521017432531-fbd92d768814"),
 ];
 
 export const imagesProduits = [
