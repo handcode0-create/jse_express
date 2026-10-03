@@ -19,7 +19,7 @@ class SecurityHeaders
             'Permissions-Policy',
             'accelerometer=(), ambient-light-sensor=(), autoplay=(), camera=(), '
             .'display-capture=(), document-domain=(), encrypted-media=(), '
-            .'fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), '
+            .'fullscreen=(), geolocation=(self), gyroscope=(), magnetometer=(), '
             .'microphone=(), midi=(), payment=(), picture-in-picture=(), '
             .'publickey-credentials-get=(), usb=(), xr-spatial-tracking=()'
         );
