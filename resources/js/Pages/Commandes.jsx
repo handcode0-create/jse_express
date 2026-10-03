@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 import { router, usePage } from "@inertiajs/react";
 import NavigationFlottante from "../Composants/Navigation/NavigationFlottante";
+import ModalConfirmationCommande from "../Composants/Interface/ModalConfirmationCommande";
 import {
     ArrowLeft,
     Check,
@@ -179,6 +180,8 @@ function CommandeCard({ commande, index }) {
     const IconStatut = statut.icon;
     const estTerminee = commande.statut?.code === "LIVREE";
     const estAnnulee = commande.statut?.code === "ANNULEE";
+    const [annulationOuverte, setAnnulationOuverte] = useState(false);
+    const [annulationEnCours, setAnnulationEnCours] = useState(false);
 
     const voirDetails = () => {
         router.visit("/commandes/" + commande.id);
@@ -283,22 +286,36 @@ function CommandeCard({ commande, index }) {
                 {!estTerminee && !estAnnulee && commande.peut_annuler && (
                     <button
                         type="button"
-                        onClick={() => {
-                            if (window.confirm("Voulez-vous vraiment annuler cette commande ?")) {
-                                router.post(
-                                    "/commande/" + commande.id + "/annuler",
-                                    {},
-                                    { preserveScroll: true },
-                                );
-                            }
-                        }}
-                        className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-red-50 font-sans text-xs font-semibold text-red-600 transition-colors hover:bg-red-100"
+                        onClick={() => setAnnulationOuverte(true)}
+                        className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-jse-danger/10 font-sans text-xs font-semibold text-jse-danger transition-colors hover:bg-jse-danger/15"
                     >
                         <X size={17} strokeWidth={1.9} />
                         Annuler la commande
                     </button>
                 )}
             </div>
+
+            <ModalConfirmationCommande
+                open={annulationOuverte}
+                reference={commande.reference}
+                busy={annulationEnCours}
+                onClose={() => setAnnulationOuverte(false)}
+                onConfirm={() => {
+                    if (annulationEnCours) return;
+
+                    setAnnulationEnCours(true);
+
+                    router.post(
+                        "/commande/" + commande.id + "/annuler",
+                        {},
+                        {
+                            preserveScroll: true,
+                            onFinish: () => setAnnulationEnCours(false),
+                            onSuccess: () => setAnnulationOuverte(false),
+                        },
+                    );
+                }}
+            />
         </article>
     );
 }
