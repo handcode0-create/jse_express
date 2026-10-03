@@ -250,14 +250,14 @@ function CommandeCard({ commande, index }) {
                 <ProgressionCommande statut={commande.statut} />
             )}
 
-            <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
+            <div className="mt-5 grid grid-cols-2 gap-2.5">
                 <button
                     type="button"
                     onClick={voirDetails}
-                    className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-jse-secondaire/10 font-sans text-xs font-semibold text-jse-secondaire transition-colors hover:bg-jse-secondaire/15"
+                    className="flex h-12 min-w-0 items-center justify-center gap-1.5 rounded-2xl border border-jse-secondaire bg-transparent px-3 font-sans text-[11px] font-semibold text-jse-secondaire transition-all hover:bg-jse-secondaire/10 sm:gap-2 sm:text-xs"
                 >
-                    <ClipboardList size={18} strokeWidth={1.8} />
-                    Voir les détails
+                    <ClipboardList size={17} strokeWidth={1.9} />
+                    <span className="truncate">Voir les détails</span>
                     <ChevronRight size={15} />
                 </button>
 
@@ -265,10 +265,11 @@ function CommandeCard({ commande, index }) {
                     <button
                         type="button"
                         onClick={recommander}
-                        className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-jse-secondaire/10 font-sans text-xs font-semibold text-jse-secondaire transition-colors hover:bg-jse-secondaire/15"
+                        className="flex h-12 min-w-0 items-center justify-center gap-1.5 rounded-2xl border border-jse-accent bg-jse-accent px-3 font-sans text-[11px] font-semibold text-white shadow-sm transition-all hover:brightness-105 sm:gap-2 sm:text-xs"
                     >
                         <RefreshCcw size={17} strokeWidth={1.9} />
-                        Commander à nouveau
+                        <span className="truncate">Commander à nouveau</span>
+                        <ChevronRight size={15} />
                     </button>
                 )}
 
@@ -276,10 +277,11 @@ function CommandeCard({ commande, index }) {
                     <button
                         type="button"
                         onClick={() => router.visit("/accueil")}
-                        className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-jse-accent/10 font-sans text-xs font-semibold text-jse-accent transition-colors hover:bg-jse-accent/15"
+                        className="flex h-12 min-w-0 items-center justify-center gap-1.5 rounded-2xl border border-jse-accent bg-jse-accent px-3 font-sans text-[11px] font-semibold text-white shadow-sm transition-all hover:brightness-105 sm:gap-2 sm:text-xs"
                     >
                         <Home size={17} strokeWidth={1.9} />
-                        Nouvelle commande
+                        <span className="truncate">Nouvelle commande</span>
+                        <ChevronRight size={15} />
                     </button>
                 )}
 
@@ -287,10 +289,10 @@ function CommandeCard({ commande, index }) {
                     <button
                         type="button"
                         onClick={() => setAnnulationOuverte(true)}
-                        className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-jse-danger/10 font-sans text-xs font-semibold text-jse-danger transition-colors hover:bg-jse-danger/15"
+                        className="flex h-12 min-w-0 items-center justify-center gap-1.5 rounded-2xl border border-jse-danger bg-transparent px-3 font-sans text-[11px] font-semibold text-jse-danger transition-all hover:bg-jse-danger/10 sm:gap-2 sm:text-xs"
                     >
                         <X size={17} strokeWidth={1.9} />
-                        Annuler la commande
+                        <span className="truncate">Annuler la commande</span>
                     </button>
                 )}
             </div>
