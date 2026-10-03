@@ -358,6 +358,8 @@ class RestaurantController extends Controller
                         $livraison->id,
                         'pin_livraison'
                     );
+                } else {
+                    User::query()->where('role', 'administrateur')->where('statut', 'actif')->get()->each(fn (User $admin) => $notificationService->sms($admin, 'Aucun livreur disponible pour la commande '.$commande->reference.'. Réattribution manuelle requise : /administration/livraisons.', $commande->id, $livraison->id, 'attribution'));
                 }
             }
         });
