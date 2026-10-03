@@ -317,6 +317,8 @@ Route::get('/profil', function () {
                 'zone' => $adresse->zone ? ['id' => $adresse->zone->id, 'nom' => $adresse->zone->nom] : null,
             ])->values(),
         'zones' => Zone::query()->where('statut', 'actif')->orderBy('nom')->get(['id', 'nom']),
+        'support' => config('jse.support'),
+
         'moyensPaiement' => MoyenPaiement::query()
             ->where('user_id', Auth::id())
             ->where('statut', 'actif')
