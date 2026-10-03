@@ -9,6 +9,7 @@ use App\Models\Livraison;
 use App\Models\ProfilLivreur;
 use App\Models\StatutCommande;
 use App\Models\Zone;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
