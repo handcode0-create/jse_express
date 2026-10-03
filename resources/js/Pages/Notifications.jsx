@@ -1,4 +1,5 @@
 import { router, usePage } from "@inertiajs/react";
+import { useEffect, useState } from "react";
 import {
     ArrowLeft,
     Bell,
@@ -11,6 +12,8 @@ import {
     Package,
     UserRound,
     XCircle,
+    Trash2,
+    X,
 } from "lucide-react";
 import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 
@@ -99,7 +102,79 @@ function presentationNotification(notification) {
 }
 
 export default function Notifications() {
-    const { notifications = [] } = usePage().props;
+    const { notifications: notificationsInitial = [] } = usePage().props;
+    const [notifications, setNotifications] = useState(notificationsInitial);
+    const [notificationASupprimer, setNotificationASupprimer] = useState(null);
+    const [suppressionEnCours, setSuppressionEnCours] = useState(false);
+    const [toast, setToast] = useState(null);
+
+    useEffect(() => {
+        setNotifications(notificationsInitial);
+    }, [notificationsInitial]);
+
+    useEffect(() => {
+        if (!toast) return undefined;
+
+        const timeout = window.setTimeout(() => setToast(null), 3200);
+        return () => window.clearTimeout(timeout);
+    }, [toast]);
+
+    const tokenXsrf = () => {
+        const cookie = document.cookie
+            .split("; ")
+            .find((ligne) => ligne.startsWith("XSRF-TOKEN="));
+
+        return cookie ? decodeURIComponent(cookie.split("=").slice(1).join("=")) : "";
+    };
+
+    const confirmerSuppression = async () => {
+        if (!notificationASupprimer || suppressionEnCours) return;
+
+        setSuppressionEnCours(true);
+
+        try {
+            const response = await fetch(
+                "/notifications/" + notificationASupprimer.id,
+                {
+                    method: "DELETE",
+                    credentials: "same-origin",
+                    headers: {
+                        Accept: "application/json",
+                        "X-XSRF-TOKEN": tokenXsrf(),
+                    },
+                },
+            );
+
+            const payload = await response.json().catch(() => null);
+
+            if (!response.ok || !payload?.success) {
+                throw new Error(
+                    payload?.message || "La notification n’a pas pu être supprimée.",
+                );
+            }
+
+            setNotifications((liste) =>
+                liste.filter(
+                    (notification) =>
+                        notification.id !== notificationASupprimer.id,
+                ),
+            );
+            setNotificationASupprimer(null);
+            setToast({
+                type: "success",
+                message: "Notification supprimée.",
+            });
+        } catch (error) {
+            setToast({
+                type: "error",
+                message:
+                    error?.message ||
+                    "Une erreur est survenue pendant la suppression.",
+            });
+        } finally {
+            setSuppressionEnCours(false);
+        }
+    };
 
     return (
         <main className="min-h-screen bg-jse-fond pb-28 text-jse-texte">
@@ -183,14 +258,32 @@ export default function Notifications() {
                                                                 )}
                                                             </div>
 
-                                                            {date && (
-                                                                <time
-                                                                    dateTime={date}
-                                                                    className="shrink-0 font-sans text-[9px] leading-4 text-jse-texte/35"
+                                                            <div className="flex shrink-0 items-start gap-2">
+                                                                {date && (
+                                                                    <time
+                                                                        dateTime={date}
+                                                                        className="font-sans text-[9px] leading-4 text-jse-texte/35"
+                                                                    >
+                                                                        {formaterDate(date)}
+                                                                    </time>
+                                                                )}
+
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        setNotificationASupprimer(
+                                                                            notification,
+                                                                        )
+                                                                    }
+                                                                    aria-label="Supprimer cette notification"
+                                                                    className="flex size-8 items-center justify-center rounded-full text-jse-texte/45 transition hover:bg-jse-danger/10 hover:text-jse-danger"
                                                                 >
-                                                                    {formaterDate(date)}
-                                                                </time>
-                                                            )}
+                                                                    <Trash2
+                                                                        size={15}
+                                                                        strokeWidth={1.9}
+                                                                    />
+                                                                </button>
+                                                            </div>
                                                         </div>
 
                                                         <p className="mt-2 font-sans text-xs leading-5 text-jse-texte/60">
