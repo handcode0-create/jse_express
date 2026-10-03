@@ -872,7 +872,7 @@ export default function TableauDeBord() {
                                                         modifierGroupeOption(indexGroupe, "obligatoire", obligatoire);
                                                         modifierGroupeOption(indexGroupe, "min", obligatoire ? 1 : 0);
                                                     }}
-                                                    className="size-4 accent-[#45B977]"
+                                                    className="size-4 accent-[var(--color-jse-secondaire)]"
                                                 />
                                             </label>
 

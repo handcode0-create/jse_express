@@ -184,7 +184,7 @@ export default function Authentification() {
         <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-[#07110F] font-sans text-jse-texte">
             <img src="/assets/login_page_fond.png" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 size-full object-cover object-center" />
             <div className="pointer-events-none absolute inset-0 bg-[#07110F]/45" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#123C32]/75 via-[#123C32]/30 to-[#07110F]/75" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--color-jse-principal)]/75 via-[var(--color-jse-principal)]/30 to-[#07110F]/75" />
 
             <div className="relative z-10 flex min-h-screen w-full">
 
@@ -192,7 +192,7 @@ export default function Authentification() {
                     PARTIE VISUELLE DESKTOP
                 ====================================================== */}
 
-                <section ref={heroRef} className="relative hidden min-h-screen overflow-hidden border-r border-white/10 bg-[#123C32]/55 backdrop-blur-[2px] lg:flex lg:w-1/2">
+                <section ref={heroRef} className="relative hidden min-h-screen overflow-hidden border-r border-white/10 bg-[var(--color-jse-principal)]/55 backdrop-blur-[2px] lg:flex lg:w-1/2">
 
                     <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-jse-secondaire/20 blur-3xl" />
 

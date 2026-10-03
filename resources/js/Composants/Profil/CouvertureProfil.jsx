@@ -127,7 +127,7 @@ export default function CouvertureProfil({ user }) {
 
     return (
         <section className="relative -mx-4 overflow-hidden rounded-b-[34px] sm:-mx-6 lg:mx-0 lg:rounded-[34px]">
-            <div className="relative h-[238px] overflow-hidden bg-[#123C32] sm:h-[270px]">
+            <div className="relative h-[238px] overflow-hidden bg-[var(--color-jse-principal)] sm:h-[270px]">
                 {source ? (
                     <img
                         src={source}
@@ -136,13 +136,13 @@ export default function CouvertureProfil({ user }) {
                     />
                 ) : (
                     <>
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(69,185,119,.38),transparent_32%),radial-gradient(circle_at_85%_20%,rgba(242,140,40,.20),transparent_28%),linear-gradient(135deg,#123C32,#0B2520)]" />
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(69,185,119,.38),transparent_32%),radial-gradient(circle_at_85%_20%,rgba(242,140,40,.20),transparent_28%),linear-gradient(135deg,var(--color-jse-principal),#0B2520)]" />
                         <div className="absolute -right-20 -top-28 size-72 rounded-full border border-white/10 bg-white/[0.035]" />
                         <div className="absolute -bottom-36 -left-16 size-80 rounded-full border border-jse-secondaire/15" />
                     </>
                 )}
 
-                <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/10 to-[#123C32]/90" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/10 to-[var(--color-jse-principal)]/90" />
 
                 <div className="absolute right-4 top-4 sm:right-6 sm:top-6">
                     <button
@@ -162,7 +162,7 @@ export default function CouvertureProfil({ user }) {
 
                 <div className="absolute bottom-5 left-5 right-5 flex items-end gap-4 sm:bottom-7 sm:left-8 sm:right-8">
                     <div className="relative">
-                        <div className="rounded-full bg-[#123C32]/50 p-1.5 backdrop-blur-md">
+                        <div className="rounded-full bg-[var(--color-jse-principal)]/50 p-1.5 backdrop-blur-md">
                             <div className="relative">
                                 <div className="absolute inset-0 rounded-full bg-jse-accent/25 blur-xl" />
                                 <div className="relative">

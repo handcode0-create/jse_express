@@ -45,12 +45,12 @@ export default function PolitiqueConfidentialite() {
                 </header>
 
                 <section className="mt-10 overflow-hidden rounded-[30px] border border-white/10 bg-[#0B1513]/95 shadow-[0_30px_100px_rgba(0,0,0,.4)]">
-                    <div className="border-b border-white/10 bg-gradient-to-br from-[#123C32] to-[#0B1513] p-7 sm:p-10">
+                    <div className="border-b border-white/10 bg-gradient-to-br from-[var(--color-jse-principal)] to-[#0B1513] p-7 sm:p-10">
                         <div className="flex size-12 items-center justify-center rounded-2xl bg-jse-secondaire/15 text-jse-secondaire">
                             <ShieldCheck size={24} />
                         </div>
                         <p className="mt-6 text-[11px] font-bold uppercase tracking-[.24em] text-jse-secondaire">JSE EXPRESS</p>
-                        <h1 className="mt-3 font-against text-4xl leading-tight text-[#FFF7E8] sm:text-5xl">Politique de confidentialité</h1>
+                        <h1 className="mt-3 font-against text-4xl leading-tight text-[var(--color-jse-fond)] sm:text-5xl">Politique de confidentialité</h1>
                         <p className="mt-5 max-w-3xl text-sm leading-7 text-white/60">
                             Cette page présente les données utilisées par JSE Express dans le cadre du service de commande et de livraison.
                         </p>
@@ -62,7 +62,7 @@ export default function PolitiqueConfidentialite() {
                                 <div className="flex items-start gap-3">
                                     <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-jse-secondaire" />
                                     <div>
-                                        <h2 className="font-semibold text-[#FFF7E8]">{section.title}</h2>
+                                        <h2 className="font-semibold text-[var(--color-jse-fond)]">{section.title}</h2>
                                         <p className="mt-2 text-sm leading-6 text-white/55">{section.text}</p>
                                     </div>
                                 </div>

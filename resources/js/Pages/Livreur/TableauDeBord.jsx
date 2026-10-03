@@ -285,7 +285,7 @@ function MissionDetail({ mission, onBack, onTake, loading, onNavigate }) {
 
 const livreurIcon = L.divIcon({
     className: "jse-leaflet-marker",
-    html: '<div style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#F28C28;border:4px solid #FFF7E8;box-shadow:0 0 0 10px rgba(242,140,40,.14),0 14px 32px rgba(0,0,0,.4)"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#123C32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14"/><path d="M7 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M17 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="m9 13 2-5h4l2 5"/><path d="M11 8 9 6H7"/></svg></div>',
+    html: '<div style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--color-jse-accent);border:4px solid var(--color-jse-fond);box-shadow:0 0 0 10px rgba(242,140,40,.14),0 14px 32px rgba(0,0,0,.4)"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="var(--color-jse-principal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14"/><path d="M7 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M17 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="m9 13 2-5h4l2 5"/><path d="M11 8 9 6H7"/></svg></div>',
     iconSize: [52, 52],
     iconAnchor: [26, 26],
 });
@@ -382,8 +382,8 @@ function CarteLeaflet({ compact = false, position, accuracy, error }) {
                             center={position}
                             radius={accuracy || 25}
                             pathOptions={{
-                                color: "#F28C28",
-                                fillColor: "#F28C28",
+                                color: "var(--color-jse-accent)",
+                                fillColor: "var(--color-jse-accent)",
                                 fillOpacity: 0.09,
                                 weight: 1,
                             }}
@@ -789,9 +789,9 @@ function Profile({ livreur, zones = [], historique = [], statistiques = {}, load
                         alt=""
                         className="absolute inset-0 size-full object-cover object-center"
                     />
-                    <div className="absolute inset-0 bg-[#123C32]/78" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#123C32]/95 via-[#123C32]/72 to-[#123C32]/42" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#123C32]/90 via-transparent to-[#123C32]/20" />
+                    <div className="absolute inset-0 bg-[var(--color-jse-principal)]/78" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-jse-principal)]/95 via-[var(--color-jse-principal)]/72 to-[var(--color-jse-principal)]/42" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-jse-principal)]/90 via-transparent to-[var(--color-jse-principal)]/20" />
                     <div className="relative z-10 flex min-h-[138px] items-end gap-4">
                         <PhotoProfil user={livreur} size="size-[82px]" dark />
                         <div className="min-w-0 pb-1">

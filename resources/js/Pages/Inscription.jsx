@@ -244,7 +244,7 @@ export default function Inscription() {
 
                 <section className="flex flex-1 items-center justify-center py-5 sm:py-8">
                     <div className="grid w-full max-w-[1080px] overflow-hidden rounded-[28px] border border-white/10 bg-[#0A1211]/90 shadow-[0_30px_100px_rgba(0,0,0,.45)] backdrop-blur-2xl lg:grid-cols-[.78fr_1.22fr]">
-                        <aside className="relative hidden min-h-[650px] overflow-hidden border-r border-white/10 bg-[#123C32]/90 p-8 lg:flex lg:flex-col lg:justify-between">
+                        <aside className="relative hidden min-h-[650px] overflow-hidden border-r border-white/10 bg-[var(--color-jse-principal)]/90 p-8 lg:flex lg:flex-col lg:justify-between">
                             <div className="pointer-events-none absolute -right-28 -top-28 size-72 rounded-full bg-jse-secondaire/20 blur-3xl" />
                             <div className="pointer-events-none absolute -bottom-32 -left-24 size-80 rounded-full bg-jse-accent/10 blur-3xl" />
 
@@ -252,7 +252,7 @@ export default function Inscription() {
                                 <p className="text-[11px] font-bold uppercase tracking-[.24em] text-jse-secondaire">
                                     JSE EXPRESS
                                 </p>
-                                <h1 className="mt-5 max-w-xs font-against text-[48px] leading-[.92] text-[#FFF7E8] xl:text-[56px]">
+                                <h1 className="mt-5 max-w-xs font-against text-[48px] leading-[.92] text-[var(--color-jse-fond)] xl:text-[56px]">
                                     Créons
                                     <br />
                                     votre
@@ -311,7 +311,7 @@ export default function Inscription() {
                                     <p className="text-[11px] font-bold uppercase tracking-[.18em] text-jse-secondaire">
                                         Étape {etape} sur 3
                                     </p>
-                                    <h2 className="mt-2 max-w-2xl font-against text-[32px] leading-[1.02] text-[#FFF7E8] sm:text-[38px]">
+                                    <h2 className="mt-2 max-w-2xl font-against text-[32px] leading-[1.02] text-[var(--color-jse-fond)] sm:text-[38px]">
                                         {etape === 1
                                             ? "Comment utiliserez-vous JSE Express ?"
                                             : etape === 2
