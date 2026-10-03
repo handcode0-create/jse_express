@@ -20,6 +20,7 @@ use App\Http\Controllers\LivreurController;
 use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AdministrationController;
+use App\Policies\CommandePolicy;
 use App\Services\PanierService;
 use App\Services\NotificationService;
 use App\Services\DistanceService;
