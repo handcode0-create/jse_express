@@ -9,7 +9,7 @@ export default function Clients({ utilisateur, clients = [], recherche = "" }) {
         setTraitement(client.id);
         router.post("/administration/clients/" + client.id + "/statut", {}, { preserveScroll: true, onFinish: () => setTraitement(null) });
     };
-    return <AdminDataPage utilisateur={utilisateur} title="Clients" description="Comptes clients, coordonnées et activité de commande." search={recherche} searchPlaceholder="Nom, téléphone ou email" rows={clients} columns={[
+    return <AdminDataPage utilisateur={utilisateur} title="Clients" description="Comptes clients, coordonnées et activité de commande." search={recherche} searchPlaceholder="Nom, téléphone ou email" rows={clients.data || []} pagination={clients} columns={[
         { key: "nom", label: "Client", render: row => <div><p className="font-semibold">{row.nom}</p><p className="text-xs text-jse-theme-muted">{row.email || "Sans email"}</p></div> },
         { key: "telephone", label: "Téléphone" },
         { key: "statut", label: "Statut", render: row => <span className={row.statut === "actif" ? "text-jse-secondaire" : "text-jse-theme-muted"}>{row.statut || "—"}</span> },
