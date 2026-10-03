@@ -10,6 +10,7 @@ use App\Models\ProfilLivreur;
 use App\Models\StatutCommande;
 use App\Policies\CommandePolicy;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -17,7 +18,7 @@ class CommandeController extends Controller
 {
     public function annuler(Request $request, Commande $commande): RedirectResponse
     {
-        $this->authorize('annuler', $commande);
+        Gate::authorize('annuler', $commande);
 
         DB::transaction(function () use ($request, $commande) {
             $commande = Commande::query()
