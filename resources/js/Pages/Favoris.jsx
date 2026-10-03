@@ -5,10 +5,16 @@ import { basculerFavori, lireFavoris } from "../lib/favoris";
 import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 import NavigationFlottante from "../Composants/Navigation/NavigationFlottante";
 
-const fallbacks = [
+const fallbacksUnsplash = [
     "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=85",
     "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=900&q=85",
     "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=85",
+];
+
+const fallbacksLocaux = [
+    "/assets/banner-restaurants.jpg",
+    "/assets/banner-plat-ivoirien.jpg",
+    "/assets/banner-decouverte.jpg",
 ];
 
 function NavigationItem({ label, icon: Icon, active = false, onClick }) {
@@ -62,7 +68,15 @@ export default function Favoris() {
                         {favoris.length > 0 ? <div className="grid gap-4 sm:grid-cols-2">
                             {favoris.map((restaurant, index) => <article key={restaurant.id} className="overflow-hidden rounded-[26px] bg-white shadow-sm ring-1 ring-jse-texte/5">
                                 <div className="relative aspect-[1.55/1] overflow-hidden bg-jse-principal">
-                                    <img src={restaurant.image || fallbacks[index % fallbacks.length]} alt={restaurant.nom} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = fallbacks[index % fallbacks.length]; }} className="h-full w-full object-cover" />
+                                    <img
+                                    src={restaurant.image || fallbacksUnsplash[(Number(restaurant.id) || index) % fallbacksUnsplash.length]}
+                                    alt={restaurant.nom}
+                                    onError={(event) => {
+                                        event.currentTarget.onerror = null;
+                                        event.currentTarget.src = fallbacksLocaux[(Number(restaurant.id) || index) % fallbacksLocaux.length];
+                                    }}
+                                    className="h-full w-full object-cover"
+                                />
                                     <button type="button" onClick={() => retirer(restaurant)} className="absolute right-3 top-3 flex size-10 items-center justify-center rounded-full bg-white/95 text-jse-accent shadow-lg" aria-label="Retirer des favoris"><Heart size={19} fill="currentColor" /></button>
                                 </div>
                                 <div className="p-4">
