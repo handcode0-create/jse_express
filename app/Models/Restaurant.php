@@ -13,8 +13,13 @@ class Restaurant extends Model
     use HasFactory;
 public $timestamps = false;
 
+    protected $casts = [
+        'latitude' => 'float',
+        'longitude' => 'float',
+    ];
+
     protected $fillable = [
-        'user_id','zone_id','nom','description','telephone','email','adresse','horaires','statut'
+        'user_id','zone_id','nom','description','telephone','email','adresse','latitude','longitude','horaires','statut'
     ];
 
     public function user(): BelongsTo { return $this->belongsTo(User::class, 'user_id', 'id'); }
