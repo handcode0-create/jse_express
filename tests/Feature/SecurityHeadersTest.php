@@ -24,7 +24,7 @@ class SecurityHeadersTest extends TestCase
         $contentSecurityPolicy = $response->headers->get('Content-Security-Policy');
 
         $this->assertNotEmpty($permissionsPolicy);
-        $this->assertStringContainsString('geolocation=()', $permissionsPolicy);
+        $this->assertStringContainsString('geolocation=(self)', $permissionsPolicy);
         $this->assertStringContainsString('camera=()', $permissionsPolicy);
         $this->assertStringContainsString('microphone=()', $permissionsPolicy);
 
