@@ -66,7 +66,7 @@ class NotificationsEtAnnulationCommandeTest extends TestCase
         $this->actingAs($client)
             ->deleteJson(route('notifications.supprimer', $notification))
             ->assertOk()
-            ->assertJsonPath('success', true)
+            ->assertJsonPath('succes', true)
             ->assertJsonPath('data.id', $notification->id);
 
         $this->assertDatabaseHas('notifications', ['id' => $notification->id]);
