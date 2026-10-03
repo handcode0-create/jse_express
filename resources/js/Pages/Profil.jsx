@@ -46,7 +46,7 @@ function Modal({ title, children, onClose, initialFocusRef }) {
             <div
                 role="dialog"
                 aria-modal="true"
-                aria-labelledby="profil-modal-title"
+                aria-label={title}
                 className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-jse-xxl bg-jse-theme-surface p-5 shadow-jse-elevated sm:rounded-jse-xxl"
             >
                 <div className="flex items-start justify-between gap-4">
@@ -54,7 +54,7 @@ function Modal({ title, children, onClose, initialFocusRef }) {
                         <p className="font-sans text-xs font-semibold uppercase tracking-widest text-jse-theme-muted">
                             JSE Express
                         </p>
-                        <h2 id="profil-modal-title" className="mt-1 font-against text-2xl text-jse-principal">
+                        <h2 className="mt-1 font-against text-2xl text-jse-principal">
                             {title}
                         </h2>
                     </div>
