@@ -39,6 +39,15 @@ export default function AdminDataPage({ utilisateur,title,description,search="",
                             </div>
                         </div>
                         {children}
+                        {pagination?.links?.length > 3 && (
+                            <nav className="mt-5 flex items-center justify-center gap-1" aria-label="Pagination">
+                                {pagination.links.map((link, index) => (
+                                    <button key={index} type="button" disabled={!link.url || link.active} onClick={() => link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true })} className={["min-w-9 rounded-xl px-3 py-2 text-xs font-semibold", link.active ? "bg-jse-principal text-white" : "border border-jse-theme-border text-jse-theme-muted", !link.url ? "opacity-40" : ""].join(" ")}>
+                                        {index === 0 ? "‹" : index === pagination.links.length - 1 ? "›" : <span dangerouslySetInnerHTML={{ __html: link.label }} />}
+                                    </button>
+                                ))}
+                            </nav>
+                        )}
                         <div className="jse-admin-card mt-5 overflow-hidden rounded-jse-xl border border-jse-theme-border bg-jse-theme-surface shadow-jse-carte">
                             <div className="hidden overflow-x-auto md:block">
                                 <table className="w-full min-w-[720px] text-left text-sm">
