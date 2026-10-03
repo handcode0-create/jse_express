@@ -345,7 +345,7 @@ export default function Inscription() {
                             </div>
 
                             {erreursEtape.length > 0 && (
-                                <div className="mb-5 rounded-xl border border-red-400/20 bg-red-400/5 p-3 text-xs leading-5 text-red-300">
+                                <div className="mb-5 rounded-xl border border-jse-danger/20 bg-jse-danger/5 p-3 text-xs leading-5 text-jse-danger">
                                     {erreursEtape.map((erreur, index) => (
                                         <p key={index}>{erreur}</p>
                                     ))}
