@@ -289,8 +289,8 @@ export default function Authentification() {
 
                 {afficherErreurs && !flash?.success && (
                     <div className="fixed right-5 top-5 z-[100] w-[calc(100%-2.5rem)] max-w-sm animate-in slide-in-from-right-5 fade-in duration-300">
-                        <div className="flex items-start gap-3 rounded-2xl border border-red-500/20 bg-[#17100F] p-4 shadow-xl shadow-black/20">
-                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-300">
+                        <div className="flex items-start gap-3 rounded-2xl border border-jse-danger/20 bg-[#17100F] p-4 shadow-xl shadow-black/20">
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-jse-danger/10 text-jse-danger">
                                 <X size={20} />
                             </div>
                             <div className="min-w-0 flex-1">
@@ -390,13 +390,13 @@ export default function Authentification() {
                         ================================================== */}
 
                         {afficherErreurs && (
-                            <div className="mb-5 rounded-2xl border border-red-500/20 bg-red-500/5 px-4 py-4">
+                            <div className="mb-5 rounded-2xl border border-jse-danger/20 bg-jse-danger/5 px-4 py-4">
 
-                                <p className="mb-2 text-sm font-semibold text-red-600">
+                                <p className="mb-2 text-sm font-semibold text-jse-danger">
                                     Vérifiez les informations saisies.
                                 </p>
 
-                                <ul className="space-y-1 text-xs text-red-600/80">
+                                <ul className="space-y-1 text-xs text-jse-danger/80">
                                     {erreurs.map((erreur, index) => (
                                         <li key={index}>
                                             {erreur}
