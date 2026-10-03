@@ -582,7 +582,7 @@ export default function Accueil() {
                             {restaurantsFiltres.length > 0 ? (
                                 <div
                                     className={[
-                                        "scrollbar-none -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 select-none sm:-mx-0 sm:px-0 sm:gap-4",
+                                        "scrollbar-none -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 select-none touch-pan-x sm:-mx-0 sm:px-0 sm:gap-4",
                                         "lg:grid lg:grid-cols-3 lg:overflow-visible lg:snap-none lg:pb-2",
                                         glissementRestaurants ? "cursor-grabbing" : "cursor-grab",
                                     ].join(" ")}
