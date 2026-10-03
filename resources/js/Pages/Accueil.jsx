@@ -12,6 +12,9 @@ import {
     Search,
     SlidersHorizontal,
     ShoppingBag,
+    Store,
+    Truck,
+    CheckCircle2,
     UserRound,
     X,
 } from "lucide-react";
