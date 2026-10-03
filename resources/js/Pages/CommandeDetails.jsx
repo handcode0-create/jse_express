@@ -1,6 +1,8 @@
 import React from "react";
 import SidebarJSE from "../Composants/Navigation/SidebarJSE";
+import ModalConfirmationCommande from "../Composants/Interface/ModalConfirmationCommande";
 import { router, usePage } from "@inertiajs/react";
+import { useState } from "react";
 import {
     ArrowLeft,
     Bike,
@@ -87,6 +89,8 @@ export default function CommandeDetails() {
     const { commande } = usePage().props;
     const active = statutIndex(commande?.statut?.code);
     const paiement = commande?.paiement;
+    const [annulationOuverte, setAnnulationOuverte] = useState(false);
+    const [annulationEnCours, setAnnulationEnCours] = useState(false);
 
     const recommander = () => {
         router.post(
@@ -97,15 +101,19 @@ export default function CommandeDetails() {
     };
 
     const annuler = () => {
-        if (!commande?.peut_annuler) return;
+        if (!commande?.peut_annuler || annulationEnCours) return;
 
-        if (window.confirm("Voulez-vous vraiment annuler cette commande ?")) {
-            router.post(
-                "/commande/" + commande.id + "/annuler",
-                {},
-                { preserveScroll: true },
-            );
-        }
+        setAnnulationEnCours(true);
+
+        router.post(
+            "/commande/" + commande.id + "/annuler",
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => setAnnulationEnCours(false),
+                onSuccess: () => setAnnulationOuverte(false),
+            },
+        );
     };
 
     return (
@@ -478,7 +486,7 @@ export default function CommandeDetails() {
                 {commande.peut_annuler && (
                     <button
                         type="button"
-                        onClick={annuler}
+                        onClick={() => setAnnulationOuverte(true)}
                         className="mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-red-50 px-5 font-sans text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
                     >
                         <X size={19} />
@@ -488,6 +496,14 @@ export default function CommandeDetails() {
                     </div>
                 </div>
             </div>
+
+            <ModalConfirmationCommande
+                open={annulationOuverte}
+                reference={commande.reference}
+                busy={annulationEnCours}
+                onClose={() => setAnnulationOuverte(false)}
+                onConfirm={annuler}
+            />
         </main>
     );
 }
