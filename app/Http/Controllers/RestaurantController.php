@@ -100,6 +100,8 @@ class RestaurantController extends Controller
                 'telephone' => $restaurant->telephone,
                 'email' => $restaurant->email,
                 'adresse' => $restaurant->adresse,
+                'latitude' => $restaurant->latitude,
+                'longitude' => $restaurant->longitude,
                 'horaires' => $restaurant->horaires,
             ],
             'commandes' => $commandes,
@@ -246,6 +248,8 @@ class RestaurantController extends Controller
             'telephone' => ['required', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:150'],
             'adresse' => ['required', 'string', 'max:255'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ]);
 
         $restaurant->update($donnees);
