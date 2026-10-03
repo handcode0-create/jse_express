@@ -2,6 +2,7 @@ import React from "react";
 import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 import ModalConfirmationCommande from "../Composants/Interface/ModalConfirmationCommande";
 import { router, usePage } from "@inertiajs/react";
+import { imageProduitFallback, imageRestaurantFallback } from "../lib/imagesUnsplash";
 import { useState } from "react";
 import {
     ArrowLeft,
@@ -20,8 +21,6 @@ import {
     Store,
 } from "lucide-react";
 
-const imageFallback =
-    "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80";
 
 const etapes = [
     { code: "EN_ATTENTE", label: "Commande reçue" },
@@ -150,12 +149,12 @@ export default function CommandeDetails() {
                     <div className="flex gap-4">
                         <div className="size-[116px] shrink-0 overflow-hidden rounded-[20px] bg-jse-fond sm:size-[140px]">
                             <img
-                                src={commande.restaurant?.image || imageFallback}
+                                src={commande.restaurant?.image || imageRestaurantFallback(commande.restaurant?.id)}
                                 alt={commande.restaurant?.nom || "Restaurant"}
                                 className="h-full w-full object-cover"
                                 onError={(event) => {
                                     event.currentTarget.onerror = null;
-                                    event.currentTarget.src = imageFallback;
+                                    event.currentTarget.src = imageRestaurantFallback(commande.restaurant?.id);
                                 }}
                             />
                         </div>
@@ -216,12 +215,12 @@ export default function CommandeDetails() {
                             >
                                 <div className="size-[72px] shrink-0 overflow-hidden rounded-[16px] bg-jse-fond">
                                     <img
-                                        src={ligne.image || imageFallback}
+                                        src={ligne.image || imageProduitFallback(ligne.produit_id || ligne.id)}
                                         alt={ligne.nom}
                                         onError={(event) => {
                                             event.currentTarget.onerror = null;
                                             event.currentTarget.src =
-                                                imageFallback;
+                                                imageProduitFallback(ligne.produit_id || ligne.id);
                                         }}
                                         className="h-full w-full object-cover"
                                     />
