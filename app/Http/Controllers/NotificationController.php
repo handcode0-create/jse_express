@@ -4,17 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Notification;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
-    public function destroy(Request $request, Notification $notification): JsonResponse
+    public function supprimer(Notification $notification): JsonResponse
     {
-        $this->authorize('delete', $notification);
+        $this->authorize('supprimer', $notification);
 
-        if (! $notification->hidden_by_recipient_at) {
+        if (! $notification->masquee_par_destinataire_at) {
             $notification->update([
-                'hidden_by_recipient_at' => now(),
+                'masquee_par_destinataire_at' => now(),
             ]);
         }
 
@@ -22,9 +21,9 @@ class NotificationController extends Controller
             'success' => true,
             'data' => [
                 'id' => $notification->id,
-                'hidden_by_recipient_at' => $notification->hidden_by_recipient_at?->toIso8601String(),
+                'masquee_par_destinataire_at' => $notification->masquee_par_destinataire_at?->toIso8601String(),
             ],
-            'message' => 'Notification supprimée de votre compte.',
+            'message' => 'Notification masquée de votre compte.',
         ]);
     }
 }
