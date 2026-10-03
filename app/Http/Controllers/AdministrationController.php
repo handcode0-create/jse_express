@@ -216,7 +216,7 @@ class AdministrationController extends Controller
         $recherche=trim((string)$request->query('recherche',''));
         $livraisons=Livraison::query()->with(['commande:id,reference','zone:id,nom','attributions'=>fn($q)=>$q->where('statut','active')->with('livreur:id,nom,prenom','livreur.profilLivreur:user_id,matricule')->latest('id')])
             ->when($recherche!=='' ,fn($q)=>$q->where(function($query)use($recherche){$query->whereHas('commande',fn($c)=>$c->where('reference','like','%'.$recherche.'%'))->orWhereHas('zone',fn($z)=>$z->where('nom','like','%'.$recherche.'%'))->orWhereHas('attributions.livreur',fn($u)=>$u->where('nom','like','%'.$recherche.'%')->orWhere('prenom','like','%'.$recherche.'%'));}))
-            ->latest('id')->limit(100)->get();
+            ->latest('id')->paginate(15)->withQueryString();
 
         $activeLivreurIds=AttributionLivraison::query()
             ->where('statut','active')
