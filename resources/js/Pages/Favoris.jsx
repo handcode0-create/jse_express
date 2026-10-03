@@ -4,18 +4,7 @@ import { ArrowLeft, ChevronRight, Heart, Home, MapPin, ShoppingBag, UserRound, X
 import { basculerFavori, lireFavoris } from "../lib/favoris";
 import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 import NavigationFlottante from "../Composants/Navigation/NavigationFlottante";
-
-const fallbacksUnsplash = [
-    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=85",
-];
-
-const fallbacksLocaux = [
-    "/assets/banner-restaurants.jpg",
-    "/assets/banner-plat-ivoirien.jpg",
-    "/assets/banner-decouverte.jpg",
-];
+import { imageRestaurantFallback } from "../lib/imagesUnsplash";
 
 function NavigationItem({ label, icon: Icon, active = false, onClick }) {
     return <button type="button" onClick={onClick} className={"flex min-w-[66px] flex-col items-center justify-center gap-1 rounded-[20px] px-2.5 py-2 " + (active ? "bg-jse-secondaire text-white shadow-sm" : "text-jse-texte/80 hover:bg-jse-fond")}>
@@ -69,11 +58,11 @@ export default function Favoris() {
                             {favoris.map((restaurant, index) => <article key={restaurant.id} className="overflow-hidden rounded-[26px] bg-white shadow-sm ring-1 ring-jse-texte/5">
                                 <div className="relative aspect-[1.55/1] overflow-hidden bg-jse-principal">
                                     <img
-                                    src={restaurant.image || fallbacksUnsplash[(Number(restaurant.id) || index) % fallbacksUnsplash.length]}
+                                    src={restaurant.image || imageRestaurantFallback(restaurant.id || index)}
                                     alt={restaurant.nom}
                                     onError={(event) => {
                                         event.currentTarget.onerror = null;
-                                        event.currentTarget.src = fallbacksLocaux[(Number(restaurant.id) || index) % fallbacksLocaux.length];
+                                        event.currentTarget.src = imageRestaurantFallback(restaurant.id || index);
                                     }}
                                     className="h-full w-full object-cover"
                                 />
