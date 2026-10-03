@@ -9,7 +9,7 @@ export default function Restaurants({ utilisateur, restaurants = [], recherche =
         setTraitement(restaurant.id);
         router.post("/administration/restaurants/" + restaurant.id + "/statut", {}, { preserveScroll: true, onFinish: () => setTraitement(null) });
     };
-    return <AdminDataPage utilisateur={utilisateur} title="Restaurants" description="Restaurants actifs et inactifs, responsables, zones et activité." search={recherche} searchPlaceholder="Nom, responsable ou téléphone" rows={restaurants} columns={[
+    return <AdminDataPage utilisateur={utilisateur} title="Restaurants" description="Restaurants actifs et inactifs, responsables, zones et activité." search={recherche} searchPlaceholder="Nom, responsable ou téléphone" rows={restaurants.data || []} pagination={restaurants} columns={[
         { key: "nom", label: "Restaurant", render: row => <div><p className="font-semibold">{row.nom}</p><p className="text-xs text-jse-theme-muted">{row.responsable || "—"}</p></div> },
         { key: "telephone", label: "Téléphone" },
         { key: "zone", label: "Zone" },
