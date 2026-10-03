@@ -487,7 +487,7 @@ export default function CommandeDetails() {
                     <button
                         type="button"
                         onClick={() => setAnnulationOuverte(true)}
-                        className="mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-red-50 px-5 font-sans text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
+                        className="mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-jse-danger/10 px-5 font-sans text-sm font-semibold text-jse-danger transition-colors hover:bg-jse-danger/15"
                     >
                         <X size={19} />
                         Annuler la commande
