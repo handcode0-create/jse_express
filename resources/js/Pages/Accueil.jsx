@@ -84,6 +84,23 @@ const imagesRestaurants = [
 ];
 
 
+function calculerDistanceKm(latitudeA, longitudeA, latitudeB, longitudeB) {
+    const degresEnRadians = (valeur) => (valeur * Math.PI) / 180;
+    const rayonTerreKm = 6371;
+    const differenceLatitude = degresEnRadians(latitudeB - latitudeA);
+    const differenceLongitude = degresEnRadians(longitudeB - longitudeA);
+    const latitudeAEnRadians = degresEnRadians(latitudeA);
+    const latitudeBEnRadians = degresEnRadians(latitudeB);
+
+    const a =
+        Math.sin(differenceLatitude / 2) ** 2 +
+        Math.cos(latitudeAEnRadians) *
+            Math.cos(latitudeBEnRadians) *
+            Math.sin(differenceLongitude / 2) ** 2;
+
+    return rayonTerreKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 const navigation = [
     { label: "Accueil", icon: Home, active: true },
     { label: "Commandes", icon: ShoppingBag, route: "/commandes" },
@@ -135,6 +152,9 @@ export default function Accueil() {
     const [zoneSelectionnee, setZoneSelectionnee] = useState("Toutes les zones");
     const [zoneTemporaire, setZoneTemporaire] = useState("Toutes les zones");
     const [categorieSelectionnee, setCategorieSelectionnee] = useState("Restaurants");
+    const [positionUtilisateur, setPositionUtilisateur] = useState(null);
+    const [localisationEnCours, setLocalisationEnCours] = useState(false);
+    const [messageLocalisation, setMessageLocalisation] = useState("");
     const [favoris, setFavoris] = useState([]);
     const [favorisServeur, setFavorisServeur] = useState(
         (favorisRestaurantIds || []).map(Number),
@@ -233,7 +253,44 @@ export default function Accueil() {
         return ["Toutes les zones", ...new Set(valeurs)];
     }, [restaurants]);
 
-    const restaurantsDisponibles = useMemo(() => restaurants, [restaurants]);
+    const restaurantsDisponibles = useMemo(() => {
+        if (!positionUtilisateur) return restaurants;
+
+        const restaurantsAvecDistance = restaurants.map((restaurant, index) => {
+            const latitude = Number(restaurant.latitude);
+            const longitude = Number(restaurant.longitude);
+            const coordonneesValides =
+                Number.isFinite(latitude) &&
+                Number.isFinite(longitude) &&
+                Math.abs(latitude) <= 90 &&
+                Math.abs(longitude) <= 180;
+
+            return {
+                ...restaurant,
+                distanceKm: coordonneesValides
+                    ? calculerDistanceKm(
+                          positionUtilisateur.latitude,
+                          positionUtilisateur.longitude,
+                          latitude,
+                          longitude,
+                      )
+                    : null,
+                indexOriginal: index,
+            };
+        });
+
+        const possedeDistances = restaurantsAvecDistance.some(
+            (restaurant) => restaurant.distanceKm !== null,
+        );
+
+        if (!possedeDistances) return restaurants;
+
+        return restaurantsAvecDistance.sort((premier, second) => {
+            if (premier.distanceKm === null) return 1;
+            if (second.distanceKm === null) return -1;
+            return premier.distanceKm - second.distanceKm;
+        });
+    }, [restaurants, positionUtilisateur]);
 
     const restaurantsFiltres = useMemo(() => {
         const terme = String(recherche || "").trim().toLowerCase();
@@ -303,6 +360,38 @@ export default function Accueil() {
     useEffect(() => {
         setRechercheLocale(recherche);
     }, [recherche]);
+
+    const activerLocalisation = () => {
+        if (!("geolocation" in navigator)) {
+            setMessageLocalisation("La géolocalisation n’est pas disponible sur cet appareil.");
+            return;
+        }
+
+        setLocalisationEnCours(true);
+        setMessageLocalisation("");
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setPositionUtilisateur({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                });
+                setLocalisationEnCours(false);
+                setMessageLocalisation("");
+            },
+            () => {
+                setLocalisationEnCours(false);
+                setMessageLocalisation(
+                    "Autorisez la localisation dans votre navigateur pour afficher les restaurants les plus proches.",
+                );
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000,
+            },
+        );
+    };
 
     const defilerRestaurants = (direction) => {
         if (!restaurantsRef.current) return;
@@ -430,9 +519,17 @@ export default function Accueil() {
                                     <img src="/assets/jse_logo.png" alt="JSE Express" className="h-10 w-auto object-contain sm:h-11" />
                                 </div>
 
-                                <button type="button" className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white/75 px-4 py-2.5 shadow-sm ring-1 ring-jse-texte/5 lg:static lg:translate-x-0 lg:bg-transparent lg:px-3 lg:py-2 lg:shadow-none">
-                                    <MapPin size={19} strokeWidth={2.2} className="text-jse-principal" />
-                                    <span className="font-sans text-sm font-semibold text-jse-principal">Adzopé</span>
+                                <button
+                                    type="button"
+                                    onClick={activerLocalisation}
+                                    disabled={localisationEnCours}
+                                    className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white/75 px-4 py-2.5 shadow-sm ring-1 ring-jse-texte/5 transition hover:bg-white disabled:cursor-wait disabled:opacity-70 lg:static lg:translate-x-0 lg:bg-transparent lg:px-3 lg:py-2 lg:shadow-none"
+                                    aria-label="Utiliser ma position pour les restaurants à proximité"
+                                >
+                                    <MapPin size={19} strokeWidth={2.2} className={positionUtilisateur ? "text-jse-secondaire" : "text-jse-principal"} />
+                                    <span className="font-sans text-sm font-semibold text-jse-principal">
+                                        {localisationEnCours ? "Localisation..." : positionUtilisateur ? "À proximité" : "Adzopé"}
+                                    </span>
                                     <ChevronDown size={16} strokeWidth={2.2} className="text-jse-principal/70" />
                                 </button>
 
@@ -553,7 +650,16 @@ export default function Accueil() {
                         <section ref={restaurantsRef} className="pt-8 sm:pt-9 lg:pt-10">
                             <div className="mb-4 flex items-end justify-between gap-4">
                                 <div>
-                                    <p className="font-sans text-[10px] font-medium uppercase tracking-[0.12em] text-jse-texte/35">À proximité</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-sans text-[10px] font-medium uppercase tracking-[0.12em] text-jse-texte/35">
+                                            {positionUtilisateur ? "Triés par proximité" : "À proximité"}
+                                        </p>
+                                        {positionUtilisateur && (
+                                            <span className="rounded-full bg-jse-secondaire/10 px-2 py-1 font-sans text-[9px] font-semibold text-jse-secondaire">
+                                                Position active
+                                            </span>
+                                        )}
+                                    </div>
                                     <h2 className="mt-1 font-against text-[1.65rem] leading-none text-jse-principal sm:text-2xl">Restaurants populaires</h2>
                                 </div>
                                 <div className="flex items-center gap-1.5">
@@ -630,6 +736,11 @@ export default function Accueil() {
                                                     <MapPin size={12} className="mt-0.5 shrink-0 text-jse-secondaire" />
                                                     <span className="line-clamp-2">{restaurant.adresse || restaurant.zone?.nom || "Adzopé"}</span>
                                                 </div>
+                                                {positionUtilisateur && restaurant.distanceKm !== null && restaurant.distanceKm !== undefined && (
+                                                    <p className="mt-2 font-sans text-[10px] font-semibold text-jse-secondaire">
+                                                        {restaurant.distanceKm < 1 ? Math.round(restaurant.distanceKm * 1000) + " m" : restaurant.distanceKm.toFixed(1) + " km"} de vous
+                                                    </p>
+                                                )}
                                                 {restaurant.services && (
                                                     <p className="mt-2 line-clamp-1 font-sans text-[10px] text-jse-texte/45">{restaurant.services}</p>
                                                 )}
