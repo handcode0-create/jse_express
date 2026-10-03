@@ -296,11 +296,11 @@ function CommandeCard({ commande, index }) {
             </div>
 
             <ModalConfirmationCommande
-                open={annulationOuverte}
+                ouverte={annulationOuverte}
                 reference={commande.reference}
-                busy={annulationEnCours}
-                onClose={() => setAnnulationOuverte(false)}
-                onConfirm={() => {
+                enCours={annulationEnCours}
+                fermer={() => setAnnulationOuverte(false)}
+                confirmer={() => {
                     if (annulationEnCours) return;
 
                     setAnnulationEnCours(true);
