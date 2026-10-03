@@ -498,11 +498,11 @@ export default function CommandeDetails() {
             </div>
 
             <ModalConfirmationCommande
-                open={annulationOuverte}
+                ouverte={annulationOuverte}
                 reference={commande.reference}
-                busy={annulationEnCours}
-                onClose={() => setAnnulationOuverte(false)}
-                onConfirm={annuler}
+                enCours={annulationEnCours}
+                fermer={() => setAnnulationOuverte(false)}
+                confirmer={annuler}
             />
         </main>
     );
