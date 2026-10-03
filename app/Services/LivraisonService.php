@@ -8,6 +8,7 @@ use App\Models\HistoriqueCommande;
 use App\Models\Livraison;
 use App\Models\ProfilLivreur;
 use App\Models\StatutCommande;
+use App\Models\Zone;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -39,33 +40,34 @@ class LivraisonService
                 $livraison->commande->refresh();
             }
 
+            $zone = Zone::query()->find($livraison->zone_id);
+            $zoneIds = collect([$livraison->zone_id]);
+            if ($zone?->zone_parent_id) {
+                $zoneIds->push($zone->zone_parent_id);
+                $zoneIds = $zoneIds->merge(Zone::query()->where('zone_parent_id', $zone->zone_parent_id)->pluck('id'));
+            }
+            $zoneIds = $zoneIds->filter()->unique()->values();
+
             $candidats = ProfilLivreur::query()
-                ->where('zone_id', $livraison->zone_id)
+                ->whereIn('zone_id', $zoneIds)
                 ->where('disponibilite', 'disponible')
-                ->whereHas('user', fn ($query) => $query
-                    ->where('role', 'livreur')
-                    ->where('statut', 'actif'))
+                ->whereHas('user', fn ($query) => $query->where('role', 'livreur')->where('statut', 'actif'))
                 ->orderBy('user_id')
-                ->pluck('user_id');
+                ->get(['user_id', 'zone_id']);
+
+            $activeCounts = AttributionLivraison::query()
+                ->whereIn('livreur_id', $candidats->pluck('user_id'))
+                ->where('statut', 'active')
+                ->selectRaw('livreur_id, COUNT(*) as total')
+                ->groupBy('livreur_id')
+                ->pluck('total', 'livreur_id');
 
             $profil = null;
-
-            foreach ($candidats as $profilId) {
-                $candidate = ProfilLivreur::query()->whereKey($profilId)->lockForUpdate()->first();
-
-                if (! $candidate || $candidate->disponibilite !== 'disponible') {
-                    continue;
-                }
-
-                $occupe = AttributionLivraison::query()
-                    ->where('livreur_id', $candidate->user_id)
-                    ->where('statut', 'active')
-                    ->exists();
-
-                if ($occupe) {
-                    continue;
-                }
-
+            foreach ($candidats->sortBy(fn ($candidate) => [$activeCounts[$candidate->user_id] ?? 0, $candidate->user_id]) as $profilCandidat) {
+                $candidate = ProfilLivreur::query()->whereKey($profilCandidat->user_id)->lockForUpdate()->first();
+                if (! $candidate || $candidate->disponibilite !== 'disponible') continue;
+                $occupe = AttributionLivraison::query()->where('livreur_id', $candidate->user_id)->where('statut', 'active')->exists();
+                if ($occupe) continue;
                 $profil = $candidate;
                 break;
             }
