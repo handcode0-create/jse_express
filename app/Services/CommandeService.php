@@ -19,7 +19,7 @@ class CommandeService
         User $acteur,
         ?string $commentaire = null
     ): void {
-        DB::transaction(function () use ($commande, $acteur, $statutsAnnulables, $commentaire) {
+        DB::transaction(function () use ($commande, $acteur, $commentaire) {
             $commande = Commande::query()
                 ->whereKey($commande->id)
                 ->lockForUpdate()
