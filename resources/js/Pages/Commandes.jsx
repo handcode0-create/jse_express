@@ -55,7 +55,7 @@ function statutConfig(statut) {
     if (code === "ANNULEE") {
         return {
             label: "Annulée",
-            classes: "bg-red-50 text-red-600",
+            classes: "bg-jse-danger/5 text-jse-danger",
             icon: X,
         };
     }
