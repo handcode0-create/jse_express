@@ -19,7 +19,6 @@ use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\LivreurController;
 use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\NotificationController;
-use App\Policies\CommandePolicy;
 use App\Http\Controllers\AdministrationController;
 use App\Services\PanierService;
 use App\Services\NotificationService;
@@ -296,7 +295,7 @@ Route::get('/profil', function () {
         ],
         'notificationsCount' => Notification::query()
             ->where('user_id', Auth::id())
-            ->whereNull('hidden_by_recipient_at')
+            ->whereNull('masquee_par_destinataire_at')
             ->count(),
         'adresses' => AdresseLivraison::query()
             ->where('user_id', Auth::id())
@@ -465,7 +464,7 @@ Route::delete('/profil/moyens-paiement/{moyenPaiement}', function (MoyenPaiement
     return back()->with('success', 'Moyen de paiement supprimé.');
 })->whereNumber('moyenPaiement')->middleware(['auth', 'role:client'])->name('profil.paiement.supprimer');
 
-Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])
+Route::delete('/notifications/{notification}', [NotificationController::class, 'supprimer'])
     ->whereNumber('notification')
     ->middleware(['auth', 'role:client'])
     ->name('notifications.supprimer');
@@ -475,7 +474,7 @@ Route::get('/notifications', function () {
 
     $notifications = Notification::query()
         ->where('user_id', Auth::id())
-        ->whereNull('hidden_by_recipient_at')
+        ->whereNull('masquee_par_destinataire_at')
         ->latest('id')
         ->get()
         ->map(function (Notification $notification) {
