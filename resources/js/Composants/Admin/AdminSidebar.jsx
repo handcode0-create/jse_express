@@ -8,6 +8,7 @@ import {
     Bike,
     MapPinned,
     Bell,
+    Calculator,
     LogOut,
 } from "lucide-react";
 import PhotoProfil from "../Profil/PhotoProfil";
@@ -72,6 +73,11 @@ const sections = [
                 href: "/administration/zones",
                 label: "Zones & attribution",
                 icon: MapPinned,
+            },
+            {
+                href: "/administration/tarification",
+                label: "Tarification",
+                icon: Calculator,
             },
             {
                 href: "/administration/notifications",
