@@ -31,6 +31,7 @@ createInertiaApp({
 
 function Application({ App, props }) {
     const [chargement, setChargement] = useState(false);
+    const [toast429, setToast429] = useState(false);
     const applicationRef = useRef(null);
     const prefersReducedMotion = useRef(false);
 
@@ -132,6 +133,17 @@ function Application({ App, props }) {
     }, []);
 
     useEffect(() => {
+        const retirerInvalid = router.on("invalid", (event) => {
+            if (event.detail?.response?.status !== 429) return;
+            event.preventDefault();
+            setToast429(true);
+            window.setTimeout(() => setToast429(false), 3200);
+        });
+
+        return () => retirerInvalid();
+    }, []);
+
+    useEffect(() => {
         if (!applicationRef.current || prefersReducedMotion.current) return;
 
         gsap.fromTo(
@@ -164,6 +176,12 @@ function Application({ App, props }) {
             </div>
 
             <InstallationApplication />
+
+            {toast429 && (
+                <div className="fixed bottom-5 left-1/2 z-[120] w-[calc(100%-32px)] max-w-sm -translate-x-1/2 rounded-2xl bg-jse-principal px-4 py-3 text-center text-xs font-semibold text-jse-fond shadow-2xl" role="status">
+                    Trop de tentatives. Veuillez réessayer dans une minute.
+                </div>
+            )}
 
             {chargement && (
                 <div

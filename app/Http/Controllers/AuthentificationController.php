@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -57,6 +58,11 @@ class AuthentificationController extends Controller
         }
 
         $captchaActif = filled(config('services.recaptcha.site_key')) && filled(config('services.recaptcha.secret_key'));
+
+        $inscriptionKey = 'auth:inscription:'.($request->ip() ?: 'unknown');
+        if (RateLimiter::increment($inscriptionKey) > 5) {
+            abort(429, 'Trop de tentatives d’inscription. Veuillez réessayer dans une minute.');
+        }
 
         if ($captchaActif) {
             $token = (string) $request->input('recaptcha_token');
@@ -176,6 +182,10 @@ class AuthentificationController extends Controller
         ]);
 
         $telephone = $this->normaliserTelephone((string) $donnees['telephone']);
+        $connexionKey = 'auth:connexion:'.$telephone;
+        if (RateLimiter::increment($connexionKey) > 5) {
+            abort(429, 'Trop de tentatives de connexion. Veuillez réessayer dans une minute.');
+        }
 
         $utilisateur = User::query()
             ->where('statut', 'actif')
@@ -188,6 +198,8 @@ class AuthentificationController extends Controller
                 'telephone' => 'Le numéro de téléphone ou le mot de passe est incorrect.',
             ]);
         }
+
+        RateLimiter::clear($connexionKey);
 
         Auth::login($utilisateur);
         $request->session()->regenerate();
