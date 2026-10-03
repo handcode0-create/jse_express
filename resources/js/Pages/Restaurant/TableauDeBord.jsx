@@ -19,6 +19,7 @@ import {
     ShoppingBag,
     Star,
     Store,
+    MapPin,
     Tag,
     UserRound,
     UtensilsCrossed,
@@ -117,8 +118,11 @@ export default function TableauDeBord() {
         telephone: restaurant?.telephone || "",
         email: restaurant?.email || "",
         adresse: restaurant?.adresse || "",
+        latitude: restaurant?.latitude ?? "",
+        longitude: restaurant?.longitude ?? "",
     });
     const [horaires, setHoraires] = useState(restaurant?.horaires || "");
+    const [localisationEnCours, setLocalisationEnCours] = useState(false);
     const [compte, setCompte] = useState({
         prenom: utilisateur?.prenom || "",
         nom: utilisateur?.nom || "",
@@ -145,6 +149,29 @@ export default function TableauDeBord() {
             setOnglet("menu");
             setTimeout(() => document.getElementById("categories-section")?.scrollIntoView({ behavior: "smooth" }), 0);
         }
+    };
+
+    const utiliserMaPosition = () => {
+        if (!("geolocation" in navigator)) return;
+
+        setLocalisationEnCours(true);
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setProfil((ancien) => ({
+                    ...ancien,
+                    latitude: position.coords.latitude.toFixed(7),
+                    longitude: position.coords.longitude.toFixed(7),
+                }));
+                setLocalisationEnCours(false);
+            },
+            () => setLocalisationEnCours(false),
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000,
+            },
+        );
     };
 
     const creerProduit = (event) => {
@@ -560,6 +587,17 @@ export default function TableauDeBord() {
                                         <ChampDark value={profil.telephone} onChange={(e) => setProfil({ ...profil, telephone: e.target.value })} placeholder="Téléphone" required />
                                         <ChampDark value={profil.email} onChange={(e) => setProfil({ ...profil, email: e.target.value })} placeholder="Email" type="email" />
                                         <ChampDark value={profil.adresse} onChange={(e) => setProfil({ ...profil, adresse: e.target.value })} placeholder="Adresse" required />
+                                        <ChampDark value={profil.latitude} onChange={(e) => setProfil({ ...profil, latitude: e.target.value })} placeholder="Latitude" type="number" step="0.0000001" />
+                                        <ChampDark value={profil.longitude} onChange={(e) => setProfil({ ...profil, longitude: e.target.value })} placeholder="Longitude" type="number" step="0.0000001" />
+                                    </div>
+                                    <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3">
+                                        <button type="button" onClick={utiliserMaPosition} disabled={localisationEnCours} className="inline-flex items-center gap-2 rounded-xl bg-jse-secondaire px-4 py-2.5 text-[10px] font-semibold text-jse-texte transition disabled:opacity-50">
+                                            <MapPin size={15} />
+                                            {localisationEnCours ? "Récupération..." : "Utiliser ma position"}
+                                        </button>
+                                        <p className="text-[10px] leading-4 text-white/40">
+                                            Ces coordonnées servent à classer les restaurants par proximité chez le client.
+                                        </p>
                                     </div>
                                     <textarea value={profil.description} onChange={(e) => setProfil({ ...profil, description: e.target.value })} placeholder="Description du restaurant" className="mt-4 min-h-28 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-jse-accent" />
                                     <button disabled={chargement} className="mt-4 h-11 rounded-xl bg-jse-accent px-5 text-[10px] font-semibold disabled:opacity-50">Enregistrer le profil</button>
