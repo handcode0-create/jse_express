@@ -1,21 +1,21 @@
 import { X } from "lucide-react";
 
 export default function ModalConfirmationCommande({
-    open,
+    ouverte,
     reference,
-    busy = false,
-    onClose,
-    onConfirm,
+    enCours = false,
+    fermer,
+    confirmer,
 }) {
-    if (!open) return null;
+    if (!ouverte) return null;
 
     return (
         <div
             className="fixed inset-0 z-50 flex items-end justify-center bg-jse-principal/20 p-4 backdrop-blur-sm sm:items-center"
             role="presentation"
             onMouseDown={(event) => {
-                if (event.target === event.currentTarget && !busy) {
-                    onClose();
+                if (event.target === event.currentTarget && !enCours) {
+                    fermer();
                 }
             }}
         >
@@ -40,8 +40,8 @@ export default function ModalConfirmationCommande({
 
                     <button
                         type="button"
-                        onClick={onClose}
-                        disabled={busy}
+                        onClick={fermer}
+                        disabled={enCours}
                         aria-label="Fermer"
                         className="flex size-10 shrink-0 items-center justify-center rounded-full bg-jse-fond text-jse-principal disabled:opacity-50"
                     >
@@ -66,19 +66,19 @@ export default function ModalConfirmationCommande({
                 <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
                     <button
                         type="button"
-                        onClick={onClose}
-                        disabled={busy}
+                        onClick={fermer}
+                        disabled={enCours}
                         className="rounded-full bg-jse-fond px-5 py-3 font-sans text-xs font-semibold text-jse-principal"
                     >
                         Conserver
                     </button>
                     <button
                         type="button"
-                        onClick={onConfirm}
-                        disabled={busy}
+                        onClick={confirmer}
+                        disabled={enCours}
                         className="rounded-full bg-jse-danger px-5 py-3 font-sans text-xs font-semibold text-white disabled:opacity-50"
                     >
-                        {busy ? "Annulation…" : "Confirmer l’annulation"}
+                        {enCours ? "Annulation…" : "Confirmer l’annulation"}
                     </button>
                 </div>
             </section>
