@@ -333,7 +333,7 @@ export default function TableauDeBord() {
     return (
         <main className="min-h-screen bg-[#0b0d0f] text-white">
             <div className="flex min-h-screen">
-                <aside className="sticky top-0 hidden h-screen w-[245px] shrink-0 border-r border-white/8 bg-[#101719] px-4 py-5 lg:flex lg:flex-col">
+                <aside className="sticky top-0 hidden h-screen w-[245px] shrink-0 border-r border-white/8 bg-jse-theme-surface px-4 py-5 lg:flex lg:flex-col">
                     <div className="flex items-center gap-3 px-2">
                         <img src="/assets/jse_logo.png" alt="JSE Express" className="h-11 w-11 rounded-xl object-contain" />
                         <div className="min-w-0 flex-1">
