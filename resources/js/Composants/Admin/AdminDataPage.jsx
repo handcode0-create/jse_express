@@ -56,7 +56,7 @@ export default function AdminDataPage({ utilisateur,title,description,search="",
                                     })}
                                 </article>)}
                             </div>
-                            {rows.length===0 && <div className="jse-admin-empty flex min-h-48 flex-col items-center justify-center gap-3 rounded-jse-moyen p-6 text-center><Inbox className="text-jse-theme-muted" size={24}/><p className="break-words text-sm text-jse-theme-muted">{emptyMessage}</p></div>}
+                            {rows.length===0 && <div className="jse-admin-empty flex min-h-48 flex-col items-center justify-center gap-3 rounded-jse-moyen p-6 text-center"><Inbox className="text-jse-theme-muted" size={24}/><p className="break-words text-sm text-jse-theme-muted">{emptyMessage}</p></div>}
                         </div>
                     </div>
                 </section>
