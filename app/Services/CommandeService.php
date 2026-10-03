@@ -80,7 +80,6 @@ class CommandeService
                 'statut_id' => $statut->id,
                 'pin_livraison_hash' => null,
                 'pin_livraison_chiffre' => null,
-                'pin_valide_at' => null,
             ]);
 
             HistoriqueCommande::create([
