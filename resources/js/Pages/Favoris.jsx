@@ -83,7 +83,7 @@ export default function Favoris() {
                             </article>)}
                         </div> : <div className="rounded-[28px] bg-white px-6 py-16 text-center shadow-sm ring-1 ring-jse-texte/5">
                             <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-jse-accent/10 text-jse-accent"><Heart size={30} strokeWidth={1.7} /></div>
-                            <h2 className="mt-5 font-against text-2xl text-jse-principal">Aucun favori pour le moment</h2>
+                            <h2 className="mt-5 font-against text-2xl text-jse-principal">Aucun favori. Touchez le cœur d'un restaurant pour le retrouver ici.</h2>
                             <p className="mx-auto mt-2 max-w-sm font-sans text-sm leading-5 text-jse-texte/50">Appuyez sur le cœur d’un restaurant pour le retrouver facilement ici.</p>
                             <button type="button" onClick={() => router.visit("/accueil")} className="mt-6 rounded-full bg-jse-accent px-6 py-3 font-sans text-xs font-semibold text-white shadow-sm">Découvrir les restaurants</button>
                         </div>}

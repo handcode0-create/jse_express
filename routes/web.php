@@ -317,6 +317,8 @@ Route::get('/profil', function () {
                 'zone' => $adresse->zone ? ['id' => $adresse->zone->id, 'nom' => $adresse->zone->nom] : null,
             ])->values(),
         'zones' => Zone::query()->where('statut', 'actif')->orderBy('nom')->get(['id', 'nom']),
+        'support' => config('jse.support'),
+
         'moyensPaiement' => MoyenPaiement::query()
             ->where('user_id', Auth::id())
             ->where('statut', 'actif')
@@ -345,7 +347,7 @@ Route::patch('/profil', function (Request $request) {
     ], [
         'nom.required' => 'Le nom est obligatoire.',
         'telephone.required' => 'Le numéro de téléphone est obligatoire.',
-        'telephone.unique' => 'Ce numéro de téléphone est déjà utilisé.',
+        'telephone.unique' => 'Ce numéro est déjà utilisé.',
         'email.email' => 'Veuillez saisir une adresse e-mail valide.',
         'email.unique' => 'Cette adresse e-mail est déjà utilisée.',
     ]);
@@ -378,9 +380,32 @@ Route::post('/profil/adresses', function (Request $request) {
     return back()->with('success', 'Adresse ajoutée.');
 })->middleware(['auth', 'role:client'])->name('profil.adresse.ajouter');
 
-Route::patch('/profil/adresses/{adresseLivraison}/defaut', function (AdresseLivraison $adresseLivraison) {
+Route::patch('/profil/adresses/{adresseLivraison}', function (Request $request, AdresseLivraison $adresseLivraison) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
-    abort_unless((int) $adresseLivraison->user_id === (int) Auth::id(), 404);
+    abort_unless($request->user()->can('update', $adresseLivraison), 403);
+
+    $donnees = $request->validate([
+        'libelle' => ['required', 'string', 'max:80'],
+        'adresse' => ['required', 'string', 'max:255'],
+        'complement' => ['nullable', 'string', 'max:255'],
+        'telephone' => ['nullable', 'string', 'max:30'],
+        'zone_id' => ['nullable', 'integer', 'exists:zones,id'],
+        'par_defaut' => ['boolean'],
+    ]);
+
+    DB::transaction(function () use ($donnees, $adresseLivraison) {
+        if (($donnees['par_defaut'] ?? false)) {
+            AdresseLivraison::where('user_id', Auth::id())->update(['par_defaut' => false]);
+        }
+        $adresseLivraison->update($donnees);
+    });
+
+    return back()->with('success', 'Adresse mise à jour.');
+})->whereNumber('adresseLivraison')->middleware(['auth', 'role:client'])->name('profil.adresse.modifier');
+
+Route::patch('/profil/adresses/{adresseLivraison}/defaut', function (Request $request, AdresseLivraison $adresseLivraison) {
+    abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
+    abort_unless($request->user()->can('update', $adresseLivraison), 403);
 
     DB::transaction(function () use ($adresseLivraison) {
         AdresseLivraison::where('user_id', Auth::id())->update(['par_defaut' => false]);
@@ -390,9 +415,9 @@ Route::patch('/profil/adresses/{adresseLivraison}/defaut', function (AdresseLivr
     return back()->with('success', 'Adresse par défaut mise à jour.');
 })->whereNumber('adresseLivraison')->middleware(['auth', 'role:client'])->name('profil.adresse.defaut');
 
-Route::delete('/profil/adresses/{adresseLivraison}', function (AdresseLivraison $adresseLivraison) {
+Route::delete('/profil/adresses/{adresseLivraison}', function (Request $request, AdresseLivraison $adresseLivraison) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
-    abort_unless((int) $adresseLivraison->user_id === (int) Auth::id(), 404);
+    abort_unless($request->user()->can('delete', $adresseLivraison), 403);
 
     DB::transaction(function () use ($adresseLivraison) {
         $etaitParDefaut = (bool) $adresseLivraison->par_defaut;
@@ -434,9 +459,9 @@ Route::post('/profil/moyens-paiement', function (Request $request) {
     return back()->with('success', 'Moyen de paiement ajouté.');
 })->middleware(['auth', 'role:client'])->name('profil.paiement.ajouter');
 
-Route::patch('/profil/moyens-paiement/{moyenPaiement}/defaut', function (MoyenPaiement $moyenPaiement) {
+Route::patch('/profil/moyens-paiement/{moyenPaiement}/defaut', function (Request $request, MoyenPaiement $moyenPaiement) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
-    abort_unless((int) $moyenPaiement->user_id === (int) Auth::id(), 404);
+    abort_unless($request->user()->can('update', $moyenPaiement), 403);
 
     DB::transaction(function () use ($moyenPaiement) {
         MoyenPaiement::where('user_id', Auth::id())->update(['par_defaut' => false]);
@@ -446,9 +471,9 @@ Route::patch('/profil/moyens-paiement/{moyenPaiement}/defaut', function (MoyenPa
     return back()->with('success', 'Moyen de paiement par défaut mis à jour.');
 })->whereNumber('moyenPaiement')->middleware(['auth', 'role:client'])->name('profil.paiement.defaut');
 
-Route::delete('/profil/moyens-paiement/{moyenPaiement}', function (MoyenPaiement $moyenPaiement) {
+Route::delete('/profil/moyens-paiement/{moyenPaiement}', function (Request $request, MoyenPaiement $moyenPaiement) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
-    abort_unless((int) $moyenPaiement->user_id === (int) Auth::id(), 404);
+    abort_unless($request->user()->can('delete', $moyenPaiement), 403);
 
     DB::transaction(function () use ($moyenPaiement) {
         $etaitParDefaut = (bool) $moyenPaiement->par_defaut;

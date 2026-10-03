@@ -319,7 +319,7 @@ export default function Notifications() {
                                         Aucune notification
                                     </h2>
                                     <p className="mx-auto mt-2 max-w-sm font-sans text-sm leading-5 text-jse-texte/50">
-                                        Les notifications liées à votre activité apparaîtront ici.
+                                        Aucune notification. Les mises à jour de vos commandes apparaîtront ici.
                                     </p>
                                     <button
                                         type="button"
