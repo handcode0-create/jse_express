@@ -9,7 +9,7 @@ export default function Livreurs({ utilisateur, livreurs = [], recherche = "" })
         setTraitement(livreur.id);
         router.post("/administration/livreurs/" + livreur.id + "/disponibilite", {}, { preserveScroll: true, onFinish: () => setTraitement(null) });
     };
-    return <AdminDataPage utilisateur={utilisateur} title="Livreurs" description="Matricules, zones, disponibilité et activité des livreurs." search={recherche} searchPlaceholder="Nom, matricule ou téléphone" rows={livreurs} columns={[
+    return <AdminDataPage utilisateur={utilisateur} title="Livreurs" description="Matricules, zones, disponibilité et activité des livreurs." search={recherche} searchPlaceholder="Nom, matricule ou téléphone" rows={livreurs.data || []} pagination={livreurs} columns={[
         { key: "nom", label: "Livreur" },
         { key: "matricule", label: "Matricule", render: row => <span className="font-semibold text-jse-secondaire">{row.matricule || "—"}</span> },
         { key: "telephone", label: "Téléphone" },
