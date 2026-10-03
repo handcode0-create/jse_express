@@ -1158,6 +1158,8 @@ Route::get('/accueil', function (Request $request) {
                 'nom' => $restaurant->nom,
                 'description' => $restaurant->description,
                 'adresse' => $restaurant->adresse,
+                'latitude' => $restaurant->latitude,
+                'longitude' => $restaurant->longitude,
                 'horaires' => $restaurant->horaires,
                 'zone' => $restaurant->zone
                     ? ['id' => $restaurant->zone->id, 'nom' => $restaurant->zone->nom]
