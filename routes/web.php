@@ -848,6 +848,7 @@ Route::post('/commande', function (Request $request, PanierService $panierServic
 
         $restaurant = $lignes->first()->produit?->restaurant;
         abort_unless($restaurant && $restaurant->statut === 'actif', 422);
+        abort_unless(Zone::query()->whereKey($donnees['zone_id'])->where('statut', 'actif')->exists(), 422);
 
         foreach ($lignes as $ligne) {
             abort_unless($ligne->produit && $ligne->produit->statut === 'actif' && $ligne->produit->disponible, 422);
