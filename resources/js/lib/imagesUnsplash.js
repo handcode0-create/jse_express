@@ -28,32 +28,32 @@ export const imagesRestaurants = [
     unsplash("1550966871-3ed3cdb5ed0c"),
     unsplash("1556742049-0cfed4f6a45d"),
     unsplash("1521017432531-fbd92d768814"),
-    unsplash("1521017432531-fbd92d768814"),
+    unsplash("1541544741938-58a6f7b5b4e8"),
 ];
 
 export const imagesProduits = [
-    unsplash("1546069901-ba9599a7e63c", 900),
+    unsplash("1499028344343-cd173ffc68a9", 900),
     unsplash("1540189549336-e6e99c3679fe", 900),
     unsplash("1504674900247-0877df9cc836", 900),
     unsplash("1565299624946-b28f40a0ae38", 900),
     unsplash("1565958011703-44f9829ba187", 900),
-    unsplash("1498837167922-ddd27525d352", 900),
+    unsplash("1476224203421-9ac39bcb3327", 900),
     unsplash("1505253716362-afaea1d3d1af", 900),
     unsplash("1512621776951-a57141f2eefd", 900),
     unsplash("1544025162-d76694265947", 900),
     unsplash("1513104890138-7c749659a591", 900),
-    unsplash("1515003197210-e0cd71810b5f", 900),
+    unsplash("1521305916504-4a1121188589", 900),
     unsplash("1547592180-85f173990554", 900),
     unsplash("1551183053-bf91a1d81141", 900),
-    unsplash("1551024601-bec78aea704b", 900),
+    unsplash("1504754524776-8f4f37790ca0", 900),
     unsplash("1572449043416-55c3e7f3d5d5", 900),
     unsplash("1563379926898-05f4575a45d8", 900),
 ];
 
 export const imagesSecours = [
-    unsplash("1551218808-94e220e084d2"),
-    unsplash("1517248135467-4c7edcad34c4"),
     unsplash("1498654896293-37aacf113fd9"),
+    unsplash("1501339847302-2dbf4c9a4f3e"),
+    unsplash("1541544741938-58a6f7b5b4e8"),
 ];
 
 export const imageRestaurantFallback = (id = 0) =>
