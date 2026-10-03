@@ -130,6 +130,7 @@ export default function Bienvenue() {
                                 <h1 className="font-against text-jse-landing-title leading-tight tracking-tight text-jse-fond">{slide.title}</h1>
                             </div>
                             <p className="mt-6 max-w-xl font-sans text-base leading-7 text-jse-fond/75 sm:text-lg">{slide.description}</p>
+                            <button type="button" onClick={() => router.visit("/authentification")} className="mt-6 rounded-jse-petit py-2 font-sans text-sm font-semibold text-jse-fond underline decoration-jse-secondaire/70 underline-offset-4 focus-visible:outline-none md:hidden">Se connecter</button>
                             <div className="mt-8 hidden items-center gap-5 md:flex">
                                 <span className="font-sans text-sm font-semibold tabular-nums text-jse-fond/70">{String(index + 1).padStart(2, "0")}</span>
                                 <span className="h-px w-16 bg-jse-fond/30" aria-hidden="true" />
