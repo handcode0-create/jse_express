@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Notification extends Model
 {
-    
     use HasFactory;
-protected $fillable = [
+
+    protected $fillable = [
         'user_id',
         'commande_id',
         'livraison_id',
@@ -22,12 +22,12 @@ protected $fillable = [
         'statut_envoi',
         'tentatives',
         'date_envoi',
-        'hidden_by_recipient_at',
+        'masquee_par_destinataire_at',
     ];
 
     protected $casts = [
         'date_envoi' => 'datetime',
-        'hidden_by_recipient_at' => 'datetime',
+        'masquee_par_destinataire_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
