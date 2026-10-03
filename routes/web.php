@@ -394,6 +394,9 @@ Route::patch('/profil/adresses/{adresseLivraison}', function (Request $request, 
         'telephone' => ['nullable', 'string', 'max:30'],
         'zone_id' => ['nullable', 'integer', 'exists:zones,id'],
         'par_defaut' => ['boolean'],
+    ], [
+        'libelle.required' => 'Ce champ est obligatoire.',
+        'adresse.required' => 'Ce champ est obligatoire.',
     ]);
 
     DB::transaction(function () use ($donnees, $adresseLivraison) {
