@@ -3,7 +3,7 @@ import { Head, Link, router, usePage } from "@inertiajs/react";
 import { Search, ChevronRight, Inbox } from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
 
-export default function AdminDataPage({ utilisateur,title,description,search="",searchPlaceholder="Rechercher",columns=[],rows=[],emptyMessage="Aucun élément trouvé.",filters=null,actionLabel=null,actionHref=null,pagination=null }) {
+export default function AdminDataPage({ utilisateur,title,description,search="",searchPlaceholder="Rechercher",columns=[],rows=[],emptyMessage="Aucun élément trouvé.",filters=null,actionLabel=null,actionHref=null,pagination=null,children=null }) {
     const { flash = {} } = usePage().props;
     const [rechercheEnCours, setRechercheEnCours] = useState(false);
     const submit = (event) => {
@@ -38,6 +38,7 @@ export default function AdminDataPage({ utilisateur,title,description,search="",
                                 {filters && <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap lg:shrink-0">{filters}</div>}
                             </div>
                         </div>
+                        {children}
                         <div className="jse-admin-card mt-5 overflow-hidden rounded-jse-xl border border-jse-theme-border bg-jse-theme-surface shadow-jse-carte">
                             <div className="hidden overflow-x-auto md:block">
                                 <table className="w-full min-w-[720px] text-left text-sm">
