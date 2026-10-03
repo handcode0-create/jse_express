@@ -161,7 +161,7 @@ export default function Notifications() {
             );
             setNotificationASupprimer(null);
             setToast({
-                type: "success",
+                type: "succes",
                 message: "Notification supprimée.",
             });
         } catch (erreur) {
@@ -408,7 +408,7 @@ export default function Notifications() {
                     role="status"
                     className={[
                         "fixed inset-x-4 bottom-24 z-[60] mx-auto max-w-md rounded-full px-4 py-3 shadow-xl",
-                        toast.type === "success"
+                        toast.type === "succes"
                             ? "bg-jse-secondaire text-white"
                             : "bg-jse-danger text-white",
                     ].join(" ")}
