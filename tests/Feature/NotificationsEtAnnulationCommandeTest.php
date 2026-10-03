@@ -106,10 +106,14 @@ class NotificationsEtAnnulationCommandeTest extends TestCase
             'disponibilite' => 'indisponible',
         ]);
 
-        AttributionLivraison::factory()->create([
+        $attribution = AttributionLivraison::create([
             'livraison_id' => $livraison->id,
             'livreur_id' => $livreur->id,
+            'admin_id' => null,
+            'type_attribution' => 'automatique',
             'statut' => 'active',
+            'date_attribution' => now(),
+            'motif' => null,
         ]);
 
         Paiement::create([
@@ -152,7 +156,7 @@ class NotificationsEtAnnulationCommandeTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('attributions_livraison', [
-            'id' => $livraison->attributions()->firstOrFail()->id,
+            'id' => $attribution->id,
             'statut' => 'terminee',
         ]);
 
@@ -221,10 +225,10 @@ class NotificationsEtAnnulationCommandeTest extends TestCase
         $commande = $this->creerCommande($client, 'EN_ATTENTE');
 
         $this->deleteJson(route('notifications.supprimer', $notification))
-            ->assertRedirect();
+            ->assertUnauthorized();
 
         $this->post(route('commande.annuler', $commande))
-            ->assertRedirect();
+            ->assertUnauthorized();
 
         $this->assertDatabaseHas('commandes', [
             'id' => $commande->id,
