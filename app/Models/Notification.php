@@ -22,6 +22,12 @@ protected $fillable = [
         'statut_envoi',
         'tentatives',
         'date_envoi',
+        'hidden_by_recipient_at',
+    ];
+
+    protected $casts = [
+        'date_envoi' => 'datetime',
+        'hidden_by_recipient_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
