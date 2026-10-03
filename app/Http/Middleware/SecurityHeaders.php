@@ -24,7 +24,7 @@ class SecurityHeaders
             .'publickey-credentials-get=(), usb=(), xr-spatial-tracking=()'
         );
         $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
-        $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
+        $response->headers->set('Cross-Origin-Resource-Policy', 'cross-origin');
         $response->headers->set('X-DNS-Prefetch-Control', 'off');
         $response->headers->set('X-Permitted-Cross-Domain-Policies', 'none');
         $response->headers->set('X-Download-Options', 'noopen');
@@ -80,7 +80,7 @@ class SecurityHeaders
             "form-action 'self'",
             'script-src '.implode(' ', $scriptSources),
             'style-src '.implode(' ', $styleSources),
-            "img-src 'self' data: blob: https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
+            "img-src 'self' data: blob: https://images.unsplash.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
             "font-src 'self' data: https://fonts.gstatic.com https://db.onlinewebfonts.com",
             'connect-src '.implode(' ', $connectSources),
             "frame-src 'self' https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/",
