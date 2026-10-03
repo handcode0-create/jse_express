@@ -188,8 +188,21 @@ class AdministrationController extends Controller
 
         $livraisonService->reattribuer($livraison, $request->user()->id, $livreur->id, $donnees['motif']);
         $livraison->load('commande.user');
-        $commande = $livraison->commande;        $notificationService->sms($livreur, 'Une livraison '.$commande->reference.' vous a été attribuée par l’administration.', $commande->id, $livraison->id, 'attribution');
-        $notificationService->sms($commande->user, 'Votre code de livraison est disponible dans l'application.', $commande->id, $livraison->id, 'pin_livraison');
+        $commande = $livraison->commande;
+        $notificationService->sms(
+            $livreur,
+            'Une livraison '.$commande->reference.' vous a été attribuée par l’administration.',
+            $commande->id,
+            $livraison->id,
+            'attribution'
+        );
+        $notificationService->sms(
+            $commande->user,
+            'Votre code de livraison est disponible dans l’application.',
+            $commande->id,
+            $livraison->id,
+            'pin_livraison'
+        );
 
         return back()->with('success', 'La livraison a été réattribuée.');
     }
@@ -207,7 +220,8 @@ class AdministrationController extends Controller
             ->withQueryString();
 
         $commandes->setCollection(
-            $commandes->getCollection()->map(fn (Commande $commande) => ['id'=>$commande->id,'reference'=>$commande->reference,'client'=>$commande->user ? trim($commande->user->prenom.' '.$commande->user->nom) : null,'telephone'=>$commande->user?->telephone,'restaurant'=>$commande->restaurant?->nom,'zone'=>$commande->zone?->nom,'statut'=>$commande->statutCommande?['code'=>$commande->statutCommande->code,'libelle'=>$commande->statutCommande->libelle]:null,'montant_total'=>(float)$commande->montant_total,'frais_livraison'=>(float)$commande->frais_livraison,'distance_km'=>$commande->distance_km !== null ? (float)$commande->distance_km : null,'date_commande'=>$commande->date_commande?->format('d/m/Y H:i')])->values();
+            $commandes->getCollection()->map(fn (Commande $commande) => ['id'=>$commande->id,'reference'=>$commande->reference,'client'=>$commande->user ? trim($commande->user->prenom.' '.$commande->user->nom) : null,'telephone'=>$commande->user?->telephone,'restaurant'=>$commande->restaurant?->nom,'zone'=>$commande->zone?->nom,'statut'=>$commande->statutCommande?['code'=>$commande->statutCommande->code,'libelle'=>$commande->statutCommande->libelle]:null,'montant_total'=>(float)$commande->montant_total,'frais_livraison'=>(float)$commande->frais_livraison,'distance_km'=>$commande->distance_km !== null ? (float)$commande->distance_km : null,'date_commande'=>$commande->date_commande?->format('d/m/Y H:i')])->values()
+        );
         return Inertia::render('Admin/Commandes', ['utilisateur'=>$request->user(),'commandes'=>$commandes,'recherche'=>$recherche]);
     }
 
@@ -232,7 +246,7 @@ class AdministrationController extends Controller
             ->orderBy('nom')
             ->get();
 
-        $livraisons=$livraisons->map(function(Livraison $l)use($candidats){
+        $livraisons->setCollection($livraisons->getCollection()->map(function(Livraison $l)use($candidats){
             $active=$l->attributions->first();
             $candidatsZone=$l->statut==='en_cours'||$l->statut==='attribuee'||$l->statut==='en_attente'
                 ? $candidats->filter(fn(User $u)=>(int)$u->profilLivreur?->zone_id===(int)$l->zone_id)->map(fn(User $u)=>[
@@ -254,7 +268,7 @@ class AdministrationController extends Controller
                 'date_attribution'=>$l->date_attribution?Carbon::parse($l->date_attribution)->format('d/m/Y H:i'):null,
                 'candidats'=>$candidatsZone,
             ];
-        })->values();
+        })->values());
 
         return Inertia::render('Admin/Livraisons',['utilisateur'=>$request->user(),'livraisons'=>$livraisons,'recherche'=>$recherche]);
     }
