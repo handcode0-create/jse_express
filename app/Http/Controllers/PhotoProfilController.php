@@ -32,12 +32,12 @@ class PhotoProfilController extends Controller
             }
         }
 
-        $extension = strtolower($donnees['photo']->getClientOriginalExtension());
-        $nom = Str::uuid()->toString() . '.' . $extension;
+        $extension = $donnees['photo']->extension();
+        $nom = Str::uuid()->toString().'.'.$extension;
         $donnees['photo']->move($directory, $nom);
 
         $utilisateur->forceFill([
-            'photo_profil' => '/uploads/profils/' . $nom,
+            'photo_profil' => '/uploads/profils/'.$nom,
         ])->save();
 
         return match ($utilisateur->role) {

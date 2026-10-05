@@ -32,7 +32,17 @@ class SecurityHeadersTest extends TestCase
         $this->assertStringContainsString("default-src 'self'", $contentSecurityPolicy);
         $this->assertStringContainsString("object-src 'none'", $contentSecurityPolicy);
         $this->assertStringContainsString("frame-ancestors 'none'", $contentSecurityPolicy);
-        $this->assertStringContainsString("https://www.google.com/recaptcha/", $contentSecurityPolicy);
+        $this->assertStringContainsString('https://www.google.com/recaptcha/', $contentSecurityPolicy);
+    }
+
+    public function test_la_csp_autorise_les_tuiles_de_la_carte_livreur(): void
+    {
+        $response = $this->get('/authentification');
+
+        $this->assertMatchesRegularExpression(
+            '/img-src [^;]*https:\/\/\*\.tile\.openstreetmap\.org/',
+            $response->headers->get('Content-Security-Policy')
+        );
     }
 
     public function test_hsts_est_active_sur_une_requete_https(): void

@@ -80,7 +80,7 @@ class SecurityHeaders
             "form-action 'self'",
             'script-src '.implode(' ', $scriptSources),
             'style-src '.implode(' ', $styleSources),
-            "img-src 'self' data: blob: https://images.unsplash.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
+            "img-src 'self' data: blob: https://images.unsplash.com https://*.tile.openstreetmap.org https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
             "font-src 'self' data: https://fonts.gstatic.com https://db.onlinewebfonts.com",
             'connect-src '.implode(' ', $connectSources),
             "frame-src 'self' https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/",
@@ -90,7 +90,7 @@ class SecurityHeaders
         ]);
 
         if ($request->isSecure() && app()->environment('production')) {
-            $csp .= "; upgrade-insecure-requests";
+            $csp .= '; upgrade-insecure-requests';
         }
 
         $response->headers->set('Content-Security-Policy', $csp);
