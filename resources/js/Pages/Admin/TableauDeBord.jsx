@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Head, router, usePage } from "@inertiajs/react";
-import { CheckCircle2, ShoppingBag, Store, Truck, Users, UserRound } from "lucide-react";
 import AdminDeliveryTable from "../../Composants/Admin/AdminDeliveryTable";
+import AccueilAdmin from "../../Composants/Admin/AccueilAdmin";
 import AdminLayout from "../../Composants/Admin/AdminLayout";
 import AdminPendingList from "../../Composants/Admin/AdminPendingList";
-import AdminStatCard from "../../Composants/Admin/AdminStatCard";
-import AdminStatistics from "../../Composants/Admin/AdminStatistics";
+import PanneauLivreurs from "../../Composants/Admin/PanneauLivreurs";
 import ConfirmDialog from "../../Composants/Admin/ConfirmDialog";
 
 export default function TableauDeBord({
@@ -57,15 +56,6 @@ export default function TableauDeBord({
         );
     };
 
-    const cartes = [
-        { label: "Commandes actives", value: statistiques.commandes_actives ?? 0, icon: ShoppingBag, tone: "accent", href: "/administration/commandes" },
-        { label: "Livraisons actives", value: statistiques.livraisons_actives ?? 0, icon: Truck, tone: "accent", href: "/administration/livraisons" },
-        { label: "Livreurs disponibles", value: statistiques.livreurs_disponibles ?? 0, icon: Users, tone: "secondaire", href: "/administration/livreurs" },
-        { label: "Commandes livrées", value: statistiques.commandes_livrees ?? 0, icon: CheckCircle2, tone: "secondaire", href: "/administration/commandes" },
-        { label: "Restaurants actifs", value: statistiques.restaurants_actifs ?? 0, icon: Store, tone: "principal", href: "/administration/restaurants" },
-        { label: "Clients actifs", value: statistiques.clients_actifs ?? 0, icon: UserRound, tone: "principal", href: "/administration/clients" },
-    ];
-
     const referenceAAnnuler = commandeAAnnuler ? commandeAAnnuler.reference || "#" + commandeAAnnuler.id : "";
 
     return (
@@ -73,52 +63,30 @@ export default function TableauDeBord({
             <Head title="Administration — JSE Express" />
 
             <AdminLayout utilisateur={utilisateur}>
-                <header id="vue-ensemble" className="min-w-0">
-                    <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-jse-theme-muted">
-                        <span className="h-0.5 w-6 rounded-full bg-jse-secondaire" aria-hidden="true" />
-                        JSE Express · Administration
-                    </p>
-                    <h1 className="mt-2 break-words font-against text-4xl leading-[0.95] text-jse-theme-heading sm:text-5xl">
-                        Bonjour {utilisateur?.prenom || "Administrateur"}
-                    </h1>
-                    <p className="mt-3 max-w-2xl text-sm leading-6 text-jse-theme-muted sm:text-base">
-                        Voici l’activité à surveiller aujourd’hui.
-                    </p>
-                </header>
+                <AccueilAdmin prenom={utilisateur?.prenom} statistiques={statistiques} serie={serie_activite} commandes={commandes} livraisons={livraisons} />
 
-                <section className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3" aria-label="Indicateurs clés">
-                    {cartes.map((carte) => (
-                        <AdminStatCard key={carte.label} {...carte} />
-                    ))}
-                </section>
+                <div className="mt-6 grid gap-5 sm:mt-8 xl:grid-cols-[minmax(0,1.3fr)_minmax(20rem,0.9fr)]">
+                    <AdminPendingList
+                        commandes={commandes}
+                        motifs={motifsAnnulation}
+                        traitement={traitement}
+                        onMotifChange={(id, valeur) => setMotifsAnnulation((etat) => ({ ...etat, [id]: valeur }))}
+                        onAnnuler={setCommandeAAnnuler}
+                    />
+                    <PanneauLivreurs livreurs={livreurs} />
+                </div>
 
-                <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(20rem,0.9fr)]">
-                    <div className="xl:col-start-1 xl:row-start-1">
-                        <AdminPendingList
-                            commandes={commandes}
-                            motifs={motifsAnnulation}
-                            traitement={traitement}
-                            onMotifChange={(id, valeur) => setMotifsAnnulation((etat) => ({ ...etat, [id]: valeur }))}
-                            onAnnuler={setCommandeAAnnuler}
-                        />
-                    </div>
-
-                    <div className="xl:col-span-2 xl:row-start-2">
-                        <AdminDeliveryTable
-                            livraisons={livraisons}
-                            livreurs={livreurs}
-                            selection={selection}
-                            motifs={motifs}
-                            traitement={traitement}
-                            onSelectionChange={(id, valeur) => setSelection((etat) => ({ ...etat, [id]: valeur }))}
-                            onMotifChange={(id, valeur) => setMotifs((etat) => ({ ...etat, [id]: valeur }))}
-                            onReattribuer={reattribuer}
-                        />
-                    </div>
-
-                    <div className="xl:col-start-2 xl:row-start-1">
-                        <AdminStatistics serie={serie_activite} />
-                    </div>
+                <div className="mt-5">
+                    <AdminDeliveryTable
+                        livraisons={livraisons}
+                        livreurs={livreurs}
+                        selection={selection}
+                        motifs={motifs}
+                        traitement={traitement}
+                        onSelectionChange={(id, valeur) => setSelection((etat) => ({ ...etat, [id]: valeur }))}
+                        onMotifChange={(id, valeur) => setMotifs((etat) => ({ ...etat, [id]: valeur }))}
+                        onReattribuer={reattribuer}
+                    />
                 </div>
             </AdminLayout>
 
