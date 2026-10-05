@@ -185,3 +185,12 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - IMPORTANT: Activate `inertia-react-development` when working with Inertia React client-side patterns.
 
 </laravel-boost-guidelines>
+
+## Conception mobile et design JSE Express
+
+- Rester sur la stack actuelle (Laravel + React + Inertia + Tailwind). Pas de React Native, Flutter ni Capacitor sans accord explicite.
+- Pour tout écran, parcours ou composant mobile (client, restaurant, livreur), activer le skill `mobile-app-design`.
+- Pour implémenter, relire ou déboguer l'expérience mobile, déléguer à l'agent `mobile-engineer` (`.claude/agents/mobile-engineer.md`).
+- Respecter l'identité validée : tokens `jse-*` (`#123C32`, `#45B977`, `#F28C28`, `#FFF7E8`, `#191919`), Against pour le display, Poppins pour l'interface. Pages de référence : `Bienvenue.jsx`, `APropos.jsx`, `Aide.jsx`, `Authentification.jsx`, `Inscription.jsx`, `Accueil.jsx`.
+- Mobile-first : vérifier à 360 et 390 px, zones tactiles ≥ 44 px, texte ≥ 12 px (16 px dans les champs), pas d'animation automatique sans `prefers-reduced-motion`.
+- Ne jamais inventer de données commerciales (statistiques, témoignages, partenaires) ni de fonctionnalités hors MVP.
