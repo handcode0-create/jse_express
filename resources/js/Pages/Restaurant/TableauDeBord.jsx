@@ -79,7 +79,7 @@ export default function TableauDeBord() {
 
                 {onglet === "commandes" && (
                     <section aria-labelledby="titre-commandes">
-                        <TitreRubrique surtitre="Gestion" titre="Commandes" description="Consultez et faites avancer les commandes de votre restaurant." />
+                        <TitreRubrique surtitre="Gestion" titre="Commandes" visuel="poulet" description="Consultez et faites avancer les commandes de votre restaurant." />
                         <div className="mt-6">
                             <CommandesRestaurant commandes={commandes} traitement={commandeEnCours} onAvancer={avancerCommande} />
                         </div>
@@ -101,7 +101,7 @@ export default function TableauDeBord() {
 
                 {onglet === "statistiques" && (
                     <section>
-                        <TitreRubrique surtitre="Performance" titre="Statistiques" description="Indicateurs calculés à partir de vos commandes et des paiements réussis." />
+                        <TitreRubrique surtitre="Performance" titre="Statistiques" visuel="motos" description="Indicateurs calculés à partir de vos commandes et des paiements réussis." />
                         <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
                             <AdminStatCard label="Commandes au total" value={statistiques.commandes_total || 0} icon={ShoppingBag} tone="principal" />
                             <AdminStatCard label="Commandes livrées" value={statistiques.commandes_livrees || 0} icon={Package} tone="secondaire" />
@@ -123,14 +123,14 @@ export default function TableauDeBord() {
 
                 {onglet === "horaires" && (
                     <section>
-                        <TitreRubrique surtitre="Restaurant" titre="Horaires" description="Modifiez les horaires affichés à vos clients." />
+                        <TitreRubrique surtitre="Restaurant" titre="Horaires" visuel="dessert" description="Modifiez les horaires affichés à vos clients." />
                         <FormulaireHoraires restaurant={restaurant} />
                     </section>
                 )}
 
                 {onglet === "profil" && (
                     <section>
-                        <TitreRubrique surtitre="Restaurant" titre="Profil du restaurant" description="Gérez les informations publiques de votre restaurant." />
+                        <TitreRubrique surtitre="Restaurant" titre="Profil du restaurant" visuel="attieke" description="Gérez les informations publiques de votre restaurant." />
 
                         <AdminCard className="mt-6 flex max-w-3xl items-center gap-4 p-4 sm:p-5">
                             <PhotoProfil user={utilisateur} size="size-16" dark />
@@ -169,7 +169,7 @@ export default function TableauDeBord() {
 
                 {onglet === "parametres" && (
                     <section>
-                        <TitreRubrique surtitre="Compte" titre="Mon compte" description="Modifiez les informations du responsable connecté." />
+                        <TitreRubrique surtitre="Compte" titre="Mon compte" visuel="motos-gauche" description="Modifiez les informations du responsable connecté." />
                         <FormulaireCompte utilisateur={utilisateur} />
                     </section>
                 )}

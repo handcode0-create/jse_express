@@ -44,7 +44,7 @@ export default function Tarification({ utilisateur, tarifs = [], restaurants = [
     };
 
     return (
-        <AdminDataPage utilisateur={utilisateur} title="Tarification" description="Tranches de livraison calculées par distance." afficherRecherche={false}>
+        <AdminDataPage utilisateur={utilisateur} title="Tarification" visuel="motos" description="Tranches de livraison calculées par distance." afficherRecherche={false}>
             <section className="mt-6 grid gap-5 lg:grid-cols-2">
                 <AdminCard as="form" onSubmit={ajouter} className="p-5 sm:p-6">
                     <h2 className="flex items-center gap-2 text-base font-semibold text-jse-theme-heading">

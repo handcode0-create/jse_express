@@ -39,6 +39,7 @@ export default function RestaurantMenu({ utilisateur, restaurant, categories = [
 
             <AdminLayout utilisateur={utilisateur}>
                 <AdminPageHeader
+                    visuel="poulet"
                     eyebrow="Menu du restaurant"
                     title={restaurant.nom}
                     description={[restaurant.adresse, restaurant.zone].filter(Boolean).join(" · ")}

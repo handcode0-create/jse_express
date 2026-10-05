@@ -16,7 +16,7 @@ export default function Clients({ utilisateur, clients = [], recherche = "" }) {
     return (
         <AdminDataPage
             utilisateur={utilisateur}
-            title="Clients"
+            title="Clients" visuel="attieke"
             description="Comptes clients, coordonnées et activité de commande."
             search={recherche}
             searchPlaceholder="Nom, téléphone ou email"

@@ -28,7 +28,7 @@ export default function Livraisons({ utilisateur, livraisons = [], recherche = "
     return (
         <AdminDataPage
             utilisateur={utilisateur}
-            title="Livraisons"
+            title="Livraisons" visuel="motos"
             description="Suivi opérationnel, attribution automatique et réattribution manuelle."
             search={recherche}
             searchPlaceholder="Commande, zone ou livreur"

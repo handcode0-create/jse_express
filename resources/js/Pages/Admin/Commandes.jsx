@@ -34,7 +34,7 @@ export default function Commandes({ utilisateur, commandes = { data: [] }, reche
         <>
             <AdminDataPage
                 utilisateur={utilisateur}
-                title="Commandes"
+                title="Commandes" visuel="poulet"
                 description="Supervision de toutes les commandes et de leur progression."
                 search={recherche}
                 searchPlaceholder="Référence, client ou restaurant"

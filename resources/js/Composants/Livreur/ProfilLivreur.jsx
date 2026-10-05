@@ -4,6 +4,7 @@ import { Bell, LogOut, MapPin, Phone, Receipt, UserRound } from "lucide-react";
 import AdminBadge from "../Admin/AdminBadge";
 import AdminButton from "../Admin/AdminButton";
 import AdminCard from "../Admin/AdminCard";
+import BandeauRubrique from "../Interface/BandeauRubrique";
 import { AdminField, champAdmin } from "../Admin/AdminField";
 import ThemeToggle from "../Interface/ThemeToggle";
 import PhotoProfil from "../Profil/PhotoProfil";
@@ -80,13 +81,7 @@ export default function ProfilLivreur({ livreur, zones = [], statistiques = {} }
 
     return (
         <section aria-labelledby="titre-profil" className="max-w-3xl">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-jse-theme-muted">
-                <span className="h-0.5 w-6 rounded-full bg-jse-secondaire" aria-hidden="true" />
-                Compte livreur
-            </p>
-            <h1 id="titre-profil" className="mt-2 text-2xl font-semibold tracking-tight text-jse-theme-heading sm:text-3xl">
-                Mon profil
-            </h1>
+            <BandeauRubrique surtitre="Compte livreur" titre="Mon profil" idTitre="titre-profil" visuel="motos" description="Vos informations, votre matricule et votre zone de desserte." />
 
             <AdminCard className="mt-6 flex items-center gap-4 p-4 sm:p-5">
                 <PhotoProfil user={livreur} size="size-20" dark />

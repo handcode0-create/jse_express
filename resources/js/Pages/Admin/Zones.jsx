@@ -18,7 +18,7 @@ export default function Zones({ utilisateur, zones = [], recherche = "" }) {
     return (
         <AdminDataPage
             utilisateur={utilisateur}
-            title="Zones & attribution"
+            title="Zones & attribution" visuel="motos"
             description="Zones opérationnelles et capacité de livraison par secteur."
             search={recherche}
             searchPlaceholder="Nom de zone"

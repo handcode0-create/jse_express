@@ -3,23 +3,12 @@ import { useForm } from "@inertiajs/react";
 import { MapPin } from "lucide-react";
 import AdminButton from "../Admin/AdminButton";
 import AdminCard from "../Admin/AdminCard";
+import BandeauRubrique from "../Interface/BandeauRubrique";
 import { AdminField, champAdmin } from "../Admin/AdminField";
 
-/** Titre de rubrique commun aux formulaires de l'espace restaurant. */
-export function TitreRubrique({ surtitre, titre, description, children }) {
-    return (
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="min-w-0">
-                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-jse-theme-muted">
-                    <span className="h-0.5 w-6 rounded-full bg-jse-secondaire" aria-hidden="true" />
-                    {surtitre}
-                </p>
-                <h1 className="mt-2 text-2xl font-semibold tracking-tight text-jse-theme-heading sm:text-3xl">{titre}</h1>
-                {description && <p className="mt-2 max-w-2xl text-sm leading-6 text-jse-theme-muted">{description}</p>}
-            </div>
-            {children}
-        </div>
-    );
+/** Bandeau de marque commun aux rubriques de l'espace restaurant. */
+export function TitreRubrique({ surtitre, titre, description, visuel = "motos", children }) {
+    return <BandeauRubrique surtitre={surtitre} titre={titre} description={description} visuel={visuel} actions={children} />;
 }
 
 function useChamps(valeursInitiales) {

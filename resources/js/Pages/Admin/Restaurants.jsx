@@ -63,7 +63,7 @@ export default function Restaurants({ utilisateur, restaurants = [], recherche =
     return (
         <AdminDataPage
             utilisateur={utilisateur}
-            title="Restaurants"
+            title="Restaurants" visuel="dessert"
             description="Restaurants actifs et inactifs, responsables, zones et activité."
             actionLabel="Nouveau restaurant"
             actionHref="/administration/utilisateurs?nouveau=restaurant"

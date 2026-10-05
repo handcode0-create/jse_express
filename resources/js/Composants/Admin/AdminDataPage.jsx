@@ -24,6 +24,7 @@ export default function AdminDataPage({
     search = "",
     searchPlaceholder = "Rechercher",
     afficherRecherche = true,
+    visuel = "motos",
     columns = [],
     rows = [],
     emptyMessage = "Aucun élément trouvé.",
@@ -60,6 +61,7 @@ export default function AdminDataPage({
             <Head title={`${title} — JSE Express`} />
             <AdminLayout utilisateur={utilisateur}>
                 <AdminPageHeader
+                    visuel={visuel}
                     title={title}
                     description={description}
                     actions={

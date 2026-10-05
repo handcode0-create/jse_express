@@ -5,7 +5,7 @@ export default function Notifications({ utilisateur, notifications = [], recherc
     return (
         <AdminDataPage
             utilisateur={utilisateur}
-            title="Notifications"
+            title="Notifications" visuel="motos-gauche"
             description="Historique des notifications système et de leurs statuts d'envoi."
             search={recherche}
             searchPlaceholder="Type, destinataire ou commande"

@@ -16,7 +16,7 @@ export default function Livreurs({ utilisateur, livreurs = [], recherche = "" })
     return (
         <AdminDataPage
             utilisateur={utilisateur}
-            title="Livreurs"
+            title="Livreurs" visuel="motos-gauche"
             description="Matricules, zones, disponibilité et activité des livreurs."
             actionLabel="Nouveau livreur"
             actionHref="/administration/utilisateurs?nouveau=livreur"

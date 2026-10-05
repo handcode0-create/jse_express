@@ -3,9 +3,22 @@ import { Edit3, ListChecks, Plus, Search, UtensilsCrossed } from "lucide-react";
 import AdminBadge from "../Admin/AdminBadge";
 import AdminButton from "../Admin/AdminButton";
 import AdminCard from "../Admin/AdminCard";
+import BandeauRubrique from "../Interface/BandeauRubrique";
 import { champAdmin } from "../Admin/AdminField";
 import { montant } from "../../lib/restaurant";
 
+/** Trois teintes de marque, attribuées par catégorie : un menu varié sans photo trompeuse. */
+const TEINTES = [
+    "from-jse-principal via-jse-principal to-[#1F6B52]",
+    "from-[#C9701A] via-jse-accent to-[#F5A94E]",
+    "from-[#2F8F58] via-jse-secondaire to-[#7ED9A3]",
+];
+
+function teintePour(nom = "") {
+    return TEINTES[[...nom].reduce((somme, caractere) => somme + caractere.charCodeAt(0), 0) % TEINTES.length];
+}
+
+/** Photo du produit, ou à défaut une vignette de marque : initiales en Against sur dégradé, puce de catégorie. */
 function ImageProduit({ produit }) {
     const [erreur, setErreur] = useState(false);
 
@@ -13,10 +26,19 @@ function ImageProduit({ produit }) {
         return <img src={produit.image} alt="" loading="lazy" onError={() => setErreur(true)} className="size-full object-cover" />;
     }
 
+    const lettres = produit.nom
+        .split(" ")
+        .filter((mot) => mot.length > 2 || produit.nom.split(" ").length === 1)
+        .slice(0, 2)
+        .map((mot) => mot[0])
+        .join("")
+        .toUpperCase();
+
     return (
-        <div className="flex size-full flex-col items-center justify-center gap-2 bg-jse-principal/10 text-jse-theme-heading">
-            <UtensilsCrossed size={28} aria-hidden="true" />
-            <span className="px-3 text-center text-xs font-medium opacity-70">{produit.categorie?.nom || "Sans catégorie"}</span>
+        <div className={["relative flex size-full items-center justify-center overflow-hidden bg-gradient-to-br", teintePour(produit.categorie?.nom)].join(" ")}>
+            <UtensilsCrossed size={150} strokeWidth={1.2} className="absolute -bottom-6 -right-6 rotate-12 text-white/15" aria-hidden="true" />
+            <span className="relative font-against text-6xl leading-none tracking-tight text-white drop-shadow-lg">{lettres || "·"}</span>
+            <span className="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] truncate rounded-full border border-white/25 bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">{produit.categorie?.nom || "Sans catégorie"}</span>
         </div>
     );
 }
@@ -60,31 +82,25 @@ export default function MenuRestaurant({ produits = [], categories = [], traitem
 
     return (
         <section aria-labelledby="titre-menu">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <div className="min-w-0">
-                    <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-jse-theme-muted">
-                        <span className="h-0.5 w-6 rounded-full bg-jse-secondaire" aria-hidden="true" />
-                        Catalogue
-                    </p>
-                    <h1 id="titre-menu" className="mt-2 text-2xl font-semibold tracking-tight text-jse-theme-heading sm:text-3xl">
-                        Menu et produits
-                    </h1>
-                    <p className="mt-2 text-sm text-jse-theme-muted">
-                        <span className="font-semibold tabular-nums text-jse-theme-text">{disponibles}</span> disponible{disponibles > 1 ? "s" : ""} sur{" "}
-                        <span className="font-semibold tabular-nums text-jse-theme-text">{produits.length}</span> produit{produits.length > 1 ? "s" : ""}
-                    </p>
-                </div>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                    <AdminButton variante="contour" onClick={onAjouterCategorie}>
-                        <Plus size={16} aria-hidden="true" />
-                        Nouvelle catégorie
-                    </AdminButton>
-                    <AdminButton onClick={onAjouterProduit}>
-                        <Plus size={16} aria-hidden="true" />
-                        Ajouter un produit
-                    </AdminButton>
-                </div>
-            </div>
+            <BandeauRubrique
+                surtitre="Catalogue"
+                titre="Menu et produits"
+                idTitre="titre-menu"
+                visuel="poulet"
+                description={`${disponibles} disponible${disponibles > 1 ? "s" : ""} sur ${produits.length} produit${produits.length > 1 ? "s" : ""}`}
+                actions={
+                    <>
+                        <AdminButton variante="contour" onClick={onAjouterCategorie}>
+                            <Plus size={16} aria-hidden="true" />
+                            Nouvelle catégorie
+                        </AdminButton>
+                        <AdminButton onClick={onAjouterProduit}>
+                            <Plus size={16} aria-hidden="true" />
+                            Ajouter un produit
+                        </AdminButton>
+                    </>
+                }
+            />
 
             <AdminCard className="mt-6 p-3 sm:p-4">
                 <label className="relative block">

@@ -130,6 +130,7 @@ export default function Utilisateurs({ utilisateurs, filtres = {}, roles: rolesD
 
             <AdminLayout utilisateur={utilisateur}>
                 <AdminPageHeader
+                    visuel="attieke"
                     title="Utilisateurs & rôles"
                     description="Gérez les comptes, les rôles et les accès de JSE Express."
                     actions={

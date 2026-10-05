@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Head, router, usePage } from "@inertiajs/react";
 import { Bell } from "lucide-react";
 import AdminCard from "../../Composants/Admin/AdminCard";
+import BandeauRubrique from "../../Composants/Interface/BandeauRubrique";
 import AccueilLivreur from "../../Composants/Livreur/AccueilLivreur";
 import CarteLivreur, { usePositionLivreur } from "../../Composants/Livreur/CarteLivreur";
 import { DetailMission, LivraisonMission, NavigationMission, RetraitMission, SuccesMission } from "../../Composants/Livreur/EcransMission";
@@ -12,17 +13,8 @@ import ProfilLivreur from "../../Composants/Livreur/ProfilLivreur";
 const cleFlux = (attributionId) => `jse-livreur-flux-${attributionId}`;
 const ETAPES_REPRISE = ["navigation", "pickup", "delivery"];
 
-function TitreRubrique({ surtitre, titre, children }) {
-    return (
-        <div className="flex flex-col gap-1">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-jse-theme-muted">
-                <span className="h-0.5 w-6 rounded-full bg-jse-secondaire" aria-hidden="true" />
-                {surtitre}
-            </p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-jse-theme-heading sm:text-3xl">{titre}</h1>
-            {children}
-        </div>
-    );
+function TitreRubrique({ surtitre, titre, description, visuel = "motos" }) {
+    return <BandeauRubrique surtitre={surtitre} titre={titre} description={description} visuel={visuel} />;
 }
 
 function ListeNotifications({ notifications }) {
@@ -63,12 +55,7 @@ function OngletCarte() {
 
     return (
         <section aria-labelledby="titre-carte">
-            <TitreRubrique surtitre="Géolocalisation" titre="Ma carte">
-                <p id="titre-carte" className="sr-only">
-                    Carte de votre position
-                </p>
-                <p className="mt-1 text-sm text-jse-theme-muted">Votre position n’est visible que sur votre appareil : elle n’est pas transmise au client.</p>
-            </TitreRubrique>
+            <TitreRubrique surtitre="Géolocalisation" titre="Ma carte" visuel="motos-gauche" description="Votre position n’est visible que sur votre appareil : elle n’est pas transmise au client." />
             <div className="mt-5 h-[60vh] min-h-[360px]">
                 <CarteLivreur position={position} precision={precision} erreur={erreur} />
             </div>
@@ -207,7 +194,7 @@ export default function TableauDeBord() {
 
                 {onglet === "missions" && (
                     <>
-                        <TitreRubrique surtitre="Suivi" titre="Mes missions" />
+                        <TitreRubrique surtitre="Suivi" titre="Mes missions" visuel="motos" description="Missions en cours et dernières livraisons terminées." />
                         <section className="mt-6" aria-labelledby="titre-missions-actives">
                             <h2 id="titre-missions-actives" className="mb-4 text-lg font-semibold text-jse-theme-heading">
                                 En cours
@@ -227,7 +214,7 @@ export default function TableauDeBord() {
 
                 {onglet === "notifications" && (
                     <>
-                        <TitreRubrique surtitre="Centre d’alertes" titre="Notifications" />
+                        <TitreRubrique surtitre="Centre d’alertes" titre="Notifications" visuel="motos-gauche" description="Les informations importantes concernant vos missions." />
                         <div className="mt-6">
                             <ListeNotifications notifications={notifications} />
                         </div>
