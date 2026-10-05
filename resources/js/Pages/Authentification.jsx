@@ -270,7 +270,7 @@ export default function Authentification() {
                                     Compte créé
                                 </p>
 
-                                <p className="mt-1 text-xs leading-5 text-jse-texte/55">
+                                <p className="mt-1 text-xs leading-5 text-white/65">
                                     {flash.success}
                                 </p>
                             </div>
@@ -341,13 +341,13 @@ export default function Authentification() {
                                 Bienvenue
                             </p>
 
-                            <h2 className="font-against text-3xl leading-tight tracking-tight text-jse-texte">
+                            <h2 className="font-against text-3xl leading-tight tracking-tight text-white">
                                 {mode === "connexion"
                                     ? "Connexion"
                                     : "Créer un compte"}
                             </h2>
 
-                            <p className="mt-3 text-sm leading-6 text-jse-texte/55">
+                            <p className="mt-3 text-sm leading-6 text-white/65">
                                 {mode === "connexion"
                                     ? "Connectez-vous pour accéder à votre espace JSE Express."
                                     : "Créez votre compte pour commencer à commander."}
@@ -454,7 +454,7 @@ export default function Authentification() {
                                                     }
                                                     placeholder="Votre nom"
                                                     required
-                                                    className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
+                                                    className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm text-jse-texte outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
                                                 />
                                             </div>
                                         </div>
@@ -491,7 +491,7 @@ export default function Authentification() {
                                                     }
                                                     placeholder="Votre prénom"
                                                     required
-                                                    className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
+                                                    className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm text-jse-texte outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
                                                 />
                                             </div>
                                         </div>
@@ -528,7 +528,7 @@ export default function Authentification() {
                                                     )
                                                 }
                                                 placeholder="exemple@email.com"
-                                                className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
+                                                className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm text-jse-texte outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
                                             />
                                         </div>
                                     </div>
@@ -569,7 +569,7 @@ export default function Authentification() {
                                         }
                                         placeholder="+225 07 00 00 00 00"
                                         required
-                                        className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
+                                        className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm text-jse-texte outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
                                     />
                                 </div>
                             </div>
@@ -616,7 +616,7 @@ export default function Authentification() {
                                         }
                                         placeholder="Votre mot de passe"
                                         required
-                                        className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-12 text-sm outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
+                                        className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-12 text-sm text-jse-texte outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
                                     />
 
                                     <button
@@ -683,7 +683,7 @@ export default function Authentification() {
                                             }
                                             placeholder="Confirmez votre mot de passe"
                                             required
-                                            className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-12 text-sm outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
+                                            className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-12 text-sm text-jse-texte outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
                                         />
 
                                         <button
@@ -733,7 +733,7 @@ export default function Authentification() {
 
                                 <label
                                     htmlFor={`consentement-${mode}`}
-                                    className="text-xs leading-5 text-jse-texte/55"
+                                    className="text-xs leading-5 text-white/65"
                                 >
                                     J’accepte la{" "}
 
@@ -744,7 +744,7 @@ export default function Authentification() {
                                                 "/politique-de-confidentialite",
                                             )
                                         }
-                                        className="font-semibold text-jse-principal underline underline-offset-2"
+                                        className="font-semibold text-jse-secondaire underline underline-offset-2 transition hover:text-jse-fond focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jse-secondaire"
                                     >
                                         Politique de confidentialité
                                     </button>
