@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Services\CommandeService;
 use App\Services\LivraisonService;
 use App\Services\NotificationService;
+use App\Services\TelephoneService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -309,14 +310,13 @@ class RestaurantController extends Controller
         $donnees = $request->validate([
             'prenom' => ['required', 'string', 'max:100'],
             'nom' => ['required', 'string', 'max:100'],
-            'telephone' => ['required', 'string', 'max:30', Rule::unique('users', 'telephone')->ignore($utilisateur->id)],
+            'telephone' => ['required', 'string', 'max:30', app(TelephoneService::class)->regleUnique($utilisateur->id)],
             'email' => ['nullable', 'email', 'max:150', Rule::unique('users', 'email')->ignore($utilisateur->id)],
         ], [
-            'telephone.unique' => 'Ce numéro de téléphone est déjà utilisé par un autre compte.',
             'email.unique' => 'Cette adresse e-mail est déjà utilisée par un autre compte.',
         ]);
 
-        $utilisateur->update($donnees);
+        $utilisateur->update([...$donnees, 'telephone' => app(TelephoneService::class)->normaliser($donnees['telephone'])]);
 
         return back()->with('success', 'Votre profil a été mis à jour.');
     }

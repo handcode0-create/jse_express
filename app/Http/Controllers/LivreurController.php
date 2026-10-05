@@ -10,6 +10,7 @@ use App\Models\StatutCommande;
 use App\Models\Zone;
 use App\Services\LivraisonService;
 use App\Services\NotificationService;
+use App\Services\TelephoneService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -286,12 +287,11 @@ class LivreurController extends Controller
         $donnees = $request->validate([
             'nom' => ['required', 'string', 'max:100'],
             'prenom' => ['nullable', 'string', 'max:100'],
-            'telephone' => ['required', 'string', 'max:30', Rule::unique('users', 'telephone')->ignore($request->user()->id)],
+            'telephone' => ['required', 'string', 'max:30', app(TelephoneService::class)->regleUnique($request->user()->id)],
             'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($request->user()->id)],
             'telephone_secondaire' => ['nullable', 'string', 'max:30'],
             'zone_id' => ['required', 'integer', 'exists:zones,id'],
         ], [
-            'telephone.unique' => 'Ce numéro de téléphone est déjà utilisé par un autre compte.',
             'email.unique' => 'Cette adresse e-mail est déjà utilisée par un autre compte.',
         ]);
 
@@ -311,7 +311,7 @@ class LivreurController extends Controller
             $request->user()->update([
                 'nom' => $donnees['nom'],
                 'prenom' => $donnees['prenom'] ?? null,
-                'telephone' => $donnees['telephone'],
+                'telephone' => app(TelephoneService::class)->normaliser($donnees['telephone']),
                 'email' => $donnees['email'] ?? null,
             ]);
 

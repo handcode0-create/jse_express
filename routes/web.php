@@ -4,8 +4,10 @@ use App\Http\Controllers\AdministrationController;
 use App\Http\Controllers\AdministrationMenuController;
 use App\Http\Controllers\AuthentificationController;
 use App\Http\Controllers\CommandeController;
+use App\Http\Controllers\CompteAdministrateurController;
 use App\Http\Controllers\CouvertureProfilController;
 use App\Http\Controllers\LivreurController;
+use App\Http\Controllers\MotDePasseController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PhotoProfilController;
 use App\Http\Controllers\RestaurantController;
@@ -28,6 +30,7 @@ use App\Services\DistanceService;
 use App\Services\NotificationService;
 use App\Services\PanierService;
 use App\Services\TarificationLivraisonService;
+use App\Services\TelephoneService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -78,9 +81,17 @@ Route::post('/profil/photo', [PhotoProfilController::class, 'modifier'])
     ->middleware('auth')
     ->name('profil.photo.modifier');
 
+Route::delete('/profil/photo', [PhotoProfilController::class, 'supprimer'])
+    ->middleware('auth')
+    ->name('profil.photo.supprimer');
+
 Route::post('/profil/couverture', [CouvertureProfilController::class, 'modifier'])
     ->middleware('auth')
     ->name('profil.couverture.modifier');
+
+Route::patch('/compte/mot-de-passe', [MotDePasseController::class, 'modifier'])
+    ->middleware(['auth', 'throttle:mot-de-passe'])
+    ->name('compte.mot-de-passe');
 
 Route::prefix('livreur')
     ->middleware(['auth', 'role:livreur'])
@@ -155,6 +166,12 @@ Route::prefix('administration')
     ->group(function () {
         Route::get('/tableau-de-bord', [AdministrationController::class, 'tableauDeBord'])
             ->name('admin.tableau-de-bord');
+
+        Route::get('/compte', [CompteAdministrateurController::class, 'afficher'])
+            ->name('admin.compte');
+
+        Route::patch('/compte', [CompteAdministrateurController::class, 'modifier'])
+            ->name('admin.compte.modifier');
 
         Route::get('/commandes', [AdministrationController::class, 'commandes'])
             ->name('admin.commandes');
@@ -381,15 +398,16 @@ Route::patch('/profil', function (Request $request) {
     $donnees = $request->validate([
         'nom' => ['required', 'string', 'max:100'],
         'prenom' => ['nullable', 'string', 'max:100'],
-        'telephone' => ['required', 'string', 'max:30', Rule::unique('users', 'telephone')->ignore(Auth::id())],
+        'telephone' => ['required', 'string', 'max:30', app(TelephoneService::class)->regleUnique(Auth::id(), 'Ce numéro est déjà utilisé.')],
         'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore(Auth::id())],
     ], [
         'nom.required' => 'Ce champ est obligatoire.',
         'telephone.required' => 'Ce champ est obligatoire.',
-        'telephone.unique' => 'Ce numéro est déjà utilisé.',
         'email.email' => 'Veuillez saisir une adresse e-mail valide.',
         'email.unique' => 'Cette adresse e-mail est déjà utilisée.',
     ]);
+
+    $donnees['telephone'] = app(TelephoneService::class)->normaliser($donnees['telephone']);
 
     Auth::user()->update($donnees);
 

@@ -16,6 +16,7 @@ use App\Services\DistanceService;
 use App\Services\LivraisonService;
 use App\Services\NotificationService;
 use App\Services\TarificationLivraisonService;
+use App\Services\TelephoneService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -673,12 +674,12 @@ class AdministrationController extends Controller
 
     private function validerUtilisateurAdmin(Request $request, ?User $user = null): array
     {
-        $telephone = preg_replace('/[^0-9]/', '', (string) $request->input('telephone')) ?? '';
+        $telephones = app(TelephoneService::class);
 
         $donnees = $request->validate([
             'nom' => ['required', 'string', 'max:100'],
             'prenom' => ['nullable', 'string', 'max:100'],
-            'telephone' => ['required', 'string', 'max:30', Rule::unique('users', 'telephone')->ignore($user?->id)],
+            'telephone' => ['required', 'string', 'max:30', $telephones->regleUnique($user?->id)],
             'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user?->id)],
             'role' => ['required', 'in:client,restaurant,livreur,administrateur'],
             'statut' => ['required', 'in:actif,inactif'],
@@ -694,6 +695,8 @@ class AdministrationController extends Controller
             'livreur_disponibilite' => ['nullable', 'in:disponible,indisponible'],
             'livreur_telephone_secondaire' => ['nullable', 'string', 'max:30'],
         ]);
+
+        $donnees['telephone'] = $telephones->normaliser($donnees['telephone']);
 
         if ($donnees['role'] === 'restaurant' && ! $user?->restaurant) {
             if (blank($donnees['restaurant_nom']) || blank($donnees['restaurant_telephone']) || blank($donnees['restaurant_adresse'])) {

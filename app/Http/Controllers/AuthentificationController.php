@@ -6,6 +6,7 @@ use App\Models\ProfilLivreur;
 use App\Models\Restaurant;
 use App\Models\User;
 use App\Models\Zone;
+use App\Services\TelephoneService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,6 +20,8 @@ use Inertia\Response;
 
 class AuthentificationController extends Controller
 {
+    public function __construct(private readonly TelephoneService $telephones) {}
+
     public function show(Request $request): Response|RedirectResponse
     {
         if (Auth::check()) {
@@ -90,13 +93,13 @@ class AuthentificationController extends Controller
         }
 
         $telephoneBrut = (string) $request->input('telephone');
-        $request->merge(['telephone' => $this->normaliserTelephone($telephoneBrut)]);
+        $request->merge(['telephone' => $this->telephones->normaliser($telephoneBrut)]);
 
         $donnees = $request->validate([
             'role' => ['required', 'in:client,restaurant,livreur'],
             'nom' => ['required', 'string', 'max:100'],
             'prenom' => ['required', 'string', 'max:100'],
-            'telephone' => ['required', 'string', 'max:30', 'unique:users,telephone'],
+            'telephone' => ['required', 'string', 'max:30', $this->telephones->regleUnique(null, 'Ce numéro de téléphone est déjà utilisé.')],
             'email' => ['nullable', 'email', 'max:255', 'unique:users,email'],
             'mot_de_passe' => ['required', 'string', 'min:8'],
             'confirmation_mot_de_passe' => ['required', 'same:mot_de_passe'],
@@ -179,7 +182,7 @@ class AuthentificationController extends Controller
             return $this->redirectionApresConnexion();
         }
 
-        $telephone = $this->normaliserTelephone((string) $request->input('telephone'));
+        $telephone = $this->telephones->normaliser((string) $request->input('telephone'));
         $connexionKey = 'auth:connexion:'.$telephone;
         if (RateLimiter::tooManyAttempts($connexionKey, 5)) {
             abort(429, 'Trop de tentatives de connexion. Veuillez réessayer dans une minute.');
@@ -199,7 +202,7 @@ class AuthentificationController extends Controller
         $utilisateur = User::query()
             ->whereIn('role', ['client', 'restaurant', 'livreur', 'administrateur'])
             ->get()
-            ->first(fn (User $user) => $this->normaliserTelephone((string) $user->telephone) === $telephone);
+            ->first(fn (User $user) => $this->telephones->normaliser((string) $user->telephone) === $telephone);
 
         if (! $utilisateur || ! Hash::check($donnees['mot_de_passe'], $utilisateur->password)) {
             throw ValidationException::withMessages([
@@ -219,21 +222,6 @@ class AuthentificationController extends Controller
         $request->session()->regenerate();
 
         return redirect()->to($this->routeApresConnexion($utilisateur));
-    }
-
-    private function normaliserTelephone(string $telephone): string
-    {
-        $telephone = preg_replace('/[^0-9]/', '', $telephone) ?? '';
-
-        if (str_starts_with($telephone, '00225')) {
-            $telephone = substr($telephone, 2);
-        }
-
-        if (str_starts_with($telephone, '0') && strlen($telephone) === 10) {
-            $telephone = '225'.$telephone;
-        }
-
-        return $telephone;
     }
 
     private function routeApresConnexion(User $utilisateur): string

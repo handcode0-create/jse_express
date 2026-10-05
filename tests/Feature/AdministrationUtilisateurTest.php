@@ -31,7 +31,8 @@ class AdministrationUtilisateurTest extends TestCase
         $response->assertRedirect();
         $response->assertSessionHas('success', 'Utilisateur créé avec succès.');
 
-        $utilisateur = User::query()->where('telephone', '0700000001')->firstOrFail();
+        // Le numéro est enregistré sous sa forme canonique (préfixe pays 225).
+        $utilisateur = User::query()->where('telephone', '2250700000001')->firstOrFail();
 
         $this->assertSame('client', $utilisateur->role);
         $this->assertTrue(Hash::check('motdepasse123', $utilisateur->password));
