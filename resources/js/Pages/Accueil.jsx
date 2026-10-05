@@ -1,9 +1,8 @@
-import { router, usePage } from "@inertiajs/react";
+import { Link, router, usePage } from "@inertiajs/react";
 import NavigationFlottante from "../Composants/Navigation/NavigationFlottante";
 import {
     Bell,
     ChevronDown,
-    ChevronLeft,
     ChevronRight,
     Heart,
     Home,
@@ -122,13 +121,13 @@ export default function Accueil() {
     const categoriesRef = useRef(null);
     const bannerRef = useRef(null);
     const restaurantsRef = useRef(null);
-    const listeRestaurantsRef = useRef(null);
-    const glissementRestaurantsRef = useRef({ actif: false, debutX: 0, scrollInitial: 0, aBouge: false });
-    const clicApresGlissementRef = useRef(false);
-    const [glissementRestaurants, setGlissementRestaurants] = useState(false);
+    const mouvementReduit = useMemo(
+        () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+        [],
+    );
 
     useLayoutEffect(() => {
-        if (!pageRef.current) return;
+        if (!pageRef.current || mouvementReduit) return;
         const context = gsap.context(() => {
             const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
             intro
@@ -308,37 +307,14 @@ export default function Accueil() {
     }, [restaurantsDisponibles, recherche, zoneSelectionnee, categorieSelectionnee]);
 
     useEffect(() => {
+        if (mouvementReduit) return;
+
         const intervalle = window.setInterval(() => {
             setIndexBannière((index) => (index + 1) % bannières.length);
-        }, 5000);
+        }, 6000);
 
         return () => window.clearInterval(intervalle);
-    }, []);
-
-    useEffect(() => {
-        if (restaurantsDisponibles.length < 2) return;
-
-        const intervalle = window.setInterval(() => {
-            if (!listeRestaurantsRef.current) return;
-
-            const estFin =
-                listeRestaurantsRef.current.scrollLeft +
-                    listeRestaurantsRef.current.clientWidth >=
-                listeRestaurantsRef.current.scrollWidth - 12;
-
-            if (estFin) {
-                listeRestaurantsRef.current.scrollTo({
-                    left: 0,
-                    behavior: "smooth",
-                });
-                return;
-            }
-
-            defilerRestaurants(1);
-        }, 3000);
-
-        return () => window.clearInterval(intervalle);
-    }, [restaurantsDisponibles.length]);
+    }, [mouvementReduit]);
 
     useEffect(() => {
         setRechercheLocale(recherche);
@@ -376,63 +352,11 @@ export default function Accueil() {
         );
     };
 
-    const defilerRestaurants = (direction) => {
-        if (!listeRestaurantsRef.current) return;
-
-        const distance = Math.max(listeRestaurantsRef.current.clientWidth * 0.78, 280);
-
-        listeRestaurantsRef.current.scrollBy({
-            left: direction * distance,
-            behavior: "smooth",
+    const allerAuxRestaurants = () => {
+        document.getElementById("restaurants-populaires")?.scrollIntoView({
+            behavior: mouvementReduit ? "auto" : "smooth",
+            block: "start",
         });
-    };
-
-    const commencerGlissementRestaurants = (event) => {
-        if (!listeRestaurantsRef.current || event.pointerType === "mouse") return;
-
-        glissementRestaurantsRef.current = {
-            actif: true,
-            debutX: event.clientX,
-            scrollInitial: listeRestaurantsRef.current.scrollLeft,
-            aBouge: false,
-        };
-        clicApresGlissementRef.current = false;
-
-        setGlissementRestaurants(true);
-        listeRestaurantsRef.current.setPointerCapture?.(event.pointerId);
-    };
-
-    const deplacerGlissementRestaurants = (event) => {
-        const glissement = glissementRestaurantsRef.current;
-
-        if (!glissement.actif || !listeRestaurantsRef.current) return;
-
-        const differenceX = event.clientX - glissement.debutX;
-        if (Math.abs(differenceX) > 8) {
-            glissement.aBouge = true;
-            clicApresGlissementRef.current = true;
-        }
-
-        listeRestaurantsRef.current.scrollLeft =
-            glissement.scrollInitial - differenceX;
-    };
-
-    const terminerGlissementRestaurants = (event) => {
-        const aBouge = glissementRestaurantsRef.current.aBouge;
-        glissementRestaurantsRef.current.actif = false;
-        setGlissementRestaurants(false);
-
-        if (aBouge) {
-            window.setTimeout(() => {
-                clicApresGlissementRef.current = false;
-            }, 0);
-        }
-
-        if (
-            listeRestaurantsRef.current?.hasPointerCapture?.(event.pointerId)
-        ) {
-            listeRestaurantsRef.current.releasePointerCapture(event.pointerId);
-        }
     };
 
     const rechercher = (event) => {
@@ -464,7 +388,7 @@ export default function Accueil() {
     const bannière = bannières[indexBannière];
 
     useEffect(() => {
-        if (!bannerRef.current) return;
+        if (!bannerRef.current || mouvementReduit) return;
         gsap.fromTo(bannerRef.current.querySelector(".jse-banner-image"), { opacity: 0, scale: 1.055 }, { opacity: 1, scale: 1, duration: 0.75, ease: "power2.out" });
         gsap.fromTo(bannerRef.current.querySelectorAll(".jse-banner-copy > *"), { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.48, stagger: 0.06, ease: "power3.out" });
     }, [indexBannière]);
@@ -521,7 +445,7 @@ export default function Accueil() {
                                     type="button"
                                     onClick={activerLocalisation}
                                     disabled={localisationEnCours}
-                                    className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white/75 px-4 py-2.5 shadow-sm ring-1 ring-jse-texte/5 transition hover:bg-white disabled:cursor-wait disabled:opacity-70 lg:static lg:translate-x-0 lg:bg-transparent lg:px-3 lg:py-2 lg:shadow-none"
+                                    className="flex h-11 min-w-0 items-center gap-2 rounded-full bg-white/75 px-4 shadow-sm ring-1 ring-jse-texte/5 transition hover:bg-white disabled:cursor-wait disabled:opacity-70 lg:bg-transparent lg:px-3 lg:shadow-none"
                                     aria-label="Utiliser ma position pour les restaurants à proximité"
                                 >
                                     <MapPin size={19} strokeWidth={2.2} className={positionUtilisateur ? "text-jse-secondaire" : "text-jse-principal"} />
@@ -540,7 +464,7 @@ export default function Accueil() {
                                             </span>
                                         )}
                                     </button>
-                                    <button type="button" onClick={() => router.visit("/panier")} className="relative hidden size-11 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm ring-1 ring-jse-texte/5 sm:flex" aria-label="Panier">
+                                    <button type="button" onClick={() => router.visit("/panier")} className="relative flex size-11 items-center justify-center rounded-full bg-white text-jse-principal shadow-sm ring-1 ring-jse-texte/5" aria-label="Panier">
                                         <ShoppingBag size={19} strokeWidth={1.8} />
                                         {nombreArticles > 0 && <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-jse-accent font-sans text-[9px] font-bold text-white">{nombreArticles > 9 ? "9+" : nombreArticles}</span>}
                                     </button>
@@ -562,7 +486,7 @@ export default function Accueil() {
                                         value={rechercheLocale}
                                         onChange={(event) => setRechercheLocale(event.target.value)}
                                         placeholder="Rechercher un restaurant, un plat..."
-                                        className="min-w-0 flex-1 bg-transparent font-sans text-sm outline-none placeholder:text-jse-texte/45 sm:text-base"
+                                        className="min-w-0 flex-1 bg-transparent font-sans text-base outline-none placeholder:text-jse-texte/55"
                                         aria-label="Rechercher un restaurant ou un plat"
                                     />
                                     <button
@@ -588,7 +512,7 @@ export default function Accueil() {
                                 <h2 className="font-against text-[1.65rem] leading-none text-jse-principal sm:text-2xl">Catégories</h2>
                             </div>
 
-                            <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
+                            <div className="scrollbar-none -mx-4 flex gap-2.5 overflow-x-auto px-4 pb-3 pt-1 sm:-mx-7 sm:gap-3 sm:px-7 lg:mx-0 lg:px-0">
                                 {categoriesDisponibles.length > 0 ? (
                                     categoriesDisponibles.map((nomCategorie, index) => (
                                         <button
@@ -598,10 +522,10 @@ export default function Accueil() {
                                                 setCategorieSelectionnee((actuelle) =>
                                                     actuelle === nomCategorie ? "" : nomCategorie,
                                                 );
-                                                window.setTimeout(() => document.getElementById("restaurants-populaires")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+                                                window.setTimeout(allerAuxRestaurants, 50);
                                             }}
                                             className={[
-                                                "jse-category-card group min-w-0 rounded-[22px] bg-white p-2 text-center shadow-[0_10px_30px_rgba(18,60,50,0.06)] ring-1 ring-jse-texte/5 transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(18,60,50,0.10)] sm:p-3 lg:p-3.5",
+                                                "jse-category-card group w-[88px] shrink-0 rounded-[22px] bg-white p-2 text-center shadow-[0_10px_30px_rgba(18,60,50,0.06)] ring-1 ring-jse-texte/5 transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(18,60,50,0.10)] sm:w-[104px] sm:p-3 lg:w-[120px] lg:p-3.5",
                                                 categorieSelectionnee === nomCategorie ? "ring-2 ring-jse-secondaire" : "hover:-translate-y-0.5 hover:shadow-md",
                                             ].join(" ")}
                                         >
@@ -609,16 +533,17 @@ export default function Accueil() {
                                                 <img
                                                     src={obtenirImageCategorie(index)}
                                                     alt={nomCategorie}
+                                                    loading="lazy"
                                                     className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                                                 />
                                             </div>
-                                            <p className="mt-2 truncate font-sans text-[10px] font-semibold text-jse-texte sm:text-xs">
+                                            <p className="mt-2 truncate font-sans text-xs font-semibold text-jse-texte">
                                                 {nomCategorie}
                                             </p>
                                         </button>
                                     ))
                                 ) : (
-                                    <div className="col-span-4 rounded-[22px] bg-white p-5 text-center ring-1 ring-jse-texte/5">
+                                    <div className="w-full rounded-[22px] bg-white p-5 text-center ring-1 ring-jse-texte/5">
                                         <p className="font-sans text-xs text-jse-texte/55">
                                             Aucune catégorie disponible pour les restaurants actuellement proposés.
                                         </p>
@@ -628,8 +553,8 @@ export default function Accueil() {
                         </section>
 
                         {/* Bannière */}
-                        <section ref={bannerRef} className="pt-7 sm:pt-8 lg:pt-9">
-                            <div className="jse-dark-surface relative min-h-[210px] overflow-hidden rounded-[26px] bg-jse-principal shadow-lg shadow-jse-principal/10 sm:min-h-[240px] lg:min-h-[285px]">
+                        <section ref={bannerRef} className="pt-7 sm:pt-8 lg:pt-9" aria-label="À la une">
+                            <div className="jse-dark-surface relative min-h-[220px] overflow-hidden rounded-[28px] bg-jse-principal shadow-lg shadow-jse-principal/10 sm:min-h-[250px] lg:min-h-[285px]">
                                 <img
                                     src={bannière.image}
                                     alt=""
@@ -639,139 +564,152 @@ export default function Accueil() {
                                         event.currentTarget.src = IMAGE_BANNIERE_SECOURS;
                                     }}
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-r from-jse-principal via-jse-principal/75 to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-r from-jse-principal via-jse-principal/80 to-jse-principal/10" />
 
-                                <div className="jse-banner-copy relative z-10 flex min-h-[210px] max-w-[540px] flex-col justify-center px-5 py-6 sm:min-h-[240px] sm:px-8 lg:min-h-[285px] lg:px-10">
-                                    <span className="font-sans text-[9px] font-bold uppercase tracking-[0.18em] text-jse-secondaire sm:text-[10px]">{bannière.label}</span>
-                                    <h2 className="mt-2 max-w-[420px] font-against text-[1.8rem] leading-[1.02] text-white sm:text-[2.25rem] lg:text-[2.7rem]">{bannière.titre}</h2>
-                                    <p className="mt-2 max-w-[340px] font-sans text-[11px] leading-5 text-white/75 sm:text-xs">{bannière.description}</p>
-                                    <button type="button" disabled className="mt-4 flex w-fit items-center gap-2 rounded-full bg-jse-accent px-4 py-2.5 font-sans text-[11px] font-semibold text-white shadow-md sm:px-5 sm:py-3">
-                                        Commander maintenant
-                                        <ChevronRight size={15} />
+                                <div className="jse-banner-copy relative z-10 flex min-h-[220px] max-w-[560px] flex-col justify-center px-5 pb-12 pt-6 sm:min-h-[250px] sm:px-8 lg:min-h-[285px] lg:px-10">
+                                    <span className="font-sans text-xs font-bold uppercase tracking-[0.16em] text-jse-secondaire">{bannière.label}</span>
+                                    <h2 className="mt-2 max-w-[440px] font-against text-[1.9rem] leading-[1.02] text-white sm:text-[2.25rem] lg:text-[2.7rem]">{bannière.titre}</h2>
+                                    <p className="mt-2 max-w-[360px] font-sans text-sm leading-6 text-white/80">{bannière.description}</p>
+                                    <button
+                                        type="button"
+                                        onClick={allerAuxRestaurants}
+                                        className="mt-5 flex h-12 w-fit items-center gap-2 rounded-full bg-jse-accent px-6 font-sans text-sm font-semibold text-white shadow-md transition hover:brightness-105 active:scale-[0.98]"
+                                    >
+                                        Voir les restaurants
+                                        <ChevronRight size={16} />
                                     </button>
                                 </div>
 
+                                <div className="absolute bottom-3 left-5 z-10 flex items-center gap-1 sm:left-8 lg:left-10" role="group" aria-label="Choisir une bannière">
+                                    {bannières.map((item, index) => (
+                                        <button
+                                            key={item.label}
+                                            type="button"
+                                            onClick={() => setIndexBannière(index)}
+                                            aria-label={`Bannière ${index + 1} sur ${bannières.length}`}
+                                            aria-current={index === indexBannière}
+                                            className="flex size-6 items-center justify-center"
+                                        >
+                                            <span className={["h-1.5 rounded-full transition-all", index === indexBannière ? "w-6 bg-jse-secondaire" : "w-1.5 bg-white/50"].join(" ")} />
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </section>
 
                         {/* Restaurants */}
-                        <section ref={restaurantsRef} className="pt-8 sm:pt-9 lg:pt-10">
+                        <section ref={restaurantsRef} id="restaurants-populaires" className="scroll-mt-6 pt-8 sm:pt-9 lg:pt-10" aria-labelledby="titre-restaurants">
                             <div className="mb-4 flex items-end justify-between gap-4">
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <p className="font-sans text-[10px] font-medium uppercase tracking-[0.12em] text-jse-texte/35">
+                                        <p className="font-sans text-xs font-medium uppercase tracking-[0.12em] text-jse-texte/55">
                                             {positionUtilisateur ? "Triés par proximité" : "À proximité"}
                                         </p>
                                         {positionUtilisateur && (
-                                            <span className="rounded-full bg-jse-secondaire/10 px-2 py-1 font-sans text-[9px] font-semibold text-jse-secondaire">
+                                            <span className="rounded-full bg-jse-secondaire/10 px-2 py-1 font-sans text-xs font-semibold text-jse-principal">
                                                 Position active
                                             </span>
                                         )}
                                     </div>
-                                    <h2 className="mt-1 font-against text-[1.65rem] leading-none text-jse-principal sm:text-2xl">Restaurants populaires</h2>
+                                    <h2 id="titre-restaurants" className="mt-1 font-against text-[1.65rem] leading-none text-jse-principal sm:text-2xl">Restaurants populaires</h2>
                                 </div>
-                                <div className="flex items-center gap-1.5">
-                                    <button
-                                        type="button"
-                                        onClick={() => defilerRestaurants(-1)}
-                                        className="flex size-9 items-center justify-center rounded-full bg-white/80 text-jse-principal shadow-sm ring-1 ring-jse-texte/5 transition hover:bg-white active:scale-95"
-                                        aria-label="Restaurants précédents"
-                                    >
-                                        <ChevronLeft size={16} strokeWidth={2} />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => defilerRestaurants(1)}
-                                        className="flex size-9 items-center justify-center rounded-full bg-white/80 text-jse-principal shadow-sm ring-1 ring-jse-texte/5 transition hover:bg-white active:scale-95"
-                                        aria-label="Restaurants suivants"
-                                    >
-                                        <ChevronRight size={16} strokeWidth={2} />
-                                    </button>
-                                    <button type="button" disabled className="hidden items-center gap-1 pb-0.5 font-sans text-xs font-semibold text-jse-secondaire sm:flex">
-                                        Voir tout <ChevronRight size={14} />
-                                    </button>
-                                </div>
+                                <p className="shrink-0 font-sans text-sm text-jse-texte/60" aria-live="polite">
+                                    {restaurantsFiltres.length} restaurant{restaurantsFiltres.length > 1 ? "s" : ""}
+                                </p>
                             </div>
 
+                            {(zoneSelectionnee !== "Toutes les zones" || categorieSelectionnee) && (
+                                <div className="mb-4 flex flex-wrap gap-2">
+                                    {zoneSelectionnee !== "Toutes les zones" && (
+                                        <button type="button" onClick={reinitialiserFiltres} className="flex h-9 items-center gap-2 rounded-full bg-jse-principal px-4 font-sans text-xs font-semibold text-white">
+                                            {zoneSelectionnee}
+                                            <X size={14} aria-label="Retirer le filtre de zone" />
+                                        </button>
+                                    )}
+                                    {categorieSelectionnee && (
+                                        <button type="button" onClick={() => setCategorieSelectionnee("")} className="flex h-9 items-center gap-2 rounded-full bg-jse-principal px-4 font-sans text-xs font-semibold text-white">
+                                            {categorieSelectionnee}
+                                            <X size={14} aria-label="Retirer le filtre de catégorie" />
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+
                             {restaurantsFiltres.length > 0 ? (
-                                <div
-                                    className={[
-                                        "scrollbar-none -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 select-none touch-pan-x sm:-mx-0 sm:px-0 sm:gap-4",
-                                        "lg:grid lg:grid-cols-3 lg:overflow-visible lg:snap-none lg:pb-2",
-                                        glissementRestaurants ? "cursor-grabbing" : "cursor-grab",
-                                    ].join(" ")}
-                                    ref={listeRestaurantsRef}
-                                    onPointerDown={commencerGlissementRestaurants}
-                                    onPointerMove={deplacerGlissementRestaurants}
-                                    onPointerUp={terminerGlissementRestaurants}
-                                    onPointerCancel={terminerGlissementRestaurants}
-                                >
-                                    {restaurantsFiltres.map((restaurant, index) => (
-                                        <article
-                                            key={restaurant.id}
-                                            onClick={() => {
-                                                if (clicApresGlissementRef.current) return;
-                                                if (Number.isInteger(Number(restaurant.id))) {
-                                                    router.visit(`/restaurants/${restaurant.id}`);
-                                                }
-                                            }}
-                                            className={[
-                                                "jse-restaurant-card w-[calc(100vw-72px)] max-w-[310px] shrink-0 snap-start snap-always overflow-hidden rounded-[24px] bg-white shadow-[0_12px_35px_rgba(18,60,50,0.06)] ring-1 ring-jse-texte/5 transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_42px_rgba(18,60,50,0.11)] sm:w-[300px] lg:w-auto lg:max-w-none",
-                                                Number.isInteger(Number(restaurant.id)) ? "cursor-pointer transition-transform hover:-translate-y-0.5" : "cursor-default",
-                                            ].join(" ")}
-                                        >
-                                            <div className="relative aspect-[1.45/1] overflow-hidden bg-jse-principal">
-                                                <img
-                                                    src={obtenirImageRestaurant(restaurant, index)}
-                                                    alt={restaurant.nom}
-                                                    onError={(event) => {
-                                                        event.currentTarget.onerror = null;
-                                                        event.currentTarget.src = obtenirSecoursImageRestaurant(restaurant, index);
-                                                    }}
-                                                    className="h-full w-full object-cover"
-                                                />
-                                                <button type="button" onClick={(event) => { event.stopPropagation(); gsap.fromTo(event.currentTarget, { scale: 0.82 }, { scale: 1, duration: 0.42, ease: "back.out(2)" }); basculerFavoriRestaurant(restaurant); }} className="jse-favorite-button absolute right-3 top-3 flex size-9 items-center justify-center rounded-full bg-white/95 shadow-md ring-1 ring-black/5 transition" aria-label={estRestaurantFavori(restaurant) ? "Retirer des favoris" : "Ajouter aux favoris"}>
+                                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                                    {restaurantsFiltres.map((restaurant, index) => {
+                                        const lienValide = Number.isInteger(Number(restaurant.id));
+                                        const Conteneur = lienValide ? Link : "div";
+                                        const favori = estRestaurantFavori(restaurant);
+
+                                        return (
+                                            <article
+                                                key={restaurant.id}
+                                                className="jse-restaurant-card group relative overflow-hidden rounded-3xl bg-white shadow-jse-carte ring-1 ring-jse-texte/5 transition duration-300 hover:-translate-y-1 hover:shadow-jse-elevated"
+                                            >
+                                                <Conteneur {...(lienValide ? { href: `/restaurants/${restaurant.id}` } : {})} className="block">
+                                                    <div className="relative aspect-[16/10] overflow-hidden bg-jse-principal">
+                                                        <img
+                                                            src={obtenirImageRestaurant(restaurant, index)}
+                                                            alt=""
+                                                            loading={index < 2 ? "eager" : "lazy"}
+                                                            onError={(event) => {
+                                                                event.currentTarget.onerror = null;
+                                                                event.currentTarget.src = obtenirSecoursImageRestaurant(restaurant, index);
+                                                            }}
+                                                            className="size-full object-cover transition duration-500 group-hover:scale-105"
+                                                        />
+                                                    </div>
+
+                                                    <div className="p-4">
+                                                        <div className="flex items-start justify-between gap-3">
+                                                            <h3 className="line-clamp-2 font-sans text-base font-semibold text-jse-texte">{restaurant.nom}</h3>
+                                                            {restaurant.note !== null && restaurant.note !== undefined && (
+                                                                <span className="shrink-0 rounded-full bg-jse-fond px-2.5 py-1 font-sans text-xs font-bold text-jse-principal">★ {Number(restaurant.note).toFixed(1)}</span>
+                                                            )}
+                                                        </div>
+                                                        <p className="mt-1 line-clamp-1 font-sans text-xs text-jse-texte/60">
+                                                            {restaurant.type || restaurant.description || "Restaurant"}
+                                                            {restaurant.avis > 0 ? ` · ${restaurant.avis} avis` : " · Aucun avis"}
+                                                        </p>
+                                                        <div className="mt-3 flex items-start gap-2 font-sans text-xs leading-5 text-jse-texte/65">
+                                                            <MapPin size={14} className="mt-0.5 shrink-0 text-jse-secondaire" aria-hidden="true" />
+                                                            <span className="line-clamp-2">{restaurant.adresse || restaurant.zone?.nom || "Adzopé"}</span>
+                                                        </div>
+                                                        {positionUtilisateur && restaurant.distanceKm !== null && restaurant.distanceKm !== undefined && (
+                                                            <p className="mt-2 font-sans text-xs font-semibold text-jse-principal">
+                                                                {restaurant.distanceKm < 1 ? Math.round(restaurant.distanceKm * 1000) + " m" : restaurant.distanceKm.toFixed(1) + " km"} de vous
+                                                            </p>
+                                                        )}
+                                                        {restaurant.services && (
+                                                            <p className="mt-2 line-clamp-1 font-sans text-xs text-jse-texte/55">{restaurant.services}</p>
+                                                        )}
+                                                    </div>
+                                                </Conteneur>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => basculerFavoriRestaurant(restaurant)}
+                                                    aria-pressed={favori}
+                                                    className="jse-favorite-button absolute right-3 top-3 flex size-11 items-center justify-center rounded-full bg-white/95 shadow-md ring-1 ring-black/5 transition active:scale-90"
+                                                    aria-label={favori ? `Retirer ${restaurant.nom} des favoris` : `Ajouter ${restaurant.nom} aux favoris`}
+                                                >
                                                     <Heart
-                                                        size={16}
+                                                        size={18}
                                                         strokeWidth={1.8}
-                                                        className={estRestaurantFavori(restaurant) ? "text-jse-accent" : "text-jse-principal"}
-                                                        fill={estRestaurantFavori(restaurant) ? "currentColor" : "none"}
+                                                        className={favori ? "text-jse-accent" : "text-jse-principal"}
+                                                        fill={favori ? "currentColor" : "none"}
                                                     />
                                                 </button>
-                                            </div>
-
-                                            <div className="p-3.5">
-                                                <div className="flex items-start justify-between gap-3">
-                                                    <h3 className="line-clamp-2 font-sans text-sm font-semibold text-jse-texte">{restaurant.nom}</h3>
-                                                    {restaurant.note !== null && restaurant.note !== undefined && (
-                                                        <span className="shrink-0 rounded-full bg-jse-fond px-2 py-1 font-sans text-[10px] font-bold text-jse-principal">★ {Number(restaurant.note).toFixed(1)}</span>
-                                                    )}
-                                                </div>
-                                                <p className="mt-1 line-clamp-1 font-sans text-[10px] text-jse-texte/45">
-                                                    {restaurant.type || restaurant.description || "Restaurant"}
-                                                    {restaurant.avis > 0 ? ` · ${restaurant.avis} avis` : " · Aucun avis"}
-                                                </p>
-                                                <div className="mt-3 flex items-start gap-2 font-sans text-[10px] leading-4 text-jse-texte/50">
-                                                    <MapPin size={12} className="mt-0.5 shrink-0 text-jse-secondaire" />
-                                                    <span className="line-clamp-2">{restaurant.adresse || restaurant.zone?.nom || "Adzopé"}</span>
-                                                </div>
-                                                {positionUtilisateur && restaurant.distanceKm !== null && restaurant.distanceKm !== undefined && (
-                                                    <p className="mt-2 font-sans text-[10px] font-semibold text-jse-secondaire">
-                                                        {restaurant.distanceKm < 1 ? Math.round(restaurant.distanceKm * 1000) + " m" : restaurant.distanceKm.toFixed(1) + " km"} de vous
-                                                    </p>
-                                                )}
-                                                {restaurant.services && (
-                                                    <p className="mt-2 line-clamp-1 font-sans text-[10px] text-jse-texte/45">{restaurant.services}</p>
-                                                )}
-                                            </div>
-                                        </article>
-                                    ))}
+                                            </article>
+                                        );
+                                    })}
                                 </div>
                             ) : (
-                                <div className="rounded-[22px] border border-dashed border-jse-texte/10 bg-white/50 px-5 py-9 text-center">
-                                    <ShoppingBag size={21} className="mx-auto text-jse-secondaire" />
-                                    <h3 className="mt-3 font-against text-lg text-jse-principal">{recherche || zoneSelectionnee !== "Toutes les zones" ? "Aucun restaurant trouvé" : "Aucun restaurant disponible"}</h3>
-                                    <p className="mx-auto mt-1.5 max-w-[280px] font-sans text-xs leading-5 text-jse-texte/45">{recherche || zoneSelectionnee !== "Toutes les zones" ? "Essayez un autre filtre ou une autre recherche." : "Les restaurants actifs apparaîtront ici dès qu’ils seront disponibles."}</p>
+                                <div className="rounded-3xl border border-dashed border-jse-texte/15 bg-white/60 px-5 py-10 text-center">
+                                    <ShoppingBag size={24} className="mx-auto text-jse-secondaire" aria-hidden="true" />
+                                    <h3 className="mt-3 font-against text-xl text-jse-principal">{recherche || zoneSelectionnee !== "Toutes les zones" || categorieSelectionnee ? "Aucun restaurant trouvé" : "Aucun restaurant disponible"}</h3>
+                                    <p className="mx-auto mt-2 max-w-[300px] font-sans text-sm leading-6 text-jse-texte/60">{recherche || zoneSelectionnee !== "Toutes les zones" || categorieSelectionnee ? "Essayez un autre filtre ou une autre recherche." : "Les restaurants actifs apparaîtront ici dès qu’ils seront disponibles."}</p>
                                 </div>
                             )}
                         </section>
