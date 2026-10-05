@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { router } from "@inertiajs/react";
 import AdminDataPage from "../../Composants/Admin/AdminDataPage";
+import { entetesJson } from "../../lib/csrf";
 
 export default function Tarification({ utilisateur, tarifs = [], restaurants = [] }) {
     const [resultat, setResultat] = useState(null);
@@ -11,10 +12,11 @@ export default function Tarification({ utilisateur, tarifs = [], restaurants = [
         event.preventDefault();
         const response = await fetch("/administration/tarification/simuler", {
             method: "POST",
-            headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.content || "" },
+            credentials: "same-origin",
+            headers: entetesJson(),
             body: JSON.stringify(simulation),
         });
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
         setResultat(response.ok ? data : { erreur: data.message || "Simulation impossible." });
     };
 

@@ -32,7 +32,7 @@ class CouvertureProfilController extends Controller
             }
         }
 
-        $extension = strtolower($donnees['couverture']->getClientOriginalExtension());
+        $extension = $donnees['couverture']->extension();
         $nom = Str::uuid()->toString() . '.' . $extension;
         $donnees['couverture']->move($directory, $nom);
 

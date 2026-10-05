@@ -19,18 +19,14 @@ use Inertia\Response;
 
 class AuthentificationController extends Controller
 {
-    public function show(Request $request): Response|RedirectResponse
+    public function show(): Response|RedirectResponse
     {
         if (Auth::check()) {
             return $this->redirectionApresConnexion();
         }
 
-        return Inertia::render('Authentification', [
-            'flash' => [
-                'success' => $request->session()->get('success'),
-                'error' => $request->session()->get('error'),
-            ],
-        ]);
+        // Les messages flash sont partagés globalement par HandleInertiaRequests.
+        return Inertia::render('Authentification');
     }
 
     public function showInscription(): Response|RedirectResponse
@@ -90,13 +86,13 @@ class AuthentificationController extends Controller
         }
 
         $telephoneBrut = (string) $request->input('telephone');
-        $request->merge(['telephone' => $this->normaliserTelephone($telephoneBrut)]);
+        $request->merge(['telephone' => User::normaliserTelephone($telephoneBrut)]);
 
         $donnees = $request->validate([
             'role' => ['required', 'in:client,restaurant,livreur'],
             'nom' => ['required', 'string', 'max:100'],
             'prenom' => ['required', 'string', 'max:100'],
-            'telephone' => ['required', 'string', 'max:30', 'unique:users,telephone'],
+            'telephone' => ['required', 'string', 'max:30', User::regleTelephoneUnique()],
             'email' => ['nullable', 'email', 'max:255', 'unique:users,email'],
             'mot_de_passe' => ['required', 'string', 'min:8'],
             'confirmation_mot_de_passe' => ['required', 'same:mot_de_passe'],
@@ -172,7 +168,7 @@ class AuthentificationController extends Controller
             return $this->redirectionApresConnexion();
         }
 
-        $telephone = $this->normaliserTelephone((string) $request->input('telephone'));
+        $telephone = User::normaliserTelephone((string) $request->input('telephone'));
         $connexionKey = 'auth:connexion:'.$telephone;
         if (RateLimiter::tooManyAttempts($connexionKey, 5)) {
             abort(429, 'Trop de tentatives de connexion. Veuillez réessayer dans une minute.');
@@ -193,7 +189,7 @@ class AuthentificationController extends Controller
             ->where('statut', 'actif')
             ->whereIn('role', ['client', 'restaurant', 'livreur', 'administrateur'])
             ->get()
-            ->first(fn (User $user) => $this->normaliserTelephone((string) $user->telephone) === $telephone);
+            ->first(fn (User $user) => User::normaliserTelephone((string) $user->telephone) === $telephone);
 
         if (! $utilisateur || ! Hash::check($donnees['mot_de_passe'], $utilisateur->password)) {
             throw ValidationException::withMessages([
@@ -207,21 +203,6 @@ class AuthentificationController extends Controller
         $request->session()->regenerate();
 
         return redirect()->to($this->routeApresConnexion($utilisateur));
-    }
-
-    private function normaliserTelephone(string $telephone): string
-    {
-        $telephone = preg_replace('/[^0-9]/', '', $telephone) ?? '';
-
-        if (str_starts_with($telephone, '00225')) {
-            $telephone = substr($telephone, 2);
-        }
-
-        if (str_starts_with($telephone, '0') && strlen($telephone) === 10) {
-            $telephone = '225' . $telephone;
-        }
-
-        return $telephone;
     }
 
     private function routeApresConnexion(User $utilisateur): string

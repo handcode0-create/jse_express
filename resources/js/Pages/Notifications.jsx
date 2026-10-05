@@ -1,5 +1,6 @@
 import { router, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
+import { tokenXsrf } from "../lib/csrf";
 import {
     ArrowLeft,
     Bell,
@@ -118,14 +119,6 @@ export default function Notifications() {
         const timeout = window.setTimeout(() => setToast(null), 3200);
         return () => window.clearTimeout(timeout);
     }, [toast]);
-
-    const tokenXsrf = () => {
-        const cookie = document.cookie
-            .split("; ")
-            .find((ligne) => ligne.startsWith("XSRF-TOKEN="));
-
-        return cookie ? decodeURIComponent(cookie.split("=").slice(1).join("=")) : "";
-    };
 
     const confirmerSuppression = async () => {
         if (!notificationASupprimer || suppressionEnCours) return;

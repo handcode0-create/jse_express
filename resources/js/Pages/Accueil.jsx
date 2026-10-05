@@ -204,7 +204,7 @@ export default function Accueil() {
             setFavorisServeur((anciens) =>
                 estActuel ? anciens.filter((item) => item !== id) : [...anciens, id],
             );
-            router.visit(estActuel ? `/favoris/${id}` : `/favoris/${id}`, {
+            router.visit(`/favoris/${id}`, {
                 method: estActuel ? "delete" : "post",
                 preserveScroll: true,
                 preserveState: true,

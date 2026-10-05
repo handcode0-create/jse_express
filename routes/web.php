@@ -54,7 +54,7 @@ Route::get('/authentification', [AuthentificationController::class, 'show'])->na
 
 Route::get('/inscription', [AuthentificationController::class, 'showInscription'])->name('inscription');
 
-Route::post('/inscription', [AuthentificationController::class, 'inscription'])->name('inscription');
+Route::post('/inscription', [AuthentificationController::class, 'inscription'])->name('inscription.creer');
 
 Route::post('/connexion', [AuthentificationController::class, 'connexion'])->name('connexion');
 
@@ -186,8 +186,10 @@ Route::prefix('administration')
         Route::post('/clients/{user}/statut', [AdministrationController::class, 'changerStatutClient'])
             ->whereNumber('user')
             ->name('admin.clients.statut');
-        Route::patch('/restaurants/{restaurant}/coordonnees', [AdministrationController::class, 'modifierCoordonneesRestaurant'])->name('admin.restaurants.coordonnees');
-         Route::post('/restaurants/{restaurant}/statut', [AdministrationController::class, 'changerStatutRestaurant'])
+        Route::patch('/restaurants/{restaurant}/coordonnees', [AdministrationController::class, 'modifierCoordonneesRestaurant'])
+            ->whereNumber('restaurant')
+            ->name('admin.restaurants.coordonnees');
+        Route::post('/restaurants/{restaurant}/statut', [AdministrationController::class, 'changerStatutRestaurant'])
             ->whereNumber('restaurant')
             ->name('admin.restaurants.statut');
         Route::post('/livreurs/{user}/disponibilite', [AdministrationController::class, 'changerDisponibiliteLivreur'])
@@ -353,15 +355,18 @@ Route::get('/profil', function () {
 Route::patch('/profil', function (Request $request) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
 
+    if ($request->filled('telephone')) {
+        $request->merge(['telephone' => User::normaliserTelephone((string) $request->input('telephone'))]);
+    }
+
     $donnees = $request->validate([
         'nom' => ['required', 'string', 'max:100'],
         'prenom' => ['nullable', 'string', 'max:100'],
-        'telephone' => ['required', 'string', 'max:30', Rule::unique('users', 'telephone')->ignore(Auth::id())],
+        'telephone' => ['required', 'string', 'max:30', User::regleTelephoneUnique(Auth::id())],
         'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore(Auth::id())],
     ], [
         'nom.required' => 'Ce champ est obligatoire.',
         'telephone.required' => 'Ce champ est obligatoire.',
-        'telephone.unique' => 'Ce numéro est déjà utilisé.',
         'email.email' => 'Veuillez saisir une adresse e-mail valide.',
         'email.unique' => 'Cette adresse e-mail est déjà utilisée.',
     ]);
@@ -1035,7 +1040,7 @@ Route::get('/restaurants/{restaurant}/produits/{produit}', function (Restaurant 
                 : 0,
         ],
     ]);
-})->middleware(['auth', 'role:client'])->name('produit.detail');
+})->whereNumber(['restaurant', 'produit'])->middleware(['auth', 'role:client'])->name('produit.detail');
 
 Route::get('/restaurants/{restaurant}', function (Restaurant $restaurant) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -1106,7 +1111,7 @@ Route::get('/restaurants/{restaurant}', function (Restaurant $restaurant) {
             ])->values() ?? collect(),
         ],
     ]);
-})->middleware(['auth', 'role:client'])->name('restaurant.detail');
+})->whereNumber('restaurant')->middleware(['auth', 'role:client'])->name('restaurant.detail');
 
 Route::post('/panier/produits/{produit}/ajouter', function (Request $request, Produit $produit) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -1189,18 +1194,22 @@ Route::post('/panier/produits/{produit}/ajouter', function (Request $request, Pr
     });
 
     return back()->with('success', 'Produit personnalisé ajouté au panier.');
-})->middleware(['auth', 'role:client'])->name('panier.ajouter');
+})->whereNumber('produit')->middleware(['auth', 'role:client'])->name('panier.ajouter');
 
 Route::patch('/panier/lignes/{lignePanier}', function (Request $request, LignePanier $lignePanier) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
     $lignePanier->load('panier');
     abort_unless($lignePanier->panier?->user_id === Auth::id() && $lignePanier->panier?->statut === 'actif', 404);
 
-    $quantite = (int) $request->input('quantite', 1);
+    $donnees = $request->validate([
+        'quantite' => ['required', 'integer', 'min:0', 'max:50'],
+    ]);
+
+    $quantite = (int) $donnees['quantite'];
     $quantite > 0 ? $lignePanier->update(['quantite' => $quantite]) : $lignePanier->delete();
 
     return back();
-})->middleware(['auth', 'role:client'])->name('panier.ligne.modifier');
+})->whereNumber('lignePanier')->middleware(['auth', 'role:client'])->name('panier.ligne.modifier');
 
 Route::delete('/panier/lignes/{lignePanier}', function (LignePanier $lignePanier) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
@@ -1209,7 +1218,7 @@ Route::delete('/panier/lignes/{lignePanier}', function (LignePanier $lignePanier
     $lignePanier->delete();
 
     return back();
-})->middleware(['auth', 'role:client'])->name('panier.ligne.supprimer');
+})->whereNumber('lignePanier')->middleware(['auth', 'role:client'])->name('panier.ligne.supprimer');
 
 Route::get('/politique-de-confidentialite', function () {
     return Inertia::render('PolitiqueConfidentialite');
