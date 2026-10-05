@@ -7,6 +7,7 @@ use App\Models\Commande;
 use App\Models\HistoriqueCommande;
 use App\Models\Livraison;
 use App\Models\Notification;
+use App\Models\ProfilLivreur;
 use App\Models\Zone;
 use App\Models\TarifLivraison;
 use App\Models\Restaurant;
@@ -21,6 +22,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -184,7 +187,7 @@ class AdministrationController extends Controller
             ->with('profilLivreur')
             ->firstOrFail();
 
-        abort_unless($livreur->profilLivreur?->zone_id === $livraison->zone_id, 422, 'Le livreur doit appartenir à la zone de la livraison.');
+        abort_unless((int) $livreur->profilLivreur?->zone_id === (int) $livraison->zone_id, 422, 'Le livreur doit appartenir à la zone de la livraison.');
 
         $livraisonService->reattribuer($livraison, $request->user()->id, $livreur->id, $donnees['motif']);
         $livraison->load('commande.user');
@@ -196,17 +199,19 @@ class AdministrationController extends Controller
             $livraison->id,
             'attribution'
         );
-        $notificationService->sms(
-            $commande->user,
-            'Votre code de livraison est disponible dans l’application.',
-            $commande->id,
-            $livraison->id,
-            'pin_livraison'
-        );
+        if ($commande->user) {
+            $notificationService->sms(
+                $commande->user,
+                'Votre code de livraison est disponible dans l’application.',
+                $commande->id,
+                $livraison->id,
+                'pin_livraison'
+            );
+        }
 
         return back()->with('success', 'La livraison a été réattribuée.');
     }
- 
+
     public function commandes(Request $request): Response
     {
         $recherche = trim((string) $request->query('recherche', ''));
@@ -222,7 +227,7 @@ class AdministrationController extends Controller
         $commandes->setCollection(
             $commandes->getCollection()->map(fn (Commande $commande) => ['id'=>$commande->id,'reference'=>$commande->reference,'client'=>$commande->user ? trim($commande->user->prenom.' '.$commande->user->nom) : null,'telephone'=>$commande->user?->telephone,'restaurant'=>$commande->restaurant?->nom,'zone'=>$commande->zone?->nom,'statut'=>$commande->statutCommande?['code'=>$commande->statutCommande->code,'libelle'=>$commande->statutCommande->libelle]:null,'montant_total'=>(float)$commande->montant_total,'frais_livraison'=>(float)$commande->frais_livraison,'distance_km'=>$commande->distance_km !== null ? (float)$commande->distance_km : null,'date_commande'=>$commande->date_commande?->format('d/m/Y H:i')])->values()
         );
-        return Inertia::render('Admin/Commandes', ['utilisateur'=>$request->user(),'commandes'=>$commandes,'recherche'=>$recherche]);
+        return Inertia::render('Admin/Commandes', ['utilisateur'=>$this->utilisateurAdmin($request->user()),'commandes'=>$commandes,'recherche'=>$recherche]);
     }
 
     public function livraisons(Request $request): Response
@@ -270,7 +275,7 @@ class AdministrationController extends Controller
             ];
         })->values());
 
-        return Inertia::render('Admin/Livraisons',['utilisateur'=>$request->user(),'livraisons'=>$livraisons,'recherche'=>$recherche]);
+        return Inertia::render('Admin/Livraisons',['utilisateur'=>$this->utilisateurAdmin($request->user()),'livraisons'=>$livraisons,'recherche'=>$recherche]);
     }
 
     public function clients(Request $request): Response
@@ -280,7 +285,7 @@ class AdministrationController extends Controller
             ->when($recherche!=='' ,fn($q)=>$q->where(function($query)use($recherche){$query->where('nom','like','%'.$recherche.'%')->orWhere('prenom','like','%'.$recherche.'%')->orWhere('telephone','like','%'.$recherche.'%')->orWhere('email','like','%'.$recherche.'%');}))
             ->latest('id')->paginate(15)->withQueryString();
         $clients->setCollection($clients->getCollection()->map(fn(User $u)=>['id'=>$u->id,'nom'=>trim($u->prenom.' '.$u->nom),'email'=>$u->email,'telephone'=>$u->telephone,'statut'=>$u->statut,'commandes_count'=>(int)$u->commandes_count,'derniere_commande'=>$u->commandes->first()?->date_commande?->format('d/m/Y H:i')])->values());
-        return Inertia::render('Admin/Clients',['utilisateur'=>$request->user(),'clients'=>$clients,'recherche'=>$recherche]);
+        return Inertia::render('Admin/Clients',['utilisateur'=>$this->utilisateurAdmin($request->user()),'clients'=>$clients,'recherche'=>$recherche]);
     }
 
     public function restaurants(Request $request): Response
@@ -290,7 +295,7 @@ class AdministrationController extends Controller
             ->when($recherche!=='' ,fn($q)=>$q->where(function($query)use($recherche){$query->where('nom','like','%'.$recherche.'%')->orWhere('telephone','like','%'.$recherche.'%')->orWhereHas('user',fn($u)=>$u->where('nom','like','%'.$recherche.'%')->orWhere('prenom','like','%'.$recherche.'%'));}))
             ->orderBy('nom')->paginate(15)->withQueryString();
         $restaurants->setCollection($restaurants->getCollection()->map(fn(Restaurant $r)=>['id'=>$r->id,'nom'=>$r->nom,'responsable'=>$r->user ? trim($r->user->prenom.' '.$r->user->nom) : null,'telephone'=>$r->telephone?:$r->user?->telephone,'zone'=>$r->zone?->nom,'statut'=>$r->statut,'produits_count'=>(int)$r->produits_count,'commandes_count'=>(int)$r->commandes_count,'latitude'=>$r->latitude,'longitude'=>$r->longitude])->values());
-        return Inertia::render('Admin/Restaurants',['utilisateur'=>$request->user(),'restaurants'=>$restaurants,'recherche'=>$recherche]);
+        return Inertia::render('Admin/Restaurants',['utilisateur'=>$this->utilisateurAdmin($request->user()),'restaurants'=>$restaurants,'recherche'=>$recherche]);
     }
 
     public function livreurs(Request $request): Response
@@ -301,7 +306,7 @@ class AdministrationController extends Controller
             ->latest('id')->paginate(15)->withQueryString();
         $activeCounts=AttributionLivraison::query()->where('statut','active')->whereIn('livreur_id',$livreurs->getCollection()->pluck('id'))->selectRaw('livreur_id, COUNT(*) total')->groupBy('livreur_id')->pluck('total','livreur_id');
         $livreurs->setCollection($livreurs->getCollection()->map(fn(User $u)=>['id'=>$u->id,'nom'=>trim($u->prenom.' '.$u->nom),'matricule'=>$u->profilLivreur?->matricule,'telephone'=>$u->telephone,'zone'=>$u->profilLivreur?->zone?->nom,'disponibilite'=>$u->profilLivreur?->disponibilite,'livraisons_count'=>(int)($activeCounts[$u->id]??0)])->values());
-        return Inertia::render('Admin/Livreurs',['utilisateur'=>$request->user(),'livreurs'=>$livreurs,'recherche'=>$recherche]);
+        return Inertia::render('Admin/Livreurs',['utilisateur'=>$this->utilisateurAdmin($request->user()),'livreurs'=>$livreurs,'recherche'=>$recherche]);
     }
 
     public function zones(Request $request): Response
@@ -335,13 +340,13 @@ class AdministrationController extends Controller
             'livreurs_disponibles'=>(int)($livreurs->get($z->id)?->filter(fn(User $u)=>$u->profilLivreur?->disponibilite==='disponible')->count()??0),
             'livraisons_actives'=>(int)$z->livraisons_actives,
         ])->values();
-        return Inertia::render('Admin/Zones',['utilisateur'=>$request->user(),'zones'=>$zones,'recherche'=>$recherche]);
+        return Inertia::render('Admin/Zones',['utilisateur'=>$this->utilisateurAdmin($request->user()),'zones'=>$zones,'recherche'=>$recherche]);
     }
 
     public function tarification(Request $request): Response
     {
         return Inertia::render('Admin/Tarification', [
-            'utilisateur' => $request->user(),
+            'utilisateur' => $this->utilisateurAdmin($request->user()),
             'tarifs' => TarifLivraison::query()->orderBy('distance_min_km')->get(),
             'restaurants' => Restaurant::query()->where('statut', 'actif')->orderBy('nom')->get(['id', 'nom', 'latitude', 'longitude']),
         ]);
@@ -383,7 +388,7 @@ class AdministrationController extends Controller
     public function simulerTarif(Request $request, DistanceService $distanceService, TarificationLivraisonService $tarificationService)
     {
         $donnees = $request->validate([
-            'restaurant_id' => ['nullable', 'integer', 'exists:restaurants,id'],
+            'restaurant_id' => ['required_without:distance_km', 'nullable', 'integer', 'exists:restaurants,id'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'distance_km' => ['nullable', 'numeric', 'min:0'],
@@ -416,7 +421,7 @@ class AdministrationController extends Controller
             ->when($recherche!=='' ,fn($q)=>$q->where(function($query)use($recherche){$query->where('type_evenement','like','%'.$recherche.'%')->orWhere('canal','like','%'.$recherche.'%')->orWhere('statut_envoi','like','%'.$recherche.'%')->orWhereHas('user',fn($u)=>$u->where('nom','like','%'.$recherche.'%')->orWhere('prenom','like','%'.$recherche.'%'))->orWhereHas('commande',fn($c)=>$c->where('reference','like','%'.$recherche.'%'));}))
             ->latest('id')->paginate(15)->withQueryString();
         $notifications->setCollection($notifications->getCollection()->map(fn(Notification $n)=>['id'=>$n->id,'date_envoi'=>$n->date_envoi?Carbon::parse($n->date_envoi)->format('d/m/Y H:i'):null,'destinataire'=>$n->user ? trim($n->user->prenom.' '.$n->user->nom) : ($n->telephone_destination ?: '—'),'type_evenement'=>$n->type_evenement,'canal'=>$n->canal,'statut_envoi'=>$n->statut_envoi,'reference'=>$n->commande?->reference])->values());
-        return Inertia::render('Admin/Notifications',['utilisateur'=>$request->user(),'notifications'=>$notifications,'recherche'=>$recherche]);
+        return Inertia::render('Admin/Notifications',['utilisateur'=>$this->utilisateurAdmin($request->user()),'notifications'=>$notifications,'recherche'=>$recherche]);
     }
 
     public function changerStatutRestaurant(Restaurant $restaurant): RedirectResponse
@@ -425,6 +430,17 @@ class AdministrationController extends Controller
         $restaurant->update(['statut' => $nouveauStatut]);
 
         return back()->with('success', 'Le statut du restaurant a été mis à jour.');
+    }
+
+    public function changerStatutClient(User $user): RedirectResponse
+    {
+        abort_unless($user->role === 'client', 404);
+
+        $user->update([
+            'statut' => $user->statut === 'actif' ? 'inactif' : 'actif',
+        ]);
+
+        return back()->with('success', 'Le statut du client a été mis à jour.');
     }
 
     public function changerDisponibiliteLivreur(User $user): RedirectResponse
@@ -504,7 +520,7 @@ class AdministrationController extends Controller
             'roles' => ['client', 'restaurant', 'livreur', 'administrateur'],
             'statuts' => ['actif', 'inactif'],
             'administrateursActifs' => User::query()->where('role', 'administrateur')->where('statut', 'actif')->count(),
-            'zones' => Zone::query()->orderBy('nom')->where('statut', 'actif')->orderBy('nom')->get(['id', 'nom']),
+            'zones' => Zone::query()->where('statut', 'actif')->orderBy('nom')->get(['id', 'nom']),
             'utilisateur' => $this->utilisateurAdmin($request->user()),
         ]);
     }
@@ -519,7 +535,7 @@ class AdministrationController extends Controller
                 'prenom' => $donnees['prenom'] ?? null,
                 'telephone' => $donnees['telephone'],
                 'email' => $donnees['email'] ?? null,
-                'password' => IlluminateSupportFacadesHash::make($donnees['mot_de_passe']),
+                'password' => Hash::make($donnees['mot_de_passe']),
                 'role' => $donnees['role'],
                 'statut' => $donnees['statut'],
             ]);
@@ -553,7 +569,7 @@ class AdministrationController extends Controller
                 'email' => $donnees['email'] ?? null,
                 'role' => $donnees['role'],
                 'statut' => $donnees['statut'],
-                ...(!empty($donnees['mot_de_passe']) ? ['password' => IlluminateSupportFacadesHash::make($donnees['mot_de_passe'])] : []),
+                ...(!empty($donnees['mot_de_passe']) ? ['password' => Hash::make($donnees['mot_de_passe'])] : []),
             ]);
 
             $this->synchroniserProfilMetier($user->fresh(), $donnees);
@@ -632,13 +648,15 @@ class AdministrationController extends Controller
 
     private function validerUtilisateurAdmin(Request $request, ?User $user = null): array
     {
-        $telephone = preg_replace('/[^0-9]/', '', (string) $request->input('telephone')) ?? '';
+        if ($request->filled('telephone')) {
+            $request->merge(['telephone' => User::normaliserTelephone((string) $request->input('telephone'))]);
+        }
 
         $donnees = $request->validate([
             'nom' => ['required', 'string', 'max:100'],
             'prenom' => ['nullable', 'string', 'max:100'],
-            'telephone' => ['required', 'string', 'max:30', IlluminateValidationRule::unique('users', 'telephone')->ignore($user?->id)],
-            'email' => ['nullable', 'email', 'max:255', IlluminateValidationRule::unique('users', 'email')->ignore($user?->id)],
+            'telephone' => ['required', 'string', 'max:30', User::regleTelephoneUnique($user?->id)],
+            'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user?->id)],
             'role' => ['required', 'in:client,restaurant,livreur,administrateur'],
             'statut' => ['required', 'in:actif,inactif'],
             'mot_de_passe' => [$user ? 'nullable' : 'required', 'string', 'min:8'],
@@ -648,7 +666,7 @@ class AdministrationController extends Controller
             'restaurant_email' => ['nullable', 'email', 'max:150'],
             'restaurant_adresse' => ['nullable', 'string', 'max:1000'],
             'restaurant_zone_id' => ['nullable', 'integer', 'exists:zones,id'],
-            'livreur_matricule' => ['nullable', 'string', 'max:100', $user ? IlluminateValidationRule::unique('profils_livreurs', 'matricule')->ignore($user->id, 'user_id') : 'unique:profils_livreurs,matricule'],
+            'livreur_matricule' => ['nullable', 'string', 'max:100', $user ? Rule::unique('profils_livreurs', 'matricule')->ignore($user->id, 'user_id') : 'unique:profils_livreurs,matricule'],
             'livreur_zone_id' => ['nullable', 'integer', 'exists:zones,id'],
             'livreur_disponibilite' => ['nullable', 'in:disponible,indisponible'],
             'livreur_telephone_secondaire' => ['nullable', 'string', 'max:30'],
@@ -705,7 +723,7 @@ class AdministrationController extends Controller
                     'telephone_secondaire' => $donnees['livreur_telephone_secondaire'] ?? null,
                 ], fn ($value) => $value !== null));
             } else {
-                AppModelsProfilLivreur::create([
+                ProfilLivreur::create([
                     'user_id' => $user->id,
                     'matricule' => $donnees['livreur_matricule'],
                     'zone_id' => $donnees['livreur_zone_id'] ?? null,

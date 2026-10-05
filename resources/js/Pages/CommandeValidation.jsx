@@ -2,6 +2,7 @@ import { router, usePage } from "@inertiajs/react";
 import { ArrowLeft, Bike, Check, ChevronRight, MapPin, Phone, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import SidebarJSE from "../Composants/Navigation/SidebarJSE";
+import { entetesJson } from "../lib/csrf";
 
 const prix=(v)=>new Intl.NumberFormat("fr-FR",{maximumFractionDigits:0}).format(Number(v||0));
 
@@ -16,7 +17,7 @@ export default function CommandeValidation(){
  const [estimation,setEstimation]=useState(null);
  const [localisation,setLocalisation]=useState(false);
 
- const utiliserPosition=()=>{setLocalisation(true);setErreur("");if(!navigator.geolocation){setErreur("La géolocalisation n’est pas disponible sur cet appareil.");setLocalisation(false);return;}navigator.geolocation.getCurrentPosition(async p=>{const coords={latitude:p.coords.latitude,longitude:p.coords.longitude};setPosition(coords);try{const response=await fetch("/commande/estimation-livraison",{method:"POST",headers:{"Content-Type":"application/json","X-CSRF-TOKEN":document.querySelector('meta[name="csrf-token"]')?.content||""},body:JSON.stringify(coords)});const data=await response.json();if(!response.ok)throw new Error(data.message||"Adresse hors zone de livraison");setEstimation(data);}catch(error){setErreur(error.message||"Impossible d’estimer la livraison.");}finally{setLocalisation(false);}},()=>{setErreur("Position refusée. Vous pouvez continuer sans partager votre position.");setLocalisation(false);},{enableHighAccuracy:false,maximumAge:0,timeout:10000});};
+ const utiliserPosition=()=>{setLocalisation(true);setErreur("");if(!navigator.geolocation){setErreur("La géolocalisation n’est pas disponible sur cet appareil.");setLocalisation(false);return;}navigator.geolocation.getCurrentPosition(async p=>{const coords={latitude:p.coords.latitude,longitude:p.coords.longitude};setPosition(coords);try{const response=await fetch("/commande/estimation-livraison",{method:"POST",credentials:"same-origin",headers:entetesJson(),body:JSON.stringify(coords)});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.message||"Adresse hors zone de livraison");setEstimation(data);}catch(error){setErreur(error.message||"Impossible d’estimer la livraison.");}finally{setLocalisation(false);}},()=>{setErreur("Position refusée. Vous pouvez continuer sans partager votre position.");setLocalisation(false);},{enableHighAccuracy:false,maximumAge:0,timeout:10000});};
  const valider=(e)=>{e.preventDefault();setErreur("");setEnvoi(true);router.post("/commande",{zone_id:zoneId,latitude:position?.latitude,longitude:position?.longitude,adresse_livraison:adresse,telephone_livraison:telephone},{preserveScroll:true,onError:(errors)=>{setErreur(Object.values(errors||{})[0]||"Vérifiez les informations saisies.");setEnvoi(false);},onFinish:()=>setEnvoi(false)})};
 
  return <main className="min-h-screen bg-jse-fond text-jse-texte"><div className="mx-auto flex min-h-screen w-full max-w-none"><SidebarJSE /><div className="min-w-0 flex-1"><div className="mx-auto w-full max-w-none px-5 pb-12 sm:px-8">

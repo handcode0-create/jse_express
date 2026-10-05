@@ -44,10 +44,10 @@ class ThrottleRoutesTest extends TestCase
         RateLimiter::clear($key);
 
         for ($i = 0; $i < 5; $i++) {
-            $this->post(route('inscription'), [])->assertSessionHasErrors();
+            $this->post(route('inscription.creer'), [])->assertSessionHasErrors();
         }
 
-        $this->post(route('inscription'), [])->assertStatus(429);
+        $this->post(route('inscription.creer'), [])->assertStatus(429);
     }
 
     public function test_livreur_pin_validation_is_throttled_per_user_and_delivery(): void

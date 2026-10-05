@@ -14,6 +14,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use App\Services\LivraisonService;
 use App\Services\CommandeService;
 use App\Services\NotificationService;
@@ -130,6 +131,7 @@ class RestaurantController extends Controller
                     ->sum('montant'),
                 'notifications' => Notification::query()
                     ->where('user_id', $request->user()->id)
+                    ->whereNull('masquee_par_destinataire_at')
                     ->count(),
                 'commandes_total' => Commande::query()
                     ->where('restaurant_id', $restaurant->id)
@@ -249,7 +251,7 @@ class RestaurantController extends Controller
             'description' => ['nullable', 'string', 'max:2000'],
             'telephone' => ['required', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:150'],
-            'adresse' => ['required', 'string', 'max:255'],
+            'adresse' => ['required', 'string', 'max:1000'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ]);
@@ -276,11 +278,15 @@ class RestaurantController extends Controller
     {
         $utilisateur = $request->user();
 
+        if ($request->filled('telephone')) {
+            $request->merge(['telephone' => User::normaliserTelephone((string) $request->input('telephone'))]);
+        }
+
         $donnees = $request->validate([
             'prenom' => ['required', 'string', 'max:100'],
             'nom' => ['required', 'string', 'max:100'],
-            'telephone' => ['required', 'string', 'max:30'],
-            'email' => ['nullable', 'email', 'max:150'],
+            'telephone' => ['required', 'string', 'max:30', User::regleTelephoneUnique($utilisateur->id)],
+            'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($utilisateur->id)],
         ]);
 
         $utilisateur->update($donnees);
@@ -322,15 +328,17 @@ class RestaurantController extends Controller
                 'date_changement' => now(),
             ]);
 
-            $notificationService->sms(
-                $commande->user,
-                $donnees['statut'] === 'PRETE'
-                    ? 'Votre commande '.$commande->reference.' est prête et va être attribuée à un livreur.'
-                    : 'Le statut de votre commande '.$commande->reference.' a été mis à jour.',
-                $commande->id,
-                null,
-                'commande'
-            );
+            if ($commande->user) {
+                $notificationService->sms(
+                    $commande->user,
+                    $donnees['statut'] === 'PRETE'
+                        ? 'Votre commande '.$commande->reference.' est prête et va être attribuée à un livreur.'
+                        : 'Le statut de votre commande '.$commande->reference.' a été mis à jour.',
+                    $commande->id,
+                    null,
+                    'commande'
+                );
+            }
 
             if ($donnees['statut'] === 'PRETE') {
                 $livraison = Livraison::query()->firstOrCreate(
@@ -354,13 +362,15 @@ class RestaurantController extends Controller
                         'attribution'
                     );
 
-                    $notificationService->sms(
-                        $commande->user,
-                        'Votre code de livraison est disponible dans l\'application.',
-                        $commande->id,
-                        $livraison->id,
-                        'pin_livraison'
-                    );
+                    if ($commande->user) {
+                        $notificationService->sms(
+                            $commande->user,
+                            'Votre code de livraison est disponible dans l’application.',
+                            $commande->id,
+                            $livraison->id,
+                            'pin_livraison'
+                        );
+                    }
                 } else {
                     User::query()->where('role', 'administrateur')->where('statut', 'actif')->get()->each(fn (User $admin) => $notificationService->sms($admin, 'Aucun livreur disponible pour la commande '.$commande->reference.'. Réattribution manuelle requise : /administration/livraisons.', $commande->id, $livraison->id, 'attribution'));
                 }
@@ -445,8 +455,9 @@ class RestaurantController extends Controller
         if (! empty($donnees['categorie_id'])) {
             abort_unless(
                 Categorie::query()
-                    ->where('id', $donnees['categorie_id'])
+                    ->whereKey($donnees['categorie_id'])
                     ->where('restaurant_id', $restaurant->id)
+                    ->where('statut', 'actif')
                     ->exists(),
                 422,
                 'Cette catégorie n’appartient pas à votre restaurant.'

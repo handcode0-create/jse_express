@@ -7,6 +7,7 @@ use App\Models\HistoriqueCommande;
 use App\Models\Notification;
 use App\Models\ProfilLivreur;
 use App\Models\StatutCommande;
+use App\Models\User;
 use App\Models\Zone;
 use App\Services\LivraisonService;
 use App\Services\NotificationService;
@@ -14,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -157,7 +159,7 @@ class LivreurController extends Controller
 
     public function prendreEnCharge(Request $request, int $livraison): RedirectResponse
     {
-        $profil = $this->profil($request);
+        $this->profil($request);
 
         $attribution = AttributionLivraison::query()
             ->where('id', $livraison)
@@ -169,11 +171,9 @@ class LivreurController extends Controller
         $livraisonModel = $attribution->livraison;
         $commande = $livraisonModel?->commande;
 
+        // L'attribution active (déjà filtrée sur ce livreur) fait foi : un livreur
+        // peut être attribué depuis une zone voisine ou avoir changé de zone depuis.
         abort_unless($livraisonModel && $commande, 404);
-        abort_unless(
-            (int) $livraisonModel->zone_id === (int) $profil->zone_id,
-            403
-        );
 
         if ($commande->statutCommande?->code === 'EN_LIVRAISON' && $livraisonModel->statut === 'en_cours') {
             return back()->with('success', 'Cette livraison est déjà prise en charge.');
@@ -215,7 +215,7 @@ class LivreurController extends Controller
         NotificationService $notificationService
     ): RedirectResponse
     {
-        $profil = $this->profil($request);
+        $this->profil($request);
 
         $attribution = AttributionLivraison::query()
             ->whereKey($livraison)
@@ -228,7 +228,6 @@ class LivreurController extends Controller
         $commande = $livraisonModel?->commande;
 
         abort_unless($livraisonModel && $commande, 404);
-        abort_unless((int) $livraisonModel->zone_id === (int) $profil->zone_id, 403);
         abort_unless($livraisonModel->statut === 'en_cours', 422, 'La livraison n’est pas en cours.');
         abort_unless($commande->statutCommande?->code === 'EN_LIVRAISON', 422, 'La commande n’est pas en livraison.');
 
@@ -279,11 +278,15 @@ class LivreurController extends Controller
     {
         $profil = $this->profil($request);
 
+        if ($request->filled('telephone')) {
+            $request->merge(['telephone' => User::normaliserTelephone((string) $request->input('telephone'))]);
+        }
+
         $donnees = $request->validate([
             'nom' => ['required', 'string', 'max:100'],
             'prenom' => ['nullable', 'string', 'max:100'],
-            'telephone' => ['required', 'string', 'max:30'],
-            'email' => ['nullable', 'email', 'max:255'],
+            'telephone' => ['required', 'string', 'max:30', User::regleTelephoneUnique($request->user()->id)],
+            'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($request->user()->id)],
             'telephone_secondaire' => ['nullable', 'string', 'max:30'],
             'zone_id' => ['required', 'integer', 'exists:zones,id'],
         ]);

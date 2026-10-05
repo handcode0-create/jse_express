@@ -32,7 +32,7 @@ class PhotoProfilController extends Controller
             }
         }
 
-        $extension = strtolower($donnees['photo']->getClientOriginalExtension());
+        $extension = $donnees['photo']->extension();
         $nom = Str::uuid()->toString() . '.' . $extension;
         $donnees['photo']->move($directory, $nom);
 

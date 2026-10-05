@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\DB;
 
 class CommandeService
 {
-    private const STATUTS_ANNULABLES = ['EN_ATTENTE', 'CONFIRMEE'];
+    public const STATUTS_ANNULABLES = ['EN_ATTENTE', 'CONFIRMEE'];
+
     public function annuler(
         Commande $commande,
         User $acteur,

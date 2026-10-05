@@ -4,14 +4,10 @@ namespace App\Policies;
 
 use App\Models\Commande;
 use App\Models\User;
+use App\Services\CommandeService;
 
 class CommandePolicy
 {
-    private const STATUTS_ANNULABLES = [
-        'EN_ATTENTE',
-        'CONFIRMEE',
-    ];
-
     public function annuler(User $user, Commande $commande): bool
     {
         return (int) $commande->user_id === (int) $user->id;
@@ -21,7 +17,7 @@ class CommandePolicy
     {
         return in_array(
             $commande->statutCommande?->code,
-            self::STATUTS_ANNULABLES,
+            CommandeService::STATUTS_ANNULABLES,
             true
         );
     }
