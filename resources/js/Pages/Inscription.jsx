@@ -1,5 +1,5 @@
 import { router, useForm, usePage } from "@inertiajs/react";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import {
     ArrowLeft,
     Check,
@@ -45,12 +45,10 @@ const inputClass =
     "h-13 w-full rounded-2xl border border-jse-texte/10 bg-white px-4 text-sm text-jse-texte outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10";
 
 export default function Inscription() {
-    const { zones = [], captcha = {} } = usePage().props;
+    const { zones = [] } = usePage().props;
     const [etape, setEtape] = useState(1);
     const [afficherMotDePasse, setAfficherMotDePasse] = useState(false);
     const [afficherConfirmation, setAfficherConfirmation] = useState(false);
-    const captchaRef = useRef(null);
-    const captchaWidgetRef = useRef(null);
 
     const { data, setData, post, processing, errors, clearErrors, setError } = useForm({
         role: "",
@@ -71,7 +69,6 @@ export default function Inscription() {
         livreur_zone_id: "",
         livreur_disponibilite: "indisponible",
         livreur_telephone_secondaire: "",
-        recaptcha_token: "",
     });
 
     const erreursEtape = useMemo(() => {
@@ -177,37 +174,6 @@ export default function Inscription() {
             setEtape(3);
         }
     };
-
-    useEffect(() => {
-        if (!captcha?.enabled || !captcha?.site_key || !captchaRef.current) return;
-
-        const rendreCaptcha = () => {
-            if (!window.grecaptcha || !captchaRef.current || captchaWidgetRef.current !== null) return;
-            captchaWidgetRef.current = window.grecaptcha.render(captchaRef.current, {
-                sitekey: captcha.site_key,
-                theme: "light",
-                callback: (token) => setData("recaptcha_token", token),
-                "expired-callback": () => setData("recaptcha_token", ""),
-                "error-callback": () => setData("recaptcha_token", ""),
-            });
-        };
-
-        if (window.grecaptcha) {
-            rendreCaptcha();
-            return;
-        }
-
-        const script = document.createElement("script");
-        script.src = "https://www.google.com/recaptcha/api.js?render=explicit&hl=fr";
-        script.async = true;
-        script.defer = true;
-        script.onload = rendreCaptcha;
-        document.head.appendChild(script);
-
-        return () => {
-            script.onload = null;
-        };
-    }, [captcha?.enabled, captcha?.site_key]);
 
     const soumettre = (event) => {
         event.preventDefault();
