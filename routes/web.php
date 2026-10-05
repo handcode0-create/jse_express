@@ -334,7 +334,9 @@ Route::get('/profil', function () {
             ->count(),
         'adresses' => AdresseLivraison::query()
             ->where('user_id', Auth::id())
-            ->with('zone')
+            ->with(['zone', 'categories' => function ($query) {
+            $query->where('statut', 'actif')->orderBy('nom');
+        }])
             ->orderByDesc('par_defaut')
             ->latest('id')
             ->get()
@@ -1108,7 +1110,6 @@ Route::get('/restaurants/{restaurant}', function (Restaurant $restaurant) {
             'telephone' => $restaurant->telephone,
             'zone' => $restaurant->zone ? ['id' => $restaurant->zone->id, 'nom' => $restaurant->zone->nom] : null,
         ],
-        'categories' => $categories,
         'estFavori' => $estFavori,
         'panier' => [
             'nombre_articles' => $panier?->lignesPanier->sum('quantite') ?? 0,
@@ -1261,34 +1262,15 @@ Route::get('/accueil', function (Request $request) {
                 'zone' => $restaurant->zone
                     ? ['id' => $restaurant->zone->id, 'nom' => $restaurant->zone->nom]
                     : null,
+                'categories' => $restaurant->categories
+                    ->map(fn (Categorie $categorie) => [
+                        'id' => $categorie->id,
+                        'nom' => $categorie->nom,
+                    ])
+                    ->values(),
             ];
         })
         ->values();
-
-    $categories = Categorie::query()
-        ->where('statut', 'actif')
-        ->whereHas('restaurant', function ($query) {
-            $query->where('statut', 'actif');
-        })
-        ->orderBy('nom')
-        ->get(['id', 'nom'])
-        ->unique('nom')
-        ->values();
-
-    $imagesCategories = [
-        '/assets/hero_icon/fast_food.jpeg',
-        '/assets/hero_icon/glacier.jpeg',
-        '/assets/hero_icon/promo.jpeg',
-        '/assets/hero_icon/resto.jpeg',
-    ];
-
-    $categories = $categories->map(function ($categorie, $index) use ($imagesCategories) {
-        return [
-            'id' => $categorie->id,
-            'nom' => $categorie->nom,
-            'image' => $imagesCategories[$index % count($imagesCategories)],
-        ];
-    })->values();
 
     $panier = Panier::query()
         ->where('user_id', Auth::id())
