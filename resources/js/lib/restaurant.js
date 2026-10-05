@@ -1,14 +1,4 @@
-/** Montant en FCFA, avec séparateur de milliers français. */
-export const montant = (valeur) => new Intl.NumberFormat("fr-FR").format(Number(valeur || 0)) + " FCFA";
-
-export const initiales = (texte = "") =>
-    texte
-        .split(" ")
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((partie) => partie[0])
-        .join("")
-        .toUpperCase();
+export { initiales, montant } from "./format";
 
 /** Prochaine action du restaurant sur une commande, selon son statut actuel. */
 export const statutSuivant = {
