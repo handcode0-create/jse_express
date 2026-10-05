@@ -20,7 +20,7 @@ export default function TableauDeBord({
     const [motifsAnnulation, setMotifsAnnulation] = useState({});
     const [traitement, setTraitement] = useState(null);
     const [commandeAAnnuler, setCommandeAAnnuler] = useState(null);
-    const { auth, errors = {} } = usePage().props;
+    const { auth } = usePage().props;
     const utilisateur = auth?.user;
 
     const reattribuer = (livraisonId) => {
@@ -66,7 +66,6 @@ export default function TableauDeBord({
         { label: "Clients actifs", value: statistiques.clients_actifs ?? 0, icon: UserRound, tone: "principal", href: "/administration/clients" },
     ];
 
-    const erreurs = Object.values(errors || {}).filter(Boolean);
     const referenceAAnnuler = commandeAAnnuler ? commandeAAnnuler.reference || "#" + commandeAAnnuler.id : "";
 
     return (
@@ -86,12 +85,6 @@ export default function TableauDeBord({
                         Voici l’activité à surveiller aujourd’hui.
                     </p>
                 </header>
-
-                {erreurs.length > 0 && (
-                    <div className="mt-5 rounded-2xl border border-jse-danger/30 bg-jse-danger/10 p-4 text-sm leading-6 text-jse-danger" role="alert">
-                        {erreurs[0]}
-                    </div>
-                )}
 
                 <section className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3" aria-label="Indicateurs clés">
                     {cartes.map((carte) => (

@@ -203,6 +203,7 @@ class RestaurantController extends Controller
             'restaurant' => [
                 'id' => $restaurant->id,
                 'nom' => $restaurant->nom,
+                'adresse' => $restaurant->adresse,
             ],
             'commande' => [
                 'id' => $commande->id,
