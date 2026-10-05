@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { Bike, ChevronLeft, ChevronRight, Edit3, Mail, MapPin, Plus, Search, ShieldCheck, Store, UserRound, X } from "lucide-react";
 import AdminSidebar from "../../Composants/Admin/AdminSidebar";
@@ -20,7 +20,16 @@ export default function Utilisateurs({ utilisateurs, filtres = {}, roles: rolesD
     const listeRoles = useMemo(() => roles.filter((r) => rolesDisponibles.includes(r.value)), [rolesDisponibles]);
     const data = utilisateurs?.data || [];
 
-    const ouvrirCreation = () => { setForm({ ...emptyForm }); setModal({ type: "create" }); };
+    const ouvrirCreation = (role = "client") => { setForm({ ...emptyForm, role }); setModal({ type: "create" }); };
+
+    // Les pages Restaurants et Livreurs renvoient ici avec ?nouveau=restaurant|livreur.
+    useEffect(() => {
+        const role = new URLSearchParams(window.location.search).get("nouveau");
+
+        if (role === "restaurant" || role === "livreur") {
+            ouvrirCreation(role);
+        }
+    }, []);
     const ouvrirEdition = (item) => {
         setForm({ ...emptyForm, ...item, restaurant_nom:item.restaurant?.nom || "", restaurant_telephone:item.restaurant?.telephone || "", restaurant_email:item.restaurant?.email || "", restaurant_adresse:item.restaurant?.adresse || "", livreur_matricule:item.profil_livreur?.matricule || "", livreur_zone_id:item.profil_livreur?.zone_id || "", livreur_disponibilite:item.profil_livreur?.disponibilite || "indisponible", livreur_telephone_secondaire:item.profil_livreur?.telephone_secondaire || "" });
         setModal({ type:"edit", user:item });
@@ -42,7 +51,7 @@ export default function Utilisateurs({ utilisateurs, filtres = {}, roles: rolesD
     return <>
         <Head title="Utilisateurs & rôles — Administration" />
         <main className="jse-admin-page min-h-screen overflow-x-hidden bg-jse-theme-bg text-jse-theme-text"><div className="flex min-h-screen lg:pl-[238px]"><AdminSidebar utilisateur={utilisateur} /><section className="min-w-0 flex-1"><div className="mx-auto w-full max-w-7xl px-4 py-5 pb-[calc(96px+env(safe-area-inset-bottom))] sm:px-6 sm:py-7 lg:px-8 lg:py-9 lg:pb-9">
-            <header className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div className="min-w-0"><p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-jse-secondaire">Administration</p><h1 className="mt-1.5 break-words text-2xl font-semibold leading-tight tracking-tight sm:text-4xl">Utilisateurs & rôles</h1><p className="mt-2 max-w-2xl text-xs leading-5 text-jse-theme-muted sm:text-sm">Gérez les comptes, les rôles et les accès de JSE Express.</p></div><button type="button" onClick={ouvrirCreation} className="jse-admin-primary inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-jse-principal px-4 text-sm font-semibold text-white sm:w-auto"><Plus size={17}/>Ajouter un utilisateur</button></header>
+            <header className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div className="min-w-0"><p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-jse-secondaire">Administration</p><h1 className="mt-1.5 break-words text-2xl font-semibold leading-tight tracking-tight sm:text-4xl">Utilisateurs & rôles</h1><p className="mt-2 max-w-2xl text-xs leading-5 text-jse-theme-muted sm:text-sm">Gérez les comptes, les rôles et les accès de JSE Express.</p></div><button type="button" onClick={() => ouvrirCreation()} className="jse-admin-primary inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-jse-principal px-4 text-sm font-semibold text-white sm:w-auto"><Plus size={17}/>Ajouter un utilisateur</button></header>
             {flash?.success && <div className="mt-5 rounded-2xl border border-jse-secondaire/20 bg-jse-secondaire/10 px-4 py-3 text-sm text-jse-principal dark:text-jse-secondaire">{flash.success}</div>}
             <section className="jse-admin-card mt-6 rounded-[24px] border border-jse-theme-border bg-jse-theme-surface p-3 shadow-jse-carte sm:p-4"><div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_180px_auto]">
                 <label className="relative block"><Search size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-jse-theme-muted"/><input value={filtres.recherche || ""} onChange={(e)=>query({ recherche:e.target.value || undefined, page:1 })} placeholder="Rechercher nom, téléphone ou email..." className="jse-admin-input h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-bg pl-10 pr-3 text-sm outline-none focus:border-jse-secondaire"/></label>

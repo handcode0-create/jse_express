@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ProfilLivreur;
 use App\Models\Restaurant;
 use App\Models\User;
-use App\Models\ProfilLivreur;
 use App\Models\Zone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -125,7 +125,12 @@ class AuthentificationController extends Controller
             'livreur_disponibilite.required_if' => 'Veuillez indiquer votre disponibilité.',
         ]);
 
-        DB::transaction(function () use ($donnees) {
+        // Les comptes restaurant et livreur restent inactifs jusqu'à leur
+        // validation par un administrateur.
+        $validationRequise = in_array($donnees['role'], ['restaurant', 'livreur'], true);
+        $statutInitial = $validationRequise ? 'inactif' : 'actif';
+
+        DB::transaction(function () use ($donnees, $statutInitial) {
             $utilisateur = User::create([
                 'nom' => $donnees['nom'],
                 'prenom' => $donnees['prenom'],
@@ -133,7 +138,7 @@ class AuthentificationController extends Controller
                 'email' => $donnees['email'] ?? null,
                 'password' => Hash::make($donnees['mot_de_passe']),
                 'role' => $donnees['role'],
-                'statut' => 'actif',
+                'statut' => $statutInitial,
             ]);
 
             if ($donnees['role'] === 'restaurant') {
@@ -146,7 +151,7 @@ class AuthentificationController extends Controller
                     'email' => $donnees['restaurant_email'] ?? null,
                     'adresse' => $donnees['restaurant_adresse'],
                     'horaires' => null,
-                    'statut' => 'actif',
+                    'statut' => $statutInitial,
                 ]);
             }
 
@@ -163,7 +168,9 @@ class AuthentificationController extends Controller
 
         return redirect()
             ->route('authentification')
-            ->with('success', 'Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.');
+            ->with('success', $validationRequise
+                ? 'Votre compte a été créé. Il sera activé après validation par l’administration.'
+                : 'Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.');
     }
 
     public function connexion(Request $request): RedirectResponse
@@ -190,7 +197,6 @@ class AuthentificationController extends Controller
         ]);
 
         $utilisateur = User::query()
-            ->where('statut', 'actif')
             ->whereIn('role', ['client', 'restaurant', 'livreur', 'administrateur'])
             ->get()
             ->first(fn (User $user) => $this->normaliserTelephone((string) $user->telephone) === $telephone);
@@ -198,6 +204,12 @@ class AuthentificationController extends Controller
         if (! $utilisateur || ! Hash::check($donnees['mot_de_passe'], $utilisateur->password)) {
             throw ValidationException::withMessages([
                 'telephone' => 'Le numéro de téléphone ou le mot de passe est incorrect.',
+            ]);
+        }
+
+        if ($utilisateur->statut !== 'actif') {
+            throw ValidationException::withMessages([
+                'telephone' => 'Votre compte n’est pas actif. Il doit être validé par l’administration avant de pouvoir vous connecter.',
             ]);
         }
 
@@ -218,7 +230,7 @@ class AuthentificationController extends Controller
         }
 
         if (str_starts_with($telephone, '0') && strlen($telephone) === 10) {
-            $telephone = '225' . $telephone;
+            $telephone = '225'.$telephone;
         }
 
         return $telephone;

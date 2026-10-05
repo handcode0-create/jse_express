@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Restaurant;
 use App\Models\User;
 use App\Models\Zone;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -100,6 +101,42 @@ class AdministrationUtilisateurTest extends TestCase
             'matricule' => 'JSE-LIV-9001',
             'zone_id' => $zone->id,
         ]);
+    }
+
+    public function test_l_activation_d_un_compte_restaurant_active_aussi_son_restaurant(): void
+    {
+        $admin = User::factory()->administrateur()->create();
+        $restaurateur = User::factory()->restaurant()->create(['statut' => 'inactif']);
+        $restaurant = Restaurant::factory()->create([
+            'user_id' => $restaurateur->id,
+            'statut' => 'inactif',
+        ]);
+
+        $response = $this->actingAs($admin)->patch(route('admin.utilisateurs.statut', $restaurateur), [
+            'statut' => 'actif',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Statut utilisateur mis à jour.');
+
+        $this->assertSame('actif', $restaurateur->fresh()->statut);
+        $this->assertSame('actif', $restaurant->fresh()->statut);
+    }
+
+    public function test_la_desactivation_d_un_compte_restaurant_retire_son_restaurant_du_catalogue(): void
+    {
+        $admin = User::factory()->administrateur()->create();
+        $restaurateur = User::factory()->restaurant()->create();
+        $restaurant = Restaurant::factory()->create([
+            'user_id' => $restaurateur->id,
+            'statut' => 'actif',
+        ]);
+
+        $this->actingAs($admin)->patch(route('admin.utilisateurs.statut', $restaurateur), [
+            'statut' => 'inactif',
+        ])->assertRedirect();
+
+        $this->assertSame('inactif', $restaurant->fresh()->statut);
     }
 
     public function test_un_client_ne_peut_pas_creer_un_utilisateur(): void

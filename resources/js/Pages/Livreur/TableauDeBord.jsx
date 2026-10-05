@@ -177,7 +177,7 @@ function MissionDetail({ mission, onBack, onTake, loading, onNavigate }) {
     const attribuee = ["attribuee", "en_attente"].includes(mission.statut_livraison);
 
     return (
-        <div className="fixed inset-0 z-50 bg-[#070b0d] text-white">
+        <div className="jse-adaptive fixed inset-0 z-50 bg-[#070b0d] text-white">
             <div className="mx-auto h-full w-full max-w-[480px] overflow-y-auto px-4 pb-8">
                 <div className="flex items-center justify-between py-4">
                     <button onClick={onBack} className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5">
@@ -296,7 +296,11 @@ function usePositionLivreur(active = true) {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (!active || !("geolocation" in navigator)) {
+        if (!active) {
+            return;
+        }
+
+        if (!("geolocation" in navigator)) {
             setError("La géolocalisation n’est pas disponible sur cet appareil.");
             return;
         }
@@ -339,33 +343,17 @@ function RecentrerPosition({ position }) {
     return null;
 }
 
+// Centre d'Adzopé, affiché tant qu'aucune position n'est connue.
+const CENTRE_PAR_DEFAUT = [6.1069, -3.8619];
+
 function CarteLeaflet({ compact = false, position, accuracy, error }) {
-
-    if (error && !position) {
-        return (
-            <div className="relative flex h-full min-h-[360px] items-center justify-center overflow-hidden rounded-[28px] bg-[#0B1112] p-6">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(18,60,50,.75),transparent_65%)]" />
-                <div className="relative max-w-xs text-center">
-                    <div className="mx-auto flex size-16 items-center justify-center rounded-[22px] border border-jse-accent/20 bg-jse-accent/10 text-jse-accent">
-                        <MapPin size={28} />
-                    </div>
-                    <p className="mt-5 text-sm font-bold text-white">Localisation requise</p>
-                    <p className="mt-2 text-[10px] leading-5 text-white/45">{error}</p>
-                    <p className="mt-4 text-[9px] leading-4 text-white/25">
-                        La carte utilise la géolocalisation native du navigateur. Aucun emplacement fictif n’est utilisé.
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
-    const center = position || [0, 0];
+    const localisationEnEchec = Boolean(error) && !position;
 
     return (
-        <div className="relative h-full min-h-[360px] overflow-hidden rounded-[28px] border border-white/10 bg-[#0B1112]">
+        <div className="jse-dark-surface relative h-full min-h-[360px] overflow-hidden rounded-[28px] border border-white/10 bg-[#0B1112]">
             <MapContainer
-                center={center}
-                zoom={position ? 16 : 2}
+                center={position || CENTRE_PAR_DEFAUT}
+                zoom={position ? 16 : 14}
                 zoomControl={false}
                 scrollWheelZoom={!compact}
                 className="h-full min-h-[360px] w-full"
@@ -404,7 +392,7 @@ function CarteLeaflet({ compact = false, position, accuracy, error }) {
                 <div className="rounded-[18px] border border-white/10 bg-[#0B1112]/90 px-4 py-3 shadow-2xl backdrop-blur-xl">
                     <p className="text-[8px] font-semibold uppercase tracking-[.18em] text-white/35">Navigation</p>
                     <p className="mt-1 text-xs font-bold text-white">
-                        {position ? "Position en direct" : "Recherche de position…"}
+                        {position ? "Position en direct" : localisationEnEchec ? "Position indisponible" : "Recherche de position…"}
                     </p>
                 </div>
                 {position && (
@@ -413,6 +401,20 @@ function CarteLeaflet({ compact = false, position, accuracy, error }) {
                     </div>
                 )}
             </div>
+
+            {localisationEnEchec && (
+                <div className="absolute bottom-4 left-4 right-4 z-[500] rounded-[22px] border border-white/10 bg-[#0B1112]/92 p-4 shadow-2xl backdrop-blur-xl">
+                    <div className="flex items-center gap-3">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-full border border-jse-accent/20 bg-jse-accent/10 text-jse-accent">
+                            <MapPin size={17} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-xs font-bold text-white">Localisation requise</p>
+                            <p className="mt-1 text-[10px] leading-4 text-white/45">{error}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {position && (
                 <div className="absolute bottom-4 left-4 right-4 z-[500] rounded-[22px] border border-white/10 bg-[#0B1112]/92 p-4 shadow-2xl backdrop-blur-xl">
@@ -437,7 +439,7 @@ function NavigationScreen({ mission, onBack, onArrive }) {
     const { position, accuracy, error } = usePositionLivreur(true);
 
     return (
-        <div className="fixed inset-0 z-50 bg-[#070B0D] text-white">
+        <div className="jse-dark-surface fixed inset-0 z-50 bg-[#070B0D] text-white">
             <div className="mx-auto flex h-full w-full max-w-[480px] flex-col">
                 <header className="absolute left-0 right-0 top-0 z-[600] flex items-center justify-between px-4 py-4">
                     <button onClick={onBack} className="flex size-11 items-center justify-center rounded-full border border-white/10 bg-[#0B1112]/90 text-white shadow-2xl backdrop-blur-xl">
@@ -489,7 +491,7 @@ function NavigationScreen({ mission, onBack, onArrive }) {
 
 function PickupScreen({ mission, onBack, onStart }) {
     return (
-        <div className="fixed inset-0 z-50 bg-[#070b0d] text-white">
+        <div className="jse-adaptive fixed inset-0 z-50 bg-[#070b0d] text-white">
             <div className="mx-auto h-full w-full max-w-[480px] overflow-y-auto px-4 pb-8">
                 <header className="flex items-center gap-3 py-4">
                     <button onClick={onBack} className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5"><ArrowLeft size={19} /></button>
@@ -573,7 +575,7 @@ function DeliveryScreen({ mission, onBack, onValidate, loading, error }) {
     };
 
     return (
-        <div className="fixed inset-0 z-50 bg-[#070b0d] text-white">
+        <div className="jse-adaptive fixed inset-0 z-50 bg-[#070b0d] text-white">
             <div className="mx-auto h-full w-full max-w-[480px] overflow-y-auto px-4 pb-8">
                 <header className="flex items-center gap-3 py-4">
                     <button onClick={onBack} className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5">
@@ -656,7 +658,7 @@ function DeliveryScreen({ mission, onBack, onValidate, loading, error }) {
 
 function SuccessScreen({ mission, onBack }) {
     return (
-        <div className="fixed inset-0 z-50 bg-[#070b0d] text-white">
+        <div className="jse-adaptive fixed inset-0 z-50 bg-[#070b0d] text-white">
             <div className="mx-auto flex h-full w-full max-w-[480px] flex-col items-center justify-center px-5 text-center">
                 <div className="relative animate-jse-pop">
                     <div className="absolute inset-0 animate-jse-pulse rounded-full bg-jse-secondaire/20" />
@@ -783,7 +785,7 @@ function Profile({ livreur, zones = [], historique = [], statistiques = {}, load
             </div>
 
             <div className="mt-5 overflow-hidden rounded-[26px] border border-white/10 bg-jse-theme-surface shadow-[0_24px_70px_rgba(0,0,0,.28)]">
-                <div className="jse-profile-hero relative min-h-[190px] overflow-hidden px-5 pb-7 pt-6">
+                <div className="jse-profile-hero jse-dark-surface relative min-h-[190px] overflow-hidden px-5 pb-7 pt-6">
                     <img
                         src="/assets/profil_header.png"
                         alt=""
@@ -1045,7 +1047,7 @@ export default function TableauDeBord() {
     }
 
     return (
-        <main className="min-h-screen bg-[#070b0d] pb-28 text-white lg:pb-0">
+        <main className="jse-adaptive min-h-screen bg-[#070b0d] pb-28 text-white lg:pb-0">
             <div className="flex min-h-screen">
                 <SidebarLivreur actif={onglet} livreur={livreur} onChange={setOnglet} />
 

@@ -557,6 +557,7 @@ class AdministrationController extends Controller
 
         DB::transaction(function () use ($donnees, $user) {
             $ancienRole = $user->role;
+            $ancienStatut = $user->statut;
 
             if ($ancienRole === 'administrateur' && $user->statut === 'actif') {
                 $passeAdministrateurActif = ($donnees['role'] ?? $ancienRole) === 'administrateur'
@@ -578,6 +579,7 @@ class AdministrationController extends Controller
             ]);
 
             $this->synchroniserProfilMetier($user->fresh(), $donnees);
+            $this->synchroniserStatutRestaurant($user->fresh(), $ancienStatut);
         });
 
         return back()->with('success', 'Utilisateur mis à jour.');
@@ -646,9 +648,27 @@ class AdministrationController extends Controller
             abort(422, 'Impossible de désactiver le dernier administrateur actif du système.');
         }
 
-        $user->update(['statut' => $donnees['statut']]);
+        DB::transaction(function () use ($donnees, $user) {
+            $ancienStatut = $user->statut;
+
+            $user->update(['statut' => $donnees['statut']]);
+            $this->synchroniserStatutRestaurant($user, $ancienStatut);
+        });
 
         return back()->with('success', 'Statut utilisateur mis à jour.');
+    }
+
+    /**
+     * Le restaurant suit l'activation ou la désactivation de son compte,
+     * afin qu'un compte inactif n'apparaisse pas dans le catalogue.
+     */
+    private function synchroniserStatutRestaurant(User $user, string $ancienStatut): void
+    {
+        if ($user->role !== 'restaurant' || $user->statut === $ancienStatut) {
+            return;
+        }
+
+        $user->restaurant?->update(['statut' => $user->statut]);
     }
 
     private function validerUtilisateurAdmin(Request $request, ?User $user = null): array

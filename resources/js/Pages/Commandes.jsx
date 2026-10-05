@@ -386,7 +386,7 @@ export default function Commandes() {
                                                 "rounded-full px-5 py-3 font-sans text-xs font-semibold transition-all sm:px-7 sm:text-sm",
                                                 filtreActif === onglet.value
                                                     ? "bg-jse-secondaire text-white shadow-sm"
-                                                    : "text-jse-texte/70 hover:bg-jse-fond",
+                                                    : "text-jse-texte/70 hover:bg-jse-principal",
                                             ].join(" ")}
                                         >
                                             {onglet.label}

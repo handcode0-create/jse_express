@@ -331,7 +331,7 @@ export default function TableauDeBord() {
     };
 
     return (
-        <main className="min-h-screen bg-[#0b0d0f] text-white">
+        <main className="jse-adaptive min-h-screen bg-[#0b0d0f] text-white">
             <div className="flex min-h-screen">
                 <aside className="sticky top-0 hidden h-screen w-[245px] shrink-0 border-r border-white/8 bg-jse-theme-surface px-4 py-5 lg:flex lg:flex-col">
                     <div className="flex items-center gap-3 px-2">
@@ -434,7 +434,7 @@ export default function TableauDeBord() {
                         {onglet === "dashboard" && (
                             <>
                                 <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
-                                    <div className="relative min-h-[215px] overflow-hidden rounded-2xl border border-jse-accent/50 bg-[#17191b]">
+                                    <div className="jse-dark-surface relative min-h-[215px] overflow-hidden rounded-2xl border border-jse-accent/50 bg-[#17191b]">
                                         <img src="/assets/plat-hero.png" alt="" className="absolute inset-0 h-full w-full object-cover opacity-55" />
                                         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
                                         <div className="relative z-10 max-w-[570px] p-7 sm:p-8">
@@ -493,7 +493,7 @@ export default function TableauDeBord() {
                                         </div>
                                     </div>
 
-                                    <div className="relative min-h-[250px] overflow-hidden rounded-2xl bg-[#151719]">
+                                    <div className="jse-dark-surface relative min-h-[250px] overflow-hidden rounded-2xl bg-[#151719]">
                                         <img src="/assets/plat-hero.png" alt="" className="absolute inset-0 size-full object-cover opacity-35" />
                                         <div className="absolute inset-0 bg-black/60" />
                                         <div className="relative z-10 flex h-full flex-col justify-end p-5">

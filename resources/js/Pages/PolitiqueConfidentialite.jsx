@@ -34,7 +34,7 @@ const sections = [
 
 export default function PolitiqueConfidentialite() {
     return (
-        <main className="min-h-screen bg-[#07110F] px-4 py-6 font-sans text-white sm:px-6 lg:px-10">
+        <main className="jse-adaptive min-h-screen bg-[#07110F] px-4 py-6 font-sans text-white sm:px-6 lg:px-10">
             <div className="mx-auto max-w-5xl">
                 <header className="flex items-center justify-between gap-4">
                     <button
@@ -49,7 +49,7 @@ export default function PolitiqueConfidentialite() {
                 </header>
 
                 <section className="mt-10 overflow-hidden rounded-[30px] border border-white/10 bg-[#0B1513]/95 shadow-[0_30px_100px_rgba(0,0,0,.4)]">
-                    <div className="border-b border-white/10 bg-gradient-to-br from-[var(--color-jse-principal)] to-[#0B1513] p-7 sm:p-10">
+                    <div className="jse-dark-surface border-b border-white/10 bg-gradient-to-br from-[var(--color-jse-principal)] to-[#0B1513] p-7 sm:p-10">
                         <div className="flex size-12 items-center justify-center rounded-2xl bg-jse-secondaire/15 text-jse-secondaire">
                             <ShieldCheck size={24} />
                         </div>
@@ -66,7 +66,7 @@ export default function PolitiqueConfidentialite() {
                                 <div className="flex items-start gap-3">
                                     <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-jse-secondaire" />
                                     <div>
-                                        <h2 className="font-semibold text-[var(--color-jse-fond)]">{section.title}</h2>
+                                        <h2 className="font-semibold text-white">{section.title}</h2>
                                         <p className="mt-2 text-sm leading-6 text-white/55">{section.text}</p>
                                     </div>
                                 </div>

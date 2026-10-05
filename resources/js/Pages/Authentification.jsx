@@ -181,7 +181,7 @@ export default function Authentification() {
     };
 
     return (
-        <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-jse-principal font-sans text-jse-texte">
+        <main ref={pageRef} className="jse-dark-surface relative min-h-screen overflow-hidden bg-jse-principal font-sans text-jse-texte">
             <img src="/assets/login_page_fond.png" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 size-full object-cover object-center" />
             <div className="pointer-events-none absolute inset-0 bg-jse-principal/45" />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--color-jse-principal)]/75 via-[var(--color-jse-principal)]/30 to-[var(--color-jse-principal)]/75" />
@@ -378,7 +378,7 @@ export default function Authentification() {
                                 className={`rounded-xl px-4 py-3 text-sm font-semibold transition ${
                                     mode === "inscription"
                                         ? "bg-white text-jse-principal shadow-sm"
-                                        : "text-jse-texte/45 hover:text-jse-texte"
+                                        : "text-jse-fond hover:text-jse-fond"
                                 }`}
                             >
                                 Inscription
@@ -760,7 +760,7 @@ export default function Authentification() {
 
                             <button
                                 type="submit"
-                                className="flex h-13 w-full items-center justify-center rounded-2xl bg-jse-principal px-6 text-sm font-semibold text-white shadow-lg shadow-jse-principal/15 transition hover:bg-jse-principal/90 active:scale-[0.99]"
+                                className="flex h-13 w-full items-center justify-center rounded-2xl bg-jse-secondaire px-6 text-sm font-semibold text-jse-principal shadow-lg shadow-jse-secondaire/15 transition hover:brightness-105 active:scale-[0.99]"
                             >
                                 {soumissionEnCours
                                     ? "Connexion en cours..."
