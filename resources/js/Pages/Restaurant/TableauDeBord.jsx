@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import { Head, router, usePage } from "@inertiajs/react";
-import { BarChart3, ChevronRight, CircleDollarSign, Clock3, LogOut, Package, ShoppingBag, UtensilsCrossed } from "lucide-react";
+import { BarChart3, CircleDollarSign, LogOut, Package, ShoppingBag } from "lucide-react";
 import AdminButton from "../../Composants/Admin/AdminButton";
 import AdminCard from "../../Composants/Admin/AdminCard";
 import AdminStatCard from "../../Composants/Admin/AdminStatCard";
 import ThemeToggle from "../../Composants/Interface/ThemeToggle";
 import PhotoProfil from "../../Composants/Profil/PhotoProfil";
+import AccueilRestaurant from "../../Composants/Restaurant/AccueilRestaurant";
 import CommandesRestaurant from "../../Composants/Restaurant/CommandesRestaurant";
 import { FormulaireCompte, FormulaireHoraires, FormulaireProfil, TitreRubrique } from "../../Composants/Restaurant/FormulairesRestaurant";
 import { ModaleCategorie, ModaleProduit } from "../../Composants/Restaurant/FormulairesProduit";
@@ -60,50 +61,20 @@ export default function TableauDeBord() {
 
             <RestaurantLayout restaurant={restaurant} onglet={onglet} onNavigate={naviguer} aTraiter={commandesATraiter.length}>
                 {onglet === "dashboard" && (
-                    <>
-                        <header className="min-w-0">
-                            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-jse-theme-muted">
-                                <span className="h-0.5 w-6 rounded-full bg-jse-secondaire" aria-hidden="true" />
-                                Espace restaurant
-                            </p>
-                            <h1 className="mt-2 break-words font-against text-4xl leading-[0.95] text-jse-theme-heading sm:text-5xl">Bonjour {prenom}</h1>
-                            <p className="mt-3 max-w-2xl text-sm leading-6 text-jse-theme-muted sm:text-base">Voici l’activité de votre restaurant aujourd’hui.</p>
-                        </header>
-
-                        <section className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4" aria-label="Indicateurs du jour">
-                            <AdminStatCard label="Commandes à traiter" value={commandesATraiter.length} icon={Clock3} tone="accent" onClick={() => naviguer("commandes")} />
-                            <AdminStatCard label="Commandes aujourd'hui" value={statistiques.commandes_du_jour || 0} icon={ShoppingBag} tone="principal" onClick={() => naviguer("commandes")} />
-                            <AdminStatCard label="Revenus du jour" value={montant(statistiques.revenus_du_jour)} icon={CircleDollarSign} tone="secondaire" onClick={() => naviguer("statistiques")} />
-                            <AdminStatCard label="Produits disponibles" value={statistiques.produits_disponibles || 0} icon={UtensilsCrossed} tone="secondaire" onClick={() => naviguer("menu")} />
-                        </section>
-
-                        <section className="mt-8" aria-labelledby="titre-a-traiter">
-                            <div className="mb-4 flex items-end justify-between gap-3">
-                                <div>
-                                    <h2 id="titre-a-traiter" className="text-lg font-semibold text-jse-theme-heading">
-                                        Commandes à traiter
-                                    </h2>
-                                    <p className="text-sm text-jse-theme-muted">Confirmez, préparez, puis marquez prêtes pour la livraison.</p>
-                                </div>
-                                <button type="button" onClick={() => naviguer("commandes")} className="inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-jse-theme-heading hover:underline">
-                                    Toutes les commandes
-                                    <ChevronRight size={16} aria-hidden="true" />
-                                </button>
-                            </div>
-                            <CommandesRestaurant commandes={commandesATraiter} filtres={false} limite={5} traitement={commandeEnCours} onAvancer={avancerCommande} />
-                        </section>
-
-                        {produitsIndisponibles > 0 && (
-                            <AdminCard className="mt-6 flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-                                <p className="text-sm text-jse-theme-text">
-                                    <span className="font-semibold tabular-nums">{produitsIndisponibles}</span> produit{produitsIndisponibles > 1 ? "s sont" : " est"} actuellement indisponible{produitsIndisponibles > 1 ? "s" : ""} pour vos clients.
-                                </p>
-                                <AdminButton variante="contour" taille="petit" onClick={() => naviguer("menu")}>
-                                    Gérer le menu
-                                </AdminButton>
-                            </AdminCard>
-                        )}
-                    </>
+                    <AccueilRestaurant
+                        restaurant={restaurant}
+                        prenom={prenom}
+                        commandes={commandes}
+                        commandesATraiter={commandesATraiter}
+                        categories={categories}
+                        produits={produits}
+                        statistiques={statistiques}
+                        traitementCommande={commandeEnCours}
+                        traitementProduit={produitEnCours}
+                        onAvancer={avancerCommande}
+                        onBasculerProduit={basculerDisponibilite}
+                        onNaviguer={naviguer}
+                    />
                 )}
 
                 {onglet === "commandes" && (
