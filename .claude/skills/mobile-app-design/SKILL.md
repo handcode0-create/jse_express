@@ -1,6 +1,6 @@
 ---
 name: mobile-app-design
-description: "Expert en design d'application mobile (UI/UX, iOS/Android, mobile-first web). Activer pour concevoir, critiquer ou refondre un écran mobile, un parcours (commande, onboarding, authentification, suivi de livraison), une navigation, un composant tactile ou une version mobile d'une page JSE Express. Couvre ergonomie tactile, hiérarchie, états, accessibilité, performance perçue et cohérence avec le design system JSE Express. Ne pas utiliser pour la logique backend ou le code non visuel."
+description: "Expert en design d'application mobile (UI/UX, iOS/Android, mobile-first web), exigeant sur la richesse visuelle : photo, typographie Against, dégradés, mouvement, pas de simples listes de cartes. Activer pour concevoir, critiquer ou refondre un écran mobile, un parcours (commande, onboarding, authentification, suivi de livraison), une navigation, un composant tactile ou une version mobile d'une page JSE Express. Couvre ergonomie tactile, hiérarchie, états, accessibilité, performance perçue et cohérence avec le design system JSE Express. Ne pas utiliser pour la logique backend ou le code non visuel."
 license: MIT
 metadata:
   author: jse-express
@@ -8,7 +8,7 @@ metadata:
 
 # Design d'application mobile
 
-Tu raisonnes comme un directeur artistique et product designer mobile senior : tu pars de l'usage réel (une main, en mouvement, connexion variable, soleil), tu tranches, et tu justifies chaque choix.
+Tu raisonnes comme un directeur artistique et product designer mobile senior, **avec un vrai parti pris visuel** : tu ne livres jamais un écran simplement fonctionnel. Tu pars de l'usage réel (une main, en mouvement, connexion variable, soleil), tu tranches, et tu justifies chaque choix.
 
 ## Quand l'activer
 
@@ -24,6 +24,30 @@ Tu raisonnes comme un directeur artistique et product designer mobile senior : t
 - Direction validée : fond crème, blocs vert foncé, photos Unsplash arrondies, titres Against, boutons `rounded-full`. Voir `Bienvenue.jsx`, `APropos.jsx`, `Aide.jsx`, `Authentification.jsx`.
 - Marché : Adzopé, paiement mobile, usage majoritairement smartphone. Privilégier contrastes élevés, aplats plutôt que dégradés lourds, pas de contenu bloquant sur connexion lente.
 - Aucune donnée commerciale inventée (chiffres, témoignages, partenaires).
+
+## Niveau de finition exigé (anti-« trop simple »)
+
+L'ergonomie et l'accessibilité sont un **plancher**, pas le but. Un écran qui n'est « que » propre, lisible et conforme est un échec : il doit avoir le caractère des pages de référence (`Bienvenue.jsx`, `APropos.jsx`, `Accueil.jsx`). Lire au moins deux de ces pages avant de concevoir un écran.
+
+**Ce qui fait la richesse de `Bienvenue.jsx` (à reproduire, pas à copier) :**
+- Fond photographique plein écran (`/assets/bg_bienvenue.png`) + plusieurs couches de dégradés vert `jse-principal` pour garder le texte lisible.
+- Photographie produit détourée mise en scène (`/assets/bienvenue/*.png`, `/assets/plat-hero.png`) : un visuel dominant, jamais une grille d'icônes.
+- Titres Against très grands (`text-5xl` à `text-8xl`), serrés, posés sur l'image, avec un mot en orange `jse-accent`.
+- Surfaces vert foncé de marque et verre dépoli (`bg-white/10 backdrop-blur-md`, bordure `white/20`), avec CTA orange net.
+- Chorégraphie GSAP : entrée échelonnée (header, titre, visuel, actions), parallaxe, gestes et clavier, toujours avec garde `prefers-reduced-motion`.
+
+**Chaque écran doit contenir :**
+1. **Un moment de marque** : une bande héro (photo + dégradés + titre Against + une action) ou un bloc vert de marque. Pas d'écran qui commence par une carte blanche.
+2. **Un élément dominant** par écran (visuel, chiffre clé, action principale). Si tout a le même poids, c'est plat.
+3. **Du vrai contenu visuel** : images du projet (`public/assets`, `lib/imagesUnsplash.js`), photos de plats, de restaurants, vidéo `livreur-bg.mp4` pour l'espace livreur. Une vignette neutre n'est qu'un état de secours.
+4. **De l'information visualisée** plutôt que listée : chiffres clés en grand avec contexte (variation, objectif), barres de progression, frises de statut, pastilles de couleur, mini-graphiques.
+5. **Du rythme** : alterner surfaces claires, vertes et photographiques ; varier les tailles de cartes (une grande + deux petites) ; éviter trois cartes identiques côte à côte.
+6. **Du mouvement utile** : entrée échelonnée, retour visuel au toucher, transitions de statut, compteur qui s'anime. Sobre, rapide (150–700 ms), désactivé si `prefers-reduced-motion`.
+7. **Du texte de marque** : titres et sous-titres écrits pour JSE Express (Adzopé, plats locaux), pas des libellés génériques « Tableau de bord ».
+
+**Interdit :** une page faite uniquement de `AdminCard` + titre + liste/formulaire, répétée d'une rubrique à l'autre. Les composants partagés (`AdminCard`, `AdminButton`, `AdminField`) servent aux **formulaires et aux données** ; l'**accueil de chaque espace** (client, restaurant, livreur, admin) doit être un écran de caractère.
+
+**Test final :** placé à côté de `Bienvenue.jsx`, cet écran paraît-il appartenir au même produit, avec la même ambition ? Sinon, le retravailler avant de le livrer.
 
 ## Processus
 
@@ -78,6 +102,8 @@ Pour un écran ou un parcours : (1) job de l'écran, (2) structure de haut en ba
 
 ## Checklist avant livraison
 
+- [ ] **Caractère visuel** : moment de marque (photo + dégradés + titre Against), élément dominant, au moins une information visualisée, mouvement utile
+- [ ] Cohérent avec `Bienvenue.jsx` : l'écran n'est pas « que propre », il est riche
 - [ ] Une action principale claire, atteignable au pouce
 - [ ] Cibles tactiles ≥ 44 pt, texte ≥ 16 px dans les champs
 - [ ] États vide, chargement, erreur et succès conçus
