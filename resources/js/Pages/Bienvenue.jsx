@@ -111,9 +111,9 @@ export default function Bienvenue() {
                     </button>
 
                     <nav className="hidden items-center gap-7 font-sans text-sm font-medium text-jse-fond/90 lg:flex" aria-label="Navigation principale">
-                        <button type="button" onClick={() => router.visit("/")} className="transition hover:text-jse-secondaire">Restaurants</button>
-                        <button type="button" onClick={() => router.visit("/")} className="transition hover:text-jse-secondaire">À propos</button>
-                        <button type="button" onClick={() => router.visit("/")} className="transition hover:text-jse-secondaire">Aide</button>
+                        <button type="button" onClick={() => router.visit("/accueil")} className="transition hover:text-jse-secondaire">Restaurants</button>
+                        <button type="button" onClick={() => router.visit("/a-propos")} className="transition hover:text-jse-secondaire">À propos</button>
+                        <button type="button" onClick={() => router.visit("/aide")} className="transition hover:text-jse-secondaire">Aide</button>
                         <button
                             type="button"
                             onClick={() => router.visit("/authentification")}
@@ -158,9 +158,9 @@ export default function Bienvenue() {
                                 className="absolute right-0 top-12 z-50 min-w-44 rounded-2xl border border-white/15 bg-jse-principal p-2 font-sans text-sm text-jse-fond shadow-2xl"
                                 aria-label="Navigation mobile"
                             >
-                                <button type="button" onClick={() => { setMenuOuvert(false); router.visit("/"); }} className="w-full rounded-xl px-4 py-3 text-left transition hover:bg-white/10">Restaurants</button>
-                                <button type="button" onClick={() => { setMenuOuvert(false); router.visit("/"); }} className="w-full rounded-xl px-4 py-3 text-left transition hover:bg-white/10">À propos</button>
-                                <button type="button" onClick={() => { setMenuOuvert(false); router.visit("/"); }} className="w-full rounded-xl px-4 py-3 text-left transition hover:bg-white/10">Aide</button>
+                                <button type="button" onClick={() => { setMenuOuvert(false); router.visit("/accueil"); }} className="w-full rounded-xl px-4 py-3 text-left transition hover:bg-white/10">Restaurants</button>
+                                <button type="button" onClick={() => { setMenuOuvert(false); router.visit("/a-propos"); }} className="w-full rounded-xl px-4 py-3 text-left transition hover:bg-white/10">À propos</button>
+                                <button type="button" onClick={() => { setMenuOuvert(false); router.visit("/aide"); }} className="w-full rounded-xl px-4 py-3 text-left transition hover:bg-white/10">Aide</button>
                                 <button type="button" onClick={() => { setMenuOuvert(false); router.visit("/inscription"); }} className="mt-1 w-full rounded-xl bg-jse-accent px-4 py-3 text-left font-semibold text-white transition hover:bg-jse-accent/90">S'inscrire</button>
                             </nav>
                         )}
