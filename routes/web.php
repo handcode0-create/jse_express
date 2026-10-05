@@ -54,6 +54,14 @@ Route::get('/bienvenue', function () {
     return Inertia::render('Bienvenue');
 })->name('bienvenue');
 
+Route::get('/a-propos', function () {
+    return Inertia::render('APropos');
+})->name('a-propos');
+
+Route::get('/aide', function () {
+    return Inertia::render('Aide');
+})->name('aide');
+
 Route::get('/authentification', [AuthentificationController::class, 'show'])->name('authentification');
 
 Route::get('/inscription', [AuthentificationController::class, 'showInscription'])->name('inscription');
