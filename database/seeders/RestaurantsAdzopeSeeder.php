@@ -98,6 +98,16 @@ class RestaurantsAdzopeSeeder extends Seeder
     }
 
     /**
+     * Type de menu (maquis, restaurant, boulangerie) de chaque fiche, indexé par nom.
+     *
+     * @return array<string, string>
+     */
+    public function typesParNom(): array
+    {
+        return array_column($this->etablissements(), 'type', 'nom');
+    }
+
+    /**
      * @return list<array{nom: string, type: string, adresse?: string, telephone?: string, latitude?: float, longitude?: float}>
      */
     private function etablissements(): array
@@ -142,7 +152,7 @@ class RestaurantsAdzopeSeeder extends Seeder
                     'Foutou sauce graine' => 2500,
                 ],
                 'Boissons' => [
-                    'Boisson' => 500,
+                    'Boisson gazeuse' => 500,
                     'Jus de bissap' => 500,
                     'Eau minérale' => 500,
                 ],
@@ -159,7 +169,7 @@ class RestaurantsAdzopeSeeder extends Seeder
                     'Riz blanc' => 500,
                 ],
                 'Boissons' => [
-                    'Boisson' => 500,
+                    'Boisson gazeuse' => 500,
                     'Jus de gingembre' => 500,
                     'Eau minérale' => 500,
                 ],
@@ -175,7 +185,7 @@ class RestaurantsAdzopeSeeder extends Seeder
                     'Gâteau au yaourt' => 1500,
                 ],
                 'Boissons' => [
-                    'Boisson' => 500,
+                    'Boisson gazeuse' => 500,
                     'Café' => 500,
                 ],
             ],
