@@ -31,12 +31,8 @@ const bannières = [
     { image: imagesBannieres[4], label: "À DÉCOUVRIR", titre: "Variez les plaisirs", description: "Trouvez différentes propositions au même endroit." },
 ];
 
-const raccourcisAccueil = [
-    { nom: "Restaurants", image: imagesCategories[0] },
-    { nom: "Fast food", image: imagesCategories[1] },
-    { nom: "Boissons", image: imagesCategories[2] },
-    { nom: "Promotions", image: imagesCategories[3] },
-];
+const obtenirImageCategorie = (index = 0) =>
+    imagesCategories[Math.abs(Number(index) || 0) % imagesCategories.length];
 
 const obtenirImageRestaurant = (restaurant, index = 0) =>
     restaurant?.image || imageRestaurantFallback(restaurant?.id ?? index);
@@ -112,7 +108,7 @@ export default function Accueil() {
     const [filtreOuvert, setFiltreOuvert] = useState(false);
     const [zoneSelectionnee, setZoneSelectionnee] = useState("Toutes les zones");
     const [zoneTemporaire, setZoneTemporaire] = useState("Toutes les zones");
-    const [categorieSelectionnee, setCategorieSelectionnee] = useState("Restaurants");
+    const [categorieSelectionnee, setCategorieSelectionnee] = useState("");
     const [positionUtilisateur, setPositionUtilisateur] = useState(null);
     const [localisationEnCours, setLocalisationEnCours] = useState(false);
     const [messageLocalisation, setMessageLocalisation] = useState("");
@@ -228,6 +224,17 @@ export default function Accueil() {
         return ["Toutes les zones", ...new Set(valeurs)];
     }, [restaurants]);
 
+    const categoriesDisponibles = useMemo(() => {
+        const noms = restaurants
+            .flatMap((restaurant) => Array.isArray(restaurant.categories) ? restaurant.categories : [])
+            .map((categorie) => String(categorie?.nom || categorie || "").trim())
+            .filter(Boolean);
+
+        return [...new Set(noms)].sort((premier, second) =>
+            premier.localeCompare(second, "fr", { sensitivity: "base" }),
+        );
+    }, [restaurants]);
+
     const restaurantsDisponibles = useMemo(() => {
         if (!positionUtilisateur) return restaurants;
 
@@ -286,14 +293,15 @@ export default function Accueil() {
                 .join(" ")
                 .toLowerCase();
 
+            const categoriesRestaurant = Array.isArray(restaurant.categories)
+                ? restaurant.categories.map((categorie) =>
+                      String(categorie?.nom || categorie || "").trim().toLowerCase(),
+                  )
+                : [];
+
             const correspondCategorie =
-                categorieSelectionnee === "Restaurants" ||
-                (categorieSelectionnee === "Fast food" &&
-                    /fast.?food|burger|snack|pizza|sandwich|grill/i.test(texte)) ||
-                (categorieSelectionnee === "Boissons" &&
-                    /boisson|jus|glacier|café|bar/i.test(texte)) ||
-                (categorieSelectionnee === "Promotions" &&
-                    /promo|promotion|offre|réduction/i.test(texte));
+                !categorieSelectionnee ||
+                categoriesRestaurant.includes(categorieSelectionnee.trim().toLowerCase());
 
             return correspondZone && correspondCategorie && (!terme || texte.includes(terme));
         });
@@ -581,31 +589,41 @@ export default function Accueil() {
                             </div>
 
                             <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
-                                {raccourcisAccueil.map((raccourci) => (
-                                    <button
-                                        key={raccourci.nom}
-                                        type="button"
-                                        onClick={() => {
-                                            setCategorieSelectionnee(raccourci.nom);
-                                            window.setTimeout(() => document.getElementById("restaurants-populaires")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
-                                        }}
-                                        className={[
-                                            "jse-category-card group min-w-0 rounded-[22px] bg-white p-2 text-center shadow-[0_10px_30px_rgba(18,60,50,0.06)] ring-1 ring-jse-texte/5 transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(18,60,50,0.10)] sm:p-3 lg:p-3.5",
-                                            categorieSelectionnee === raccourci.nom ? "ring-2 ring-jse-secondaire" : "hover:-translate-y-0.5 hover:shadow-md",
-                                        ].join(" ")}
-                                    >
-                                        <div className="aspect-square overflow-hidden rounded-[18px] bg-jse-fond">
-                                            <img
-                                                src={raccourci.image}
-                                                alt={raccourci.nom}
-                                                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                                            />
-                                        </div>
-                                        <p className="mt-2 truncate font-sans text-[10px] font-semibold text-jse-texte sm:text-xs">
-                                            {raccourci.nom}
+                                {categoriesDisponibles.length > 0 ? (
+                                    categoriesDisponibles.map((nomCategorie, index) => (
+                                        <button
+                                            key={nomCategorie}
+                                            type="button"
+                                            onClick={() => {
+                                                setCategorieSelectionnee((actuelle) =>
+                                                    actuelle === nomCategorie ? "" : nomCategorie,
+                                                );
+                                                window.setTimeout(() => document.getElementById("restaurants-populaires")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+                                            }}
+                                            className={[
+                                                "jse-category-card group min-w-0 rounded-[22px] bg-white p-2 text-center shadow-[0_10px_30px_rgba(18,60,50,0.06)] ring-1 ring-jse-texte/5 transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(18,60,50,0.10)] sm:p-3 lg:p-3.5",
+                                                categorieSelectionnee === nomCategorie ? "ring-2 ring-jse-secondaire" : "hover:-translate-y-0.5 hover:shadow-md",
+                                            ].join(" ")}
+                                        >
+                                            <div className="aspect-square overflow-hidden rounded-[18px] bg-jse-fond">
+                                                <img
+                                                    src={obtenirImageCategorie(index)}
+                                                    alt={nomCategorie}
+                                                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                                />
+                                            </div>
+                                            <p className="mt-2 truncate font-sans text-[10px] font-semibold text-jse-texte sm:text-xs">
+                                                {nomCategorie}
+                                            </p>
+                                        </button>
+                                    ))
+                                ) : (
+                                    <div className="col-span-4 rounded-[22px] bg-white p-5 text-center ring-1 ring-jse-texte/5">
+                                        <p className="font-sans text-xs text-jse-texte/55">
+                                            Aucune catégorie disponible pour les restaurants actuellement proposés.
                                         </p>
-                                    </button>
-                                ))}
+                                    </div>
+                                )}
                             </div>
                         </section>
 
