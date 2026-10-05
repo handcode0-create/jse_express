@@ -145,6 +145,79 @@ class InscriptionTest extends TestCase
         $this->assertDatabaseCount('users', 0);
     }
 
+    public function test_l_inscription_client_accepte_les_champs_de_profil_vides_envoyes_par_le_formulaire(): void
+    {
+        $this->post('/inscription', $this->donneesBase(['role' => 'client'] + $this->champsDeProfilVides()))
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/authentification');
+
+        $this->assertDatabaseHas('users', ['telephone' => '2250700000001', 'role' => 'client', 'statut' => 'actif']);
+        $this->assertDatabaseCount('restaurants', 0);
+        $this->assertDatabaseCount('profils_livreurs', 0);
+    }
+
+    public function test_l_inscription_restaurant_accepte_les_champs_livreur_vides_envoyes_par_le_formulaire(): void
+    {
+        $donnees = [
+            'role' => 'restaurant',
+            'restaurant_nom' => 'Chez Test',
+            'restaurant_telephone' => '0700000002',
+            'restaurant_adresse' => 'Centre-ville, Adzopé',
+        ];
+
+        $this->post('/inscription', $this->donneesBase($donnees + $this->champsDeProfilVides()))
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/authentification');
+
+        $this->assertDatabaseHas('restaurants', ['nom' => 'Chez Test', 'statut' => 'inactif']);
+        $this->assertDatabaseCount('profils_livreurs', 0);
+    }
+
+    public function test_l_inscription_livreur_accepte_les_champs_restaurant_vides_envoyes_par_le_formulaire(): void
+    {
+        $donnees = [
+            'role' => 'livreur',
+            'livreur_matricule' => 'LIV-TEST-01',
+            'livreur_disponibilite' => 'disponible',
+        ];
+
+        $this->post('/inscription', $this->donneesBase($donnees + $this->champsDeProfilVides()))
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/authentification');
+
+        $this->assertDatabaseHas('profils_livreurs', ['matricule' => 'LIV-TEST-01']);
+        $this->assertDatabaseCount('restaurants', 0);
+    }
+
+    public function test_l_inscription_restaurant_sans_nom_reste_refusee(): void
+    {
+        $this->post('/inscription', $this->donneesBase(['role' => 'restaurant'] + $this->champsDeProfilVides()))
+            ->assertSessionHasErrors(['restaurant_nom', 'restaurant_telephone', 'restaurant_adresse']);
+
+        $this->assertDatabaseCount('users', 0);
+    }
+
+    /**
+     * Champs de profil tels que le formulaire les envoie lorsqu'ils ne sont pas renseignés.
+     *
+     * @return array<string, string>
+     */
+    private function champsDeProfilVides(): array
+    {
+        return [
+            'restaurant_nom' => '',
+            'restaurant_description' => '',
+            'restaurant_telephone' => '',
+            'restaurant_email' => '',
+            'restaurant_adresse' => '',
+            'restaurant_zone_id' => '',
+            'livreur_matricule' => '',
+            'livreur_zone_id' => '',
+            'livreur_disponibilite' => 'indisponible',
+            'livreur_telephone_secondaire' => '',
+        ];
+    }
+
     private function donneesBase(array $overrides = []): array
     {
         return array_merge([

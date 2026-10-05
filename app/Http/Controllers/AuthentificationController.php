@@ -103,16 +103,16 @@ class AuthentificationController extends Controller
             'consentement' => ['accepted'],
             'recaptcha_token' => [$captchaActif ? 'required' : 'nullable', 'string'],
 
-            'restaurant_nom' => ['required_if:role,restaurant', 'string', 'max:150'],
+            'restaurant_nom' => ['required_if:role,restaurant', 'nullable', 'string', 'max:150'],
             'restaurant_description' => ['nullable', 'string', 'max:2000'],
-            'restaurant_telephone' => ['required_if:role,restaurant', 'string', 'max:30'],
+            'restaurant_telephone' => ['required_if:role,restaurant', 'nullable', 'string', 'max:30'],
             'restaurant_email' => ['nullable', 'email', 'max:150'],
-            'restaurant_adresse' => ['required_if:role,restaurant', 'string', 'max:1000'],
+            'restaurant_adresse' => ['required_if:role,restaurant', 'nullable', 'string', 'max:1000'],
             'restaurant_zone_id' => ['nullable', 'integer', 'exists:zones,id'],
 
-            'livreur_matricule' => ['required_if:role,livreur', 'string', 'max:100', 'unique:profils_livreurs,matricule'],
+            'livreur_matricule' => ['required_if:role,livreur', 'nullable', 'string', 'max:100', 'unique:profils_livreurs,matricule'],
             'livreur_zone_id' => ['nullable', 'integer', 'exists:zones,id'],
-            'livreur_disponibilite' => ['required_if:role,livreur', 'in:disponible,indisponible'],
+            'livreur_disponibilite' => ['required_if:role,livreur', 'nullable', 'in:disponible,indisponible'],
             'livreur_telephone_secondaire' => ['nullable', 'string', 'max:30'],
         ], [
             'role.required' => 'Veuillez indiquer votre usage de JSE Express.',
