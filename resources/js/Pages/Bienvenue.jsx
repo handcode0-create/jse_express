@@ -105,7 +105,7 @@ export default function Bienvenue() {
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/5" />
             <div className="pointer-events-none absolute inset-0 border border-white/[0.045]" />
             <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[393px] flex-col px-5 lg:max-w-none lg:px-10 xl:px-16">
-                <header data-welcome-header className="flex items-center justify-between py-5 sm:py-6 lg:py-7">
+                <header data-welcome-header className="relative z-40 flex items-center justify-between py-5 sm:py-6 lg:py-7">
                     <button type="button" onClick={() => router.visit("/")} className="flex items-center" aria-label="Accueil">
                         <img src="/assets/jse_logo.png?v=20261002" alt="JSE Express" className="h-9 w-auto object-contain sm:h-10" />
                     </button>
@@ -155,7 +155,7 @@ export default function Bienvenue() {
 
                         {menuOuvert && (
                             <nav
-                                className="absolute right-0 top-12 z-30 min-w-44 rounded-2xl border border-white/15 bg-jse-principal/90 p-2 font-sans text-sm text-jse-fond shadow-2xl backdrop-blur-xl"
+                                className="absolute right-0 top-12 z-50 min-w-44 rounded-2xl border border-white/15 bg-jse-principal p-2 font-sans text-sm text-jse-fond shadow-2xl"
                                 aria-label="Navigation mobile"
                             >
                                 <button type="button" onClick={() => { setMenuOuvert(false); router.visit("/"); }} className="w-full rounded-xl px-4 py-3 text-left transition hover:bg-white/10">Restaurants</button>
