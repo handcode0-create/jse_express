@@ -334,9 +334,7 @@ Route::get('/profil', function () {
             ->count(),
         'adresses' => AdresseLivraison::query()
             ->where('user_id', Auth::id())
-            ->with(['zone', 'categories' => function ($query) {
-            $query->where('statut', 'actif')->orderBy('nom');
-        }])
+            ->with('zone')
             ->orderByDesc('par_defaut')
             ->latest('id')
             ->get()
@@ -1239,7 +1237,9 @@ Route::get('/accueil', function (Request $request) {
     $recherche = trim((string) $request->query('recherche', ''));
 
     $restaurants = Restaurant::query()
-        ->with('zone')
+        ->with(['zone', 'categories' => function ($query) {
+            $query->where('statut', 'actif')->orderBy('nom');
+        }])
         ->where('statut', 'actif')
         ->when($recherche !== '', function ($query) use ($recherche) {
             $query->where(function ($sousRequete) use ($recherche) {
@@ -1290,7 +1290,6 @@ Route::get('/accueil', function (Request $request) {
             ->where('user_id', Auth::id())
             ->whereNull('masquee_par_destinataire_at')
             ->count(),
-        'categories' => $categories,
         'restaurants' => $restaurants,
         'favorisRestaurantIds' => $favorisRestaurantIds,
         'recherche' => $recherche,
