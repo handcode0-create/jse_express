@@ -99,10 +99,10 @@ export default function Bienvenue() {
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-100"
             />
-            <div className="pointer-events-none absolute inset-0 bg-jse-principal/14" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-jse-principal/72 via-jse-principal/22 to-transparent" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-jse-principal/58 via-transparent to-jse-principal/10" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10" />
+            <div className="pointer-events-none absolute inset-0 bg-jse-principal/8" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-jse-principal/34 via-jse-principal/10 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-jse-principal/28 via-transparent to-jse-principal/5" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/5" />
             <div className="pointer-events-none absolute inset-0 border border-white/[0.045]" />
             <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[393px] flex-col px-5 lg:max-w-none lg:px-10 xl:px-16">
                 <header data-welcome-header className="flex items-center justify-between py-5 sm:py-6 lg:py-7">
@@ -172,12 +172,12 @@ export default function Bienvenue() {
                     onPointerEnter={pauseAutoplay}
                     onPointerLeave={reprendreAutoplay}
                 >
-                    <div data-welcome-copy className="relative z-10 pt-8 text-center sm:pt-10 lg:max-w-[610px] lg:pt-0 lg:text-left">
-                        <p className="mb-3 font-sans text-sm font-semibold text-jse-secondaire lg:text-base">{slide.eyebrow}</p>
-                        <h1 className="font-against text-[clamp(2.5rem,10vw,4rem)] leading-[0.94] tracking-[-0.02em] text-jse-fond sm:text-[3.5rem] lg:text-[4.5rem] xl:text-[5.4rem]">
+                    <div data-welcome-copy className="relative z-10 pt-8 text-center sm:pt-10 lg:max-w-[600px] lg:-translate-y-3 lg:pt-0 lg:text-left xl:-translate-y-5">
+                        <p className="mb-3 font-sans text-sm font-semibold text-jse-secondaire drop-shadow-sm lg:text-base">{slide.eyebrow}</p>
+                        <h1 className="font-against text-[clamp(2.5rem,10vw,4rem)] leading-[0.94] tracking-[-0.02em] text-jse-fond drop-shadow-[0_2px_10px_color-mix(in_srgb,var(--color-jse-principal)_35%,transparent)] sm:text-[3.5rem] lg:text-[4.5rem] xl:text-[5.4rem]">
                             {slide.title}
                         </h1>
-                        <p className="mx-auto mt-5 max-w-[390px] font-sans text-sm leading-6 text-jse-fond/75 lg:mx-0 lg:mt-7 lg:text-base lg:leading-7">{slide.description}</p>
+                        <p className="mx-auto mt-5 max-w-[390px] font-sans text-sm leading-6 text-jse-fond/85 drop-shadow-sm lg:mx-0 lg:mt-7 lg:text-base lg:leading-7">{slide.description}</p>
 
                         <div data-welcome-action className="mt-7 hidden items-center gap-4 lg:flex">
                             <button type="button" onClick={() => router.visit("/authentification")} className="h-12 rounded-full bg-jse-secondaire px-7 font-sans text-sm font-semibold text-jse-principal shadow-lg shadow-jse-principal/15 transition hover:-translate-y-0.5 hover:bg-jse-secondaire/90 active:scale-[0.98]">
@@ -192,7 +192,7 @@ export default function Bienvenue() {
 
                     <div
                         ref={visualRef}
-                        className="relative mt-2 flex min-h-[310px] flex-1 touch-pan-y select-none items-center justify-center sm:min-h-[360px] lg:mt-0 lg:min-h-[620px]"
+                        className="relative mt-2 flex min-h-[310px] flex-1 touch-pan-y select-none items-center justify-center sm:min-h-[360px] lg:mt-0 lg:min-h-[620px] lg:translate-x-4 xl:translate-x-8"
                         onPointerDown={debuterGeste}
                         onPointerUp={terminerGeste}
                         onPointerCancel={() => { pointerStart.current = null; }}
