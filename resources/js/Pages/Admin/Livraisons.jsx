@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { router } from "@inertiajs/react";
 import { RefreshCw } from "lucide-react";
+import AdminBadge from "../../Composants/Admin/AdminBadge";
+import AdminButton from "../../Composants/Admin/AdminButton";
 import AdminDataPage from "../../Composants/Admin/AdminDataPage";
+import { champAdmin } from "../../Composants/Admin/AdminField";
 
 export default function Livraisons({ utilisateur, livraisons = [], recherche = "" }) {
     const [selection, setSelection] = useState({});
@@ -11,16 +14,15 @@ export default function Livraisons({ utilisateur, livraisons = [], recherche = "
     const reattribuer = (livraison) => {
         const livreurId = selection[livraison.id];
         const motif = (motifs[livraison.id] || "").trim();
+
         if (!livreurId || !motif) return;
 
         setTraitement(livraison.id);
-        router.post("/administration/livraisons/" + livraison.id + "/reattribuer", {
-            livreur_id: livreurId,
-            motif,
-        }, {
-            preserveScroll: true,
-            onFinish: () => setTraitement(null),
-        });
+        router.post(
+            "/administration/livraisons/" + livraison.id + "/reattribuer",
+            { livreur_id: livreurId, motif },
+            { preserveScroll: true, onFinish: () => setTraitement(null) },
+        );
     };
 
     return (
@@ -30,30 +32,64 @@ export default function Livraisons({ utilisateur, livraisons = [], recherche = "
             description="Suivi opérationnel, attribution automatique et réattribution manuelle."
             search={recherche}
             searchPlaceholder="Commande, zone ou livreur"
-            rows={livraisons.data || []} pagination={livraisons}
+            rows={livraisons.data || []}
+            pagination={livraisons}
             columns={[
-                { key: "reference", label: "Commande", render: row => <span className="font-semibold">{row.reference || "—"}</span> },
+                { key: "reference", label: "Commande", render: (row) => <span className="font-semibold">{row.reference || "—"}</span> },
                 { key: "zone", label: "Zone" },
-                { key: "statut", label: "Statut", render: row => <span className="inline-flex rounded-full bg-jse-accent/10 px-3 py-1 text-xs font-semibold text-jse-accent">{row.statut || "—"}</span> },
-                { key: "livreur", label: "Livreur", render: row => <div><p className="font-semibold">{row.livreur || "Non attribué"}</p><p className="text-xs text-jse-theme-muted">{row.matricule || "—"}</p></div> },
-                { key: "mode_attribution", label: "Attribution" },
+                { key: "statut", label: "Statut", render: (row) => <AdminBadge statut={row.statut} /> },
+                {
+                    key: "livreur",
+                    label: "Livreur",
+                    render: (row) => (
+                        <div>
+                            <p className="font-semibold">{row.livreur || "Non attribué"}</p>
+                            <p className="text-xs text-jse-theme-muted">{row.matricule || "—"}</p>
+                        </div>
+                    ),
+                },
+                { key: "mode_attribution", label: "Attribution", mobile: false },
                 { key: "date_attribution", label: "Date" },
                 {
                     key: "actions",
                     label: "Réattribution",
-                    render: row => row.candidats?.length ? (
-                        <div className="min-w-64 space-y-2">
-                            <select value={selection[row.id] || ""} onChange={event => setSelection(state => ({ ...state, [row.id]: event.target.value }))} className="min-h-10 w-full rounded-full border border-jse-theme-border bg-jse-theme-surface-soft px-3 text-xs text-jse-theme-text">
-                                <option value="">Choisir un livreur</option>
-                                {row.candidats.map(candidat => <option key={candidat.id} value={candidat.id}>{candidat.nom}{candidat.matricule ? " · " + candidat.matricule : ""}</option>)}
-                            </select>
-                            <input value={motifs[row.id] || ""} onChange={event => setMotifs(state => ({ ...state, [row.id]: event.target.value }))} placeholder="Motif de réattribution" className="min-h-10 w-full rounded-full border border-jse-theme-border bg-jse-theme-surface-soft px-3 text-xs text-jse-theme-text" />
-                            <button type="button" onClick={() => reattribuer(row)} disabled={traitement === row.id || !selection[row.id] || !motifs[row.id]?.trim()} className="inline-flex min-h-10 items-center gap-2 rounded-full bg-jse-principal px-4 text-xs font-semibold text-white disabled:opacity-50">
-                                <RefreshCw size={15} aria-hidden="true" />
-                                {traitement === row.id ? "Traitement..." : "Réattribuer"}
-                            </button>
-                        </div>
-                    ) : <span className="text-xs text-jse-theme-muted">Aucun livreur disponible dans cette zone</span>,
+                    render: (row) =>
+                        row.candidats?.length ? (
+                            <div className="space-y-2 md:min-w-64">
+                                <select
+                                    aria-label={"Livreur pour " + (row.reference || row.id)}
+                                    value={selection[row.id] || ""}
+                                    onChange={(evenement) => setSelection((etat) => ({ ...etat, [row.id]: evenement.target.value }))}
+                                    className={champAdmin}
+                                >
+                                    <option value="">Choisir un livreur</option>
+                                    {row.candidats.map((candidat) => (
+                                        <option key={candidat.id} value={candidat.id}>
+                                            {candidat.nom}
+                                            {candidat.matricule ? " · " + candidat.matricule : ""}
+                                        </option>
+                                    ))}
+                                </select>
+                                <input
+                                    aria-label={"Motif pour " + (row.reference || row.id)}
+                                    value={motifs[row.id] || ""}
+                                    onChange={(evenement) => setMotifs((etat) => ({ ...etat, [row.id]: evenement.target.value }))}
+                                    placeholder="Motif de réattribution"
+                                    className={champAdmin}
+                                />
+                                <AdminButton
+                                    taille="petit"
+                                    onClick={() => reattribuer(row)}
+                                    chargement={traitement === row.id}
+                                    disabled={!selection[row.id] || !motifs[row.id]?.trim()}
+                                >
+                                    <RefreshCw size={15} aria-hidden="true" />
+                                    Réattribuer
+                                </AdminButton>
+                            </div>
+                        ) : (
+                            <span className="text-sm text-jse-theme-muted">Aucun livreur disponible dans cette zone</span>
+                        ),
                 },
             ]}
             emptyMessage="Aucune livraison ne correspond aux critères."

@@ -1,26 +1,56 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Head, Link, router, usePage } from "@inertiajs/react";
-import { Bike, ChevronLeft, ChevronRight, Edit3, Mail, MapPin, Plus, Search, ShieldCheck, Store, UserRound, X } from "lucide-react";
-import AdminSidebar from "../../Composants/Admin/AdminSidebar";
+import { useEffect, useMemo, useState } from "react";
+import { Head, router } from "@inertiajs/react";
+import { Edit3, Mail, MapPin, Plus, Search, UserRound, X } from "lucide-react";
+import AdminBadge from "../../Composants/Admin/AdminBadge";
+import AdminButton from "../../Composants/Admin/AdminButton";
+import AdminCard from "../../Composants/Admin/AdminCard";
+import { AdminField, champAdmin } from "../../Composants/Admin/AdminField";
+import AdminLayout from "../../Composants/Admin/AdminLayout";
+import AdminPageHeader from "../../Composants/Admin/AdminPageHeader";
+import AdminPagination from "../../Composants/Admin/AdminPagination";
+import ConfirmDialog from "../../Composants/Admin/ConfirmDialog";
 
 const roles = [
-    { value: "client", label: "Client" },
-    { value: "restaurant", label: "Restaurant" },
-    { value: "livreur", label: "Livreur" },
-    { value: "administrateur", label: "Administrateur" },
+    { value: "client", label: "Client", ton: "neutre" },
+    { value: "restaurant", label: "Restaurant", ton: "information" },
+    { value: "livreur", label: "Livreur", ton: "attention" },
+    { value: "administrateur", label: "Administrateur", ton: "principal" },
 ];
-const emptyForm = { nom:"", prenom:"", telephone:"", email:"", mot_de_passe:"", role:"client", statut:"actif", restaurant_nom:"", restaurant_description:"", restaurant_telephone:"", restaurant_email:"", restaurant_adresse:"", restaurant_zone_id:"", livreur_matricule:"", livreur_zone_id:"", livreur_disponibilite:"indisponible", livreur_telephone_secondaire:"" };
-const roleLabel = (role) => roles.find((r) => r.value === role)?.label || role;
+
+const formulaireVide = {
+    nom: "",
+    prenom: "",
+    telephone: "",
+    email: "",
+    mot_de_passe: "",
+    role: "client",
+    statut: "actif",
+    restaurant_nom: "",
+    restaurant_description: "",
+    restaurant_telephone: "",
+    restaurant_email: "",
+    restaurant_adresse: "",
+    restaurant_zone_id: "",
+    livreur_matricule: "",
+    livreur_zone_id: "",
+    livreur_disponibilite: "indisponible",
+    livreur_telephone_secondaire: "",
+};
+
+const nomComplet = (item) => [item.prenom, item.nom].filter(Boolean).join(" ") || "Sans nom";
 
 export default function Utilisateurs({ utilisateurs, filtres = {}, roles: rolesDisponibles = [], administrateursActifs = 0, utilisateur, zones = [] }) {
-    const { flash = {} } = usePage().props;
     const [modal, setModal] = useState(null);
-    const [form, setForm] = useState(emptyForm);
+    const [form, setForm] = useState(formulaireVide);
     const [processing, setProcessing] = useState(false);
-    const listeRoles = useMemo(() => roles.filter((r) => rolesDisponibles.includes(r.value)), [rolesDisponibles]);
-    const data = utilisateurs?.data || [];
+    const [alerte, setAlerte] = useState(null);
+    const listeRoles = useMemo(() => roles.filter((role) => rolesDisponibles.includes(role.value)), [rolesDisponibles]);
+    const donnees = utilisateurs?.data || [];
 
-    const ouvrirCreation = (role = "client") => { setForm({ ...emptyForm, role }); setModal({ type: "create" }); };
+    const ouvrirCreation = (role = "client") => {
+        setForm({ ...formulaireVide, role });
+        setModal({ type: "create" });
+    };
 
     // Les pages Restaurants et Livreurs renvoient ici avec ?nouveau=restaurant|livreur.
     useEffect(() => {
@@ -30,67 +60,423 @@ export default function Utilisateurs({ utilisateurs, filtres = {}, roles: rolesD
             ouvrirCreation(role);
         }
     }, []);
+
     const ouvrirEdition = (item) => {
-        setForm({ ...emptyForm, ...item, restaurant_nom:item.restaurant?.nom || "", restaurant_telephone:item.restaurant?.telephone || "", restaurant_email:item.restaurant?.email || "", restaurant_adresse:item.restaurant?.adresse || "", livreur_matricule:item.profil_livreur?.matricule || "", livreur_zone_id:item.profil_livreur?.zone_id || "", livreur_disponibilite:item.profil_livreur?.disponibilite || "indisponible", livreur_telephone_secondaire:item.profil_livreur?.telephone_secondaire || "" });
-        setModal({ type:"edit", user:item });
-    };
-    const changer = (champ, valeur) => setForm((etat) => ({ ...etat, [champ]: valeur }));
-    const fermer = () => { if (!processing) setModal(null); };
-    const soumettre = (event) => {
-        event.preventDefault(); if (processing) return; setProcessing(true);
-        const options = { preserveScroll:true, onFinish:()=>setProcessing(false), onSuccess:()=>setModal(null) };
-        if (modal?.type === "edit") router.patch("/administration/utilisateurs/" + modal.user.id, form, options);
-        else router.post("/administration/utilisateurs", form, options);
-    };
-    const query = (patch) => router.get("/administration/utilisateurs", { ...filtres, ...patch }, { preserveState:true, preserveScroll:true, replace:true });
-    const changerStatut = (item) => {
-        if (item.role === "administrateur" && item.statut === "actif" && administrateursActifs <= 1) { window.alert("Impossible de désactiver le dernier administrateur actif du système."); return; }
-        router.patch("/administration/utilisateurs/" + item.id + "/statut", { statut:item.statut === "actif" ? "inactif" : "actif" }, { preserveScroll:true });
+        setForm({
+            ...formulaireVide,
+            ...item,
+            restaurant_nom: item.restaurant?.nom || "",
+            restaurant_telephone: item.restaurant?.telephone || "",
+            restaurant_email: item.restaurant?.email || "",
+            restaurant_adresse: item.restaurant?.adresse || "",
+            livreur_matricule: item.profil_livreur?.matricule || "",
+            livreur_zone_id: item.profil_livreur?.zone_id || "",
+            livreur_disponibilite: item.profil_livreur?.disponibilite || "indisponible",
+            livreur_telephone_secondaire: item.profil_livreur?.telephone_secondaire || "",
+        });
+        setModal({ type: "edit", user: item });
     };
 
-    return <>
-        <Head title="Utilisateurs & rôles — Administration" />
-        <main className="jse-admin-page min-h-screen overflow-x-hidden bg-jse-theme-bg text-jse-theme-text"><div className="flex min-h-screen lg:pl-[238px]"><AdminSidebar utilisateur={utilisateur} /><section className="min-w-0 flex-1"><div className="mx-auto w-full max-w-7xl px-4 py-5 pb-[calc(96px+env(safe-area-inset-bottom))] sm:px-6 sm:py-7 lg:px-8 lg:py-9 lg:pb-9">
-            <header className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div className="min-w-0"><p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-jse-secondaire">Administration</p><h1 className="mt-1.5 break-words text-2xl font-semibold leading-tight tracking-tight sm:text-4xl">Utilisateurs & rôles</h1><p className="mt-2 max-w-2xl text-xs leading-5 text-jse-theme-muted sm:text-sm">Gérez les comptes, les rôles et les accès de JSE Express.</p></div><button type="button" onClick={() => ouvrirCreation()} className="jse-admin-primary inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-jse-principal px-4 text-sm font-semibold text-white sm:w-auto"><Plus size={17}/>Ajouter un utilisateur</button></header>
-            {flash?.success && <div className="mt-5 rounded-2xl border border-jse-secondaire/20 bg-jse-secondaire/10 px-4 py-3 text-sm text-jse-principal dark:text-jse-secondaire">{flash.success}</div>}
-            <section className="jse-admin-card mt-6 rounded-[24px] border border-jse-theme-border bg-jse-theme-surface p-3 shadow-jse-carte sm:p-4"><div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_180px_auto]">
-                <label className="relative block"><Search size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-jse-theme-muted"/><input value={filtres.recherche || ""} onChange={(e)=>query({ recherche:e.target.value || undefined, page:1 })} placeholder="Rechercher nom, téléphone ou email..." className="jse-admin-input h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-bg pl-10 pr-3 text-sm outline-none focus:border-jse-secondaire"/></label>
-                <select value={filtres.role || ""} onChange={(e)=>query({ role:e.target.value || undefined, page:1 })} className="jse-admin-input h-11 w-full min-w-0 rounded-2xl border border-jse-theme-border bg-jse-theme-bg px-3 text-sm outline-none"><option value="">Tous les rôles</option>{listeRoles.map((r)=><option key={r.value} value={r.value}>{r.label}</option>)}</select>
-                <select value={filtres.statut || ""} onChange={(e)=>query({ statut:e.target.value || undefined, page:1 })} className="jse-admin-input h-11 rounded-2xl border border-jse-theme-border bg-jse-theme-bg px-3 text-sm outline-none"><option value="">Tous les statuts</option><option value="actif">Actifs</option><option value="inactif">Inactifs</option></select>
-                <Link href="/administration/utilisateurs" className="inline-flex h-11 items-center justify-center rounded-2xl border border-jse-theme-border px-4 text-sm font-medium text-jse-theme-muted">Réinitialiser</Link>
-            </div></section>
-            <div className="mt-4 flex items-center justify-between px-1"><p className="text-xs text-jse-theme-muted">{utilisateurs?.total || 0} utilisateur(s)</p><p className="hidden text-xs text-jse-theme-muted sm:block">{administrateursActifs} administrateur(s) actif(s)</p></div>
-            <section className="jse-admin-card jse-admin-table mt-3 hidden overflow-hidden rounded-[24px] border border-jse-theme-border bg-jse-theme-surface shadow-jse-carte md:block"><div className="overflow-x-auto"><table className="w-full min-w-[850px] text-left"><thead className="border-b border-jse-theme-border bg-jse-theme-bg/70"><tr className="text-[10px] uppercase tracking-[0.14em] text-jse-theme-muted"><th className="px-5 py-4">Utilisateur</th><th className="px-5 py-4">Contact</th><th className="px-5 py-4">Rôle</th><th className="px-5 py-4">Statut</th><th className="px-5 py-4">Créé le</th><th className="px-5 py-4 text-right">Actions</th></tr></thead>
-                <tbody className="divide-y divide-jse-theme-border">{data.map((item)=><tr key={item.id} className="hover:bg-jse-theme-bg/50"><td className="px-5 py-4"><div className="flex items-center gap-3"><Avatar item={item}/><div className="min-w-0"><p className="truncate text-sm font-semibold">{[item.prenom,item.nom].filter(Boolean).join(" ") || "Sans nom"}</p>{item.restaurant?.nom && <p className="truncate text-xs text-jse-theme-muted">{item.restaurant.nom}</p>}{item.profil_livreur?.matricule && <p className="truncate text-xs text-jse-theme-muted">{item.profil_livreur.matricule}</p>}</div></div></td>
-                    <td className="px-5 py-4 text-xs text-jse-theme-muted"><p>{item.telephone}</p>{item.email && <p className="mt-1">{item.email}</p>}</td><td className="px-5 py-4"><RoleBadge role={item.role}/></td><td className="px-5 py-4"><StatusBadge statut={item.statut}/></td><td className="px-5 py-4 text-xs text-jse-theme-muted">{item.created_at || "—"}</td>
-                    <td className="px-5 py-4"><div className="flex justify-end gap-2"><button type="button" onClick={()=>ouvrirEdition(item)} className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-jse-theme-border px-3 text-xs font-semibold"><Edit3 size={14}/>Modifier</button><button type="button" onClick={()=>changerStatut(item)} className="inline-flex h-9 items-center rounded-xl bg-jse-theme-bg px-3 text-xs font-semibold">{item.statut === "actif" ? "Désactiver" : "Activer"}</button></div></td></tr>)}</tbody></table></div>{data.length===0 && <EmptyState/>}</section>
-            <section className="mt-3 space-y-3 md:hidden">{data.map((item)=><article key={item.id} className="jse-admin-card min-w-0 rounded-[24px] border border-jse-theme-border bg-jse-theme-surface p-4 shadow-jse-carte"><div className="flex items-start gap-3"><Avatar item={item}/><div className="min-w-0 flex-1"><p className="break-words font-semibold">{[item.prenom,item.nom].filter(Boolean).join(" ") || "Sans nom"}</p><div className="mt-1 space-y-1 text-xs text-jse-theme-muted"><p className="break-words">{item.telephone}</p>{item.email && <p className="flex min-w-0 items-start gap-1 break-all"><Mail className="mt-0.5 shrink-0" size={12}/><span>{item.email}</span></p>}</div></div></div><div className="mt-4 flex flex-wrap gap-2"><RoleBadge role={item.role}/><StatusBadge statut={item.statut}/></div>{(item.restaurant?.nom || item.profil_livreur?.matricule || item.profil_livreur?.zone) && <div className="mt-4 rounded-2xl bg-jse-theme-bg p-3 text-xs text-jse-theme-muted">{item.restaurant?.nom && <p className="font-medium">{item.restaurant.nom}</p>}{item.profil_livreur?.matricule && <p>Matricule : {item.profil_livreur.matricule}</p>}{item.profil_livreur?.zone && <p className="mt-1 flex items-center gap-1"><MapPin size={12}/>{item.profil_livreur.zone}</p>}</div>}<div className="mt-4 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2"><button type="button" onClick={()=>ouvrirEdition(item)} className="min-h-11 w-full rounded-xl border border-jse-theme-border px-3 text-xs font-semibold">Modifier</button><button type="button" onClick={()=>changerStatut(item)} className="min-h-11 w-full rounded-xl bg-jse-theme-bg px-3 text-xs font-semibold">{item.statut === "actif" ? "Désactiver" : "Activer"}</button></div></article>)}{data.length===0 && <EmptyState/>}</section>
-            {utilisateurs?.links?.length > 3 && <nav className="mt-5 flex items-center justify-center gap-1" aria-label="Pagination">{utilisateurs.links.map((link,index)=><button key={index} type="button" disabled={!link.url || link.active} onClick={()=>link.url && router.get(link.url,{}, { preserveState:true, preserveScroll:true })} className={["min-w-9 rounded-xl px-3 py-2 text-xs font-semibold",link.active?"bg-jse-principal text-white":"border border-jse-theme-border text-jse-theme-muted",!link.url?"opacity-40":""] .join(" ")}>{index===0?<ChevronLeft size={15}/>:index===utilisateurs.links.length-1?<ChevronRight size={15}/>:<span dangerouslySetInnerHTML={{__html:link.label}}/>}</button>)}</nav>}
-        </div></section></div></main>
-        {modal && <Modal modal={modal} form={form} changer={changer} fermer={fermer} soumettre={soumettre} processing={processing} roles={listeRoles} zones={zones}/>}
-    </>;
+    const changer = (champ, valeur) => setForm((etat) => ({ ...etat, [champ]: valeur }));
+    const fermer = () => {
+        if (!processing) setModal(null);
+    };
+
+    const soumettre = (evenement) => {
+        evenement.preventDefault();
+        if (processing) return;
+        setProcessing(true);
+
+        const options = { preserveScroll: true, onFinish: () => setProcessing(false), onSuccess: () => setModal(null) };
+
+        if (modal?.type === "edit") {
+            router.patch("/administration/utilisateurs/" + modal.user.id, form, options);
+        } else {
+            router.post("/administration/utilisateurs", form, options);
+        }
+    };
+
+    const requete = (patch) =>
+        router.get("/administration/utilisateurs", { ...filtres, ...patch }, { preserveState: true, preserveScroll: true, replace: true });
+
+    const changerStatut = (item) => {
+        if (item.role === "administrateur" && item.statut === "actif" && administrateursActifs <= 1) {
+            setAlerte("Impossible de désactiver le dernier administrateur actif du système.");
+            return;
+        }
+
+        router.patch(
+            "/administration/utilisateurs/" + item.id + "/statut",
+            { statut: item.statut === "actif" ? "inactif" : "actif" },
+            { preserveScroll: true },
+        );
+    };
+
+    const actionsUtilisateur = (item) => (
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <AdminButton variante="contour" taille="petit" onClick={() => ouvrirEdition(item)}>
+                <Edit3 size={14} aria-hidden="true" />
+                Modifier
+            </AdminButton>
+            <AdminButton variante={item.statut === "actif" ? "contour" : "principal"} taille="petit" onClick={() => changerStatut(item)}>
+                {item.statut === "actif" ? "Désactiver" : "Activer"}
+            </AdminButton>
+        </div>
+    );
+
+    return (
+        <>
+            <Head title="Utilisateurs & rôles — Administration" />
+
+            <AdminLayout utilisateur={utilisateur}>
+                <AdminPageHeader
+                    title="Utilisateurs & rôles"
+                    description="Gérez les comptes, les rôles et les accès de JSE Express."
+                    actions={
+                        <AdminButton onClick={() => ouvrirCreation()}>
+                            <Plus size={17} aria-hidden="true" />
+                            Ajouter un utilisateur
+                        </AdminButton>
+                    }
+                />
+
+                <AdminCard className="mt-6 p-3 sm:p-4">
+                    <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_200px_200px_auto]">
+                        <label className="relative block">
+                            <span className="sr-only">Rechercher un utilisateur</span>
+                            <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-jse-theme-muted" aria-hidden="true" />
+                            <input
+                                type="search"
+                                value={filtres.recherche || ""}
+                                onChange={(evenement) => requete({ recherche: evenement.target.value || undefined, page: 1 })}
+                                placeholder="Rechercher nom, téléphone ou email..."
+                                className={champAdmin + " pl-11"}
+                            />
+                        </label>
+                        <select
+                            aria-label="Filtrer par rôle"
+                            value={filtres.role || ""}
+                            onChange={(evenement) => requete({ role: evenement.target.value || undefined, page: 1 })}
+                            className={champAdmin}
+                        >
+                            <option value="">Tous les rôles</option>
+                            {listeRoles.map((role) => (
+                                <option key={role.value} value={role.value}>
+                                    {role.label}
+                                </option>
+                            ))}
+                        </select>
+                        <select
+                            aria-label="Filtrer par statut"
+                            value={filtres.statut || ""}
+                            onChange={(evenement) => requete({ statut: evenement.target.value || undefined, page: 1 })}
+                            className={champAdmin}
+                        >
+                            <option value="">Tous les statuts</option>
+                            <option value="actif">Actifs</option>
+                            <option value="inactif">Inactifs</option>
+                        </select>
+                        <AdminButton href="/administration/utilisateurs" variante="contour">
+                            Réinitialiser
+                        </AdminButton>
+                    </div>
+                </AdminCard>
+
+                <div className="mt-5 flex items-center justify-between gap-3 px-1 text-sm text-jse-theme-muted">
+                    <p aria-live="polite">
+                        <span className="font-semibold tabular-nums text-jse-theme-text">{utilisateurs?.total || 0}</span> utilisateur(s)
+                    </p>
+                    <p>
+                        <span className="font-semibold tabular-nums text-jse-theme-text">{administrateursActifs}</span> administrateur(s) actif(s)
+                    </p>
+                </div>
+
+                <AdminCard className="mt-2 hidden overflow-hidden md:block">
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[850px] text-left text-sm">
+                            <thead className="jse-admin-table border-b border-jse-theme-border bg-jse-theme-surface-soft">
+                                <tr>
+                                    {["Utilisateur", "Contact", "Rôle", "Statut", "Créé le"].map((libelle) => (
+                                        <th key={libelle} scope="col" className="px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.1em] text-jse-theme-muted">
+                                            {libelle}
+                                        </th>
+                                    ))}
+                                    <th scope="col" className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-[0.1em] text-jse-theme-muted">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-jse-theme-border">
+                                {donnees.map((item) => (
+                                    <tr key={item.id} className="transition hover:bg-jse-theme-surface-soft/60">
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <Avatar item={item} />
+                                                <div className="min-w-0">
+                                                    <p className="truncate font-semibold text-jse-theme-text">{nomComplet(item)}</p>
+                                                    {item.restaurant?.nom && <p className="truncate text-xs text-jse-theme-muted">{item.restaurant.nom}</p>}
+                                                    {item.profil_livreur?.matricule && <p className="truncate text-xs text-jse-theme-muted">{item.profil_livreur.matricule}</p>}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-5 py-4 text-sm text-jse-theme-muted">
+                                            <p>{item.telephone}</p>
+                                            {item.email && <p className="mt-0.5">{item.email}</p>}
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <RoleBadge role={item.role} />
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <AdminBadge statut={item.statut} />
+                                        </td>
+                                        <td className="px-5 py-4 text-sm text-jse-theme-muted">{item.created_at || "—"}</td>
+                                        <td className="px-5 py-4">{actionsUtilisateur(item)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    {donnees.length === 0 && <EtatVide />}
+                </AdminCard>
+
+                <ul className="mt-2 space-y-3 md:hidden">
+                    {donnees.map((item) => (
+                        <AdminCard as="li" key={item.id} className="p-4">
+                            <div className="flex items-start gap-3">
+                                <Avatar item={item} />
+                                <div className="min-w-0 flex-1">
+                                    <p className="break-words font-semibold text-jse-theme-heading">{nomComplet(item)}</p>
+                                    <div className="mt-1 space-y-1 text-sm text-jse-theme-muted">
+                                        <p className="break-words">{item.telephone}</p>
+                                        {item.email && (
+                                            <p className="flex min-w-0 items-start gap-1.5 break-all">
+                                                <Mail className="mt-1 shrink-0" size={13} aria-hidden="true" />
+                                                <span>{item.email}</span>
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 flex flex-wrap gap-2">
+                                <RoleBadge role={item.role} />
+                                <AdminBadge statut={item.statut} />
+                            </div>
+
+                            {(item.restaurant?.nom || item.profil_livreur?.matricule || item.profil_livreur?.zone) && (
+                                <div className="mt-4 rounded-2xl bg-jse-theme-surface-soft p-3 text-sm text-jse-theme-muted">
+                                    {item.restaurant?.nom && <p className="font-medium text-jse-theme-text">{item.restaurant.nom}</p>}
+                                    {item.profil_livreur?.matricule && <p>Matricule : {item.profil_livreur.matricule}</p>}
+                                    {item.profil_livreur?.zone && (
+                                        <p className="mt-1 flex items-center gap-1.5">
+                                            <MapPin size={13} aria-hidden="true" />
+                                            {item.profil_livreur.zone}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="mt-4 border-t border-jse-theme-border pt-4">{actionsUtilisateur(item)}</div>
+                        </AdminCard>
+                    ))}
+                    {donnees.length === 0 && (
+                        <AdminCard as="li">
+                            <EtatVide />
+                        </AdminCard>
+                    )}
+                </ul>
+
+                <AdminPagination pagination={utilisateurs} />
+            </AdminLayout>
+
+            {modal && (
+                <ModalUtilisateur modal={modal} form={form} changer={changer} fermer={fermer} soumettre={soumettre} processing={processing} roles={listeRoles} zones={zones} />
+            )}
+
+            <ConfirmDialog ouvert={Boolean(alerte)} ton="info" titre="Action impossible" description={alerte || ""} onFermer={() => setAlerte(null)} />
+        </>
+    );
 }
 
-function Avatar({item}) { return item.photo_profil ? <img src={item.photo_profil} alt="" className="size-10 rounded-2xl object-cover"/> : <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-jse-principal text-sm font-semibold text-white">{(item.prenom?.[0] || item.nom?.[0] || "U").toUpperCase()}</div>; }
-function RoleBadge({role}) { return <span className="inline-flex rounded-full bg-jse-secondaire/10 px-2.5 py-1 text-[10px] font-semibold text-jse-principal dark:text-jse-secondaire">{roleLabel(role)}</span>; }
-function StatusBadge({statut}) { return <span className={["inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold",statut==="actif"?"bg-jse-secondaire/10 text-jse-principal dark:text-jse-secondaire":"bg-jse-danger/10 text-jse-danger"].join(" ")}>{statut==="actif"?"Actif":"Inactif"}</span>; }
-function EmptyState() { return <div className="px-5 py-12 text-center"><UserRound className="mx-auto text-jse-theme-muted" size={28}/><p className="mt-3 text-sm font-semibold">Aucun utilisateur trouvé</p><p className="mt-1 text-xs text-jse-theme-muted">Modifiez la recherche ou les filtres.</p></div>; }
-function Field({label,required,children}) { return <label className="block"><span className="mb-1.5 block text-[11px] font-semibold text-jse-theme-muted">{label}{required?" *":""}</span>{children}</label>; }
-function Modal({modal,form,changer,fermer,soumettre,processing,roles,zones}) {
-    const metier = form.role === "restaurant" ? "restaurant" : form.role === "livreur" ? "livreur" : null;
-    return <div className="jse-admin-modal fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-5"><div className="max-h-[calc(100dvh-env(safe-area-inset-top)-8px)] w-full overflow-y-auto rounded-t-[28px] bg-jse-theme-surface p-4 pb-[calc(20px+env(safe-area-inset-bottom))] shadow-2xl sm:max-h-[92vh] sm:max-w-2xl sm:rounded-[28px] sm:p-7">
-        <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-jse-secondaire">{modal.type==="edit"?"Modifier le compte":"Nouveau compte"}</p><h2 className="mt-1 text-xl font-semibold">{modal.type==="edit"?"Informations utilisateur":"Ajouter un utilisateur"}</h2></div><button type="button" onClick={fermer} className="flex size-10 items-center justify-center rounded-full border border-jse-theme-border"><X size={18}/></button></div>
-        <form onSubmit={soumettre} className="mt-6 space-y-5"><div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Prénom"><input value={form.prenom} onChange={(e)=>changer("prenom",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-bg px-3 text-sm outline-none"/></Field>
-            <Field label="Nom" required><input required value={form.nom} onChange={(e)=>changer("nom",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-bg px-3 text-sm outline-none"/></Field>
-            <Field label="Téléphone" required><input required value={form.telephone} onChange={(e)=>changer("telephone",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-bg px-3 text-sm outline-none"/></Field>
-            <Field label="Email"><input type="email" value={form.email || ""} onChange={(e)=>changer("email",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-bg px-3 text-sm outline-none"/></Field>
-            <Field label="Rôle" required><select required value={form.role} onChange={(e)=>changer("role",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-bg px-3 text-sm outline-none">{roles.map((r)=><option key={r.value} value={r.value}>{r.label}</option>)}</select></Field>
-            <Field label="Statut" required><select required value={form.statut} onChange={(e)=>changer("statut",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-bg px-3 text-sm outline-none"><option value="actif">Actif</option><option value="inactif">Inactif</option></select></Field>
-            <Field label={modal.type==="edit"?"Nouveau mot de passe (optionnel)":"Mot de passe"} required={modal.type!=="edit"}><input type="password" minLength={8} required={modal.type!=="edit"} value={form.mot_de_passe} onChange={(e)=>changer("mot_de_passe",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-bg px-3 text-sm outline-none"/></Field>
+function Avatar({ item }) {
+    return item.photo_profil ? (
+        <img src={item.photo_profil} alt="" className="size-11 shrink-0 rounded-2xl object-cover" />
+    ) : (
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-jse-principal text-sm font-semibold text-white">
+            {(item.prenom?.[0] || item.nom?.[0] || "U").toUpperCase()}
         </div>
-        {metier==="restaurant" && <div className="rounded-2xl border border-jse-theme-border bg-jse-theme-bg p-4"><p className="font-semibold">Profil restaurant</p><div className="mt-3 grid gap-3 sm:grid-cols-2"><Field label="Nom du restaurant" required={!modal.user?.restaurant}><input required={!modal.user?.restaurant} value={form.restaurant_nom} onChange={(e)=>changer("restaurant_nom",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-surface px-3 text-sm"/></Field><Field label="Téléphone restaurant" required={!modal.user?.restaurant}><input required={!modal.user?.restaurant} value={form.restaurant_telephone} onChange={(e)=>changer("restaurant_telephone",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-surface px-3 text-sm"/></Field><Field label="Email restaurant"><input type="email" value={form.restaurant_email} onChange={(e)=>changer("restaurant_email",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-surface px-3 text-sm"/></Field><Field label="Zone"><select value={form.restaurant_zone_id || ""} onChange={(e)=>changer("restaurant_zone_id",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-surface px-3 text-sm"><option value="">Aucune zone</option>{zones.map((z)=><option key={z.id} value={z.id}>{z.nom}</option>)}</select></Field><div className="sm:col-span-2"><Field label="Adresse" required={!modal.user?.restaurant}><input required={!modal.user?.restaurant} value={form.restaurant_adresse} onChange={(e)=>changer("restaurant_adresse",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-surface px-3 text-sm"/></Field></div></div></div>}
-        {metier==="livreur" && <div className="rounded-2xl border border-jse-theme-border bg-jse-theme-bg p-4"><p className="font-semibold">Profil livreur</p><div className="mt-3 grid gap-3 sm:grid-cols-2"><Field label="Matricule" required={!modal.user?.profil_livreur}><input required={!modal.user?.profil_livreur} value={form.livreur_matricule} onChange={(e)=>changer("livreur_matricule",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-surface px-3 text-sm"/></Field><Field label="Disponibilité" required={!modal.user?.profil_livreur}><select required={!modal.user?.profil_livreur} value={form.livreur_disponibilite} onChange={(e)=>changer("livreur_disponibilite",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-surface px-3 text-sm"><option value="disponible">Disponible</option><option value="indisponible">Indisponible</option></select></Field><Field label="Zone"><select value={form.livreur_zone_id || ""} onChange={(e)=>changer("livreur_zone_id",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-surface px-3 text-sm"><option value="">Aucune zone</option>{zones.map((z)=><option key={z.id} value={z.id}>{z.nom}</option>)}</select></Field><Field label="Téléphone secondaire"><input value={form.livreur_telephone_secondaire} onChange={(e)=>changer("livreur_telephone_secondaire",e.target.value)} className="h-11 w-full rounded-2xl border border-jse-theme-border bg-jse-theme-surface px-3 text-sm"/></Field></div></div>}
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" onClick={fermer} className="min-h-11 rounded-2xl border border-jse-theme-border px-5 text-sm font-semibold">Annuler</button><button type="submit" disabled={processing} className="jse-admin-primary min-h-11 rounded-2xl bg-jse-principal px-5 text-sm font-semibold text-white disabled:opacity-60">{processing?"Enregistrement...":"Enregistrer"}</button></div>
-        </form></div></div>;
+    );
+}
+
+function RoleBadge({ role }) {
+    const trouve = roles.find((item) => item.value === role);
+
+    return <AdminBadge ton={trouve?.ton ?? "neutre"} libelle={trouve?.label ?? role} />;
+}
+
+function EtatVide() {
+    return (
+        <div className="px-5 py-12 text-center">
+            <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-jse-theme-surface-soft text-jse-theme-muted">
+                <UserRound size={22} aria-hidden="true" />
+            </span>
+            <p className="mt-3 text-sm font-semibold text-jse-theme-text">Aucun utilisateur trouvé</p>
+            <p className="mt-1 text-sm text-jse-theme-muted">Modifiez la recherche ou les filtres.</p>
+        </div>
+    );
+}
+
+function BlocProfil({ titre, children }) {
+    return (
+        <fieldset className="rounded-2xl border border-jse-theme-border bg-jse-theme-surface-soft p-4">
+            <legend className="px-1 text-sm font-semibold text-jse-theme-heading">{titre}</legend>
+            <div className="mt-1 grid gap-3 sm:grid-cols-2">{children}</div>
+        </fieldset>
+    );
+}
+
+function ModalUtilisateur({ modal, form, changer, fermer, soumettre, processing, roles: rolesListe, zones }) {
+    const edition = modal.type === "edit";
+    const metier = form.role === "restaurant" ? "restaurant" : form.role === "livreur" ? "livreur" : null;
+    const saisie = (champ, extra = {}) => ({
+        value: form[champ] ?? "",
+        onChange: (evenement) => changer(champ, evenement.target.value),
+        className: champAdmin,
+        ...extra,
+    });
+
+    useEffect(() => {
+        const surClavier = (evenement) => {
+            if (evenement.key === "Escape") fermer();
+        };
+        document.addEventListener("keydown", surClavier);
+
+        return () => document.removeEventListener("keydown", surClavier);
+    }, [fermer]);
+
+    return (
+        <div className="jse-admin-modal fixed inset-0 z-[100] flex items-end justify-center bg-black/45 backdrop-blur-sm sm:items-center sm:p-5">
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="titre-modal-utilisateur"
+                className="max-h-[calc(100dvh-env(safe-area-inset-top)-8px)] w-full overflow-y-auto rounded-t-[28px] bg-jse-theme-surface p-5 pb-[calc(20px+env(safe-area-inset-bottom))] shadow-2xl sm:max-h-[92vh] sm:max-w-2xl sm:rounded-[28px] sm:p-7"
+            >
+                <div className="flex items-start justify-between gap-4">
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-jse-theme-muted">{edition ? "Modifier le compte" : "Nouveau compte"}</p>
+                        <h2 id="titre-modal-utilisateur" className="mt-1 text-xl font-semibold text-jse-theme-heading">
+                            {edition ? "Informations utilisateur" : "Ajouter un utilisateur"}
+                        </h2>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={fermer}
+                        aria-label="Fermer"
+                        className="flex size-11 shrink-0 items-center justify-center rounded-full border border-jse-theme-border text-jse-theme-text transition hover:bg-jse-theme-surface-soft"
+                    >
+                        <X size={18} aria-hidden="true" />
+                    </button>
+                </div>
+
+                <form onSubmit={soumettre} className="mt-6 space-y-5">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                        <AdminField label="Prénom">
+                            <input {...saisie("prenom")} autoComplete="given-name" />
+                        </AdminField>
+                        <AdminField label="Nom" required>
+                            <input {...saisie("nom", { required: true })} autoComplete="family-name" />
+                        </AdminField>
+                        <AdminField label="Téléphone" required>
+                            <input {...saisie("telephone", { required: true, type: "tel" })} autoComplete="tel" />
+                        </AdminField>
+                        <AdminField label="Email">
+                            <input {...saisie("email", { type: "email" })} autoComplete="email" />
+                        </AdminField>
+                        <AdminField label="Rôle" required>
+                            <select {...saisie("role", { required: true })}>
+                                {rolesListe.map((role) => (
+                                    <option key={role.value} value={role.value}>
+                                        {role.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </AdminField>
+                        <AdminField label="Statut" required>
+                            <select {...saisie("statut", { required: true })}>
+                                <option value="actif">Actif</option>
+                                <option value="inactif">Inactif</option>
+                            </select>
+                        </AdminField>
+                        <AdminField label={edition ? "Nouveau mot de passe (optionnel)" : "Mot de passe"} required={!edition} className="sm:col-span-2">
+                            <input {...saisie("mot_de_passe", { type: "password", minLength: 8, required: !edition })} autoComplete="new-password" />
+                        </AdminField>
+                    </div>
+
+                    {metier === "restaurant" && (
+                        <BlocProfil titre="Profil restaurant">
+                            <AdminField label="Nom du restaurant" required={!modal.user?.restaurant}>
+                                <input {...saisie("restaurant_nom", { required: !modal.user?.restaurant })} />
+                            </AdminField>
+                            <AdminField label="Téléphone restaurant" required={!modal.user?.restaurant}>
+                                <input {...saisie("restaurant_telephone", { required: !modal.user?.restaurant, type: "tel" })} />
+                            </AdminField>
+                            <AdminField label="Email restaurant">
+                                <input {...saisie("restaurant_email", { type: "email" })} />
+                            </AdminField>
+                            <AdminField label="Zone">
+                                <select {...saisie("restaurant_zone_id")}>
+                                    <option value="">Aucune zone</option>
+                                    {zones.map((zone) => (
+                                        <option key={zone.id} value={zone.id}>
+                                            {zone.nom}
+                                        </option>
+                                    ))}
+                                </select>
+                            </AdminField>
+                            <AdminField label="Adresse" required={!modal.user?.restaurant} className="sm:col-span-2">
+                                <input {...saisie("restaurant_adresse", { required: !modal.user?.restaurant })} />
+                            </AdminField>
+                        </BlocProfil>
+                    )}
+
+                    {metier === "livreur" && (
+                        <BlocProfil titre="Profil livreur">
+                            <AdminField label="Matricule" required={!modal.user?.profil_livreur}>
+                                <input {...saisie("livreur_matricule", { required: !modal.user?.profil_livreur })} />
+                            </AdminField>
+                            <AdminField label="Disponibilité" required={!modal.user?.profil_livreur}>
+                                <select {...saisie("livreur_disponibilite", { required: !modal.user?.profil_livreur })}>
+                                    <option value="disponible">Disponible</option>
+                                    <option value="indisponible">Indisponible</option>
+                                </select>
+                            </AdminField>
+                            <AdminField label="Zone">
+                                <select {...saisie("livreur_zone_id")}>
+                                    <option value="">Aucune zone</option>
+                                    {zones.map((zone) => (
+                                        <option key={zone.id} value={zone.id}>
+                                            {zone.nom}
+                                        </option>
+                                    ))}
+                                </select>
+                            </AdminField>
+                            <AdminField label="Téléphone secondaire">
+                                <input {...saisie("livreur_telephone_secondaire", { type: "tel" })} />
+                            </AdminField>
+                        </BlocProfil>
+                    )}
+
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                        <AdminButton variante="contour" onClick={fermer}>
+                            Annuler
+                        </AdminButton>
+                        <AdminButton type="submit" chargement={processing}>
+                            {processing ? "Enregistrement..." : "Enregistrer"}
+                        </AdminButton>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
 }

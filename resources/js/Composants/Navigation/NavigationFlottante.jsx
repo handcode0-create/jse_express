@@ -12,11 +12,12 @@ import {
     UtensilsCrossed,
     Bell,
     Truck,
-    Users,
     MoreHorizontal,
     Store,
     Bike,
+    Calculator,
     MapPinned,
+    UserCog,
     LogOut,
     X,
 } from "lucide-react";
@@ -38,7 +39,7 @@ const ensembles = {
         { id: "dashboard", label: "Accueil", icon: LayoutDashboard, route: "/administration/tableau-de-bord" },
         { id: "commandes", label: "Commandes", icon: ShoppingBag, route: "/administration/commandes" },
         { id: "livraisons", label: "Livraisons", icon: Truck, route: "/administration/livraisons" },
-        { id: "utilisateurs", label: "Utilisateurs", icon: Users, route: "/administration/utilisateurs" },
+        { id: "utilisateurs", label: "Utilisateurs", icon: UserCog, route: "/administration/utilisateurs" },
         { id: "plus", label: "Plus", icon: MoreHorizontal },
     ],
     livreur: [
@@ -51,10 +52,11 @@ const ensembles = {
 };
 
 const adminSecondaire = [
-    { label: "Clients", icon: Users, route: "/administration/clients" },
+    { label: "Clients", icon: UserRound, route: "/administration/clients" },
     { label: "Restaurants", icon: Store, route: "/administration/restaurants" },
     { label: "Livreurs", icon: Bike, route: "/administration/livreurs" },
     { label: "Zones & attribution", icon: MapPinned, route: "/administration/zones" },
+    { label: "Tarification", icon: Calculator, route: "/administration/tarification" },
     { label: "Notifications", icon: Bell, route: "/administration/notifications" },
 ];
 
@@ -129,7 +131,7 @@ export default function NavigationFlottante({
             {type === "admin" && adminMenuOuvert && (
                 <div className="jse-admin-floating-menu mx-auto mb-3 w-full max-w-[456px] rounded-[28px] border border-white/10 bg-[#101719]/95 p-3 shadow-[0_20px_60px_rgba(0,0,0,.55)] backdrop-blur-2xl">
                     <div className="mb-2 flex items-center justify-between px-2">
-                        <p className="jse-admin-floating-title text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
+                        <p className="jse-admin-floating-title text-xs font-semibold uppercase tracking-[0.14em] text-white/55">
                             Administration
                         </p>
                         <button
@@ -225,7 +227,7 @@ export default function NavigationFlottante({
                                 aria-hidden="true"
                             />
                             {selected && (
-                                <span className="whitespace-nowrap text-[9px] font-bold">
+                                <span className="whitespace-nowrap text-[11px] font-bold">
                                     {label}
                                 </span>
                             )}

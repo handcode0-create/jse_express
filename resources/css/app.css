@@ -38,6 +38,7 @@
     --color-jse-theme-text: var(--jse-theme-text);
     --color-jse-theme-muted: var(--jse-theme-muted);
     --color-jse-theme-border: var(--jse-theme-border);
+    --color-jse-theme-heading: var(--jse-theme-heading);
 }
 
 :root {
@@ -553,7 +554,6 @@ html[data-theme="light"] .jse-admin-sidebar .jse-admin-nav-item:not([aria-curren
 html[data-theme="light"] .jse-admin-sidebar .jse-admin-nav-item[aria-current="page"] {
     background: rgb(69 185 119 / .13) !important;
     color: #17643F !important;
-    box-shadow: inset 3px 0 0 #45B977;
 }
 
 html[data-theme="light"] .jse-admin-sidebar .jse-admin-profile {
