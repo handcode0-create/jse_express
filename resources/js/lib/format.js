@@ -30,3 +30,14 @@ export function libelleDuree(minutes) {
 
     return `${Math.floor(minutes / 1440)} j`;
 }
+
+/** Numéro lisible : « +225 07 01 02 03 04 » (les autres formats sont renvoyés tels quels). */
+export function formaterTelephone(telephone) {
+    const chiffres = String(telephone || "").replace(/\D/g, "");
+
+    if (chiffres.startsWith("225") && chiffres.length === 13) {
+        return `+225 ${chiffres.slice(3).match(/.{2}/g).join(" ")}`;
+    }
+
+    return telephone || "—";
+}

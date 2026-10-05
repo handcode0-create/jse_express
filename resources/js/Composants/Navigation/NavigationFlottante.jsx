@@ -17,6 +17,7 @@ import {
     Bike,
     Calculator,
     MapPinned,
+    Settings,
     UserCog,
     LogOut,
     X,
@@ -58,6 +59,7 @@ const adminSecondaire = [
     { label: "Zones & attribution", icon: MapPinned, route: "/administration/zones" },
     { label: "Tarification", icon: Calculator, route: "/administration/tarification" },
     { label: "Notifications", icon: Bell, route: "/administration/notifications" },
+    { label: "Mon compte", icon: Settings, route: "/administration/compte" },
 ];
 
 export default function NavigationFlottante({

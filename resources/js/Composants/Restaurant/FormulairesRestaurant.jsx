@@ -4,6 +4,7 @@ import { MapPin } from "lucide-react";
 import AdminButton from "../Admin/AdminButton";
 import AdminCard from "../Admin/AdminCard";
 import BandeauRubrique from "../Interface/BandeauRubrique";
+import { formaterTelephone } from "../../lib/format";
 import { AdminField, champAdmin } from "../Admin/AdminField";
 
 /** Bandeau de marque commun aux rubriques de l'espace restaurant. */
@@ -124,7 +125,7 @@ export function FormulaireCompte({ utilisateur }) {
     const { data, modifier, patch, processing, errors } = useChamps({
         prenom: utilisateur?.prenom || "",
         nom: utilisateur?.nom || "",
-        telephone: utilisateur?.telephone || "",
+        telephone: formaterTelephone(utilisateur?.telephone || ""),
         email: utilisateur?.email || "",
     });
 

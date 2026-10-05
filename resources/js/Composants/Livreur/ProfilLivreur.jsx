@@ -6,14 +6,16 @@ import AdminButton from "../Admin/AdminButton";
 import AdminCard from "../Admin/AdminCard";
 import BandeauRubrique from "../Interface/BandeauRubrique";
 import { AdminField, champAdmin } from "../Admin/AdminField";
-import ThemeToggle from "../Interface/ThemeToggle";
+import FormulaireMotDePasse from "../Interface/FormulaireMotDePasse";
+import PreferencesCompte from "../Interface/PreferencesCompte";
+import { formaterTelephone } from "../../lib/format";
 import PhotoProfil from "../Profil/PhotoProfil";
 
 function FormulaireProfil({ livreur, zones, onFermer }) {
     const { data, setData, patch, processing, errors, clearErrors } = useForm({
         nom: livreur?.nom || "",
         prenom: livreur?.prenom || "",
-        telephone: livreur?.telephone || "",
+        telephone: formaterTelephone(livreur?.telephone || ""),
         email: livreur?.email || "",
         telephone_secondaire: livreur?.telephone_secondaire || "",
         zone_id: livreur?.zone_id || "",
@@ -87,7 +89,7 @@ export default function ProfilLivreur({ livreur, zones = [], statistiques = {} }
                 <PhotoProfil user={livreur} size="size-20" dark />
                 <div className="min-w-0">
                     <p className="truncate text-lg font-semibold text-jse-theme-text">{nomComplet}</p>
-                    <p className="text-sm text-jse-theme-muted">{livreur?.telephone || "—"}</p>
+                    <p className="text-sm text-jse-theme-muted">{formaterTelephone(livreur?.telephone)}</p>
                     <div className="mt-2">
                         <AdminBadge statut={disponible ? "disponible" : "indisponible"} />
                     </div>
@@ -122,7 +124,7 @@ export default function ProfilLivreur({ livreur, zones = [], statistiques = {} }
                     </div>
                     <dl className="mt-3 divide-y divide-jse-theme-border">
                         {[
-                            ["Téléphone", livreur?.telephone || "—", Phone],
+                            ["Téléphone", formaterTelephone(livreur?.telephone), Phone],
                             ["Téléphone secondaire", livreur?.telephone_secondaire || "Non renseigné", Phone],
                             ["E-mail", livreur?.email || "Non renseigné", Bell],
                         ].map(([libelle, valeur, Icone]) => (
@@ -150,16 +152,22 @@ export default function ProfilLivreur({ livreur, zones = [], statistiques = {} }
                 </div>
             </AdminCard>
 
-            <AdminCard className="mt-4 p-5 lg:hidden">
-                <div className="flex items-center justify-between rounded-2xl bg-jse-theme-surface-soft px-4 py-3">
-                    <span className="text-sm font-medium text-jse-theme-text">Thème</span>
-                    <ThemeToggle compact />
-                </div>
-                <AdminButton variante="dangerDoux" className="mt-3" onClick={() => router.post("/deconnexion")}>
+            <AdminCard className="mt-4 p-5 sm:p-6">
+                <h2 className="mb-4 text-base font-semibold text-jse-theme-heading">Sécurité</h2>
+                <FormulaireMotDePasse />
+            </AdminCard>
+
+            <AdminCard className="mt-4 p-5 sm:p-6">
+                <h2 className="mb-4 text-base font-semibold text-jse-theme-heading">Préférences</h2>
+                <PreferencesCompte photoProfil={livreur?.photo_profil} />
+            </AdminCard>
+
+            <div className="mt-4 lg:hidden">
+                <AdminButton variante="dangerDoux" onClick={() => router.post("/deconnexion")}>
                     <LogOut size={16} aria-hidden="true" />
                     Se déconnecter
                 </AdminButton>
-            </AdminCard>
+            </div>
         </section>
     );
 }

@@ -4,6 +4,8 @@ import { BarChart3, CircleDollarSign, LogOut, Package, ShoppingBag } from "lucid
 import AdminButton from "../../Composants/Admin/AdminButton";
 import AdminCard from "../../Composants/Admin/AdminCard";
 import AdminStatCard from "../../Composants/Admin/AdminStatCard";
+import FormulaireMotDePasse from "../../Composants/Interface/FormulaireMotDePasse";
+import PreferencesCompte from "../../Composants/Interface/PreferencesCompte";
 import ThemeToggle from "../../Composants/Interface/ThemeToggle";
 import PhotoProfil from "../../Composants/Profil/PhotoProfil";
 import AccueilRestaurant from "../../Composants/Restaurant/AccueilRestaurant";
@@ -171,6 +173,16 @@ export default function TableauDeBord() {
                     <section>
                         <TitreRubrique surtitre="Compte" titre="Mon compte" visuel="motos-gauche" description="Modifiez les informations du responsable connecté." />
                         <FormulaireCompte utilisateur={utilisateur} />
+
+                        <AdminCard className="mt-6 max-w-3xl p-5 sm:p-6">
+                            <h2 className="mb-4 text-base font-semibold text-jse-theme-heading">Sécurité</h2>
+                            <FormulaireMotDePasse />
+                        </AdminCard>
+
+                        <AdminCard className="mt-6 max-w-3xl p-5 sm:p-6">
+                            <h2 className="mb-4 text-base font-semibold text-jse-theme-heading">Préférences</h2>
+                            <PreferencesCompte photoProfil={utilisateur?.photo_profil} />
+                        </AdminCard>
                     </section>
                 )}
             </RestaurantLayout>

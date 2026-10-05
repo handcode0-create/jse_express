@@ -6,6 +6,7 @@ import {
     LayoutDashboard,
     LogOut,
     MapPinned,
+    Settings,
     ShoppingBag,
     Store,
     Truck,
@@ -43,6 +44,7 @@ const sections = [
             { href: "/administration/zones", label: "Zones & attribution", icon: MapPinned },
             { href: "/administration/tarification", label: "Tarification", icon: Calculator },
             { href: "/administration/notifications", label: "Notifications", icon: Bell },
+            { href: "/administration/compte", label: "Mon compte", icon: Settings },
         ],
     },
 ];
