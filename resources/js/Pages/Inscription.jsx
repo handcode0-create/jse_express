@@ -175,8 +175,21 @@ export default function Inscription() {
         }
     };
 
+    // Un client saute l'étape « profil » : le retour depuis l'étape 3 le ramène donc à l'étape 1.
+    const retourner = () => {
+        clearErrors();
+        setEtape((value) => (value === 3 && data.role === "client" ? 1 : Math.max(1, value - 1)));
+    };
+
     const soumettre = (event) => {
         event.preventDefault();
+
+        // Aucun envoi avant la dernière étape (ex. touche Entrée) : on avance d'abord.
+        if (etape < 3) {
+            continuer();
+            return;
+        }
+
         post("/inscription", { preserveScroll: true });
     };
 
@@ -511,7 +524,7 @@ export default function Inscription() {
                             <div className="mt-8 flex items-center justify-between gap-3 border-t border-jse-principal/10 pt-6">
                                 <button
                                     type="button"
-                                    onClick={() => setEtape((value) => Math.max(1, value - 1))}
+                                    onClick={retourner}
                                     disabled={etape === 1}
                                     className="flex h-12 items-center gap-2 rounded-full border border-jse-principal/15 bg-white px-5 text-sm font-semibold text-jse-principal transition hover:bg-jse-principal/5 disabled:pointer-events-none disabled:opacity-30"
                                 >
@@ -521,6 +534,7 @@ export default function Inscription() {
 
                                 {etape < 3 ? (
                                     <button
+                                        key="continuer"
                                         type="button"
                                         onClick={continuer}
                                         className="flex h-12 items-center gap-2 rounded-full bg-jse-principal px-6 text-sm font-semibold text-white shadow-lg shadow-jse-principal/10 transition hover:-translate-y-0.5 hover:bg-jse-principal/90 active:scale-[0.98]"
@@ -530,6 +544,7 @@ export default function Inscription() {
                                     </button>
                                 ) : (
                                     <button
+                                        key="soumettre"
                                         type="submit"
                                         disabled={processing}
                                         className="flex h-12 items-center gap-2 rounded-full bg-jse-secondaire px-6 text-sm font-semibold text-jse-principal shadow-lg shadow-jse-secondaire/20 transition hover:brightness-105 active:scale-[0.98] disabled:opacity-50"
