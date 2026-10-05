@@ -181,7 +181,7 @@ export default function Authentification() {
     };
 
     return (
-        <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-jse-principal font-sans text-jse-texte">
+        <main ref={pageRef} className="relative min-h-screen overflow-x-hidden bg-jse-principal font-sans text-white">
             <img src="/assets/login_page_fond.png" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 size-full object-cover object-center" />
             <div className="pointer-events-none absolute inset-0 bg-jse-principal/45" />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--color-jse-principal)]/75 via-[var(--color-jse-principal)]/30 to-[var(--color-jse-principal)]/75" />
@@ -305,7 +305,7 @@ export default function Authentification() {
                     FORMULAIRE
                 ====================================================== */}
 
-                <section ref={formRef} className="flex w-full items-center justify-center bg-jse-principal/82 px-5 py-10 backdrop-blur-2xl sm:px-8 lg:min-h-screen lg:w-1/2 lg:px-12 xl:px-20">
+                <section ref={formRef} className="flex w-full items-center justify-center bg-jse-principal/82 px-5 py-10 text-white backdrop-blur-2xl sm:px-8 lg:min-h-screen lg:w-1/2 lg:px-12 xl:px-20">
 
                     <div className="w-full max-w-md">
 
@@ -358,7 +358,7 @@ export default function Authentification() {
                             ONGLETS
                         ================================================== */}
 
-                        <div data-auth-item className="mb-8 grid grid-cols-2 rounded-2xl bg-jse-principal/5 p-1">
+                        <div data-auth-item className="mb-8 grid grid-cols-2 rounded-2xl bg-white/10 p-1">
 
                             <button
                                 type="button"
@@ -760,7 +760,9 @@ export default function Authentification() {
 
                             <button
                                 type="submit"
-                                className="flex h-13 w-full items-center justify-center rounded-2xl bg-jse-principal px-6 text-sm font-semibold text-white shadow-lg shadow-jse-principal/15 transition hover:bg-jse-principal/90 active:scale-[0.99]"
+                                disabled={soumissionEnCours}
+                                aria-busy={soumissionEnCours}
+                                className="flex h-13 w-full items-center justify-center rounded-2xl bg-jse-secondaire px-6 text-sm font-semibold text-jse-principal shadow-lg shadow-jse-principal/15 transition hover:bg-jse-secondaire/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jse-secondaire active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {soumissionEnCours
                                     ? "Connexion en cours..."
@@ -787,7 +789,7 @@ export default function Authentification() {
                                         ? router.visit("/inscription")
                                         : changerMode("connexion")
                                 }
-                                className="font-semibold text-jse-principal hover:underline"
+                                className="font-semibold text-jse-secondaire underline-offset-4 transition hover:text-jse-fond hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jse-secondaire active:opacity-80"
                             >
                                 {mode === "connexion"
                                     ? "Créer un compte"
