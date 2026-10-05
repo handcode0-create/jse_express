@@ -90,54 +90,82 @@ export default function Bienvenue() {
     };
 
     return (
-        <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-jse-principal text-jse-texte">
+        <main ref={pageRef} className="relative min-h-screen overflow-hidden bg-jse-principal text-jse-fond">
             <img
                 ref={backgroundRef}
-                src="/assets/bg.png"
+                src="/assets/bg_bienvenue.png"
                 alt=""
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-[-2%] h-[104%] w-[104%] object-cover object-center opacity-100"
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-100"
             />
-            <div className="pointer-events-none absolute inset-0 bg-jse-principal/72 backdrop-blur-[3px]" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--color-jse-principal)]/88 via-[var(--color-jse-principal)]/38 to-[var(--color-jse-principal)]/55" />
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_48%,color-mix(in srgb, var(--color-jse-secondaire) 10%, transparent),transparent_36%),linear-gradient(to_bottom,rgba(7,17,15,0.12),color-mix(in srgb, var(--color-jse-principal) 38%, transparent))]" />
-            <div className="pointer-events-none absolute inset-0 border border-white/[0.045] bg-white/[0.018] backdrop-blur-[1px]" />
+            <div className="pointer-events-none absolute inset-0 bg-jse-principal/14" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-jse-principal/72 via-jse-principal/22 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-jse-principal/58 via-transparent to-jse-principal/10" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10" />
+            <div className="pointer-events-none absolute inset-0 border border-white/[0.045]" />
             <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[393px] flex-col px-5 lg:max-w-none lg:px-10 xl:px-16">
-                <header data-welcome-header className="flex items-center justify-between pt-6 lg:pt-8">
+                <header data-welcome-header className="flex items-center justify-between py-5 sm:py-6 lg:py-7">
                     <button type="button" onClick={() => router.visit("/")} className="flex items-center" aria-label="Accueil">
-                        <img src="/assets/jse_logo.png?v=20261002" alt="JSE Express" className="h-9 w-auto object-contain lg:h-10" />
+                        <img src="/assets/jse_logo.png?v=20261002" alt="JSE Express" className="h-9 w-auto object-contain sm:h-10" />
                     </button>
-                    <button type="button" onClick={() => router.visit("/authentification")} className="font-sans text-sm font-medium text-jse-texte/65 transition hover:text-jse-principal">
-                        Passer
-                    </button>
+
+                    <nav className="hidden items-center gap-7 font-sans text-sm font-medium text-jse-fond/90 lg:flex" aria-label="Navigation principale">
+                        <button type="button" onClick={() => router.visit("/")} className="transition hover:text-jse-secondaire">Restaurants</button>
+                        <button type="button" onClick={() => router.visit("/")} className="transition hover:text-jse-secondaire">À propos</button>
+                        <button type="button" onClick={() => router.visit("/")} className="transition hover:text-jse-secondaire">Aide</button>
+                        <button
+                            type="button"
+                            onClick={() => router.visit("/authentification")}
+                            className="rounded-full border border-white/30 bg-white/10 px-5 py-2.5 text-jse-fond backdrop-blur-md transition hover:border-white/50 hover:bg-white/15 active:scale-[0.98]"
+                        >
+                            Se connecter
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => router.visit("/inscription")}
+                            className="rounded-full bg-jse-accent px-5 py-2.5 text-white shadow-lg shadow-jse-accent/20 transition hover:-translate-y-0.5 hover:bg-jse-accent/90 active:scale-[0.98]"
+                        >
+                            S'inscrire
+                        </button>
+                    </nav>
+
+                    <div className="flex items-center gap-2 lg:hidden">
+                        <button
+                            type="button"
+                            onClick={() => router.visit("/authentification")}
+                            className="rounded-full border border-white/25 bg-white/10 px-4 py-2 font-sans text-xs font-semibold text-jse-fond backdrop-blur-md transition hover:bg-white/15 active:scale-[0.98]"
+                        >
+                            Se connecter
+                        </button>
+                    </div>
                 </header>
 
                 <section
-                    className="relative flex flex-1 flex-col lg:grid lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-12 xl:grid-cols-[0.8fr_1.2fr] xl:gap-20"
+                    className="relative flex flex-1 flex-col lg:grid lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-10 xl:grid-cols-[0.85fr_1.15fr] xl:gap-16"
                     onPointerEnter={pauseAutoplay}
                     onPointerLeave={reprendreAutoplay}
                 >
-                    <div data-welcome-copy className="relative z-10 pt-10 text-center lg:max-w-[610px] lg:pt-0 lg:text-left">
+                    <div data-welcome-copy className="relative z-10 pt-8 text-center sm:pt-10 lg:max-w-[610px] lg:pt-0 lg:text-left">
                         <p className="mb-3 font-sans text-sm font-semibold text-jse-secondaire lg:text-base">{slide.eyebrow}</p>
-                        <h1 className="font-against text-[2rem] leading-[0.98] tracking-[-0.02em] text-jse-texte sm:text-[2.2rem] lg:text-[4.5rem] xl:text-[5.4rem]">
+                        <h1 className="font-against text-[clamp(2.5rem,10vw,4rem)] leading-[0.94] tracking-[-0.02em] text-jse-fond sm:text-[3.5rem] lg:text-[4.5rem] xl:text-[5.4rem]">
                             {slide.title}
                         </h1>
-                        <p className="mx-auto mt-5 max-w-[390px] font-sans text-sm leading-6 text-jse-texte/60 lg:mx-0 lg:mt-7 lg:text-base lg:leading-7">{slide.description}</p>
+                        <p className="mx-auto mt-5 max-w-[390px] font-sans text-sm leading-6 text-jse-fond/75 lg:mx-0 lg:mt-7 lg:text-base lg:leading-7">{slide.description}</p>
 
                         <div data-welcome-action className="mt-7 hidden items-center gap-4 lg:flex">
-                            <button type="button" onClick={() => router.visit("/authentification")} className="h-12 rounded-full bg-jse-principal px-7 font-sans text-sm font-semibold text-white shadow-lg shadow-jse-principal/15 transition hover:-translate-y-0.5 hover:bg-jse-principal/90">
+                            <button type="button" onClick={() => router.visit("/authentification")} className="h-12 rounded-full bg-jse-secondaire px-7 font-sans text-sm font-semibold text-jse-principal shadow-lg shadow-jse-principal/15 transition hover:-translate-y-0.5 hover:bg-jse-secondaire/90 active:scale-[0.98]">
                                 Commencer
                             </button>
-                            <span className="font-sans text-xs text-jse-texte/45">
+                            <span className="font-sans text-xs text-jse-fond/65">
                                 Déjà un compte ?{" "}
-                                <button type="button" onClick={() => router.visit("/authentification")} className="font-semibold text-jse-principal underline underline-offset-2">Se connecter</button>
+                                <button type="button" onClick={() => router.visit("/authentification")} className="font-semibold text-jse-secondaire underline underline-offset-2 transition hover:text-jse-fond">Se connecter</button>
                             </span>
                         </div>
                     </div>
 
                     <div
                         ref={visualRef}
-                        className="relative mt-5 flex min-h-[360px] flex-1 touch-pan-y select-none items-center justify-center lg:mt-0 lg:min-h-[620px]"
+                        className="relative mt-2 flex min-h-[310px] flex-1 touch-pan-y select-none items-center justify-center sm:min-h-[360px] lg:mt-0 lg:min-h-[620px]"
                         onPointerDown={debuterGeste}
                         onPointerUp={terminerGeste}
                         onPointerCancel={() => { pointerStart.current = null; }}
@@ -148,7 +176,7 @@ export default function Bienvenue() {
                             src={slide.image}
                             alt=""
                             draggable="false"
-                            className="relative z-10 w-full max-w-[330px] object-contain drop-shadow-[0_24px_35px_color-mix(in srgb, var(--color-jse-principal) 18%, transparent)] sm:max-w-[350px] lg:max-w-[650px] xl:max-w-[760px]"
+                            className="relative z-10 w-full max-w-[320px] object-contain drop-shadow-[0_24px_35px_color-mix(in srgb, var(--color-jse-principal) 18%, transparent)] sm:max-w-[370px] lg:max-w-[650px] xl:max-w-[760px]"
                         />
                     </div>
 
@@ -162,16 +190,16 @@ export default function Bienvenue() {
                                     if (itemIndex === index) return;
                                     changerSlide(itemIndex > index ? 1 : -1);
                                 }}
-                                className={"h-1.5 rounded-full transition-all duration-300 " + (itemIndex === index ? "w-5 bg-jse-accent" : "w-1.5 bg-jse-texte/20")}
+                                className={"h-1.5 rounded-full transition-all duration-300 " + (itemIndex === index ? "w-5 bg-jse-accent" : "w-1.5 bg-jse-fond/35")}
                             />
                         ))}
                     </div>
 
-                    <div data-welcome-action className="pb-7 pt-6 lg:hidden">
-                        <button type="button" onClick={() => router.visit("/authentification")} className="flex h-12 w-full items-center justify-center rounded-full bg-jse-principal px-6 font-sans text-sm font-semibold text-white shadow-lg shadow-jse-principal/15 transition hover:bg-jse-principal/90 active:scale-[0.99]">
+                    <div data-welcome-action className="pb-8 pt-4 sm:pt-6 lg:hidden">
+                        <button type="button" onClick={() => router.visit("/authentification")} className="flex h-12 w-full items-center justify-center rounded-full bg-jse-secondaire px-6 font-sans text-sm font-semibold text-jse-principal shadow-lg shadow-jse-principal/15 transition hover:bg-jse-secondaire/90 active:scale-[0.99]">
                             Commencer
                         </button>
-                        <p className="mt-5 text-center font-sans text-xs text-jse-texte/50">
+                        <p className="mt-5 text-center font-sans text-xs text-jse-fond/65">
                             Déjà un compte ?{" "}
                             <button type="button" onClick={() => router.visit("/authentification")} className="font-semibold text-jse-principal underline underline-offset-2">Se connecter</button>
                         </p>
