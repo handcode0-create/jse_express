@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import { Head, router, usePage } from "@inertiajs/react";
-import { Bell, CheckCircle2, Receipt, Truck } from "lucide-react";
+import { Bell } from "lucide-react";
 import AdminCard from "../../Composants/Admin/AdminCard";
-import AdminStatCard from "../../Composants/Admin/AdminStatCard";
+import AccueilLivreur from "../../Composants/Livreur/AccueilLivreur";
 import CarteLivreur, { usePositionLivreur } from "../../Composants/Livreur/CarteLivreur";
 import { DetailMission, LivraisonMission, NavigationMission, RetraitMission, SuccesMission } from "../../Composants/Livreur/EcransMission";
 import LivreurLayout from "../../Composants/Livreur/LivreurLayout";
-import { DisponibiliteLivreur, HistoriqueLivraisons, ListeMissions } from "../../Composants/Livreur/MissionsLivreur";
+import { HistoriqueLivraisons, ListeMissions } from "../../Composants/Livreur/MissionsLivreur";
 import ProfilLivreur from "../../Composants/Livreur/ProfilLivreur";
 
 const cleFlux = (attributionId) => `jse-livreur-flux-${attributionId}`;
@@ -193,30 +193,16 @@ export default function TableauDeBord() {
 
             <LivreurLayout livreur={livreur} onglet={onglet} onNavigate={naviguer}>
                 {onglet === "accueil" && (
-                    <>
-                        <TitreRubrique surtitre="Aujourd’hui" titre={`Bonjour ${livreur?.prenom || livreur?.nom || ""}`.trim()}>
-                            <p className="mt-1 text-sm text-jse-theme-muted">
-                                {[livreur?.zone?.nom && `Zone ${livreur.zone.nom}`, livreur?.matricule && `Matricule ${livreur.matricule}`].filter(Boolean).join(" · ")}
-                            </p>
-                        </TitreRubrique>
-
-                        <div className="mt-6">
-                            <DisponibiliteLivreur livreur={livreur} enCours={enCours} onBasculer={basculerDisponibilite} />
-                        </div>
-
-                        <section className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4" aria-label="Indicateurs">
-                            <AdminStatCard label="Livraisons du jour" value={statistiques.missions_du_jour || 0} icon={Truck} tone="accent" />
-                            <AdminStatCard label="Missions actives" value={statistiques.missions_actives || 0} icon={Receipt} tone="principal" onClick={() => naviguer("missions")} />
-                            <AdminStatCard label="Livraisons terminées" value={statistiques.livraisons_terminees || 0} icon={CheckCircle2} tone="secondaire" />
-                        </section>
-
-                        <section className="mt-8" aria-labelledby="titre-en-cours">
-                            <h2 id="titre-en-cours" className="mb-4 text-lg font-semibold text-jse-theme-heading">
-                                Missions en cours
-                            </h2>
-                            <ListeMissions missions={livraisons} disponible={disponible} onOuvrir={ouvrirMission} />
-                        </section>
-                    </>
+                    <AccueilLivreur
+                        livreur={livreur}
+                        livraisons={livraisons}
+                        historique={historique}
+                        statistiques={statistiques}
+                        enCours={enCours}
+                        onBasculer={basculerDisponibilite}
+                        onOuvrir={ouvrirMission}
+                        onNaviguer={naviguer}
+                    />
                 )}
 
                 {onglet === "missions" && (

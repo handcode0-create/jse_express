@@ -60,8 +60,8 @@ export default function CarteLivreur({ position, precision, erreur, compact = fa
     const echec = Boolean(erreur) && !position;
 
     return (
-        <div className={["relative h-full min-h-[320px] overflow-hidden rounded-3xl border border-jse-theme-border bg-jse-theme-surface-soft", className].join(" ")}>
-            <MapContainer center={position || CENTRE_PAR_DEFAUT} zoom={position ? 16 : 14} zoomControl={false} scrollWheelZoom={!compact} className="h-full min-h-[320px] w-full">
+        <div className={["relative h-full overflow-hidden rounded-3xl border border-jse-theme-border bg-jse-theme-surface-soft", compact ? "min-h-[240px]" : "min-h-[320px]", className].join(" ")}>
+            <MapContainer center={position || CENTRE_PAR_DEFAUT} zoom={position ? 16 : 14} zoomControl={false} scrollWheelZoom={!compact} className={["h-full w-full", compact ? "min-h-[240px]" : "min-h-[320px]"].join(" ")}>
                 <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <ZoomControl position="bottomright" />
                 {position && (

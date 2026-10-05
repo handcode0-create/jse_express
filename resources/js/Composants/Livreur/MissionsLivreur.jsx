@@ -1,40 +1,7 @@
-import { Bike, Check, ChevronRight, MapPin, Power, Store } from "lucide-react";
+import { Bike, Check, ChevronRight, MapPin, Store } from "lucide-react";
 import AdminBadge from "../Admin/AdminBadge";
 import AdminCard from "../Admin/AdminCard";
 import { montant } from "../../lib/format";
-
-/**
- * Interrupteur « en ligne / hors ligne ». Hors ligne, l'attribution automatique ne propose plus de mission.
- */
-export function DisponibiliteLivreur({ livreur, enCours, onBasculer }) {
-    const disponible = livreur?.disponibilite === "disponible";
-
-    return (
-        <AdminCard className="flex items-center justify-between gap-4 p-4 sm:p-5">
-            <div className="min-w-0">
-                <p className="text-sm font-semibold text-jse-theme-text">{disponible ? "Vous êtes en ligne" : "Vous êtes hors ligne"}</p>
-                <p className="mt-0.5 text-sm text-jse-theme-muted">
-                    {disponible ? "De nouvelles missions peuvent vous être attribuées." : "Passez en ligne pour recevoir des missions."}
-                </p>
-            </div>
-            <button
-                type="button"
-                role="switch"
-                aria-checked={disponible}
-                aria-label="Disponibilité pour les livraisons"
-                disabled={enCours}
-                onClick={onBasculer}
-                className="group flex shrink-0 items-center gap-2 rounded-full focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-jse-secondaire/30 disabled:opacity-60"
-            >
-                <span className={["relative h-8 w-14 rounded-full transition", disponible ? "bg-jse-secondaire" : "bg-jse-theme-muted/40"].join(" ")}>
-                    <span className={["absolute top-1 flex size-6 items-center justify-center rounded-full bg-white text-jse-principal shadow transition-all", disponible ? "left-7" : "left-1"].join(" ")}>
-                        <Power size={13} aria-hidden="true" />
-                    </span>
-                </span>
-            </button>
-        </AdminCard>
-    );
-}
 
 const libellesLivraison = { en_attente: "Nouvelle mission", attribuee: "Nouvelle mission", en_cours: "En livraison" };
 

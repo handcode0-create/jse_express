@@ -3,9 +3,11 @@ import { gsap } from "gsap";
 import { ArrowRight, CircleDollarSign, Clock3, PackageCheck, ShoppingBag, Timer, UtensilsCrossed } from "lucide-react";
 import AdminBadge from "../Admin/AdminBadge";
 import AdminButton from "../Admin/AdminButton";
+import Compteur from "../Interface/Compteur";
+import TuileIndicateur from "../Interface/TuileIndicateur";
+import { libelleDuree, minutesDepuis } from "../../lib/format";
+import { mouvementReduit } from "../../lib/mouvement";
 import { initiales, montant, statutSuivant } from "../../lib/restaurant";
-
-const MOUVEMENT_REDUIT = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /** Étapes d'une commande, de la réception à la livraison ; les trois premières relèvent du restaurant. */
 const ETAPES = [
@@ -29,60 +31,13 @@ function platPour(categories = []) {
     return "/assets/optimises/plat-attieke-poisson.webp";
 }
 
-function minutesDepuis(date, heure) {
-    if (!date || !heure) return null;
-
-    const [jour, mois, annee] = date.split("/");
-    const minutes = Math.floor((Date.now() - new Date(`${annee}-${mois}-${jour}T${heure}:00`).getTime()) / 60000);
-
-    return Number.isFinite(minutes) && minutes >= 0 ? minutes : null;
-}
-
-function libelleDuree(minutes) {
-    if (minutes === null) return "—";
-    if (minutes < 1) return "à l’instant";
-    if (minutes < 60) return `${minutes} min`;
-    if (minutes < 1440) return `${Math.floor(minutes / 60)} h`;
-
-    return `${Math.floor(minutes / 1440)} j`;
-}
-
-/** Nombre qui s'anime de 0 à sa valeur (affiché tel quel si l'utilisateur réduit les animations). */
-function Compteur({ valeur, formater = (nombre) => nombre.toLocaleString("fr-FR"), className = "" }) {
-    const ref = useRef(null);
-
-    useEffect(() => {
-        const cible = Number(valeur || 0);
-
-        if (!ref.current || MOUVEMENT_REDUIT()) return undefined;
-
-        const etat = { v: 0 };
-        const animation = gsap.to(etat, {
-            v: cible,
-            duration: 0.9,
-            ease: "power2.out",
-            onUpdate: () => {
-                if (ref.current) ref.current.textContent = formater(Math.round(etat.v));
-            },
-        });
-
-        return () => animation.kill();
-    }, [valeur]);
-
-    return (
-        <span ref={ref} className={className}>
-            {formater(Number(valeur || 0))}
-        </span>
-    );
-}
-
 function Heros({ restaurant, prenom, categories, aTraiter, produitsDisponibles, onNaviguer }) {
     const racine = useRef(null);
     const platRef = useRef(null);
     const plat = useMemo(() => platPour(categories), [categories]);
 
     useLayoutEffect(() => {
-        if (!racine.current || MOUVEMENT_REDUIT()) return undefined;
+        if (!racine.current || mouvementReduit()) return undefined;
 
         const contexte = gsap.context(() => {
             gsap.from("[data-hero]", { y: 26, opacity: 0, duration: 0.7, ease: "power3.out", stagger: 0.09 });
@@ -158,25 +113,6 @@ function Heros({ restaurant, prenom, categories, aTraiter, produitsDisponibles, 
 
             <img src={plat} alt="" aria-hidden="true" decoding="async" className="pointer-events-none absolute -bottom-8 -right-12 z-0 w-48 rotate-6 drop-shadow-2xl sm:w-60 lg:hidden" />
         </section>
-    );
-}
-
-function Tuile({ icone: Icone, label, children, sombre = false }) {
-    return (
-        <article
-            className={[
-                "relative h-full overflow-hidden rounded-3xl p-4 sm:p-6",
-                sombre
-                    ? "jse-dark-surface bg-jse-principal text-jse-fond shadow-jse-elevated"
-                    : "jse-admin-card border border-jse-theme-border bg-jse-theme-surface text-jse-theme-text shadow-jse-carte",
-            ].join(" ")}
-        >
-            <span className={["flex size-11 items-center justify-center rounded-2xl", sombre ? "bg-white/12 text-jse-accent" : "bg-jse-secondaire/15 text-jse-theme-heading"].join(" ")}>
-                <Icone size={20} aria-hidden="true" />
-            </span>
-            <p className={["mt-4 text-3xl font-semibold tabular-nums tracking-tight sm:mt-5 sm:text-5xl", sombre ? "text-jse-fond" : "text-jse-theme-heading"].join(" ")}>{children}</p>
-            <p className={["mt-1 text-sm", sombre ? "text-jse-fond/70" : "text-jse-theme-muted"].join(" ")}>{label}</p>
-        </article>
     );
 }
 
@@ -376,7 +312,7 @@ export default function AccueilRestaurant({ restaurant, prenom, commandes, comma
     const racineTickets = useRef(null);
 
     useLayoutEffect(() => {
-        if (!racineTickets.current || MOUVEMENT_REDUIT()) return undefined;
+        if (!racineTickets.current || mouvementReduit()) return undefined;
 
         const contexte = gsap.context(() => {
             gsap.from("[data-ticket]", { y: 24, opacity: 0, duration: 0.55, ease: "power3.out", stagger: 0.08, delay: 0.25 });
@@ -391,19 +327,19 @@ export default function AccueilRestaurant({ restaurant, prenom, commandes, comma
 
             <section aria-label="Indicateurs du jour" className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
                 <div className="order-2 sm:order-1">
-                    <Tuile icone={ShoppingBag} label="Commandes aujourd’hui">
+                    <TuileIndicateur icone={ShoppingBag} label="Commandes aujourd’hui">
                         <Compteur valeur={statistiques.commandes_du_jour || 0} />
-                    </Tuile>
+                    </TuileIndicateur>
                 </div>
                 <div className="order-1 col-span-2 sm:order-2 sm:col-span-1">
-                    <Tuile icone={CircleDollarSign} label="Revenus du jour" sombre>
+                    <TuileIndicateur icone={CircleDollarSign} label="Revenus du jour" sombre>
                         <Compteur valeur={statistiques.revenus_du_jour || 0} formater={montant} />
-                    </Tuile>
+                    </TuileIndicateur>
                 </div>
                 <div className="order-3">
-                    <Tuile icone={PackageCheck} label="Commandes livrées">
+                    <TuileIndicateur icone={PackageCheck} label="Commandes livrées">
                         <Compteur valeur={statistiques.commandes_livrees ?? livrees} />
-                    </Tuile>
+                    </TuileIndicateur>
                 </div>
             </section>
 
