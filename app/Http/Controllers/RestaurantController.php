@@ -10,13 +10,17 @@ use App\Models\Notification;
 use App\Models\Paiement;
 use App\Models\Produit;
 use App\Models\Restaurant;
+use App\Models\StatutCommande;
 use App\Models\User;
+use App\Services\CommandeService;
+use App\Services\LivraisonService;
+use App\Services\NotificationService;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Services\LivraisonService;
-use App\Services\CommandeService;
-use App\Services\NotificationService;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -28,6 +32,30 @@ class RestaurantController extends Controller
             ->where('user_id', $request->user()->id)
             ->where('statut', 'actif')
             ->firstOrFail();
+    }
+
+    /**
+     * Valide les champs d'un produit ; la catégorie doit être une catégorie active du restaurant.
+     *
+     * @return array<string, mixed>
+     */
+    private function validerProduit(Request $request, Restaurant $restaurant): array
+    {
+        return $request->validate([
+            'categorie_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('categories', 'id')
+                    ->where('restaurant_id', $restaurant->id)
+                    ->where('statut', 'actif'),
+            ],
+            'nom' => ['required', 'string', 'max:150'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'prix' => ['required', 'numeric', 'min:0'],
+            'image' => ['nullable', 'string', 'max:500'],
+        ], [
+            'categorie_id.exists' => 'Cette catégorie n’appartient pas à votre restaurant.',
+        ]);
     }
 
     public function tableauDeBord(Request $request): Response
@@ -45,7 +73,7 @@ class RestaurantController extends Controller
                 'id' => $commande->id,
                 'reference' => $commande->reference,
                 'client' => $commande->user ? [
-                    'nom' => trim($commande->user->prenom . ' ' . $commande->user->nom),
+                    'nom' => trim($commande->user->prenom.' '.$commande->user->nom),
                     'telephone' => $commande->user->telephone,
                 ] : null,
                 'zone' => $commande->zone?->nom,
@@ -130,6 +158,7 @@ class RestaurantController extends Controller
                     ->sum('montant'),
                 'notifications' => Notification::query()
                     ->where('user_id', $request->user()->id)
+                    ->whereNull('masquee_par_destinataire_at')
                     ->count(),
                 'commandes_total' => Commande::query()
                     ->where('restaurant_id', $restaurant->id)
@@ -179,7 +208,7 @@ class RestaurantController extends Controller
                 'id' => $commande->id,
                 'reference' => $commande->reference,
                 'client' => $commande->user ? [
-                    'nom' => trim($commande->user->prenom . ' ' . $commande->user->nom),
+                    'nom' => trim($commande->user->prenom.' '.$commande->user->nom),
                     'telephone' => $commande->user->telephone,
                     'email' => $commande->user->email,
                 ] : null,
@@ -213,15 +242,15 @@ class RestaurantController extends Controller
                     'reference_transaction' => $paiement->reference_transaction,
                     'montant' => (float) $paiement->montant,
                     'statut' => $paiement->statut,
-                    'date' => $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('d/m/Y') : null,
-                    'heure' => $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('H:i') : null,
+                    'date' => $paiement->date_paiement ? Carbon::parse($paiement->date_paiement)->format('d/m/Y') : null,
+                    'heure' => $paiement->date_paiement ? Carbon::parse($paiement->date_paiement)->format('H:i') : null,
                 ] : null,
                 'livraison' => $commande->livraison ? [
                     'statut' => $commande->livraison->statut,
                     'mode_attribution' => $commande->livraison->mode_attribution,
                     'livreur' => $commande->livraison->attributions->first()?->livreur ? [
                         'nom' => trim(
-                            $commande->livraison->attributions->first()->livreur->prenom . ' ' .
+                            $commande->livraison->attributions->first()->livreur->prenom.' '.
                             $commande->livraison->attributions->first()->livreur->nom
                         ),
                         'telephone' => $commande->livraison->attributions->first()->livreur->telephone,
@@ -233,8 +262,8 @@ class RestaurantController extends Controller
                         'code' => $historique->statut?->code,
                         'libelle' => $historique->statut?->libelle,
                         'commentaire' => $historique->commentaire,
-                        'date' => $historique->date_changement ? \Carbon\Carbon::parse($historique->date_changement)->format('d/m/Y') : null,
-                        'heure' => $historique->date_changement ? \Carbon\Carbon::parse($historique->date_changement)->format('H:i') : null,
+                        'date' => $historique->date_changement ? Carbon::parse($historique->date_changement)->format('d/m/Y') : null,
+                        'heure' => $historique->date_changement ? Carbon::parse($historique->date_changement)->format('H:i') : null,
                     ])->values(),
             ],
         ]);
@@ -279,8 +308,11 @@ class RestaurantController extends Controller
         $donnees = $request->validate([
             'prenom' => ['required', 'string', 'max:100'],
             'nom' => ['required', 'string', 'max:100'],
-            'telephone' => ['required', 'string', 'max:30'],
-            'email' => ['nullable', 'email', 'max:150'],
+            'telephone' => ['required', 'string', 'max:30', Rule::unique('users', 'telephone')->ignore($utilisateur->id)],
+            'email' => ['nullable', 'email', 'max:150', Rule::unique('users', 'email')->ignore($utilisateur->id)],
+        ], [
+            'telephone.unique' => 'Ce numéro de téléphone est déjà utilisé par un autre compte.',
+            'email.unique' => 'Cette adresse e-mail est déjà utilisée par un autre compte.',
         ]);
 
         $utilisateur->update($donnees);
@@ -298,7 +330,7 @@ class RestaurantController extends Controller
             'statut' => ['required', 'in:CONFIRMEE,EN_PREPARATION,PRETE'],
         ]);
 
-        DB::transaction(function () use ($request, $commande, $restaurant, $donnees, $livraisonService, $notificationService) {
+        DB::transaction(function () use ($request, $commande, $donnees, $livraisonService, $notificationService) {
             $commande = Commande::query()->whereKey($commande->id)->lockForUpdate()->with(['statutCommande', 'user'])->firstOrFail();
 
             $transitions = [
@@ -308,9 +340,11 @@ class RestaurantController extends Controller
             ];
 
             $actuel = $commande->statutCommande?->code;
-            abort_unless($actuel && in_array($donnees['statut'], $transitions[$actuel] ?? [], true), 422, 'Cette commande ne peut pas passer à ce statut.');
+            if (! $actuel || ! in_array($donnees['statut'], $transitions[$actuel] ?? [], true)) {
+                throw ValidationException::withMessages(['statut' => 'Cette commande ne peut pas passer à ce statut.']);
+            }
 
-            $statut = \App\Models\StatutCommande::query()->where('code', $donnees['statut'])->firstOrFail();
+            $statut = StatutCommande::query()->where('code', $donnees['statut'])->firstOrFail();
 
             $commande->update(['statut_id' => $statut->id]);
 
@@ -434,24 +468,7 @@ class RestaurantController extends Controller
     {
         $restaurant = $this->restaurant($request);
 
-        $donnees = $request->validate([
-            'categorie_id' => ['nullable', 'integer'],
-            'nom' => ['required', 'string', 'max:150'],
-            'description' => ['nullable', 'string', 'max:2000'],
-            'prix' => ['required', 'numeric', 'min:0'],
-            'image' => ['nullable', 'string', 'max:500'],
-        ]);
-
-        if (! empty($donnees['categorie_id'])) {
-            abort_unless(
-                Categorie::query()
-                    ->where('id', $donnees['categorie_id'])
-                    ->where('restaurant_id', $restaurant->id)
-                    ->exists(),
-                422,
-                'Cette catégorie n’appartient pas à votre restaurant.'
-            );
-        }
+        $donnees = $this->validerProduit($request, $restaurant);
 
         Produit::create([
             'restaurant_id' => $restaurant->id,
@@ -474,25 +491,7 @@ class RestaurantController extends Controller
 
         abort_unless((int) $produit->restaurant_id === (int) $restaurant->id, 404);
 
-        $donnees = $request->validate([
-            'categorie_id' => ['nullable', 'integer'],
-            'nom' => ['required', 'string', 'max:150'],
-            'description' => ['nullable', 'string', 'max:2000'],
-            'prix' => ['required', 'numeric', 'min:0'],
-            'image' => ['nullable', 'string', 'max:500'],
-        ]);
-
-        if (! empty($donnees['categorie_id'])) {
-            abort_unless(
-                Categorie::query()
-                    ->whereKey($donnees['categorie_id'])
-                    ->where('restaurant_id', $restaurant->id)
-                    ->where('statut', 'actif')
-                    ->exists(),
-                422,
-                'Cette catégorie n’appartient pas à votre restaurant.'
-            );
-        }
+        $donnees = $this->validerProduit($request, $restaurant);
 
         $produit->update([
             'categorie_id' => $donnees['categorie_id'] ?? null,
