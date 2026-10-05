@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\AttributionLivraison;
 use App\Models\Commande;
-use App\Models\HistoriqueCommande;
 use App\Models\Livraison;
 use App\Models\Notification;
 use App\Models\ProfilLivreur;
@@ -15,8 +14,8 @@ use App\Models\Zone;
 use App\Services\LivraisonService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class PinLivraisonTest extends TestCase
@@ -46,8 +45,8 @@ class PinLivraisonTest extends TestCase
         return User::create([
             'nom' => ucfirst($role),
             'prenom' => 'Test',
-            'telephone' => '0700000' . str_pad((string) $index, 3, '0', STR_PAD_LEFT),
-            'email' => $role . $index . '@jse.test',
+            'telephone' => '0700000'.str_pad((string) $index, 3, '0', STR_PAD_LEFT),
+            'email' => $role.$index.'@jse.test',
             'password' => Hash::make('password'),
             'role' => $role,
             'statut' => 'actif',
@@ -82,7 +81,7 @@ class PinLivraisonTest extends TestCase
 
         ProfilLivreur::create([
             'user_id' => $livreur->id,
-            'matricule' => 'LIV-TEST-' . $livreur->id,
+            'matricule' => 'LIV-TEST-'.$livreur->id,
             'zone_id' => $zone->id,
             'disponibilite' => 'disponible',
             'telephone_secondaire' => null,
@@ -93,7 +92,7 @@ class PinLivraisonTest extends TestCase
             ->value('id');
 
         $commande = Commande::create([
-            'reference' => 'JSE-TEST-' . str_pad((string) $client->id, 6, '0', STR_PAD_LEFT),
+            'reference' => 'JSE-TEST-'.str_pad((string) $client->id, 6, '0', STR_PAD_LEFT),
             'user_id' => $client->id,
             'restaurant_id' => $restaurant->id,
             'zone_id' => $zone->id,
@@ -194,7 +193,7 @@ class PinLivraisonTest extends TestCase
         foreach (['', '123', '12345', '1234567', '12A456', ' 123456 '] as $pin) {
             $this->assertFalse(
                 $service->validerPin($scenario['commande']->fresh(), $pin),
-                'Le PIN invalide suivant doit être refusé : ' . json_encode($pin)
+                'Le PIN invalide suivant doit être refusé : '.json_encode($pin)
             );
         }
     }
@@ -208,10 +207,10 @@ class PinLivraisonTest extends TestCase
 
         $this->actingAs($scenario['livreur'])
             ->from('/livreur/tableau-de-bord')
-            ->post('/livreur/livraisons/' . $scenario['attribution']->id . '/valider-pin', [
+            ->post('/livreur/livraisons/'.$scenario['attribution']->id.'/valider-pin', [
                 'pin' => '000000',
             ])
-            ->assertStatus(422);
+            ->assertSessionHasErrors('pin');
 
         $this->assertSame('en_cours', $scenario['livraison']->fresh()->statut);
         $this->assertSame(
@@ -231,13 +230,13 @@ class PinLivraisonTest extends TestCase
         $autreLivreur = $this->creerUtilisateur('livreur', 4);
         ProfilLivreur::create([
             'user_id' => $autreLivreur->id,
-            'matricule' => 'LIV-TEST-' . $autreLivreur->id,
+            'matricule' => 'LIV-TEST-'.$autreLivreur->id,
             'zone_id' => $scenario['zone']->id,
             'disponibilite' => 'disponible',
         ]);
 
         $this->actingAs($autreLivreur)
-            ->post('/livreur/livraisons/' . $scenario['attribution']->id . '/valider-pin', [
+            ->post('/livreur/livraisons/'.$scenario['attribution']->id.'/valider-pin', [
                 'pin' => $service->genererPin($scenario['commande']),
             ])
             ->assertStatus(404);
@@ -255,7 +254,7 @@ class PinLivraisonTest extends TestCase
 
         $response = $this->actingAs($scenario['livreur'])
             ->from('/livreur/tableau-de-bord')
-            ->post('/livreur/livraisons/' . $scenario['attribution']->id . '/valider-pin', [
+            ->post('/livreur/livraisons/'.$scenario['attribution']->id.'/valider-pin', [
                 'pin' => $pin,
             ]);
 
@@ -304,10 +303,10 @@ class PinLivraisonTest extends TestCase
         $pin = $service->genererPin($scenario['commande']);
 
         $this->actingAs($scenario['livreur'])
-            ->post('/livreur/livraisons/' . $scenario['attribution']->id . '/valider-pin', [
+            ->post('/livreur/livraisons/'.$scenario['attribution']->id.'/valider-pin', [
                 'pin' => $pin,
             ])
-            ->assertStatus(422);
+            ->assertSessionHasErrors('mission');
 
         $this->assertSame('attribuee', $scenario['livraison']->fresh()->statut);
         $this->assertSame('active', $scenario['attribution']->fresh()->statut);
@@ -321,14 +320,15 @@ class PinLivraisonTest extends TestCase
         $pin = $service->genererPin($scenario['commande']);
 
         $this->actingAs($scenario['livreur'])
-            ->post('/livreur/livraisons/' . $scenario['attribution']->id . '/valider-pin', [
+            ->post('/livreur/livraisons/'.$scenario['attribution']->id.'/valider-pin', [
                 'pin' => $pin,
             ])
-            ->assertStatus(422);
+            ->assertSessionHasErrors('mission');
 
         $this->assertSame('en_cours', $scenario['livraison']->fresh()->statut);
         $this->assertSame('PRETE', $scenario['commande']->fresh()->statutCommande->code);
     }
+
     public function test_le_flux_complet_restaurant_livreur_pin_cloture_la_commande(): void
     {
         $scenario = $this->creerLivraisonScenario('en_attente', 'EN_ATTENTE');
@@ -337,11 +337,11 @@ class PinLivraisonTest extends TestCase
 
         foreach (['CONFIRMEE', 'EN_PREPARATION', 'PRETE'] as $statut) {
             $this->actingAs($scenario['restaurantUser'])
-                ->from('/restaurant/commandes/' . $scenario['commande']->id)
-                ->patch('/restaurant/commandes/' . $scenario['commande']->id . '/statut', [
+                ->from('/restaurant/commandes/'.$scenario['commande']->id)
+                ->patch('/restaurant/commandes/'.$scenario['commande']->id.'/statut', [
                     'statut' => $statut,
                 ])
-                ->assertRedirect('/restaurant/commandes/' . $scenario['commande']->id);
+                ->assertRedirect('/restaurant/commandes/'.$scenario['commande']->id);
         }
 
         $commande = $scenario['commande']->fresh();
@@ -361,7 +361,7 @@ class PinLivraisonTest extends TestCase
 
         $this->actingAs($scenario['livreur'])
             ->from('/livreur/tableau-de-bord')
-            ->patch('/livreur/livraisons/' . $attribution->id . '/prise-en-charge')
+            ->patch('/livreur/livraisons/'.$attribution->id.'/prise-en-charge')
             ->assertRedirect('/livreur/tableau-de-bord');
 
         $this->assertSame('EN_LIVRAISON', $commande->fresh()->statutCommande->code);
@@ -369,7 +369,7 @@ class PinLivraisonTest extends TestCase
 
         $this->actingAs($scenario['livreur'])
             ->from('/livreur/tableau-de-bord')
-            ->post('/livreur/livraisons/' . $attribution->id . '/valider-pin', [
+            ->post('/livreur/livraisons/'.$attribution->id.'/valider-pin', [
                 'pin' => $pin,
             ])
             ->assertRedirect('/livreur/tableau-de-bord')
@@ -388,5 +388,4 @@ class PinLivraisonTest extends TestCase
             'commentaire' => 'Livraison validée par PIN.',
         ]);
     }
-
 }

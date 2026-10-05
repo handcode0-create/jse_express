@@ -9,6 +9,7 @@ use App\Models\Livraison;
 use App\Models\ProfilLivreur;
 use App\Models\StatutCommande;
 use App\Models\Zone;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -41,13 +42,7 @@ class LivraisonService
                 $livraison->commande->refresh();
             }
 
-            $zone = Zone::query()->find($livraison->zone_id);
-            $zoneIds = collect([$livraison->zone_id]);
-            if ($zone?->zone_parent_id) {
-                $zoneIds->push($zone->zone_parent_id);
-                $zoneIds = $zoneIds->merge(Zone::query()->where('zone_parent_id', $zone->zone_parent_id)->pluck('id'));
-            }
-            $zoneIds = $zoneIds->filter()->unique()->values();
+            $zoneIds = $this->zoneIdsCouvertes($livraison->zone_id);
 
             $candidats = ProfilLivreur::query()
                 ->whereIn('zone_id', $zoneIds)
@@ -66,9 +61,13 @@ class LivraisonService
             $profil = null;
             foreach ($candidats->sortBy(fn ($candidate) => [$activeCounts[$candidate->user_id] ?? 0, $candidate->user_id]) as $profilCandidat) {
                 $candidate = ProfilLivreur::query()->whereKey($profilCandidat->user_id)->lockForUpdate()->first();
-                if (! $candidate || $candidate->disponibilite !== 'disponible') continue;
+                if (! $candidate || $candidate->disponibilite !== 'disponible') {
+                    continue;
+                }
                 $occupe = AttributionLivraison::query()->where('livreur_id', $candidate->user_id)->where('statut', 'active')->exists();
-                if ($occupe) continue;
+                if ($occupe) {
+                    continue;
+                }
                 $profil = $candidate;
                 break;
             }
@@ -95,6 +94,31 @@ class LivraisonService
 
             return $attribution;
         });
+    }
+
+    /**
+     * Zones dont un livreur peut desservir une livraison : la zone elle-même, sa zone parente
+     * et les zones sœurs du même secteur. Utilisée pour l'attribution automatique ET pour
+     * contrôler qu'un livreur attribué peut effectivement prendre la mission en charge.
+     *
+     * @return Collection<int, int>
+     */
+    public function zoneIdsCouvertes(?int $zoneId): Collection
+    {
+        $zone = $zoneId ? Zone::query()->find($zoneId) : null;
+        $zoneIds = collect([$zoneId]);
+
+        if ($zone?->zone_parent_id) {
+            $zoneIds->push($zone->zone_parent_id);
+            $zoneIds = $zoneIds->merge(Zone::query()->where('zone_parent_id', $zone->zone_parent_id)->pluck('id'));
+        }
+
+        return $zoneIds->filter()->unique()->values();
+    }
+
+    public function livreurDessertLaZone(ProfilLivreur $profil, Livraison $livraison): bool
+    {
+        return $this->zoneIdsCouvertes($livraison->zone_id)->contains((int) $profil->zone_id);
     }
 
     public function reattribuer(Livraison $livraison, int $adminId, int $livreurId, string $motif): AttributionLivraison
