@@ -21,6 +21,7 @@ export default function Bienvenue() {
     const pointerStart = useRef(null);
     const autoplayRef = useRef(null);
     const [index, setIndex] = useState(0);
+    const [menuOuvert, setMenuOuvert] = useState(false);
     const slide = slides[index];
 
     const animerSlide = (direction = 1, nextIndex = index) => {
@@ -129,7 +130,7 @@ export default function Bienvenue() {
                         </button>
                     </nav>
 
-                    <div className="flex items-center gap-2 lg:hidden">
+                    <div className="relative flex items-center gap-2 lg:hidden">
                         <button
                             type="button"
                             onClick={() => router.visit("/authentification")}
@@ -137,6 +138,32 @@ export default function Bienvenue() {
                         >
                             Se connecter
                         </button>
+                        <button
+                            type="button"
+                            aria-label={menuOuvert ? "Fermer le menu" : "Ouvrir le menu"}
+                            aria-expanded={menuOuvert}
+                            onClick={() => setMenuOuvert((ouvert) => !ouvert)}
+                            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/10 text-jse-fond backdrop-blur-md transition hover:bg-white/15 active:scale-[0.96]"
+                        >
+                            <span className="sr-only">{menuOuvert ? "Fermer" : "Menu"}</span>
+                            <span className="flex w-4 flex-col gap-1">
+                                <span className="h-px w-full bg-current" />
+                                <span className="h-px w-full bg-current" />
+                                <span className="h-px w-full bg-current" />
+                            </span>
+                        </button>
+
+                        {menuOuvert && (
+                            <nav
+                                className="absolute right-0 top-12 z-30 min-w-44 rounded-2xl border border-white/15 bg-jse-principal/90 p-2 font-sans text-sm text-jse-fond shadow-2xl backdrop-blur-xl"
+                                aria-label="Navigation mobile"
+                            >
+                                <button type="button" onClick={() => { setMenuOuvert(false); router.visit("/"); }} className="w-full rounded-xl px-4 py-3 text-left transition hover:bg-white/10">Restaurants</button>
+                                <button type="button" onClick={() => { setMenuOuvert(false); router.visit("/"); }} className="w-full rounded-xl px-4 py-3 text-left transition hover:bg-white/10">À propos</button>
+                                <button type="button" onClick={() => { setMenuOuvert(false); router.visit("/"); }} className="w-full rounded-xl px-4 py-3 text-left transition hover:bg-white/10">Aide</button>
+                                <button type="button" onClick={() => { setMenuOuvert(false); router.visit("/inscription"); }} className="mt-1 w-full rounded-xl bg-jse-accent px-4 py-3 text-left font-semibold text-white transition hover:bg-jse-accent/90">S'inscrire</button>
+                            </nav>
+                        )}
                     </div>
                 </header>
 
