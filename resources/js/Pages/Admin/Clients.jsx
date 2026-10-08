@@ -1,20 +1,54 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { router } from "@inertiajs/react";
 import { Power } from "lucide-react";
+import AdminBadge from "../../Composants/Admin/AdminBadge";
+import AdminButton from "../../Composants/Admin/AdminButton";
 import AdminDataPage from "../../Composants/Admin/AdminDataPage";
 
 export default function Clients({ utilisateur, clients = [], recherche = "" }) {
     const [traitement, setTraitement] = useState(null);
+
     const basculer = (client) => {
         setTraitement(client.id);
         router.post("/administration/clients/" + client.id + "/statut", {}, { preserveScroll: true, onFinish: () => setTraitement(null) });
     };
-    return <AdminDataPage utilisateur={utilisateur} title="Clients" description="Comptes clients, coordonnées et activité de commande." search={recherche} searchPlaceholder="Nom, téléphone ou email" rows={clients.data || []} pagination={clients} columns={[
-        { key: "nom", label: "Client", render: row => <div><p className="font-semibold">{row.nom}</p><p className="text-xs text-jse-theme-muted">{row.email || "Sans email"}</p></div> },
-        { key: "telephone", label: "Téléphone" },
-        { key: "statut", label: "Statut", render: row => <span className={row.statut === "actif" ? "text-jse-secondaire" : "text-jse-theme-muted"}>{row.statut || "—"}</span> },
-        { key: "commandes_count", label: "Commandes" },
-        { key: "derniere_commande", label: "Dernière commande" },
-        { key: "actions", label: "Action", render: row => <button type="button" onClick={() => basculer(row)} disabled={traitement === row.id} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-jse-principal sm:w-auto sm:rounded-full px-4 text-xs font-semibold text-white disabled:opacity-50"><Power size={15} />{traitement === row.id ? "..." : row.statut === "actif" ? "Désactiver" : "Activer"}</button> },
-    ]} emptyMessage="Aucun client trouvé." />;
+
+    return (
+        <AdminDataPage
+            utilisateur={utilisateur}
+            title="Clients" visuel="attieke"
+            description="Comptes clients, coordonnées et activité de commande."
+            search={recherche}
+            searchPlaceholder="Nom, téléphone ou email"
+            rows={clients.data || []}
+            pagination={clients}
+            columns={[
+                {
+                    key: "nom",
+                    label: "Client",
+                    render: (row) => (
+                        <div>
+                            <p className="font-semibold">{row.nom}</p>
+                            <p className="text-xs text-jse-theme-muted">{row.email || "Sans email"}</p>
+                        </div>
+                    ),
+                },
+                { key: "telephone", label: "Téléphone" },
+                { key: "statut", label: "Statut", render: (row) => <AdminBadge statut={row.statut} /> },
+                { key: "commandes_count", label: "Commandes", render: (row) => <span className="tabular-nums">{row.commandes_count}</span> },
+                { key: "derniere_commande", label: "Dernière commande" },
+                {
+                    key: "actions",
+                    label: "Action",
+                    render: (row) => (
+                        <AdminButton variante={row.statut === "actif" ? "contour" : "principal"} taille="petit" chargement={traitement === row.id} onClick={() => basculer(row)}>
+                            <Power size={15} aria-hidden="true" />
+                            {row.statut === "actif" ? "Désactiver" : "Activer"}
+                        </AdminButton>
+                    ),
+                },
+            ]}
+            emptyMessage="Aucun client trouvé."
+        />
+    );
 }

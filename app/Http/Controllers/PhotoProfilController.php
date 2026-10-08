@@ -9,6 +9,19 @@ use Illuminate\Support\Str;
 
 class PhotoProfilController extends Controller
 {
+    /** Retire la photo de profil (fichier et référence) ; sans effet si l'utilisateur n'en a pas. */
+    public function supprimer(Request $request): RedirectResponse
+    {
+        $utilisateur = $request->user();
+
+        if ($utilisateur->photo_profil) {
+            File::delete(public_path(ltrim($utilisateur->photo_profil, '/')));
+            $utilisateur->forceFill(['photo_profil' => null])->save();
+        }
+
+        return back()->with('success', 'Photo de profil retirée.');
+    }
+
     public function modifier(Request $request): RedirectResponse
     {
         $donnees = $request->validate([
@@ -32,12 +45,12 @@ class PhotoProfilController extends Controller
             }
         }
 
-        $extension = strtolower($donnees['photo']->getClientOriginalExtension());
-        $nom = Str::uuid()->toString() . '.' . $extension;
+        $extension = $donnees['photo']->extension();
+        $nom = Str::uuid()->toString().'.'.$extension;
         $donnees['photo']->move($directory, $nom);
 
         $utilisateur->forceFill([
-            'photo_profil' => '/uploads/profils/' . $nom,
+            'photo_profil' => '/uploads/profils/'.$nom,
         ])->save();
 
         return match ($utilisateur->role) {

@@ -1,34 +1,41 @@
 <?php
 
-use App\Models\Categorie;
+use App\Http\Controllers\AdministrationController;
+use App\Http\Controllers\AdministrationMenuController;
+use App\Http\Controllers\AuthentificationController;
+use App\Http\Controllers\CommandeController;
+use App\Http\Controllers\CompteAdministrateurController;
+use App\Http\Controllers\CouvertureProfilController;
+use App\Http\Controllers\LivreurController;
+use App\Http\Controllers\MotDePasseController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PhotoProfilController;
+use App\Http\Controllers\RestaurantController;
 use App\Models\AdresseLivraison;
-use App\Models\Favori;
-use App\Models\MoyenPaiement;
+use App\Models\Categorie;
 use App\Models\Commande;
+use App\Models\Favori;
 use App\Models\HistoriqueCommande;
-use App\Models\Notification;
 use App\Models\LigneCommande;
 use App\Models\LignePanier;
+use App\Models\Livraison;
+use App\Models\MoyenPaiement;
+use App\Models\Notification;
 use App\Models\Panier;
 use App\Models\Produit;
 use App\Models\Restaurant;
-use App\Models\User;
 use App\Models\Zone;
-use App\Http\Controllers\AuthentificationController;
-use App\Http\Controllers\RestaurantController;
-use App\Http\Controllers\LivreurController;
-use App\Http\Controllers\CommandeController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\AdministrationController;
 use App\Policies\CommandePolicy;
-use App\Services\PanierService;
-use App\Services\NotificationService;
 use App\Services\DistanceService;
+use App\Services\NotificationService;
+use App\Services\PanierService;
 use App\Services\TarificationLivraisonService;
+use App\Services\TelephoneService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -50,6 +57,39 @@ Route::get('/bienvenue', function () {
     return Inertia::render('Bienvenue');
 })->name('bienvenue');
 
+Route::get('/a-propos', function () {
+    return Inertia::render('APropos');
+})->name('a-propos');
+
+Route::get('/aide', function () {
+    return Inertia::render('Aide');
+})->name('aide');
+
+Route::get('/restaurants', function () {
+    $restaurants = Restaurant::query()
+        ->with(['zone', 'categories' => function ($query) {
+            $query->where('statut', 'actif')->orderBy('nom');
+        }])
+        ->where('statut', 'actif')
+        ->orderBy('nom')
+        ->get()
+        ->map(fn (Restaurant $restaurant) => [
+            'id' => $restaurant->id,
+            'nom' => $restaurant->nom,
+            'description' => $restaurant->description,
+            'adresse' => $restaurant->adresse,
+            'horaires' => $restaurant->horaires,
+            'zone' => $restaurant->zone?->nom,
+            'categories' => $restaurant->categories->pluck('nom')->values(),
+        ])
+        ->values();
+
+    return Inertia::render('Restaurants', [
+        'restaurants' => $restaurants,
+        'estClient' => Auth::check() && Auth::user()->role === 'client',
+    ]);
+})->name('restaurants.presentation');
+
 Route::get('/authentification', [AuthentificationController::class, 'show'])->name('authentification');
 
 Route::get('/inscription', [AuthentificationController::class, 'showInscription'])->name('inscription');
@@ -62,13 +102,21 @@ Route::post('/deconnexion', [AuthentificationController::class, 'deconnexion'])
     ->middleware('auth')
     ->name('deconnexion');
 
-Route::post('/profil/photo', [\App\Http\Controllers\PhotoProfilController::class, 'modifier'])
+Route::post('/profil/photo', [PhotoProfilController::class, 'modifier'])
     ->middleware('auth')
     ->name('profil.photo.modifier');
 
-Route::post('/profil/couverture', [\App\Http\Controllers\CouvertureProfilController::class, 'modifier'])
+Route::delete('/profil/photo', [PhotoProfilController::class, 'supprimer'])
+    ->middleware('auth')
+    ->name('profil.photo.supprimer');
+
+Route::post('/profil/couverture', [CouvertureProfilController::class, 'modifier'])
     ->middleware('auth')
     ->name('profil.couverture.modifier');
+
+Route::patch('/compte/mot-de-passe', [MotDePasseController::class, 'modifier'])
+    ->middleware(['auth', 'throttle:mot-de-passe'])
+    ->name('compte.mot-de-passe');
 
 Route::prefix('livreur')
     ->middleware(['auth', 'role:livreur'])
@@ -91,7 +139,6 @@ Route::prefix('livreur')
             ->middleware('throttle:livreur-pin')
             ->name('livreur.livraisons.valider-pin');
     });
-
 
 Route::prefix('restaurant')
     ->middleware(['auth', 'role:restaurant'])
@@ -139,12 +186,17 @@ Route::prefix('restaurant')
             ->name('restaurant.produits.creer');
     });
 
-
 Route::prefix('administration')
     ->middleware(['auth', 'role:administrateur'])
     ->group(function () {
         Route::get('/tableau-de-bord', [AdministrationController::class, 'tableauDeBord'])
             ->name('admin.tableau-de-bord');
+
+        Route::get('/compte', [CompteAdministrateurController::class, 'afficher'])
+            ->name('admin.compte');
+
+        Route::patch('/compte', [CompteAdministrateurController::class, 'modifier'])
+            ->name('admin.compte.modifier');
 
         Route::get('/commandes', [AdministrationController::class, 'commandes'])
             ->name('admin.commandes');
@@ -187,9 +239,24 @@ Route::prefix('administration')
             ->whereNumber('user')
             ->name('admin.clients.statut');
         Route::patch('/restaurants/{restaurant}/coordonnees', [AdministrationController::class, 'modifierCoordonneesRestaurant'])->name('admin.restaurants.coordonnees');
-         Route::post('/restaurants/{restaurant}/statut', [AdministrationController::class, 'changerStatutRestaurant'])
+        Route::post('/restaurants/{restaurant}/statut', [AdministrationController::class, 'changerStatutRestaurant'])
             ->whereNumber('restaurant')
             ->name('admin.restaurants.statut');
+        Route::get('/restaurants/{restaurant}/menu', [AdministrationMenuController::class, 'afficher'])
+            ->whereNumber('restaurant')
+            ->name('admin.restaurants.menu');
+        Route::post('/restaurants/{restaurant}/categories', [AdministrationMenuController::class, 'creerCategorie'])
+            ->whereNumber('restaurant')
+            ->name('admin.restaurants.categories.creer');
+        Route::post('/restaurants/{restaurant}/produits', [AdministrationMenuController::class, 'creerProduit'])
+            ->whereNumber('restaurant')
+            ->name('admin.restaurants.produits.creer');
+        Route::patch('/restaurants/{restaurant}/produits/{produit}', [AdministrationMenuController::class, 'modifierProduit'])
+            ->whereNumber(['restaurant', 'produit'])
+            ->name('admin.restaurants.produits.modifier');
+        Route::patch('/restaurants/{restaurant}/produits/{produit}/disponibilite', [AdministrationMenuController::class, 'changerDisponibiliteProduit'])
+            ->whereNumber(['restaurant', 'produit'])
+            ->name('admin.restaurants.produits.disponibilite');
         Route::post('/livreurs/{user}/disponibilite', [AdministrationController::class, 'changerDisponibiliteLivreur'])
             ->whereNumber('user')
             ->name('admin.livreurs.disponibilite');
@@ -356,15 +423,16 @@ Route::patch('/profil', function (Request $request) {
     $donnees = $request->validate([
         'nom' => ['required', 'string', 'max:100'],
         'prenom' => ['nullable', 'string', 'max:100'],
-        'telephone' => ['required', 'string', 'max:30', Rule::unique('users', 'telephone')->ignore(Auth::id())],
+        'telephone' => ['required', 'string', 'max:30', app(TelephoneService::class)->regleUnique(Auth::id(), 'Ce numéro est déjà utilisé.')],
         'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore(Auth::id())],
     ], [
         'nom.required' => 'Ce champ est obligatoire.',
         'telephone.required' => 'Ce champ est obligatoire.',
-        'telephone.unique' => 'Ce numéro est déjà utilisé.',
         'email.email' => 'Veuillez saisir une adresse e-mail valide.',
         'email.unique' => 'Cette adresse e-mail est déjà utilisée.',
     ]);
+
+    $donnees['telephone'] = app(TelephoneService::class)->normaliser($donnees['telephone']);
 
     Auth::user()->update($donnees);
 
@@ -539,7 +607,7 @@ Route::get('/notifications', function () {
                 'statut_envoi' => $notification->statut_envoi,
                 'tentatives' => (int) $notification->tentatives,
                 'date_envoi' => $notification->date_envoi
-                    ? \Illuminate\Support\Carbon::parse($notification->date_envoi)->toIso8601String()
+                    ? Carbon::parse($notification->date_envoi)->toIso8601String()
                     : null,
             ];
         })
@@ -630,7 +698,7 @@ Route::get('/commandes/{commande}', function (Commande $commande) {
     ) {
         try {
             $pinLivraison = Crypt::decryptString($commande->pin_livraison_chiffre);
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $pinLivraison = null;
         }
     }
@@ -642,10 +710,10 @@ Route::get('/commandes/{commande}', function (Commande $commande) {
                 'code' => $element->statut?->code,
                 'libelle' => $element->statut?->libelle,
                 'date' => $element->date_changement
-                    ? \Illuminate\Support\Carbon::parse($element->date_changement)->format('d/m/Y')
+                    ? Carbon::parse($element->date_changement)->format('d/m/Y')
                     : null,
                 'heure' => $element->date_changement
-                    ? \Illuminate\Support\Carbon::parse($element->date_changement)->format('H:i')
+                    ? Carbon::parse($element->date_changement)->format('H:i')
                     : null,
             ];
         })
@@ -695,10 +763,10 @@ Route::get('/commandes/{commande}', function (Commande $commande) {
                 'montant' => (float) $paiement->montant,
                 'statut' => $paiement->statut,
                 'date' => $paiement->date_paiement
-                    ? \Illuminate\Support\Carbon::parse($paiement->date_paiement)->format('d/m/Y')
+                    ? Carbon::parse($paiement->date_paiement)->format('d/m/Y')
                     : null,
                 'heure' => $paiement->date_paiement
-                    ? \Illuminate\Support\Carbon::parse($paiement->date_paiement)->format('H:i')
+                    ? Carbon::parse($paiement->date_paiement)->format('H:i')
                     : null,
             ] : null,
             'historique' => $historique,
@@ -737,10 +805,11 @@ Route::post('/commandes/{commande}/recommander', function (Commande $commande) {
             // réintroduire une option devenue invalide.
             $optionsValides = $optionsCommande->filter(function (array $option) use ($configuration) {
                 $groupe = $configuration->first(fn ($item) => ($item['name'] ?? '') === ($option['groupe'] ?? ''));
-                if (! $groupe) return false;
+                if (! $groupe) {
+                    return false;
+                }
 
-                return collect($groupe['items'] ?? [])->contains(fn ($item) =>
-                    ($item['name'] ?? '') === ($option['nom'] ?? '') && (bool) ($item['disponible'] ?? true)
+                return collect($groupe['items'] ?? [])->contains(fn ($item) => ($item['name'] ?? '') === ($option['nom'] ?? '') && (bool) ($item['disponible'] ?? true)
                 );
             })->values();
 
@@ -863,6 +932,7 @@ Route::post('/commande/estimation-livraison', function (Request $request, Distan
         return response()->json(['distance_km' => null, 'frais' => (float) config('jse.frais_livraison', 500)]);
     }
     $distance = $distanceService->calculer((float) $restaurant->latitude, (float) $restaurant->longitude, (float) $donnees['latitude'], (float) $donnees['longitude']);
+
     return response()->json(['distance_km' => $distance, 'frais' => $tarificationService->fraisPourDistance($distance)]);
 })->middleware(['auth', 'role:client', 'throttle:5,1'])->name('commande.estimation-livraison');
 
@@ -918,7 +988,7 @@ Route::post('/commande', function (Request $request, PanierService $panierServic
         if ($latitude !== null && $longitude !== null) {
             AdresseLivraison::query()->where('user_id', Auth::id())->where('adresse', $donnees['adresse_livraison'])->latest('id')->first()?->update(['latitude' => $latitude, 'longitude' => $longitude]);
         }
-        $reference = 'JSE-TMP-' . Str::uuid()->toString();
+        $reference = 'JSE-TMP-'.Str::uuid()->toString();
 
         $statutId = DB::table('statuts_commandes')->where('code', 'EN_ATTENTE')->value('id');
         abort_unless($statutId, 422);
@@ -941,7 +1011,7 @@ Route::post('/commande', function (Request $request, PanierService $panierServic
         ]);
 
         $commande->update([
-            'reference' => 'JSE-' . str_pad((string) $commande->id, 6, '0', STR_PAD_LEFT),
+            'reference' => 'JSE-'.str_pad((string) $commande->id, 6, '0', STR_PAD_LEFT),
         ]);
 
         HistoriqueCommande::create([
@@ -966,7 +1036,7 @@ Route::post('/commande', function (Request $request, PanierService $panierServic
 
         $panier->lignesPanier()->delete();
 
-        $livraison = \App\Models\Livraison::create([
+        $livraison = Livraison::create([
             'commande_id' => $commande->id,
             'zone_id' => $commande->zone_id,
             'statut' => 'en_attente',
@@ -1089,7 +1159,6 @@ Route::get('/restaurants/{restaurant}', function (Restaurant $restaurant) {
             'telephone' => $restaurant->telephone,
             'zone' => $restaurant->zone ? ['id' => $restaurant->zone->id, 'nom' => $restaurant->zone->nom] : null,
         ],
-        'categories' => $categories,
         'estFavori' => $estFavori,
         'panier' => [
             'nombre_articles' => $panier?->lignesPanier->sum('quantite') ?? 0,
@@ -1129,8 +1198,7 @@ Route::post('/panier/produits/{produit}/ajouter', function (Request $request, Pr
         $groupe = $configuration->first(fn ($item) => ($item['name'] ?? '') === $choix['groupe']);
         abort_unless($groupe, 422, 'Une option sélectionnée n’existe plus.');
 
-        $item = collect($groupe['items'] ?? [])->first(fn ($element) =>
-            ($element['name'] ?? '') === $choix['nom'] && (bool) ($element['disponible'] ?? true)
+        $item = collect($groupe['items'] ?? [])->first(fn ($element) => ($element['name'] ?? '') === $choix['nom'] && (bool) ($element['disponible'] ?? true)
         );
         abort_unless($item, 422, 'Une option sélectionnée n’est plus disponible.');
 
@@ -1171,8 +1239,7 @@ Route::post('/panier/produits/{produit}/ajouter', function (Request $request, Pr
             ->get();
 
         $options = $selection->values()->all();
-        $ligne = $lignes->first(fn (LignePanier $candidate) =>
-            ($candidate->options ?? []) === $options
+        $ligne = $lignes->first(fn (LignePanier $candidate) => ($candidate->options ?? []) === $options
         );
 
         if ($ligne) {
@@ -1215,20 +1282,21 @@ Route::get('/politique-de-confidentialite', function () {
     return Inertia::render('PolitiqueConfidentialite');
 })->name('politique.confidentialite');
 
-
 Route::get('/accueil', function (Request $request) {
     abort_unless(Auth::check() && Auth::user()->role === 'client', 403);
 
     $recherche = trim((string) $request->query('recherche', ''));
 
     $restaurants = Restaurant::query()
-        ->with('zone')
+        ->with(['zone', 'categories' => function ($query) {
+            $query->where('statut', 'actif')->orderBy('nom');
+        }])
         ->where('statut', 'actif')
         ->when($recherche !== '', function ($query) use ($recherche) {
             $query->where(function ($sousRequete) use ($recherche) {
                 $sousRequete
-                    ->where('nom', 'like', '%' . $recherche . '%')
-                    ->orWhere('description', 'like', '%' . $recherche . '%');
+                    ->where('nom', 'like', '%'.$recherche.'%')
+                    ->orWhere('description', 'like', '%'.$recherche.'%');
             });
         })
         ->orderBy('nom')
@@ -1245,34 +1313,15 @@ Route::get('/accueil', function (Request $request) {
                 'zone' => $restaurant->zone
                     ? ['id' => $restaurant->zone->id, 'nom' => $restaurant->zone->nom]
                     : null,
+                'categories' => $restaurant->categories
+                    ->map(fn (Categorie $categorie) => [
+                        'id' => $categorie->id,
+                        'nom' => $categorie->nom,
+                    ])
+                    ->values(),
             ];
         })
         ->values();
-
-    $categories = Categorie::query()
-        ->where('statut', 'actif')
-        ->whereHas('restaurant', function ($query) {
-            $query->where('statut', 'actif');
-        })
-        ->orderBy('nom')
-        ->get(['id', 'nom'])
-        ->unique('nom')
-        ->values();
-
-    $imagesCategories = [
-        '/assets/hero_icon/fast_food.jpeg',
-        '/assets/hero_icon/glacier.jpeg',
-        '/assets/hero_icon/promo.jpeg',
-        '/assets/hero_icon/resto.jpeg',
-    ];
-
-    $categories = $categories->map(function ($categorie, $index) use ($imagesCategories) {
-        return [
-            'id' => $categorie->id,
-            'nom' => $categorie->nom,
-            'image' => $imagesCategories[$index % count($imagesCategories)],
-        ];
-    })->values();
 
     $panier = Panier::query()
         ->where('user_id', Auth::id())
@@ -1292,7 +1341,6 @@ Route::get('/accueil', function (Request $request) {
             ->where('user_id', Auth::id())
             ->whereNull('masquee_par_destinataire_at')
             ->count(),
-        'categories' => $categories,
         'restaurants' => $restaurants,
         'favorisRestaurantIds' => $favorisRestaurantIds,
         'recherche' => $recherche,

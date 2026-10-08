@@ -10,10 +10,14 @@ use App\Models\StatutCommande;
 use App\Models\Zone;
 use App\Services\LivraisonService;
 use App\Services\NotificationService;
+use App\Services\TelephoneService;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -60,7 +64,7 @@ class LivreurController extends Controller
                 ] : null,
                 'client' => $attribution->livraison->commande->user ? [
                     'nom' => trim(
-                        $attribution->livraison->commande->user->prenom . ' ' .
+                        $attribution->livraison->commande->user->prenom.' '.
                         $attribution->livraison->commande->user->nom
                     ),
                     'telephone' => $attribution->livraison->commande->user->telephone,
@@ -80,7 +84,7 @@ class LivreurController extends Controller
                     'image' => $ligne->produit?->image,
                     'total_ligne' => (float) $ligne->total_ligne,
                 ])->values(),
-                'date_attribution' => $attribution->date_attribution ? \Carbon\Carbon::parse($attribution->date_attribution)->format('d/m/Y H:i') : null,
+                'date_attribution' => $attribution->date_attribution ? Carbon::parse($attribution->date_attribution)->format('d/m/Y H:i') : null,
             ])->values();
 
         $historique = AttributionLivraison::query()
@@ -101,7 +105,7 @@ class LivreurController extends Controller
                 'adresse' => $attribution->livraison?->commande?->restaurant?->adresse,
                 'montant_total' => (float) ($attribution->livraison?->commande?->montant_total ?? 0),
                 'date' => $attribution->date_attribution
-                    ? \Carbon\Carbon::parse($attribution->date_attribution)->format('d/m H:i')
+                    ? Carbon::parse($attribution->date_attribution)->format('d/m H:i')
                     : null,
                 'statut' => $attribution->livraison?->statut,
             ])
@@ -130,6 +134,7 @@ class LivreurController extends Controller
             'zones' => Zone::query()->where('statut', 'actif')->orderBy('nom')->get(['id', 'nom']),
             'notifications' => Notification::query()
                 ->where('user_id', $request->user()->id)
+                ->whereNull('masquee_par_destinataire_at')
                 ->latest('id')
                 ->limit(20)
                 ->get()
@@ -154,8 +159,7 @@ class LivreurController extends Controller
         ]);
     }
 
-
-    public function prendreEnCharge(Request $request, int $livraison): RedirectResponse
+    public function prendreEnCharge(Request $request, int $livraison, LivraisonService $livraisonService): RedirectResponse
     {
         $profil = $this->profil($request);
 
@@ -170,17 +174,17 @@ class LivreurController extends Controller
         $commande = $livraisonModel?->commande;
 
         abort_unless($livraisonModel && $commande, 404);
-        abort_unless(
-            (int) $livraisonModel->zone_id === (int) $profil->zone_id,
-            403
-        );
+        abort_unless($livraisonService->livreurDessertLaZone($profil, $livraisonModel), 403);
 
         if ($commande->statutCommande?->code === 'EN_LIVRAISON' && $livraisonModel->statut === 'en_cours') {
             return back()->with('success', 'Cette livraison est déjà prise en charge.');
         }
 
-        abort_unless($commande->statutCommande?->code === 'PRETE', 422);
-        abort_unless(in_array($livraisonModel->statut, ['en_attente', 'attribuee'], true), 422);
+        if ($commande->statutCommande?->code !== 'PRETE' || ! in_array($livraisonModel->statut, ['en_attente', 'attribuee'], true)) {
+            throw ValidationException::withMessages([
+                'mission' => 'Cette commande n’est pas encore prête : attendez la fin de sa préparation par le restaurant.',
+            ]);
+        }
 
         DB::transaction(function () use ($livraisonModel, $commande, $request) {
             $statutEnLivraison = StatutCommande::query()
@@ -213,8 +217,7 @@ class LivreurController extends Controller
         int $livraison,
         LivraisonService $livraisonService,
         NotificationService $notificationService
-    ): RedirectResponse
-    {
+    ): RedirectResponse {
         $profil = $this->profil($request);
 
         $attribution = AttributionLivraison::query()
@@ -228,9 +231,13 @@ class LivreurController extends Controller
         $commande = $livraisonModel?->commande;
 
         abort_unless($livraisonModel && $commande, 404);
-        abort_unless((int) $livraisonModel->zone_id === (int) $profil->zone_id, 403);
-        abort_unless($livraisonModel->statut === 'en_cours', 422, 'La livraison n’est pas en cours.');
-        abort_unless($commande->statutCommande?->code === 'EN_LIVRAISON', 422, 'La commande n’est pas en livraison.');
+        abort_unless($livraisonService->livreurDessertLaZone($profil, $livraisonModel), 403);
+
+        if ($livraisonModel->statut !== 'en_cours' || $commande->statutCommande?->code !== 'EN_LIVRAISON') {
+            throw ValidationException::withMessages([
+                'mission' => 'Cette livraison n’est pas en cours : prenez d’abord la commande en charge.',
+            ]);
+        }
 
         $pinKey = 'livraison:pin:'.$request->user()->id.':'.$livraisonModel->id;
         if (RateLimiter::tooManyAttempts($pinKey, 5)) {
@@ -242,11 +249,9 @@ class LivreurController extends Controller
             'pin' => ['required', 'digits:6'],
         ]);
 
-        abort_unless(
-            $livraisonService->validerPin($commande, $donnees['pin']),
-            422,
-            'Le PIN de livraison est incorrect.'
-        );
+        if (! $livraisonService->validerPin($commande, $donnees['pin'])) {
+            throw ValidationException::withMessages(['pin' => 'Le PIN de livraison est incorrect.']);
+        }
 
         RateLimiter::clear($pinKey);
 
@@ -282,17 +287,31 @@ class LivreurController extends Controller
         $donnees = $request->validate([
             'nom' => ['required', 'string', 'max:100'],
             'prenom' => ['nullable', 'string', 'max:100'],
-            'telephone' => ['required', 'string', 'max:30'],
-            'email' => ['nullable', 'email', 'max:255'],
+            'telephone' => ['required', 'string', 'max:30', app(TelephoneService::class)->regleUnique($request->user()->id)],
+            'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($request->user()->id)],
             'telephone_secondaire' => ['nullable', 'string', 'max:30'],
             'zone_id' => ['required', 'integer', 'exists:zones,id'],
+        ], [
+            'email.unique' => 'Cette adresse e-mail est déjà utilisée par un autre compte.',
         ]);
+
+        // Changer de zone en pleine mission rendrait la livraison en cours impossible à terminer.
+        $missionActive = AttributionLivraison::query()
+            ->where('livreur_id', $request->user()->id)
+            ->where('statut', 'active')
+            ->exists();
+
+        if ($missionActive && (int) $donnees['zone_id'] !== (int) $profil->zone_id) {
+            throw ValidationException::withMessages([
+                'zone_id' => 'Vous ne pouvez pas changer de zone tant qu’une mission est en cours.',
+            ]);
+        }
 
         DB::transaction(function () use ($request, $profil, $donnees) {
             $request->user()->update([
                 'nom' => $donnees['nom'],
                 'prenom' => $donnees['prenom'] ?? null,
-                'telephone' => $donnees['telephone'],
+                'telephone' => app(TelephoneService::class)->normaliser($donnees['telephone']),
                 'email' => $donnees['email'] ?? null,
             ]);
 

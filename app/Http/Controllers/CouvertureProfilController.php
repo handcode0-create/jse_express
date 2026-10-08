@@ -32,12 +32,12 @@ class CouvertureProfilController extends Controller
             }
         }
 
-        $extension = strtolower($donnees['couverture']->getClientOriginalExtension());
-        $nom = Str::uuid()->toString() . '.' . $extension;
+        $extension = $donnees['couverture']->extension();
+        $nom = Str::uuid()->toString().'.'.$extension;
         $donnees['couverture']->move($directory, $nom);
 
         $utilisateur->forceFill([
-            'couverture_profil' => '/uploads/couvertures/' . $nom,
+            'couverture_profil' => '/uploads/couvertures/'.$nom,
         ])->save();
 
         return back()->with('success', 'Couverture de profil mise à jour.');

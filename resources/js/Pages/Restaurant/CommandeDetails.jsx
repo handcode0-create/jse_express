@@ -1,187 +1,204 @@
-import React from "react";
-import { router, usePage } from "@inertiajs/react";
-import { ArrowLeft, Bike, Check, ChevronRight, ClipboardList, CreditCard, MapPin, Package, XCircle } from "lucide-react";
+import { useState } from "react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
+import { Bike, Check, ChevronLeft, ClipboardList, CreditCard, MapPin, Package, Phone, UserRound, XCircle } from "lucide-react";
+import AdminBadge from "../../Composants/Admin/AdminBadge";
+import AdminButton from "../../Composants/Admin/AdminButton";
+import AdminCard from "../../Composants/Admin/AdminCard";
+import ConfirmDialog from "../../Composants/Admin/ConfirmDialog";
+import RestaurantLayout from "../../Composants/Restaurant/RestaurantLayout";
+import { URL_ESPACE, montant, statutSuivant, statutsAnnulables } from "../../lib/restaurant";
 
-const transitions = {
-    EN_ATTENTE: { code: "CONFIRMEE", label: "Confirmer la commande" },
-    CONFIRMEE: { code: "EN_PREPARATION", label: "Démarrer la préparation" },
-    EN_PREPARATION: { code: "PRETE", label: "Marquer la commande prête" },
-};
-
-const formatMontant = (value) =>
-    new Intl.NumberFormat("fr-FR").format(Number(value || 0)) + " FCFA";
-
-function Section({ title, icon: Icon, children }) {
+function Bloc({ titre, icone: Icone, children, className = "" }) {
     return (
-        <section className="mt-4 rounded-[28px] bg-[#101215] p-5 shadow-sm ring-1 ring-white/10 sm:p-6">
-            <div className="flex items-center gap-2">
-                <Icon size={19} className="text-jse-secondaire" />
-                <h2 className="font-against text-[1.45rem] leading-none text-white">{title}</h2>
-            </div>
-            {children}
-        </section>
+        <AdminCard className={["p-5 sm:p-6", className].join(" ")}>
+            <h2 className="flex items-center gap-2 text-base font-semibold text-jse-theme-heading">
+                <Icone size={18} aria-hidden="true" />
+                {titre}
+            </h2>
+            <div className="mt-4">{children}</div>
+        </AdminCard>
     );
 }
 
 export default function CommandeDetailsRestaurant() {
-    const { restaurant, commande, flash = {} } = usePage().props;
-    const action = transitions[commande?.statut?.code];
-    const [chargement, setChargement] = React.useState(false);
-    const [erreur, setErreur] = React.useState(null);
+    const { restaurant, commande } = usePage().props;
+    const code = commande?.statut?.code;
+    const action = statutSuivant[code];
+    const annulable = statutsAnnulables.includes(code);
+    const [chargement, setChargement] = useState(false);
+    const [confirmationAnnulation, setConfirmationAnnulation] = useState(false);
 
-    const changerStatut = () => {
+    const naviguer = (id) => router.visit(id === "dashboard" ? URL_ESPACE : `${URL_ESPACE}?onglet=${id}`);
+
+    const avancer = () => {
         if (!action || chargement) return;
-        setErreur(null);
         setChargement(true);
-        router.patch(`/restaurant/commandes/${commande.id}/statut`, { statut: action.code }, {
-            preserveScroll: true,
-            onError: (errors) => {
-                setErreur(Object.values(errors || {})[0] || "Impossible de mettre à jour la commande.");
-            },
-            onFinish: () => setChargement(false),
-        });
+        router.patch(`/restaurant/commandes/${commande.id}/statut`, { statut: action.code }, { preserveScroll: true, onFinish: () => setChargement(false) });
     };
 
-    const annulerCommande = () => {
-        if (chargement) return;
-        const confirme = window.confirm("Annuler cette commande ? Cette action est réservée aux commandes encore traitables.");
-        if (!confirme) return;
-
-        setErreur(null);
+    const annuler = (motif) => {
         setChargement(true);
-        router.post(`/restaurant/commandes/${commande.id}/annuler`, {
-            motif: "Commande annulée par le restaurant.",
-        }, {
-            preserveScroll: true,
-            onError: (errors) => {
-                setErreur(Object.values(errors || {})[0] || "Impossible d'annuler la commande.");
+        router.post(
+            `/restaurant/commandes/${commande.id}/annuler`,
+            { motif },
+            {
+                preserveScroll: true,
+                onFinish: () => {
+                    setChargement(false);
+                    setConfirmationAnnulation(false);
+                },
             },
-            onFinish: () => setChargement(false),
-        });
+        );
     };
 
     return (
-        <main className="min-h-screen bg-[#0b0d0f] pb-28 text-white">
-            <div className="mx-auto w-full max-w-none px-4 sm:px-6">
-                <header className="flex items-center justify-between py-5">
-                    <button type="button" onClick={() => router.visit("/restaurant/tableau-de-bord")} className="flex size-11 items-center justify-center rounded-full bg-[#101215] text-white shadow-sm ring-1 ring-white/10" aria-label="Retour">
-                        <ArrowLeft size={20} />
-                    </button>
-                    <div className="text-center">
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/35">{restaurant?.nom || "Restaurant"}</p>
-                        <h1 className="mt-1 text-base font-bold text-white">#{commande?.reference}</h1>
+        <>
+            <Head title={`Commande ${commande?.reference ?? ""} — ${restaurant?.nom ?? "Restaurant"}`} />
+
+            <RestaurantLayout restaurant={restaurant} onglet="commandes" onNavigate={naviguer}>
+                <Link href={`${URL_ESPACE}?onglet=commandes`} className="inline-flex min-h-8 items-center gap-1 text-sm font-medium text-jse-theme-muted transition hover:text-jse-theme-text">
+                    <ChevronLeft size={16} aria-hidden="true" />
+                    Toutes les commandes
+                </Link>
+
+                <header className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-jse-theme-muted">
+                            <span className="h-0.5 w-6 rounded-full bg-jse-secondaire" aria-hidden="true" />
+                            Commande reçue
+                        </p>
+                        <h1 className="mt-2 break-words text-2xl font-semibold tracking-tight text-jse-theme-heading sm:text-3xl">{commande?.reference}</h1>
+                        <p className="mt-2 text-sm text-jse-theme-muted">
+                            {commande?.client?.nom || "Client"} · {commande?.date_commande} à {commande?.heure_commande}
+                        </p>
                     </div>
-                    <div className="flex size-11 items-center justify-center rounded-full bg-[#101215] text-white shadow-sm ring-1 ring-white/10"><ClipboardList size={19} /></div>
+                    <AdminBadge statut={code} libelle={commande?.statut?.libelle} className="sm:mt-1" />
                 </header>
 
-                {flash?.success && <div className="rounded-2xl bg-jse-secondaire/10 px-4 py-3 text-xs font-semibold text-white">{flash.success}</div>}
-                {erreur && <div className="mt-3 rounded-2xl bg-red-500/10 px-4 py-3 text-xs font-semibold text-red-200">{erreur}</div>}
-
-                <section className="mt-2 rounded-[28px] bg-jse-principal p-5 text-white shadow-sm sm:p-6">
-                    <div className="flex items-start justify-between gap-4">
-                        <div>
-                            <p className="text-[10px] uppercase tracking-[0.16em] text-white/45">Commande reçue</p>
-                            <h2 className="mt-2 font-against text-3xl leading-none">{commande?.client?.nom || "Client"}</h2>
-                            <p className="mt-2 text-xs text-white/60">{commande?.date_commande} · {commande?.heure_commande}</p>
-                        </div>
-                        <span className="rounded-full bg-white/10 px-3 py-2 text-[10px] font-semibold">{commande?.statut?.libelle || "Inconnu"}</span>
-                    </div>
-                    {action && (
-                        <button type="button" disabled={chargement} onClick={changerStatut} className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-jse-secondaire text-xs font-semibold text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50">
-                            <Check size={17} />{chargement ? "Mise à jour..." : action.label}
-                        </button>
-                    )}
-                    {["EN_ATTENTE", "CONFIRMEE", "EN_PREPARATION"].includes(commande?.statut?.code) && (
-                        <button type="button" disabled={chargement} onClick={annulerCommande} className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-white/5 text-xs font-semibold text-red-200 ring-1 ring-white/10 disabled:opacity-50">
-                            <XCircle size={16} /> Annuler la commande
-                        </button>
-                    )}
-                </section>
-
-                <Section title="Client" icon={ClipboardList}>
-                    <div className="mt-4 rounded-[20px] bg-white/5 p-4">
-                        <p className="text-sm font-bold text-white">{commande?.client?.nom || "Client"}</p>
-                        <p className="mt-1 text-xs text-white/55">{commande?.client?.telephone}</p>
-                        {commande?.client?.email && <p className="mt-1 text-xs text-white/55">{commande.client.email}</p>}
-                    </div>
-                </Section>
-
-                <Section title="Articles" icon={Package}>
-                    <div className="mt-4 divide-y divide-jse-texte/8">
-                        {(commande?.lignes || []).map((ligne) => (
-                            <div key={ligne.id} className="flex items-center gap-3 py-4 first:pt-0 last:pb-0">
-                                <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#0b0d0f] text-white"><Package size={18} /></div>
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-semibold">{ligne.nom}</p>
-                                    <p className="mt-1 text-[10px] text-white/45">{ligne.quantite} × {formatMontant(ligne.prix_unitaire)}</p>
-                                    {ligne.options?.length > 0 && (
-                                        <p className="mt-2 line-clamp-2 text-[10px] leading-4 text-jse-secondaire">
-                                            {ligne.options.map((option) => option.nom).join(" · ")}
-                                        </p>
-                                    )}
-                                </div>
-                                <p className="text-sm font-bold text-white">{formatMontant(ligne.total)}</p>
-                            </div>
-                        ))}
-                    </div>
-                </Section>
-
-                <Section title="Livraison" icon={Bike}>
-                    <div className="mt-4 rounded-[20px] bg-[#0b0d0f] p-4">
-                        <div className="flex gap-3">
-                            <MapPin size={19} className="mt-0.5 shrink-0 text-jse-secondaire" />
-                            <div>
-                                <p className="text-sm font-semibold">{commande?.adresse_livraison}</p>
-                                <p className="mt-1 text-xs text-white/50">{commande?.zone?.nom || "Zone non précisée"}</p>
-                                <p className="mt-1 text-xs text-white/50">{commande?.telephone_livraison}</p>
-                            </div>
-                        </div>
-                        {commande?.livraison?.livreur && (
-                            <div className="mt-4 border-t border-jse-texte/8 pt-4">
-                                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">Livreur attribué</p>
-                                <p className="mt-1 text-sm font-semibold">{commande.livraison.livreur.nom}</p>
-                                <p className="mt-1 text-xs text-white/50">{commande.livraison.livreur.telephone}</p>
-                            </div>
+                {(action || annulable) && (
+                    <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+                        {action && (
+                            <AdminButton chargement={chargement} onClick={avancer}>
+                                <Check size={16} aria-hidden="true" />
+                                {action.label}
+                            </AdminButton>
+                        )}
+                        {annulable && (
+                            <AdminButton variante="dangerDoux" disabled={chargement} onClick={() => setConfirmationAnnulation(true)}>
+                                <XCircle size={16} aria-hidden="true" />
+                                Annuler la commande
+                            </AdminButton>
                         )}
                     </div>
-                </Section>
+                )}
 
-                <Section title="Paiement" icon={CreditCard}>
-                    <div className="mt-4 flex items-center justify-between rounded-[20px] bg-[#0b0d0f] p-4">
-                        <div>
-                            <p className="text-sm font-semibold">{commande?.paiement?.moyen || "Non enregistré"}</p>
-                            <p className="mt-1 text-[10px] text-white/45">{commande?.paiement?.statut || "Aucun paiement"}</p>
-                        </div>
-                        <p className="text-lg font-bold text-white">{formatMontant(commande?.paiement?.montant ?? commande?.montant_total)}</p>
-                    </div>
-                </Section>
-
-                <Section title="Total" icon={ClipboardList}>
-                    <div className="mt-4 space-y-3 text-sm">
-                        <div className="flex justify-between text-white/55"><span>Sous-total</span><span>{formatMontant(commande?.sous_total)}</span></div>
-                        <div className="flex justify-between text-white/55"><span>Livraison</span><span>{formatMontant(commande?.frais_livraison)}</span></div>
-                        <div className="border-t border-jse-texte/10 pt-3"><div className="flex items-center justify-between"><span className="font-bold">Total</span><span className="font-against text-2xl text-jse-secondaire">{formatMontant(commande?.montant_total)}</span></div></div>
-                    </div>
-                </Section>
-
-                <Section title="Historique" icon={ClipboardList}>
-                    <div className="mt-4 space-y-3">
-                        {(commande?.historique || []).map((item, index) => (
-                            <div key={index} className="flex gap-3">
-                                <span className="mt-1 size-2 shrink-0 rounded-full bg-jse-secondaire" />
-                                <div>
-                                    <p className="text-xs font-semibold">{item.libelle}</p>
-                                    <p className="mt-1 text-[10px] text-white/45">{item.date} · {item.heure}{item.commentaire ? ` · ${item.commentaire}` : ""}</p>
+                <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+                    <div className="space-y-5">
+                        <Bloc titre="Articles" icone={Package}>
+                            <ul className="divide-y divide-jse-theme-border">
+                                {(commande?.lignes || []).map((ligne) => (
+                                    <li key={ligne.id} className="flex items-start gap-3 py-4 first:pt-0 last:pb-0">
+                                        <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-jse-theme-surface-soft text-sm font-semibold tabular-nums text-jse-theme-heading">
+                                            {ligne.quantite}×
+                                        </span>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-semibold text-jse-theme-text">{ligne.nom}</p>
+                                            <p className="mt-0.5 text-sm text-jse-theme-muted">{montant(ligne.prix_unitaire)} l’unité</p>
+                                            {ligne.options?.length > 0 && (
+                                                <p className="mt-1 text-sm text-jse-theme-heading">{ligne.options.map((option) => option.nom).join(" · ")}</p>
+                                            )}
+                                        </div>
+                                        <p className="shrink-0 text-sm font-semibold tabular-nums text-jse-theme-text">{montant(ligne.total)}</p>
+                                    </li>
+                                ))}
+                            </ul>
+                            <dl className="mt-5 space-y-2 border-t border-jse-theme-border pt-4 text-sm">
+                                <div className="flex justify-between text-jse-theme-muted">
+                                    <dt>Sous-total</dt>
+                                    <dd className="tabular-nums">{montant(commande?.sous_total)}</dd>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                </Section>
+                                <div className="flex justify-between text-jse-theme-muted">
+                                    <dt>Livraison</dt>
+                                    <dd className="tabular-nums">{montant(commande?.frais_livraison)}</dd>
+                                </div>
+                                <div className="flex items-center justify-between pt-1">
+                                    <dt className="font-semibold text-jse-theme-text">Total</dt>
+                                    <dd className="text-lg font-semibold tabular-nums text-jse-theme-heading">{montant(commande?.montant_total)}</dd>
+                                </div>
+                            </dl>
+                        </Bloc>
 
-                <button type="button" onClick={() => router.visit("/restaurant/tableau-de-bord")} className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#101215] text-xs font-semibold text-white shadow-sm ring-1 ring-white/10">
-                    Retour aux commandes <ChevronRight size={16} />
-                </button>
-            </div>
-        </main>
+                        <Bloc titre="Historique" icone={ClipboardList}>
+                            <ol className="space-y-4">
+                                {(commande?.historique || []).map((item, index) => (
+                                    <li key={index} className="flex gap-3">
+                                        <span className="mt-1.5 size-2.5 shrink-0 rounded-full bg-jse-secondaire" aria-hidden="true" />
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-semibold text-jse-theme-text">{item.libelle}</p>
+                                            <p className="mt-0.5 text-sm text-jse-theme-muted">
+                                                {item.date} à {item.heure}
+                                                {item.commentaire ? ` · ${item.commentaire}` : ""}
+                                            </p>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ol>
+                        </Bloc>
+                    </div>
+
+                    <div className="space-y-5">
+                        <Bloc titre="Client" icone={UserRound}>
+                            <p className="text-sm font-semibold text-jse-theme-text">{commande?.client?.nom || "Client"}</p>
+                            {commande?.client?.telephone && (
+                                <a href={`tel:${commande.client.telephone}`} className="mt-2 inline-flex min-h-10 items-center gap-2 text-sm font-medium text-jse-theme-heading hover:underline">
+                                    <Phone size={15} aria-hidden="true" />
+                                    {commande.client.telephone}
+                                </a>
+                            )}
+                            {commande?.client?.email && <p className="mt-1 break-all text-sm text-jse-theme-muted">{commande.client.email}</p>}
+                        </Bloc>
+
+                        <Bloc titre="Livraison" icone={Bike}>
+                            <p className="flex items-start gap-2 text-sm font-semibold text-jse-theme-text">
+                                <MapPin size={16} className="mt-0.5 shrink-0 text-jse-secondaire" aria-hidden="true" />
+                                <span className="min-w-0 break-words">{commande?.adresse_livraison}</span>
+                            </p>
+                            <p className="mt-1 pl-6 text-sm text-jse-theme-muted">{commande?.zone?.nom || "Zone non précisée"}</p>
+                            {commande?.telephone_livraison && <p className="mt-1 pl-6 text-sm text-jse-theme-muted">{commande.telephone_livraison}</p>}
+                            {commande?.livraison?.livreur && (
+                                <div className="mt-4 rounded-2xl bg-jse-theme-surface-soft p-3">
+                                    <p className="text-xs font-semibold uppercase tracking-[0.1em] text-jse-theme-muted">Livreur attribué</p>
+                                    <p className="mt-1 text-sm font-semibold text-jse-theme-text">{commande.livraison.livreur.nom}</p>
+                                    <p className="text-sm text-jse-theme-muted">{commande.livraison.livreur.telephone}</p>
+                                </div>
+                            )}
+                        </Bloc>
+
+                        <Bloc titre="Paiement" icone={CreditCard}>
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="min-w-0">
+                                    <p className="text-sm font-semibold text-jse-theme-text">{commande?.paiement?.moyen || "Non enregistré"}</p>
+                                    <p className="text-sm text-jse-theme-muted">{commande?.paiement?.statut || "Aucun paiement"}</p>
+                                </div>
+                                <p className="shrink-0 text-base font-semibold tabular-nums text-jse-theme-heading">{montant(commande?.paiement?.montant ?? commande?.montant_total)}</p>
+                            </div>
+                        </Bloc>
+                    </div>
+                </div>
+            </RestaurantLayout>
+
+            <ConfirmDialog
+                ouvert={confirmationAnnulation}
+                titre={`Annuler la commande ${commande?.reference ?? ""} ?`}
+                description="Le motif est conservé dans l'historique de la commande. L'annulation n'est plus possible une fois la préparation lancée."
+                motifRequis
+                motifLabel="Motif d'annulation"
+                confirmerLabel="Annuler la commande"
+                annulerLabel="Retour"
+                chargement={chargement}
+                onConfirmer={annuler}
+                onFermer={() => setConfirmationAnnulation(false)}
+            />
+        </>
     );
 }

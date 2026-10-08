@@ -168,7 +168,7 @@ class JseExpressSeeder extends Seeder
         );
 
         $produit1 = Produit::query()->updateOrCreate(
-            ['restaurant_id' => $restaurant->id, 'nom' => 'Plat de démonstration'],
+            ['restaurant_id' => $restaurant->id, 'nom' => 'Poulet braisé et attiéké'],
             [
                 'categorie_id' => $categoriePlats->id,
                 'description' => 'Produit de test JSE Express.',
@@ -192,7 +192,7 @@ class JseExpressSeeder extends Seeder
         );
 
         $produit3 = Produit::query()->updateOrCreate(
-            ['restaurant_id' => $restaurant->id, 'nom' => 'Boisson'],
+            ['restaurant_id' => $restaurant->id, 'nom' => 'Boisson gazeuse'],
             [
                 'categorie_id' => $categorieBoissons->id,
                 'description' => 'Boisson de démonstration.',

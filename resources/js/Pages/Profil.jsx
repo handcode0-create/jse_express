@@ -4,16 +4,21 @@ import NavigationFlottante from "../Composants/Navigation/NavigationFlottante";
 import {
     Bell, Check, ChevronRight, Clock3, Heart, HelpCircle, Info, LogOut,
     Mail, MapPin, MessageCircle, Package, Pencil, Phone, Plus, Trash2,
-    UserRound, WalletCards, X,
+    Palette, ShieldCheck, UserRound, WalletCards, X,
 } from "lucide-react";
 import { BoutonChargement } from "../Composants/Interface/EtatsChargement";
 import SidebarJSE from "../Composants/Navigation/SidebarJSE";
 import CouvertureProfil from "../Composants/Profil/CouvertureProfil";
+import FormulaireMotDePasse from "../Composants/Interface/FormulaireMotDePasse";
+import PreferencesCompte from "../Composants/Interface/PreferencesCompte";
+import { formaterTelephone } from "../lib/format";
 
 const actions = [
     { id: "informations", label: "Mes informations", icon: UserRound, action: "modal" },
     { id: "adresses", label: "Mes adresses", icon: MapPin, action: "modal" },
     { id: "paiements", label: "Mes moyens de paiement", icon: WalletCards, action: "modal" },
+    { id: "securite", label: "Sécurité et mot de passe", icon: ShieldCheck, action: "modal" },
+    { id: "preferences", label: "Préférences", icon: Palette, action: "modal" },
     { id: "commandes", label: "Mes commandes", icon: Package, action: "route", route: "/commandes" },
     { id: "favoris", label: "Mes favoris", icon: Heart, action: "route", route: "/favoris" },
     { id: "notifications", label: "Notifications", icon: Bell, action: "route", route: "/notifications" },
@@ -166,7 +171,7 @@ export default function Profil() {
     const [formulaire, setFormulaire] = useState({
         nom: utilisateur?.nom || "",
         prenom: utilisateur?.prenom || "",
-        telephone: utilisateur?.telephone || "",
+        telephone: formaterTelephone(utilisateur?.telephone || ""),
         email: utilisateur?.email || "",
     });
 
@@ -544,6 +549,22 @@ export default function Profil() {
                             {succes && <p role="status" className="mt-4 rounded-jse-grand bg-jse-secondaire/10 px-4 py-3 font-sans text-xs text-jse-principal">{succes}</p>}
                             {chargement ? <div className="mt-4"><BoutonChargement className="w-full" /></div> : <button className="mt-4 h-12 w-full rounded-full bg-jse-secondaire font-sans text-xs font-semibold text-jse-fond">Enregistrer le moyen</button>}
                         </form>
+                    </div>
+                </Modal>
+            )}
+
+            {modal === "securite" && (
+                <Modal title="Sécurité" onClose={fermerModal} initialFocusRef={triggerRef}>
+                    <div className="mt-5">
+                        <FormulaireMotDePasse />
+                    </div>
+                </Modal>
+            )}
+
+            {modal === "preferences" && (
+                <Modal title="Préférences" onClose={fermerModal} initialFocusRef={triggerRef}>
+                    <div className="mt-5">
+                        <PreferencesCompte photoProfil={utilisateur?.photo_profil} />
                     </div>
                 </Modal>
             )}

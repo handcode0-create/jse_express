@@ -14,6 +14,9 @@ import {
     X,
 } from "lucide-react";
 
+const imageAuthentification =
+    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1800&q=85";
+
 export default function Authentification() {
     const { flash = {}, errors = {} } = usePage().props;
     const pageRef = useRef(null);
@@ -181,22 +184,50 @@ export default function Authentification() {
     };
 
     return (
-        <main ref={pageRef} className="relative min-h-screen overflow-x-hidden bg-jse-principal font-sans text-white">
-            <img src="/assets/login_page_fond.png" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 size-full object-cover object-center" />
-            <div className="pointer-events-none absolute inset-0 bg-jse-principal/45" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--color-jse-principal)]/75 via-[var(--color-jse-principal)]/30 to-[var(--color-jse-principal)]/75" />
+        <main ref={pageRef} className="relative min-h-screen overflow-x-hidden bg-jse-fond font-sans text-jse-texte">
+            <div className="relative z-10 flex min-h-screen w-full flex-col lg:flex-row">
 
-            <div className="relative z-10 flex min-h-screen w-full">
+                {/* =====================================================
+                    BANNIÈRE MOBILE
+                ====================================================== */}
+
+                <header className="relative h-60 shrink-0 overflow-hidden bg-jse-principal sm:h-72 lg:hidden">
+                    <img src={imageAuthentification} alt="" aria-hidden="true" className="absolute inset-0 size-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-jse-principal/90 via-jse-principal/45 to-jse-principal/25" />
+
+                    <div className="relative z-10 flex h-full flex-col justify-between px-5 pb-12 pt-5 sm:px-8">
+                        <button
+                            type="button"
+                            onClick={() => router.visit("/bienvenue")}
+                            className="flex w-fit items-center gap-2 rounded-full bg-white/15 px-3.5 py-2 text-sm font-medium text-white backdrop-blur-md transition hover:bg-white/25"
+                        >
+                            <ArrowLeft size={16} />
+                            <span>Retour</span>
+                        </button>
+
+                        <div className="flex items-end justify-between gap-4">
+                            <h1 className="font-against text-3xl leading-[0.95] text-white sm:text-4xl">
+                                Commandez.
+                                <br />
+                                Savourez.
+                            </h1>
+                            <img
+                                src="/assets/jse_logo.png"
+                                alt="JSE Express"
+                                className="h-12 w-auto shrink-0 object-contain"
+                            />
+                        </div>
+                    </div>
+                </header>
 
                 {/* =====================================================
                     PARTIE VISUELLE DESKTOP
                 ====================================================== */}
 
-                <section ref={heroRef} className="relative hidden min-h-screen overflow-hidden border-r border-white/10 bg-[var(--color-jse-principal)]/55 backdrop-blur-[2px] lg:flex lg:w-1/2">
+                <section ref={heroRef} className="relative hidden min-h-screen overflow-hidden bg-jse-principal lg:flex lg:w-1/2">
 
-                    <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-jse-secondaire/20 blur-3xl" />
-
-                    <div className="absolute -bottom-40 -right-32 h-[32rem] w-[32rem] rounded-full bg-jse-accent/20 blur-3xl" />
+                    <img src={imageAuthentification} alt="" aria-hidden="true" className="absolute inset-0 size-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-jse-principal/90 via-jse-principal/40 to-jse-principal/30" />
 
                     <div className="relative z-10 flex w-full flex-col justify-between p-12 xl:p-16">
 
@@ -270,7 +301,7 @@ export default function Authentification() {
                                     Compte créé
                                 </p>
 
-                                <p className="mt-1 text-xs leading-5 text-white/65">
+                                <p className="mt-1 text-xs leading-5 text-jse-texte/55">
                                     {flash.success}
                                 </p>
                             </div>
@@ -289,13 +320,13 @@ export default function Authentification() {
 
                 {afficherErreurs && !flash?.success && (
                     <div className="fixed right-5 top-5 z-[100] w-[calc(100%-2.5rem)] max-w-sm animate-in slide-in-from-right-5 fade-in duration-300">
-                        <div className="flex items-start gap-3 rounded-2xl border border-jse-danger/20 bg-[#17100F] p-4 shadow-xl shadow-black/20">
+                        <div className="flex items-start gap-3 rounded-2xl border border-jse-danger/20 bg-white p-4 shadow-xl shadow-jse-principal/10">
                             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-jse-danger/10 text-jse-danger">
                                 <X size={20} />
                             </div>
                             <div className="min-w-0 flex-1">
-                                <p className="text-sm font-semibold text-white">Vérifiez les informations</p>
-                                <p className="mt-1 text-xs leading-5 text-white/60">{erreurs[0]}</p>
+                                <p className="text-sm font-semibold text-jse-texte">Vérifiez les informations</p>
+                                <p className="mt-1 text-xs leading-5 text-jse-texte/60">{erreurs[0]}</p>
                             </div>
                         </div>
                     </div>
@@ -305,31 +336,9 @@ export default function Authentification() {
                     FORMULAIRE
                 ====================================================== */}
 
-                <section ref={formRef} className="flex w-full items-center justify-center bg-jse-principal/82 px-5 py-10 text-white backdrop-blur-2xl sm:px-8 lg:min-h-screen lg:w-1/2 lg:px-12 xl:px-20">
+                <section ref={formRef} className="relative z-10 -mt-8 flex w-full flex-1 items-start justify-center rounded-t-[2rem] bg-jse-fond px-5 pb-12 pt-8 sm:px-8 lg:mt-0 lg:min-h-screen lg:w-1/2 lg:items-center lg:rounded-none lg:px-12 lg:py-10 xl:px-20">
 
                     <div className="w-full max-w-md">
-
-                        {/* Retour mobile */}
-
-                        <button
-                            type="button"
-                            onClick={() => router.visit("/bienvenue")}
-                            className="mb-8 flex items-center gap-2 text-sm font-medium text-jse-texte/55 transition hover:text-jse-principal lg:hidden"
-                        >
-                            <ArrowLeft size={18} />
-
-                            <span>Retour</span>
-                        </button>
-
-                        {/* Logo mobile */}
-
-                        <div className="mb-8 lg:hidden">
-                            <img
-                                src="/assets/jse_logo.png"
-                                alt="JSE Express"
-                                className="h-14 w-auto object-contain"
-                            />
-                        </div>
 
                         {/* =================================================
                             EN-TÊTE
@@ -341,13 +350,13 @@ export default function Authentification() {
                                 Bienvenue
                             </p>
 
-                            <h2 className="font-against text-3xl leading-tight tracking-tight text-white">
+                            <h2 className="font-against text-3xl leading-tight tracking-tight text-jse-texte">
                                 {mode === "connexion"
                                     ? "Connexion"
                                     : "Créer un compte"}
                             </h2>
 
-                            <p className="mt-3 text-sm leading-6 text-white/65">
+                            <p className="mt-3 text-sm leading-6 text-jse-texte/55">
                                 {mode === "connexion"
                                     ? "Connectez-vous pour accéder à votre espace JSE Express."
                                     : "Créez votre compte pour commencer à commander."}
@@ -358,7 +367,7 @@ export default function Authentification() {
                             ONGLETS
                         ================================================== */}
 
-                        <div data-auth-item className="mb-8 grid grid-cols-2 rounded-2xl bg-white/10 p-1">
+                        <div data-auth-item className="mb-8 grid grid-cols-2 rounded-2xl bg-jse-principal/5 p-1">
 
                             <button
                                 type="button"
@@ -454,7 +463,7 @@ export default function Authentification() {
                                                     }
                                                     placeholder="Votre nom"
                                                     required
-                                                    className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm text-jse-texte outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
+                                                    className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
                                                 />
                                             </div>
                                         </div>
@@ -491,7 +500,7 @@ export default function Authentification() {
                                                     }
                                                     placeholder="Votre prénom"
                                                     required
-                                                    className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm text-jse-texte outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
+                                                    className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
                                                 />
                                             </div>
                                         </div>
@@ -528,7 +537,7 @@ export default function Authentification() {
                                                     )
                                                 }
                                                 placeholder="exemple@email.com"
-                                                className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm text-jse-texte outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
+                                                className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
                                             />
                                         </div>
                                     </div>
@@ -569,7 +578,7 @@ export default function Authentification() {
                                         }
                                         placeholder="+225 07 00 00 00 00"
                                         required
-                                        className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm text-jse-texte outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
+                                        className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-4 text-sm outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
                                     />
                                 </div>
                             </div>
@@ -616,7 +625,7 @@ export default function Authentification() {
                                         }
                                         placeholder="Votre mot de passe"
                                         required
-                                        className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-12 text-sm text-jse-texte outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
+                                        className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-12 text-sm outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
                                     />
 
                                     <button
@@ -683,7 +692,7 @@ export default function Authentification() {
                                             }
                                             placeholder="Confirmez votre mot de passe"
                                             required
-                                            className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-12 text-sm text-jse-texte outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
+                                            className="h-13 w-full rounded-2xl border border-jse-texte/10 bg-white pl-11 pr-12 text-sm outline-none transition placeholder:text-jse-texte/30 focus:border-jse-secondaire focus:ring-4 focus:ring-jse-secondaire/10"
                                         />
 
                                         <button
@@ -733,7 +742,7 @@ export default function Authentification() {
 
                                 <label
                                     htmlFor={`consentement-${mode}`}
-                                    className="text-xs leading-5 text-white/65"
+                                    className="text-xs leading-5 text-jse-texte/55"
                                 >
                                     J’accepte la{" "}
 
@@ -744,7 +753,7 @@ export default function Authentification() {
                                                 "/politique-de-confidentialite",
                                             )
                                         }
-                                        className="font-semibold text-jse-secondaire underline underline-offset-2 transition hover:text-jse-fond focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jse-secondaire"
+                                        className="font-semibold text-jse-principal underline underline-offset-2"
                                     >
                                         Politique de confidentialité
                                     </button>
@@ -762,7 +771,7 @@ export default function Authentification() {
                                 type="submit"
                                 disabled={soumissionEnCours}
                                 aria-busy={soumissionEnCours}
-                                className="flex h-13 w-full items-center justify-center rounded-2xl bg-jse-secondaire px-6 text-sm font-semibold text-jse-principal shadow-lg shadow-jse-principal/15 transition hover:bg-jse-secondaire/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jse-secondaire active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+                                className="flex h-13 w-full items-center justify-center rounded-2xl bg-jse-secondaire px-6 text-sm font-semibold text-jse-principal shadow-lg shadow-jse-secondaire/15 transition hover:brightness-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jse-secondaire active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {soumissionEnCours
                                     ? "Connexion en cours..."
@@ -789,7 +798,7 @@ export default function Authentification() {
                                         ? router.visit("/inscription")
                                         : changerMode("connexion")
                                 }
-                                className="font-semibold text-jse-secondaire underline-offset-4 transition hover:text-jse-fond hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jse-secondaire active:opacity-80"
+                                className="font-semibold text-jse-principal hover:underline"
                             >
                                 {mode === "connexion"
                                     ? "Créer un compte"

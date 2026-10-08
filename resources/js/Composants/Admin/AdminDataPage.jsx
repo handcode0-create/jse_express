@@ -1,76 +1,195 @@
-import React, { useState } from "react";
-import { Head, Link, router, usePage } from "@inertiajs/react";
-import { Search, ChevronRight, Inbox } from "lucide-react";
-import AdminSidebar from "./AdminSidebar";
+import { useState } from "react";
+import { Head, router } from "@inertiajs/react";
+import { ChevronRight, Inbox, Search, X } from "lucide-react";
+import AdminButton from "./AdminButton";
+import AdminCard from "./AdminCard";
+import { champAdmin } from "./AdminField";
+import AdminLayout from "./AdminLayout";
+import AdminPageHeader from "./AdminPageHeader";
+import AdminPagination from "./AdminPagination";
 
-export default function AdminDataPage({ utilisateur,title,description,search="",searchPlaceholder="Rechercher",columns=[],rows=[],emptyMessage="Aucun élément trouvé.",filters=null,actionLabel=null,actionHref=null,pagination=null,children=null }) {
-    const { flash = {} } = usePage().props;
+/**
+ * Page de liste admin : en-tête, recherche, filtres, tableau (desktop) et cartes (mobile).
+ *
+ * Options par colonne :
+ * - `render(row)` : rendu personnalisé de la cellule ;
+ * - `mobile: false` : colonne masquée dans les cartes mobiles ;
+ * - `wide: true` : valeur affichée sur toute la largeur de la carte mobile.
+ * La première colonne sert de titre à la carte mobile ; la colonne `actions` est placée en bas.
+ */
+export default function AdminDataPage({
+    utilisateur,
+    title,
+    description,
+    search = "",
+    searchPlaceholder = "Rechercher",
+    afficherRecherche = true,
+    visuel = "motos",
+    columns = [],
+    rows = [],
+    emptyMessage = "Aucun élément trouvé.",
+    filters = null,
+    actionLabel = null,
+    actionHref = null,
+    pagination = null,
+    children = null,
+}) {
     const [rechercheEnCours, setRechercheEnCours] = useState(false);
-    const submit = (event) => {
-        event.preventDefault();
-        const value = new FormData(event.currentTarget).get("recherche") || "";
+
+    const rechercher = (valeur) => {
         setRechercheEnCours(true);
-        router.get(window.location.pathname,{ recherche:value },{ preserveState:true,replace:true,onFinish:()=>setRechercheEnCours(false) });
+        router.get(
+            window.location.pathname,
+            valeur ? { recherche: valeur } : {},
+            { preserveState: true, replace: true, onFinish: () => setRechercheEnCours(false) },
+        );
     };
-    return <>
-        <Head title={`${title} — JSE Express`} />
-        <main className="jse-admin-page min-h-screen overflow-x-hidden bg-jse-theme-bg pb-[calc(88px+env(safe-area-inset-bottom))] text-jse-theme-text lg:pb-0">
-            <div className="flex min-h-screen flex-col lg:flex-row lg:pl-[238px]">
-                <AdminSidebar utilisateur={utilisateur} />
-                <section className="min-w-0 flex-1">
-                    <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
-                        <header className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                            <div className="min-w-0">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-jse-secondaire sm:text-xs">Administration</p>
-                                <h1 className="mt-1.5 break-words text-2xl font-semibold leading-tight tracking-tight text-jse-theme-text sm:text-3xl">{title}</h1>
-                                <p className="mt-2 max-w-2xl break-words text-xs leading-5 text-jse-theme-muted sm:text-sm">{description}</p>
-                            </div>
-                            {actionLabel && actionHref && <Link href={actionHref} className="jse-admin-primary inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-jse-principal px-5 text-sm font-semibold text-white sm:w-auto sm:rounded-full">{actionLabel}<ChevronRight size={16}/></Link>}
-                        </header>
-                        {(flash.success || flash.error) && <div className="jse-admin-card mt-5 rounded-jse-moyen border border-jse-theme-border bg-jse-theme-surface p-4 text-sm shadow-jse-carte" role="status"><p className={flash.error ? "break-words text-jse-danger" : "break-words text-jse-secondaire"}>{flash.error || flash.success}</p></div>}
-                        <div className="jse-admin-card mt-5 rounded-jse-xl border border-jse-theme-border bg-jse-theme-surface p-3 shadow-jse-carte sm:mt-6 sm:p-4">
-                            <div className="flex min-w-0 flex-col gap-3 lg:flex-row">
-                                <form onSubmit={submit} className="relative min-w-0 flex-1">
-                                    <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-jse-theme-muted sm:left-4" size={17}/>
-                                    <input name="recherche" defaultValue={search} placeholder={searchPlaceholder} disabled={rechercheEnCours} className="jse-admin-input min-h-11 w-full min-w-0 rounded-2xl border border-jse-theme-border bg-jse-theme-surface-soft pl-10 pr-20 text-sm text-jse-theme-text outline-none placeholder:text-jse-theme-muted focus:border-jse-secondaire disabled:opacity-60 sm:pl-11 sm:pr-24"/>
-                                    {rechercheEnCours && <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-jse-theme-muted sm:right-4 sm:text-xs">Recherche…</span>}
-                                </form>
-                                {filters && <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap lg:shrink-0">{filters}</div>}
-                            </div>
-                        </div>
-                        {children}
-                        {pagination?.links?.length > 3 && (
-                            <nav className="mt-5 flex items-center justify-center gap-1" aria-label="Pagination">
-                                {pagination.links.map((link, index) => (
-                                    <button key={index} type="button" disabled={!link.url || link.active} onClick={() => link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true })} className={["min-w-9 rounded-xl px-3 py-2 text-xs font-semibold", link.active ? "bg-jse-principal text-white" : "border border-jse-theme-border text-jse-theme-muted", !link.url ? "opacity-40" : ""].join(" ")}>
-                                        {index === 0 ? "‹" : index === pagination.links.length - 1 ? "›" : <span dangerouslySetInnerHTML={{ __html: link.label }} />}
+
+    const soumettre = (evenement) => {
+        evenement.preventDefault();
+        rechercher(String(new FormData(evenement.currentTarget).get("recherche") || "").trim());
+    };
+
+    const colonnesCarte = columns.filter((colonne, index) => index > 0 && colonne.key !== "actions" && colonne.mobile !== false);
+    const colonneTitre = columns[0];
+    const colonneActions = columns.find((colonne) => colonne.key === "actions");
+    const valeur = (colonne, ligne) => (colonne.render ? colonne.render(ligne) : (ligne[colonne.key] ?? "—"));
+    const total = pagination?.total ?? null;
+
+    return (
+        <>
+            <Head title={`${title} — JSE Express`} />
+            <AdminLayout utilisateur={utilisateur}>
+                <AdminPageHeader
+                    visuel={visuel}
+                    title={title}
+                    description={description}
+                    actions={
+                        actionLabel &&
+                        actionHref && (
+                            <AdminButton href={actionHref}>
+                                {actionLabel}
+                                <ChevronRight size={16} aria-hidden="true" />
+                            </AdminButton>
+                        )
+                    }
+                />
+
+                {afficherRecherche && (
+                    <AdminCard className="mt-6 p-3 sm:p-4">
+                        <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-center">
+                            <form onSubmit={soumettre} role="search" className="relative min-w-0 flex-1">
+                                <label htmlFor="recherche-admin" className="sr-only">
+                                    {searchPlaceholder}
+                                </label>
+                                <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-jse-theme-muted" size={18} aria-hidden="true" />
+                                <input
+                                    id="recherche-admin"
+                                    name="recherche"
+                                    type="search"
+                                    defaultValue={search}
+                                    key={search}
+                                    placeholder={searchPlaceholder}
+                                    disabled={rechercheEnCours}
+                                    className={champAdmin + " pl-11 pr-24"}
+                                />
+                                <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
+                                    {search && (
+                                        <button
+                                            type="button"
+                                            onClick={() => rechercher("")}
+                                            aria-label="Effacer la recherche"
+                                            className="flex size-8 items-center justify-center rounded-full text-jse-theme-muted transition hover:bg-jse-theme-surface-soft hover:text-jse-theme-text"
+                                        >
+                                            <X size={16} aria-hidden="true" />
+                                        </button>
+                                    )}
+                                    <button
+                                        type="submit"
+                                        className="flex h-8 items-center rounded-full bg-jse-principal px-3 text-xs font-semibold text-white transition hover:bg-jse-principal/90"
+                                    >
+                                        {rechercheEnCours ? "…" : "OK"}
                                     </button>
-                                ))}
-                            </nav>
+                                </div>
+                            </form>
+                            {filters && <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap lg:shrink-0">{filters}</div>}
+                        </div>
+                    </AdminCard>
+                )}
+
+                {children}
+
+                {columns.length > 0 && (
+                    <>
+                        {total !== null && (
+                            <p className="mt-5 px-1 text-sm text-jse-theme-muted" aria-live="polite">
+                                <span className="font-semibold tabular-nums text-jse-theme-text">{total}</span> résultat{total > 1 ? "s" : ""}
+                            </p>
                         )}
-                        <div className="jse-admin-card mt-5 overflow-hidden rounded-jse-xl border border-jse-theme-border bg-jse-theme-surface shadow-jse-carte">
+
+                        <AdminCard className={["overflow-hidden", total !== null ? "mt-2" : "mt-5"].join(" ")}>
                             <div className="hidden overflow-x-auto md:block">
                                 <table className="w-full min-w-[720px] text-left text-sm">
-                                    <thead className="jse-admin-table border-b border-jse-theme-border bg-jse-theme-surface-soft text-xs uppercase tracking-[0.12em] text-jse-theme-muted"><tr>{columns.map(column=><th key={column.key} className="px-5 py-4 font-semibold">{column.label}</th>)}</tr></thead>
-                                    <tbody className="divide-y divide-jse-theme-border">{rows.map((row,index)=><tr key={row.id ?? index} className="align-top">{columns.map(column=><td key={column.key} className="min-w-0 px-5 py-4 text-jse-theme-text"><div className="min-w-0 break-words">{column.render ? column.render(row) : row[column.key]}</div></td>)}</tr>)}</tbody>
+                                    <thead className="jse-admin-table border-b border-jse-theme-border bg-jse-theme-surface-soft">
+                                        <tr>
+                                            {columns.map((colonne) => (
+                                                <th key={colonne.key} scope="col" className="px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.1em] text-jse-theme-muted">
+                                                    {colonne.label}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-jse-theme-border">
+                                        {rows.map((ligne, index) => (
+                                            <tr key={ligne.id ?? index} className="align-top transition hover:bg-jse-theme-surface-soft/60">
+                                                {columns.map((colonne) => (
+                                                    <td key={colonne.key} className="min-w-0 px-5 py-4 text-jse-theme-text">
+                                                        <div className="min-w-0 break-words">{valeur(colonne, ligne)}</div>
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                    </tbody>
                                 </table>
                             </div>
-                            <div className="space-y-3 p-3 md:hidden">
-                                {rows.map((row,index)=><article key={row.id ?? index} className="jse-admin-card min-w-0 rounded-jse-moyen border border-jse-theme-border bg-jse-theme-surface-soft p-4">
-                                    {columns.map((column,columnIndex)=>{
-                                        const estAction=column.key==="actions"; const estPrincipal=columnIndex===0;
-                                        return <div key={column.key} className={["min-w-0",columnIndex>0?"mt-3":"",estAction?"border-t border-jse-theme-border pt-3":""].join(" ")}>
-                                            {!estPrincipal && <p className="text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-jse-theme-muted">{column.label}</p>}
-                                            <div className={["mt-1 min-w-0 break-words text-sm text-jse-theme-text",estPrincipal?"text-base font-semibold":"",estAction?"w-full":""].join(" ")}>{column.render ? column.render(row) : row[column.key]}</div>
-                                        </div>;
-                                    })}
-                                </article>)}
-                            </div>
-                            {rows.length===0 && <div className="jse-admin-empty flex min-h-48 flex-col items-center justify-center gap-3 rounded-jse-moyen p-6 text-center"><Inbox className="text-jse-theme-muted" size={24}/><p className="break-words text-sm text-jse-theme-muted">{emptyMessage}</p></div>}
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </main>
-    </>;
+
+                            <ul className="divide-y divide-jse-theme-border md:hidden">
+                                {rows.map((ligne, index) => (
+                                    <li key={ligne.id ?? index} className="min-w-0 p-4">
+                                        {colonneTitre && (
+                                            <div className="min-w-0 break-words text-base font-semibold text-jse-theme-heading">{valeur(colonneTitre, ligne)}</div>
+                                        )}
+
+                                        {colonnesCarte.length > 0 && (
+                                            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3">
+                                                {colonnesCarte.map((colonne) => (
+                                                    <div key={colonne.key} className={["min-w-0", colonne.wide ? "col-span-2" : ""].join(" ")}>
+                                                        <dt className="text-xs font-semibold uppercase tracking-[0.1em] text-jse-theme-muted">{colonne.label}</dt>
+                                                        <dd className="mt-1 min-w-0 break-words text-sm text-jse-theme-text">{valeur(colonne, ligne)}</dd>
+                                                    </div>
+                                                ))}
+                                            </dl>
+                                        )}
+
+                                        {colonneActions && <div className="mt-4 border-t border-jse-theme-border pt-4">{valeur(colonneActions, ligne)}</div>}
+                                    </li>
+                                ))}
+                            </ul>
+
+                            {rows.length === 0 && (
+                                <div className="jse-admin-empty flex min-h-48 flex-col items-center justify-center gap-3 p-6 text-center">
+                                    <span className="flex size-12 items-center justify-center rounded-2xl bg-jse-theme-surface-soft text-jse-theme-muted">
+                                        <Inbox size={22} aria-hidden="true" />
+                                    </span>
+                                    <p className="break-words text-sm text-jse-theme-muted">{emptyMessage}</p>
+                                </div>
+                            )}
+                        </AdminCard>
+
+                        <AdminPagination pagination={pagination} />
+                    </>
+                )}
+            </AdminLayout>
+        </>
+    );
 }

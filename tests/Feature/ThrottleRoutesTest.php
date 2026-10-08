@@ -107,7 +107,7 @@ class ThrottleRoutesTest extends TestCase
         for ($i = 0; $i < 5; $i++) {
             $this->post(route('livreur.livraisons.valider-pin', $livraison), [
                 'pin' => '000000',
-            ])->assertStatus(422);
+            ])->assertSessionHasErrors('pin');
         }
 
         $this->post(route('livreur.livraisons.valider-pin', $livraison), [
