@@ -1,0 +1,54 @@
+services:
+  - type: web
+    name: jse-express
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /up
+    autoDeploy: true
+    disk:
+      name: jse-uploads
+      mountPath: /var/www/html/public/uploads
+      sizeGB: 1
+    envVars:
+      - key: APP_NAME
+        value: JSE Express
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_LOCALE
+        value: fr
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: warning
+      # À renseigner dans le tableau de bord (valeur de `php artisan key:generate --show`).
+      - key: APP_KEY
+        sync: false
+      # URL publique du service, par exemple https://jse-express.onrender.com
+      - key: APP_URL
+        sync: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        fromDatabase:
+          name: jse-express-db
+          property: connectionString
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_STORE
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: MAIL_MAILER
+        value: log
+
+databases:
+  - name: jse-express-db
+    databaseName: jse_express
+    plan: basic-256mb
+    region: frankfurt
