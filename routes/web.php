@@ -65,6 +65,31 @@ Route::get('/aide', function () {
     return Inertia::render('Aide');
 })->name('aide');
 
+Route::get('/restaurants', function () {
+    $restaurants = Restaurant::query()
+        ->with(['zone', 'categories' => function ($query) {
+            $query->where('statut', 'actif')->orderBy('nom');
+        }])
+        ->where('statut', 'actif')
+        ->orderBy('nom')
+        ->get()
+        ->map(fn (Restaurant $restaurant) => [
+            'id' => $restaurant->id,
+            'nom' => $restaurant->nom,
+            'description' => $restaurant->description,
+            'adresse' => $restaurant->adresse,
+            'horaires' => $restaurant->horaires,
+            'zone' => $restaurant->zone?->nom,
+            'categories' => $restaurant->categories->pluck('nom')->values(),
+        ])
+        ->values();
+
+    return Inertia::render('Restaurants', [
+        'restaurants' => $restaurants,
+        'estClient' => Auth::check() && Auth::user()->role === 'client',
+    ]);
+})->name('restaurants.presentation');
+
 Route::get('/authentification', [AuthentificationController::class, 'show'])->name('authentification');
 
 Route::get('/inscription', [AuthentificationController::class, 'showInscription'])->name('inscription');

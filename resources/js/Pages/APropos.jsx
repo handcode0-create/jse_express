@@ -62,7 +62,7 @@ export default function APropos() {
                     </button>
 
                     <nav className="hidden items-center gap-1 text-sm font-medium lg:flex" aria-label="Navigation principale">
-                        <button type="button" onClick={() => router.visit("/accueil")} className="rounded-full px-4 py-2.5 transition hover:bg-jse-principal/5">
+                        <button type="button" onClick={() => router.visit("/restaurants")} className="rounded-full px-4 py-2.5 transition hover:bg-jse-principal/5">
                             Restaurants
                         </button>
                         <span className="rounded-full bg-jse-secondaire/15 px-4 py-2.5 text-jse-principal">À propos</span>
