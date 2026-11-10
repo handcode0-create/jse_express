@@ -1159,6 +1159,7 @@ Route::get('/restaurants/{restaurant}', function (Restaurant $restaurant) {
             'telephone' => $restaurant->telephone,
             'zone' => $restaurant->zone ? ['id' => $restaurant->zone->id, 'nom' => $restaurant->zone->nom] : null,
         ],
+        'categories' => $categories,
         'estFavori' => $estFavori,
         'panier' => [
             'nombre_articles' => $panier?->lignesPanier->sum('quantite') ?? 0,
