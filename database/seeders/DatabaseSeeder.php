@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             JseExpressSeeder::class,
+            JseKitchenMenuSeeder::class,
         ]);
     }
 }
